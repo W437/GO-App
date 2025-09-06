@@ -221,52 +221,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                   Expanded(child: Transform.translate(
                                     offset: Offset(0, -(scrollingRate * 20)),
-                                    child: InkWell(
-                                      onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                                        child: GetBuilder<LocationController>(builder: (locationController) {
-                                          return Column(mainAxisSize: MainAxisSize.min, children: [
-
-                                            if(scrollingRate < 0.2)
-                                            Row(children: [
-                                              AuthHelper.isLoggedIn() ? Icon(
-                                                AddressHelper.getAddressFromSharedPref()!.addressType == 'home' ? Icons.home_filled
-                                                    : AddressHelper.getAddressFromSharedPref()!.addressType == 'office' ? Icons.work : Icons.location_on,
-                                                size: 20, color: Theme.of(context).cardColor,
-                                              ) : Icon(Icons.location_on, size: 20, color: Theme.of(context).cardColor,),
-                                              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                                              Text(
-                                                (AuthHelper.isLoggedIn() && AddressHelper.getAddressFromSharedPref()!.addressType != 'others') ? AddressHelper.getAddressFromSharedPref()!.addressType!.tr : 'your_location'.tr,
-                                                style: robotoMedium.copyWith(
-                                                  color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeDefault /* - (scrollingRate * Dimensions.fontSizeDefault)*/,
-                                                ),
-                                                maxLines: 1, overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ]),
-                                            SizedBox(height: (scrollingRate < 0.15) ? 5 : 0),
-
-                                            if(scrollingRate < 0.8)
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 5),
-                                              child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      AddressHelper.getAddressFromSharedPref()!.address!,
-                                                      style: robotoRegular.copyWith(
-                                                        color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeSmall/* - (scrollingRate * Dimensions.fontSizeSmall)*/,
-                                                      ),
-                                                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  Icon(Icons.arrow_drop_down, color: Theme.of(context).cardColor, size: 16 /*- (scrollingRate * 16)*/,),
-                                                ],
-                                              ),
-                                            ),
-                                          ]);
-                                        }),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Image.asset(
+                                          'assets/brand/app-icon-white.png',
+                                          height: 60,
+                                          width: 60,
+                                        ),
                                       ),
                                     ),
                                   )),
@@ -348,6 +311,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                       ],
                     ))),
+                  ),
+
+                  // Location Display
+                  SliverToBoxAdapter(
+                    child: Center(child: Container(
+                      width: Dimensions.webMaxWidth,
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
+                      child: GetBuilder<LocationController>(builder: (locationController) {
+                        return InkWell(
+                          onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
+                          child: Row(children: [
+                            AuthHelper.isLoggedIn() ? Icon(
+                              AddressHelper.getAddressFromSharedPref()!.addressType == 'home' ? Icons.home_filled
+                                  : AddressHelper.getAddressFromSharedPref()!.addressType == 'office' ? Icons.work : Icons.location_on,
+                              size: 18, color: Theme.of(context).primaryColor,
+                            ) : Icon(Icons.location_on, size: 18, color: Theme.of(context).primaryColor),
+                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                            Flexible(
+                              child: Text(
+                                AddressHelper.getAddressFromSharedPref()!.address!,
+                                style: robotoRegular.copyWith(
+                                  color: Theme.of(context).textTheme.bodyMedium!.color, 
+                                  fontSize: Dimensions.fontSizeSmall,
+                                ),
+                                maxLines: 1, 
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ]),
+                        );
+                      }),
+                    )),
                   ),
 
                   SliverToBoxAdapter(

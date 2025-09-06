@@ -96,6 +96,7 @@ flutter:
     - assets/image/
     - assets/language/
     - assets/map/
+    - assets/brand/
     - .env
 
   fonts:
