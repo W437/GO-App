@@ -1,10 +1,10 @@
-import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
-import 'package:stackfood_multivendor/features/checkout/widgets/custom_date_picker.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_dropdown_widget.dart';
+import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
+import 'package:godelivery_user/features/checkout/widgets/custom_date_picker.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_dropdown_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

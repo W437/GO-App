@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 
 abstract class CampaignRepositoryInterface implements RepositoryInterface {
   @override

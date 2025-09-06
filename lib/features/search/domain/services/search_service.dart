@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/search/domain/repositories/search_repository_interface.dart';
-import 'package:stackfood_multivendor/features/search/domain/models/search_suggestion_model.dart';
-import 'package:stackfood_multivendor/features/search/domain/services/search_service_interface.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/search/domain/repositories/search_repository_interface.dart';
+import 'package:godelivery_user/features/search/domain/models/search_suggestion_model.dart';
+import 'package:godelivery_user/features/search/domain/services/search_service_interface.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 class SearchService implements SearchServiceInterface {

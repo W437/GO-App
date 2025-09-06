@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/features/chat/domain/models/message_model.dart';
+import 'package:godelivery_user/features/chat/domain/models/message_model.dart';
 
 class ConversationsModel {
   int? totalSize;

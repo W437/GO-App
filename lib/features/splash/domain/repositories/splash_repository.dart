@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/features/splash/domain/repositories/splash_repository_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/features/splash/domain/repositories/splash_repository_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:shared_preferences/shared_preferences.dart';

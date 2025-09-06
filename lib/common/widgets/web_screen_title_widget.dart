@@ -1,9 +1,9 @@
 /// Web screen title widget for desktop layout page headers
 /// Displays page titles in a styled container for better desktop navigation
 
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 
 

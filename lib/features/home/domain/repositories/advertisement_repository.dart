@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/api/local_client.dart';
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/features/home/domain/models/advertisement_model.dart';
-import 'package:stackfood_multivendor/features/home/domain/repositories/advertisement_repository_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/api/local_client.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
+import 'package:godelivery_user/features/home/domain/repositories/advertisement_repository_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 
 class AdvertisementRepository implements AdvertisementRepositoryInterface {
   final ApiClient apiClient;

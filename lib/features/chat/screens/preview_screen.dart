@@ -2,11 +2,11 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';
-import 'package:stackfood_multivendor/features/chat/controllers/chat_controller.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:video_player/video_player.dart';
 
 class PreviewScreen extends StatefulWidget {

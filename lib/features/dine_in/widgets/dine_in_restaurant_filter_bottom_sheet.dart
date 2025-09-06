@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
-import 'package:stackfood_multivendor/features/cuisine/controllers/cuisine_controller.dart';
-import 'package:stackfood_multivendor/features/dine_in/controllers/dine_in_controller.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
+import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class DineRestaurantFilterBottomSheet extends StatefulWidget {
   const DineRestaurantFilterBottomSheet({super.key});

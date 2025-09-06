@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/features/business/domain/models/package_model.dart';
-import 'package:stackfood_multivendor/features/business/widgets/curve_clipper_widget.dart';
-import 'package:stackfood_multivendor/features/business/widgets/package_widget.dart';
-import 'package:stackfood_multivendor/helper/price_converter.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/business/domain/models/package_model.dart';
+import 'package:godelivery_user/features/business/widgets/curve_clipper_widget.dart';
+import 'package:godelivery_user/features/business/widgets/package_widget.dart';
+import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class PackageCardWidget extends StatelessWidget {
   final bool canSelect;

@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/category/domain/models/category_model.dart';
-import 'package:stackfood_multivendor/features/category/domain/reposotories/category_repository_interface.dart';
-import 'package:stackfood_multivendor/features/category/domain/services/category_service_interface.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/category/domain/reposotories/category_repository_interface.dart';
+import 'package:godelivery_user/features/category/domain/services/category_service_interface.dart';
 import 'package:get/get_connect/connect.dart';
 
 class CategoryService implements CategoryServiceInterface {

@@ -1,10 +1,10 @@
 /// Image viewer screen widget for full-screen image gallery viewing
 /// Provides swipeable image gallery with zoom and navigation controls
 
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/features/product/controllers/product_controller.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/features/product/controllers/product_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';

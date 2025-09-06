@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/restaurant_registration_controller.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/min_max_time_picker_widget.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/auth/controllers/restaurant_registration_controller.dart';
+import 'package:godelivery_user/features/auth/widgets/min_max_time_picker_widget.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

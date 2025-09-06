@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 
 abstract class ProductServiceInterface {
   Future<List<Product>?> getPopularProductList({required String type, DataSourceEnum? source});

@@ -1,8 +1,8 @@
 /// Custom reusable button widget with loading states and styling options
 /// Provides consistent button appearance and behavior across the app
 
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

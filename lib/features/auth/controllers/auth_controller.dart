@@ -1,18 +1,18 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
-import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
-import 'package:stackfood_multivendor/features/profile/domain/models/update_user_model.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/signup_body_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/social_log_in_body_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/services/auth_service_interface.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
+import 'package:godelivery_user/features/profile/domain/models/update_user_model.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/features/auth/domain/models/signup_body_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_model.dart';
+import 'package:godelivery_user/features/auth/domain/services/auth_service_interface.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/features/verification/screens/verification_screen.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
+import 'package:godelivery_user/features/verification/screens/verification_screen.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
 
 class AuthController extends GetxController implements GetxService {
   final AuthServiceInterface authServiceInterface;

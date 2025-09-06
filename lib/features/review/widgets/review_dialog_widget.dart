@@ -1,8 +1,8 @@
-import 'package:stackfood_multivendor/common/models/review_model.dart';
-import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/models/review_model.dart';
+import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 
 class ReviewDialogWidget extends StatelessWidget {

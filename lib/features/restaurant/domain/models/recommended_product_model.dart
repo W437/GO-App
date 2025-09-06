@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
 
 class RecommendedProductModel {
   int? totalSize;

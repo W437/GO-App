@@ -1,6 +1,6 @@
 /// Data model for online shopping cart items
 /// Represents cart items stored on the server with user associations and product details
-import 'package:stackfood_multivendor/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
 
 class OnlineCartModel {
   int? id;

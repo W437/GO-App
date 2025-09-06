@@ -2,8 +2,8 @@
 /// Displays animated placeholders while product data is loading
 
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 
 class ProductShimmer extends StatelessWidget {

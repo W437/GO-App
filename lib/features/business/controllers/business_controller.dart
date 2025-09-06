@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/features/business/domain/models/business_plan_body.dart';
-import 'package:stackfood_multivendor/features/business/domain/services/business_service_interface.dart';
+import 'package:godelivery_user/features/business/domain/models/business_plan_body.dart';
+import 'package:godelivery_user/features/business/domain/services/business_service_interface.dart';
 import 'package:get/get.dart';
 
 class BusinessController extends GetxController implements GetxService {

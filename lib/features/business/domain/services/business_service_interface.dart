@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/features/business/domain/models/business_plan_body.dart';
+import 'package:godelivery_user/features/business/domain/models/business_plan_body.dart';
 
 abstract class BusinessServiceInterface{
   Future<String> processesBusinessPlan(String businessPlanStatus, int paymentIndex, int restaurantId, String? digitalPaymentName, int? selectedPackageId);

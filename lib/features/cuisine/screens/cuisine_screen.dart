@@ -1,12 +1,12 @@
-import 'package:stackfood_multivendor/features/home/widgets/cuisine_card_widget.dart';
-import 'package:stackfood_multivendor/features/cuisine/controllers/cuisine_controller.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/footer_view_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/features/home/widgets/cuisine_card_widget.dart';
+import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -2,10 +2,10 @@
 /// Displays network error message with retry functionality
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

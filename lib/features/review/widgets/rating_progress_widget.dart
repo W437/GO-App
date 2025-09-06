@@ -1,7 +1,7 @@
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class RatingProgressWidget extends StatelessWidget {
   final String ratingNumber;

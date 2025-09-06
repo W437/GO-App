@@ -1,15 +1,15 @@
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/review_model.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/product_bottom_sheet_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/readmore_widget.dart';
-import 'package:stackfood_multivendor/features/product/controllers/product_controller.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/review_model.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/readmore_widget.dart';
+import 'package:godelivery_user/features/product/controllers/product_controller.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

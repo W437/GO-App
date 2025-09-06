@@ -1,8 +1,8 @@
 /// Shopping cart display widget with item count and navigation to cart screen
 /// Shows floating cart summary with total items and price
 
-import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,14 +1,14 @@
-import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
-import 'package:stackfood_multivendor/features/cart/widgets/checkout_button_widget.dart';
-import 'package:stackfood_multivendor/features/cart/widgets/cutlary_view_widget.dart';
-import 'package:stackfood_multivendor/features/cart/widgets/extra_packaging_widget.dart';
-import 'package:stackfood_multivendor/features/cart/widgets/not_available_product_view_widget.dart';
-import 'package:stackfood_multivendor/features/checkout/widgets/delivery_instruction_view.dart';
-import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:stackfood_multivendor/helper/price_converter.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/cart/widgets/checkout_button_widget.dart';
+import 'package:godelivery_user/features/cart/widgets/cutlary_view_widget.dart';
+import 'package:godelivery_user/features/cart/widgets/extra_packaging_widget.dart';
+import 'package:godelivery_user/features/cart/widgets/not_available_product_view_widget.dart';
+import 'package:godelivery_user/features/checkout/widgets/delivery_instruction_view.dart';
+import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

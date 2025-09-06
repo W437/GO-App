@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/not_available_widget.dart';
-import 'package:stackfood_multivendor/features/dine_in/controllers/dine_in_controller.dart';
-import 'package:stackfood_multivendor/features/home/widgets/arrow_icon_button_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/icon_with_text_row_widget.dart';
-import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:stackfood_multivendor/features/restaurant/screens/restaurant_screen.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/not_available_widget.dart';
+import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
+import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
+import 'package:godelivery_user/features/home/widgets/icon_with_text_row_widget.dart';
+import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class WebDineInWidget extends StatefulWidget {
   const WebDineInWidget({super.key});

@@ -1,8 +1,8 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/restaurant/domain/models/recommended_product_model.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 
 abstract class RestaurantRepositoryInterface extends RepositoryInterface {
   @override

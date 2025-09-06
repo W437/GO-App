@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stackfood_multivendor/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 
 class DashboardRepo implements DashboardRepoInterface{
   final SharedPreferences sharedPreferences;

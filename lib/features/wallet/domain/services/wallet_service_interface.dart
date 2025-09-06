@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/features/wallet/domain/models/fund_bonus_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/models/wallet_model.dart';
+import 'package:godelivery_user/features/wallet/domain/models/fund_bonus_model.dart';
+import 'package:godelivery_user/features/wallet/domain/models/wallet_model.dart';
 
 abstract class WalletServiceInterface{
   Future<WalletModel?> getWalletTransactionList(String offset, String sortingType);

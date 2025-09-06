@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/features/search/domain/models/search_suggestion_model.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/features/search/domain/models/search_suggestion_model.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 abstract class SearchRepositoryInterface extends RepositoryInterface {

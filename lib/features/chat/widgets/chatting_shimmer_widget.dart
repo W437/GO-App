@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';

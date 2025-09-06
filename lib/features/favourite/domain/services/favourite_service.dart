@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/features/favourite/domain/repositories/favourite_repository_interface.dart';
-import 'package:stackfood_multivendor/features/favourite/domain/services/favourite_service_interface.dart';
+import 'package:godelivery_user/features/favourite/domain/repositories/favourite_repository_interface.dart';
+import 'package:godelivery_user/features/favourite/domain/services/favourite_service_interface.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 class FavouriteService implements FavouriteServiceInterface {

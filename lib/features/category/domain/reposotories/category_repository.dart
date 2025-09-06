@@ -1,12 +1,12 @@
 import 'dart:convert';
-import 'package:stackfood_multivendor/api/local_client.dart';
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/category/domain/models/category_model.dart';
-import 'package:stackfood_multivendor/features/category/domain/reposotories/category_repository_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/local_client.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/category/domain/reposotories/category_repository_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get.dart';
 
 class CategoryRepository implements CategoryRepositoryInterface {

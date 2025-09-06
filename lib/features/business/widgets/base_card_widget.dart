@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/restaurant_registration_controller.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/auth/controllers/restaurant_registration_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class BaseCardWidget extends StatelessWidget {
   final RestaurantRegistrationController restaurantRegistrationController;

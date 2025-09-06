@@ -1,7 +1,7 @@
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/offline_method_model.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/timeslote_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/checkout/domain/models/offline_method_model.dart';
+import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:godelivery_user/features/checkout/domain/models/timeslote_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

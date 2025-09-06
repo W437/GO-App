@@ -1,11 +1,11 @@
 
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/features/category/domain/models/category_model.dart';
-import 'package:stackfood_multivendor/features/location/domain/models/zone_response_model.dart';
-import 'package:stackfood_multivendor/features/restaurant/domain/models/recommended_product_model.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

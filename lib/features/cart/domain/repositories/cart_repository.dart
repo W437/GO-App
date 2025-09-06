@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/common/models/online_cart_model.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/cart/domain/models/cart_model.dart';
-import 'package:stackfood_multivendor/features/cart/domain/repositories/cart_repository_interface.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/common/models/online_cart_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/features/cart/domain/repositories/cart_repository_interface.dart';
+import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

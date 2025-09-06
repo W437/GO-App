@@ -1,19 +1,19 @@
 import 'package:just_the_tooltip/just_the_tooltip.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/coupon/controllers/coupon_controller.dart';
-import 'package:stackfood_multivendor/features/coupon/widgets/coupon_card_widget.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/footer_view_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/no_data_screen_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/not_logged_in_screen.dart';
-import 'package:stackfood_multivendor/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
+import 'package:godelivery_user/features/coupon/widgets/coupon_card_widget.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/not_logged_in_screen.dart';
+import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class CouponScreen extends StatefulWidget {
   final bool fromCheckout;

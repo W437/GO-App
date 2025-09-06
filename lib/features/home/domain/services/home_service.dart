@@ -1,8 +1,8 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/features/home/domain/models/banner_model.dart';
-import 'package:stackfood_multivendor/features/home/domain/models/cashback_model.dart';
-import 'package:stackfood_multivendor/features/home/domain/repositories/home_repository_interface.dart';
-import 'package:stackfood_multivendor/features/home/domain/services/home_service_interface.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/features/home/domain/models/banner_model.dart';
+import 'package:godelivery_user/features/home/domain/models/cashback_model.dart';
+import 'package:godelivery_user/features/home/domain/repositories/home_repository_interface.dart';
+import 'package:godelivery_user/features/home/domain/services/home_service_interface.dart';
 
 class HomeService implements HomeServiceInterface {
   final HomeRepositoryInterface homeRepositoryInterface;

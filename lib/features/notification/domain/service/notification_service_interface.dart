@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/features/notification/domain/models/notification_model.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/features/notification/domain/models/notification_model.dart';
 
 abstract class NotificationServiceInterface {
   Future<List<NotificationModel>?> getList({DataSourceEnum? source});

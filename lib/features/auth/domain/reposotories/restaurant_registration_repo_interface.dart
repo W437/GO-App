@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:image_picker/image_picker.dart';
 

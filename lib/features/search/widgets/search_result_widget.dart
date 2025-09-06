@@ -1,8 +1,8 @@
-import 'package:stackfood_multivendor/features/search/controllers/search_controller.dart' as search;
-import 'package:stackfood_multivendor/features/search/widgets/item_view_widget.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/search/controllers/search_controller.dart' as search;
+import 'package:godelivery_user/features/search/widgets/item_view_widget.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

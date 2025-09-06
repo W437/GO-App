@@ -1,14 +1,14 @@
 
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/features/cart/domain/models/cart_model.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/delivery_log_model.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/order_cancellation_body.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/order_details_model.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/pause_log_model.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/subscription_schedule_model.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:godelivery_user/features/order/domain/models/delivery_log_model.dart';
+import 'package:godelivery_user/features/order/domain/models/order_cancellation_body.dart';
+import 'package:godelivery_user/features/order/domain/models/order_details_model.dart';
+import 'package:godelivery_user/features/order/domain/models/order_model.dart';
+import 'package:godelivery_user/features/order/domain/models/pause_log_model.dart';
+import 'package:godelivery_user/features/order/domain/models/subscription_schedule_model.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:image_picker/image_picker.dart';
 

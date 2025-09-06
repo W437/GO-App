@@ -1,11 +1,11 @@
-import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
-import 'package:stackfood_multivendor/features/location/domain/models/prediction_model.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/domain/models/prediction_model.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class LocationSearchDialog extends StatefulWidget {
   final GoogleMapController? mapController;

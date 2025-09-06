@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/interest/domain/repositories/interest_repository_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/interest/domain/repositories/interest_repository_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 class InterestRepository implements InterestRepositoryInterface{

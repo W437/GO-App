@@ -1,7 +1,7 @@
 /// Web constrained box widget for responsive height management on desktop
 /// Provides minimum height constraints based on data length for better UX
 
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:flutter/material.dart';
 
 class WebConstrainedBox extends StatelessWidget {

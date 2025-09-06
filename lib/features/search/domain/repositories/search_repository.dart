@@ -1,8 +1,8 @@
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/search/domain/repositories/search_repository_interface.dart';
-import 'package:stackfood_multivendor/features/search/domain/models/search_suggestion_model.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/search/domain/repositories/search_repository_interface.dart';
+import 'package:godelivery_user/features/search/domain/models/search_suggestion_model.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

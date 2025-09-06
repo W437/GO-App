@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/signup_body_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/social_log_in_body_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/reposotories/auth_repo_interface.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/signup_body_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_model.dart';
+import 'package:godelivery_user/features/auth/domain/reposotories/auth_repo_interface.dart';
+import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

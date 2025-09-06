@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/features/category/domain/models/category_model.dart';
-import 'package:stackfood_multivendor/features/interest/domain/repositories/interest_repository_interface.dart';
-import 'package:stackfood_multivendor/features/interest/domain/services/interest_service_interface.dart';
+import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/interest/domain/repositories/interest_repository_interface.dart';
+import 'package:godelivery_user/features/interest/domain/services/interest_service_interface.dart';
 import 'package:flutter/material.dart';
 
 class InterestService implements InterestServiceInterface {

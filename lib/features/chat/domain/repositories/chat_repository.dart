@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/chat/domain/models/conversation_model.dart';
-import 'package:stackfood_multivendor/features/chat/domain/models/message_model.dart';
-import 'package:stackfood_multivendor/features/chat/domain/repositories/chat_repository_interface.dart';
-import 'package:stackfood_multivendor/features/chat/enums/user_type_enum.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/chat/domain/models/conversation_model.dart';
+import 'package:godelivery_user/features/chat/domain/models/message_model.dart';
+import 'package:godelivery_user/features/chat/domain/repositories/chat_repository_interface.dart';
+import 'package:godelivery_user/features/chat/enums/user_type_enum.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect/connect.dart';
 
 class ChatRepository implements ChatRepositoryInterface {

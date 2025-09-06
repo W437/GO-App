@@ -1,22 +1,22 @@
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/features/business/controllers/business_controller.dart';
-import 'package:stackfood_multivendor/features/business/domain/models/package_model.dart';
-import 'package:stackfood_multivendor/features/dashboard/controllers/dashboard_controller.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/zone_model.dart';
-import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
-import 'package:stackfood_multivendor/features/location/domain/models/zone_response_model.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/deliveryman_registration_controller.dart';
-import 'package:stackfood_multivendor/features/auth/domain/services/restaurant_registration_service_interface.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/business/controllers/business_controller.dart';
+import 'package:godelivery_user/features/business/domain/models/package_model.dart';
+import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/zone_model.dart';
+import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
+import 'package:godelivery_user/features/auth/controllers/deliveryman_registration_controller.dart';
+import 'package:godelivery_user/features/auth/domain/services/restaurant_registration_service_interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
 
 class RestaurantRegistrationController extends GetxController implements GetxService {
   final RestaurantRegistrationServiceInterface restaurantRegistrationServiceInterface;

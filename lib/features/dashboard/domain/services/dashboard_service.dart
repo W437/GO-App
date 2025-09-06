@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
-import 'package:stackfood_multivendor/features/dashboard/domain/services/dashboard_service_interface.dart';
+import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
+import 'package:godelivery_user/features/dashboard/domain/services/dashboard_service_interface.dart';
 
 class DashboardService implements DashboardServiceInterface {
   final DashboardRepoInterface dashboardRepoInterface;

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/footer_view_widget.dart';
-import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
-import 'package:stackfood_multivendor/common/widgets/web_page_title_widget.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
-import 'package:stackfood_multivendor/features/language/widgets/language_card_widget.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
+import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/util/app_constants.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/features/language/widgets/language_card_widget.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:get/get.dart';
 
 class WebLanguageScreen extends StatelessWidget {

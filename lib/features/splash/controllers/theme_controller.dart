@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/features/splash/domain/services/splash_service_interface.dart';
+import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 

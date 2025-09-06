@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/features/order/domain/models/order_details_model.dart';
-import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
+import 'package:godelivery_user/features/order/domain/models/order_details_model.dart';
+import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 
 class RateReviewModel {
   List<OrderDetailsModel>? orderDetailsList;

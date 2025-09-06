@@ -1,12 +1,12 @@
 /// Web product view container widget for desktop grid layouts
 /// Displays products or restaurants in responsive grids with shimmer loading
 
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/common/widgets/no_data_screen_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/web_product_widget.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/web_restaurant_widget.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/web_product_widget.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/common/widgets/web_restaurant_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

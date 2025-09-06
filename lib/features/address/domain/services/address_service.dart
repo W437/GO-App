@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/features/address/controllers/address_controller.dart';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/features/address/domain/reposotories/address_repo_interface.dart';
-import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/features/address/controllers/address_controller.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/features/address/domain/reposotories/address_repo_interface.dart';
+import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:get/get.dart';
 
 import 'address_service_interface.dart';

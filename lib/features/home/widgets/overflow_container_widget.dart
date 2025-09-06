@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 
 class OverFlowContainerWidget extends StatelessWidget {

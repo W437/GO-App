@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/chat/domain/models/conversation_model.dart';
-import 'package:stackfood_multivendor/features/chat/domain/models/message_model.dart';
-import 'package:stackfood_multivendor/features/chat/domain/repositories/chat_repository_interface.dart';
-import 'package:stackfood_multivendor/features/chat/domain/services/chat_service_interface.dart';
-import 'package:stackfood_multivendor/features/chat/enums/user_type_enum.dart';
-import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/chat/domain/models/conversation_model.dart';
+import 'package:godelivery_user/features/chat/domain/models/message_model.dart';
+import 'package:godelivery_user/features/chat/domain/repositories/chat_repository_interface.dart';
+import 'package:godelivery_user/features/chat/domain/services/chat_service_interface.dart';
+import 'package:godelivery_user/features/chat/enums/user_type_enum.dart';
+import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
 
 class ChatService implements ChatServiceInterface {
   final ChatRepositoryInterface chatRepositoryInterface;

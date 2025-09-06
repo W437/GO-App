@@ -1,8 +1,8 @@
 /// Rating bar widget for displaying star ratings with partial stars
 /// Shows product and restaurant ratings with customizable size and count
 
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 
 class RatingBarWidget extends StatelessWidget {

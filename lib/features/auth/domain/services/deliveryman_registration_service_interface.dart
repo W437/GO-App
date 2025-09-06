@@ -1,8 +1,8 @@
 
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/vehicle_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/zone_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/vehicle_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/zone_model.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 

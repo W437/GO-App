@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/common/models/online_cart_model.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:stackfood_multivendor/features/cart/domain/models/cart_model.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart' as pv;
-import 'package:stackfood_multivendor/helper/price_converter.dart';
+import 'package:godelivery_user/common/models/online_cart_model.dart';
+import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/product_model.dart' as pv;
+import 'package:godelivery_user/helper/price_converter.dart';
 
 class CartHelper {
 

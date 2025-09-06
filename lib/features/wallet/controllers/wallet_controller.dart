@@ -1,8 +1,8 @@
-import 'package:stackfood_multivendor/features/wallet/domain/models/wallet_filter_body_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/models/wallet_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/models/fund_bonus_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/services/wallet_service_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/features/wallet/domain/models/wallet_filter_body_model.dart';
+import 'package:godelivery_user/features/wallet/domain/models/wallet_model.dart';
+import 'package:godelivery_user/features/wallet/domain/models/fund_bonus_model.dart';
+import 'package:godelivery_user/features/wallet/domain/services/wallet_service_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get.dart';
 
 class WalletController extends GetxController implements GetxService {

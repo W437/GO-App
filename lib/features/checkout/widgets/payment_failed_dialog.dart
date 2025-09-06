@@ -1,12 +1,12 @@
-import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/helper/price_converter.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/order/controllers/order_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/features/home/widgets/filter_view_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/restaurant_filter_button_widget.dart';
-import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/home/widgets/filter_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/restaurant_filter_button_widget.dart';
+import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 class AllRestaurantFilterWidget extends StatelessWidget {

@@ -1,13 +1,13 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/restaurant_registration_controller.dart';
-import 'package:stackfood_multivendor/features/business/widgets/base_card_widget.dart';
-import 'package:stackfood_multivendor/features/business/widgets/package_card_widget.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/auth/controllers/restaurant_registration_controller.dart';
+import 'package:godelivery_user/features/business/widgets/base_card_widget.dart';
+import 'package:godelivery_user/features/business/widgets/package_card_widget.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class WebBusinessPlanWidget extends StatelessWidget {
   const WebBusinessPlanWidget({super.key});

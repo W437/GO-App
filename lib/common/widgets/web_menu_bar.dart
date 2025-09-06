@@ -1,23 +1,23 @@
 /// Web menu bar widget with language selector, theme toggle and navigation menu
 /// Provides header navigation for desktop browsers with location display and user actions
 import 'package:flutter/cupertino.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
-import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/theme_controller.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/auth_dialog_widget.dart';
-import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
-import 'package:stackfood_multivendor/helper/auth_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_dropdown_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/hover_widgets/text_hover_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
+import 'package:godelivery_user/features/auth/widgets/auth_dialog_widget.dart';
+import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/auth_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/app_constants.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_dropdown_widget.dart';
+import 'package:godelivery_user/common/widgets/hover_widgets/text_hover_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

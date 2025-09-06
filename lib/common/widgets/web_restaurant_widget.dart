@@ -1,21 +1,21 @@
 /// Web restaurant widget for desktop grid layouts with hover effects
 /// Displays restaurant cards with ratings, discount tags, and favorite functionality
 
-import 'package:stackfood_multivendor/common/widgets/hover_widgets/on_hover_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/theme_controller.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/discount_tag_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/not_available_widget.dart';
-import 'package:stackfood_multivendor/features/restaurant/screens/restaurant_screen.dart';
+import 'package:godelivery_user/common/widgets/hover_widgets/on_hover_widget.dart';
+import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/discount_tag_widget.dart';
+import 'package:godelivery_user/common/widgets/not_available_widget.dart';
+import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';

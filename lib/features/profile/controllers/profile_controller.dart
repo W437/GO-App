@@ -1,18 +1,18 @@
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/chat/domain/models/conversation_model.dart';
-import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
-import 'package:stackfood_multivendor/features/profile/domain/models/update_user_model.dart';
-import 'package:stackfood_multivendor/features/profile/domain/models/userinfo_model.dart';
-import 'package:stackfood_multivendor/features/profile/domain/services/profile_service_interface.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/chat/domain/models/conversation_model.dart';
+import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
+import 'package:godelivery_user/features/profile/domain/models/update_user_model.dart';
+import 'package:godelivery_user/features/profile/domain/models/userinfo_model.dart';
+import 'package:godelivery_user/features/profile/domain/services/profile_service_interface.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stackfood_multivendor/features/verification/screens/verification_screen.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
+import 'package:godelivery_user/features/verification/screens/verification_screen.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
 
 class ProfileController extends GetxController implements GetxService {
   final ProfileServiceInterface profileServiceInterface;

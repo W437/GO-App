@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/features/verification/domein/model/verification_data_model.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/features/verification/domein/model/verification_data_model.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 abstract class VerificationRepoInterface<T> extends RepositoryInterface<T>{

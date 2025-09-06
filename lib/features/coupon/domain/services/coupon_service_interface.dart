@@ -1,7 +1,7 @@
-import 'package:stackfood_multivendor/features/coupon/domain/models/coupon_model.dart';
+import 'package:godelivery_user/features/coupon/domain/models/coupon_model.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
-import 'package:stackfood_multivendor/features/coupon/domain/models/customer_coupon_model.dart';
+import 'package:godelivery_user/features/coupon/domain/models/customer_coupon_model.dart';
 
 abstract class CouponServiceInterface{
   List<JustTheController>? generateToolTipControllerList(List<CouponModel>? couponList);

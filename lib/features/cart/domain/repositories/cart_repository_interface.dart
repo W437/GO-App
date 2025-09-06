@@ -1,6 +1,6 @@
 import 'package:get/get_connect/http/src/response/response.dart';
-import 'package:stackfood_multivendor/features/cart/domain/models/cart_model.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 
 abstract class CartRepositoryInterface<OnlineCart> extends RepositoryInterface<OnlineCart> {
   Future<Response> addMultipleCartItemOnline(List<OnlineCart> carts);

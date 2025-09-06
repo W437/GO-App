@@ -1,11 +1,11 @@
-import 'package:stackfood_multivendor/features/review/controllers/review_controller.dart';
-import 'package:stackfood_multivendor/features/review/domain/models/rate_review_model.dart';
-import 'package:stackfood_multivendor/features/review/widgets/deliver_man_review_widget.dart';
-import 'package:stackfood_multivendor/features/review/widgets/product_review_widget.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
+import 'package:godelivery_user/features/review/controllers/review_controller.dart';
+import 'package:godelivery_user/features/review/domain/models/rate_review_model.dart';
+import 'package:godelivery_user/features/review/widgets/deliver_man_review_widget.dart';
+import 'package:godelivery_user/features/review/widgets/product_review_widget.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

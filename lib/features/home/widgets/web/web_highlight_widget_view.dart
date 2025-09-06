@@ -1,12 +1,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
-import 'package:stackfood_multivendor/features/home/controllers/advertisement_controller.dart';
-import 'package:stackfood_multivendor/features/home/widgets/highlight_widget_view.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
+import 'package:godelivery_user/features/home/widgets/highlight_widget_view.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class WebHighlightWidgetView extends StatefulWidget {
   const WebHighlightWidgetView({super.key});

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:stackfood_multivendor/api/api_client.dart';
+import 'package:godelivery_user/api/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';

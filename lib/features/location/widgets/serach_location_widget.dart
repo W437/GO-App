@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:stackfood_multivendor/features/location/widgets/location_search_dialog.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/features/location/widgets/location_search_dialog.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

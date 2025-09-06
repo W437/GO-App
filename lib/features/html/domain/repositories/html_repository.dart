@@ -1,7 +1,7 @@
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/html/domain/repositories/html_repository_interface.dart';
-import 'package:stackfood_multivendor/features/html/enums/html_type.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/html/domain/repositories/html_repository_interface.dart';
+import 'package:godelivery_user/features/html/enums/html_type.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 class HtmlRepository implements HtmlRepositoryInterface {

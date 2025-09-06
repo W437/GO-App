@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/features/splash/domain/models/deep_link_body.dart';
+import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 
 class LinkConverter{
 

@@ -1,9 +1,9 @@
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/business/domain/models/package_model.dart';
-import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/reposotories/restaurant_registration_repo_interface.dart';
-import 'package:stackfood_multivendor/features/auth/domain/services/restaurant_registration_service_interface.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/business/domain/models/package_model.dart';
+import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
+import 'package:godelivery_user/features/auth/domain/reposotories/restaurant_registration_repo_interface.dart';
+import 'package:godelivery_user/features/auth/domain/services/restaurant_registration_service_interface.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';

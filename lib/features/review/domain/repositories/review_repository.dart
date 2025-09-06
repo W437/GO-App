@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:stackfood_multivendor/api/local_client.dart';
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/common/models/review_model.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
-import 'package:stackfood_multivendor/features/product/domain/models/review_body_model.dart';
-import 'package:stackfood_multivendor/features/review/domain/repositories/review_repository_interface.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/api/local_client.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/common/models/review_model.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/product/domain/models/review_body_model.dart';
+import 'package:godelivery_user/features/review/domain/repositories/review_repository_interface.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get.dart';
 
 class ReviewRepository implements ReviewRepositoryInterface {

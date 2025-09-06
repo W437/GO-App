@@ -1,15 +1,15 @@
 /// Product view container widget for displaying product grids and lists
 /// Handles both products and restaurants with responsive layouts and shimmer loading
 
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/common/widgets/no_data_screen_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/product_shimmer_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/product_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/restaurant_widget.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/web_restaurant_widget.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/product_shimmer_widget.dart';
+import 'package:godelivery_user/common/widgets/product_widget.dart';
+import 'package:godelivery_user/features/home/widgets/theme1/restaurant_widget.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/common/widgets/web_restaurant_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

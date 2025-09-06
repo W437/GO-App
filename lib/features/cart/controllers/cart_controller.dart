@@ -1,19 +1,19 @@
-import 'package:stackfood_multivendor/api/api_checker.dart';
-import 'package:stackfood_multivendor/common/models/online_cart_model.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/widgets/cart_snackbar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:stackfood_multivendor/features/cart/domain/models/cart_model.dart';
-import 'package:stackfood_multivendor/features/cart/domain/services/cart_service_interface.dart';
-import 'package:stackfood_multivendor/features/product/controllers/product_controller.dart';
-import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:stackfood_multivendor/helper/auth_helper.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
-import 'package:stackfood_multivendor/helper/price_converter.dart';
+import 'package:godelivery_user/api/api_checker.dart';
+import 'package:godelivery_user/common/models/online_cart_model.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/widgets/cart_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/features/cart/domain/services/cart_service_interface.dart';
+import 'package:godelivery_user/features/product/controllers/product_controller.dart';
+import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/helper/auth_helper.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/price_converter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
 
 class CartController extends GetxController implements GetxService {
   final CartServiceInterface cartServiceInterface;

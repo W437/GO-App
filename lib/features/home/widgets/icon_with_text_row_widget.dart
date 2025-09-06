@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 
 class IconWithTextRowWidget extends StatelessWidget {

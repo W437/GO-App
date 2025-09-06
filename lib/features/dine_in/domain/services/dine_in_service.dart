@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/features/dine_in/domain/model/dine_in_model.dart';
-import 'package:stackfood_multivendor/features/dine_in/domain/repositories/dine_in_repository_interface.dart';
-import 'package:stackfood_multivendor/features/dine_in/domain/services/dine_in_service_interface.dart';
+import 'package:godelivery_user/features/dine_in/domain/model/dine_in_model.dart';
+import 'package:godelivery_user/features/dine_in/domain/repositories/dine_in_repository_interface.dart';
+import 'package:godelivery_user/features/dine_in/domain/services/dine_in_service_interface.dart';
 
 class DineInService implements DineInServiceInterface {
   final DineInRepositoryInterface dineInRepositoryInterface;

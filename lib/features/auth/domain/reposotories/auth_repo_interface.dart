@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/social_log_in_body_model.dart';
-import 'package:stackfood_multivendor/interface/repository_interface.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_model.dart';
+import 'package:godelivery_user/interface/repository_interface.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 abstract class AuthRepoInterface<SignUpModel> extends RepositoryInterface<SignUpModel>{

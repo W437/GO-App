@@ -1,7 +1,7 @@
-import 'package:stackfood_multivendor/features/home/widgets/location_banner_view_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/refer_banner_view_widget.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/features/home/widgets/location_banner_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/refer_banner_view_widget.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

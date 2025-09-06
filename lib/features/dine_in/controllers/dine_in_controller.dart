@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/features/dine_in/domain/model/dine_in_model.dart';
-import 'package:stackfood_multivendor/features/dine_in/domain/services/dine_in_service_interface.dart';
+import 'package:godelivery_user/features/dine_in/domain/model/dine_in_model.dart';
+import 'package:godelivery_user/features/dine_in/domain/services/dine_in_service_interface.dart';
 
 class DineInController extends GetxController implements GetxService {
   final DineInServiceInterface dineInServiceInterface;

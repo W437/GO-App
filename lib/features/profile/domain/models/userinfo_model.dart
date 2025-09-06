@@ -1,4 +1,4 @@
-import 'package:stackfood_multivendor/features/chat/domain/models/conversation_model.dart';
+import 'package:godelivery_user/features/chat/domain/models/conversation_model.dart';
 
 class UserInfoModel {
   int? id;

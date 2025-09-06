@@ -1,14 +1,14 @@
 
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
-import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/features/splash/domain/models/deep_link_body.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
-import 'package:stackfood_multivendor/helper/maintance_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
+import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
+import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/maintance_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 
 void route({required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
   double? minimumVersion = _getMinimumVersion();

@@ -1,18 +1,18 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/product_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/features/category/domain/models/category_model.dart';
-import 'package:stackfood_multivendor/features/location/domain/models/zone_response_model.dart';
-import 'package:stackfood_multivendor/features/restaurant/domain/models/recommended_product_model.dart';
-import 'package:stackfood_multivendor/features/restaurant/domain/repositories/restaurant_repository_interface.dart';
-import 'package:stackfood_multivendor/features/restaurant/domain/services/restaurant_service_interface.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/repositories/restaurant_repository_interface.dart';
+import 'package:godelivery_user/features/restaurant/domain/services/restaurant_service_interface.dart';
+import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 
 class RestaurantService implements RestaurantServiceInterface {
   final RestaurantRepositoryInterface restaurantRepositoryInterface;

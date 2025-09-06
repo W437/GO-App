@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stackfood_multivendor/api/api_client.dart';
+import 'package:godelivery_user/api/api_client.dart';
 
 class ImageSize{
 

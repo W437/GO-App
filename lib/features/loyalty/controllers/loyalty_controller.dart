@@ -1,7 +1,7 @@
-import 'package:stackfood_multivendor/features/loyalty/domain/services/loyalty_service_interface.dart';
-import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/models/wallet_model.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/loyalty/domain/services/loyalty_service_interface.dart';
+import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
+import 'package:godelivery_user/features/wallet/domain/models/wallet_model.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:get/get.dart';
 
 class LoyaltyController extends GetxController implements GetxService {

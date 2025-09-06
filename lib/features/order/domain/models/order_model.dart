@@ -1,5 +1,5 @@
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
 
 class PaginatedOrderModel {
   int? totalSize;

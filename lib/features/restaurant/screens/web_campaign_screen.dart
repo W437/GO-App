@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/footer_view_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/restaurants_view_widget.dart';
-import 'package:stackfood_multivendor/features/product/controllers/campaign_controller.dart';
-import 'package:stackfood_multivendor/helper/date_converter.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
+import 'package:godelivery_user/features/product/controllers/campaign_controller.dart';
+import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class WebCampaignScreen extends StatelessWidget {
   final CampaignController campaignController;

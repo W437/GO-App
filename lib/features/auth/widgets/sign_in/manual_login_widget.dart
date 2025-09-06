@@ -1,21 +1,21 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/sign_up_widget.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/social_login_widget.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/trams_conditions_check_box_widget.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/features/verification/screens/forget_pass_screen.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/util/images.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/validate_check.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/auth/widgets/sign_up_widget.dart';
+import 'package:godelivery_user/features/auth/widgets/social_login_widget.dart';
+import 'package:godelivery_user/features/auth/widgets/trams_conditions_check_box_widget.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/features/verification/screens/forget_pass_screen.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class ManualLoginWidget extends StatelessWidget {
   final TextEditingController phoneController;

@@ -1,6 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:video_player/video_player.dart';
 class ChatVideoView extends StatefulWidget {
   final String url;

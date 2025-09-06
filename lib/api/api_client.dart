@@ -4,14 +4,14 @@
 /// Manages request headers including JWT tokens, location data, and localization
 import 'dart:convert';
 import 'dart:developer';
-import 'package:stackfood_multivendor/api/api_checker.dart';
+import 'package:godelivery_user/api/api_checker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:http_parser/http_parser.dart';
 import 'dart:io';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/util/app_constants.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';

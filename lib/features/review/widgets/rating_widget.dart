@@ -1,10 +1,10 @@
-import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
-import 'package:stackfood_multivendor/features/review/widgets/rating_progress_widget.dart';
-import 'package:stackfood_multivendor/features/review/widgets/total_rating_review_view_widget.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/features/review/widgets/rating_progress_widget.dart';
+import 'package:godelivery_user/features/review/widgets/total_rating_review_view_widget.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
-import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class RatingWidget extends StatelessWidget {
   final double? averageRating;

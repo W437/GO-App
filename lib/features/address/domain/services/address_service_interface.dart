@@ -1,6 +1,6 @@
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
-import 'package:stackfood_multivendor/common/models/response_model.dart';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 
 abstract class AddressServiceInterface{
   Future<List<AddressModel>?> getList({bool isLocal = false, DataSourceEnum? source});

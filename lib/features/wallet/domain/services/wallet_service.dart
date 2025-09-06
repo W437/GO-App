@@ -1,10 +1,10 @@
-import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/models/fund_bonus_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/models/wallet_model.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/repositories/wallet_repository_interface.dart';
-import 'package:stackfood_multivendor/features/wallet/domain/services/wallet_service_interface.dart';
-import 'package:stackfood_multivendor/helper/auth_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
+import 'package:godelivery_user/features/order/domain/models/order_model.dart';
+import 'package:godelivery_user/features/wallet/domain/models/fund_bonus_model.dart';
+import 'package:godelivery_user/features/wallet/domain/models/wallet_model.dart';
+import 'package:godelivery_user/features/wallet/domain/repositories/wallet_repository_interface.dart';
+import 'package:godelivery_user/features/wallet/domain/services/wallet_service_interface.dart';
+import 'package:godelivery_user/helper/auth_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:get/get.dart';
 import 'package:universal_html/html.dart' as html;
 
