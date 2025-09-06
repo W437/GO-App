@@ -73,46 +73,56 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeDefault),
-                child: Container(
-                  width: ResponsiveHelper.isMobile(context) ? 70 : 100,
-                  height: ResponsiveHelper.isMobile(context) ? 70 : 100,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                  ),
-                  child: CustomInkWellWidget(
-                    onTap: () => Get.toNamed(RouteHelper.getCategoryProductRoute(
-                      categoryController.categoryList![index].id, categoryController.categoryList![index].name!,
-                    )),
-                    radius: Dimensions.radiusSmall,
-                    child: Column(children: [
-
-                      Container(
-                        padding: const EdgeInsets.all(2),
+                child: Column(
+                  children: [
+                    CustomInkWellWidget(
+                      onTap: () => Get.toNamed(RouteHelper.getCategoryProductRoute(
+                        categoryController.categoryList![index].id, categoryController.categoryList![index].name!,
+                      )),
+                      radius: Dimensions.radiusLarge,
+                      child: Container(
+                        width: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                        height: ResponsiveHelper.isMobile(context) ? 70 : 90,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          color: Theme.of(context).disabledColor.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Theme.of(context).primaryColor,
+                              Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            ],
+                          ),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          child: CustomImageWidget(
-                            image: '${categoryController.categoryList![index].imageFullUrl}',
-                            height: ResponsiveHelper.isMobile(context) ? 70 : 100, width: ResponsiveHelper.isMobile(context) ? 70 : 100, fit: BoxFit.cover,
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(Dimensions.radiusLarge - 2),
+                            child: CustomImageWidget(
+                              image: '${categoryController.categoryList![index].imageFullUrl}',
+                              height: ResponsiveHelper.isMobile(context) ? 66 : 86,
+                              width: ResponsiveHelper.isMobile(context) ? 66 : 86,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
-                      SizedBox(height: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeLarge),
-
-                      Expanded(child: Text(
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                    SizedBox(
+                      width: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                      child: Text(
                         categoryController.categoryList![index].name!,
                         style: robotoMedium.copyWith(
                           fontSize: Dimensions.fontSizeSmall,
+                          fontWeight: FontWeight.w500,
                         ),
-                        maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
-                      )),
-
-                    ]),
-                  ),
+                        maxLines: 1, 
+                        overflow: TextOverflow.ellipsis, 
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

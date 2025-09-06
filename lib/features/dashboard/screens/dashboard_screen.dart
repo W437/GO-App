@@ -150,6 +150,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         key: _scaffoldKey,
 
 
+        extendBody: true,
         bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
 
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
@@ -160,7 +161,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               backgroundColor: Colors.white,
               selectedItemColor: Theme.of(context).primaryColor,
               unselectedItemColor: Colors.grey,
-              elevation: 5,
+              elevation: 0,
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
