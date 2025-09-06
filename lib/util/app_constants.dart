@@ -3,7 +3,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:get/get.dart';
 
 class AppConstants {
-  static const String appName = 'StackFood';
+  static const String appName = 'GoDelivery';
   static const double appVersion = 8.3; ///Flutter SDK: 3.32.7
 
   static const String fontFamily = 'Roboto';
@@ -211,15 +211,15 @@ class AppConstants {
   static List<String?> preferenceDays = ['today', 'tomorrow'];
 
   /// Deep Links
-  static const String yourScheme = 'StackFood';
-  static const String yourHost = 'stackfood.com';
+  static const String yourScheme = 'GoDelivery';
+  static const String yourHost = 'godelivery.com';
 
   /// Languages
   static List<LanguageModel> languages = [
     LanguageModel(imageUrl: Images.english, languageName: 'English', countryCode: 'US', languageCode: 'en'),
     LanguageModel(imageUrl: Images.arabic, languageName: 'عربى', countryCode: 'SA', languageCode: 'ar'),
-    LanguageModel(imageUrl: Images.spanish, languageName: 'Spanish', countryCode: 'ES', languageCode: 'es'),
-    LanguageModel(imageUrl: Images.bengali, languageName: 'Bengali', countryCode: 'BN', languageCode: 'bn'),
+    LanguageModel(imageUrl: Images.hebrew, languageName: 'עברית', countryCode: 'IL', languageCode: 'he'),
+    LanguageModel(imageUrl: Images.russian, languageName: 'Русский', countryCode: 'RU', languageCode: 'ru'),
   ];
 
   static List<String> joinDropdown = [

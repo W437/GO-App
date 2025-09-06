@@ -27,7 +27,7 @@
     </queries>
 
     <application
-        android:label="StackFood"
+        android:label="GoDelivery"
         android:name="${applicationName}"
         android:extractNativeLibs="true"
         android:requestLegacyExternalStorage="true"
@@ -76,7 +76,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
                 <data
-                    android:scheme="StackFood"
+                    android:scheme="GoDelivery"
                     android:host="godelivery.com" />
             </intent-filter>
 
