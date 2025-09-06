@@ -1,17 +1,18 @@
+import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/language/domain/models/language_model.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:get/get.dart';
 
 class AppConstants {
-  static const String appName = 'GoDelivery';
-  static const double appVersion = 8.3; ///Flutter SDK: 3.32.7
+  static String get appName => Environment.appName;
+  static double get appVersion => Environment.appVersion;
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
-  static const String webHostedUrl = 'https://stackfood-web.6amtech.com';
+  static String get webHostedUrl => Environment.webHostedUrl;
   static const bool useReactWebsite = false;
 
-  static const String baseUrl = 'https://stackfood-admin.6amtech.com';
+  static String get baseUrl => Environment.baseUrl;
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
   static const String restaurantProductUri = '/api/v1/products/latest';
@@ -211,8 +212,8 @@ class AppConstants {
   static List<String?> preferenceDays = ['today', 'tomorrow'];
 
   /// Deep Links
-  static const String yourScheme = 'GoDelivery';
-  static const String yourHost = 'godelivery.com';
+  static String get yourScheme => Environment.yourScheme;
+  static String get yourHost => Environment.yourHost;
 
   /// Languages
   static List<LanguageModel> languages = [

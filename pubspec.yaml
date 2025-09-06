@@ -67,6 +67,7 @@ dependencies:
   permission_handler: ^11.3.1
   firebase_auth: ^5.3.1
   get_thumbnail_video: ^0.7.3
+  flutter_dotenv: ^5.1.0
 
 #  wakelock_plus: ^1.2.8
 #  video_player_avfoundation: ^2.6.2
@@ -95,6 +96,7 @@ flutter:
     - assets/image/
     - assets/language/
     - assets/map/
+    - .env
 
   fonts:
     - family: Roboto

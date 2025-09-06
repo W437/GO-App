@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -35,6 +36,9 @@ Future<void> main() async {
   }
   setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize environment variables
+  await Environment.init();
 
   // // Pass all uncaught "fatal" errors from the framework to Crashlytics
   // FlutterError.onError = (errorDetails) {
@@ -49,20 +53,20 @@ Future<void> main() async {
   DeepLinkBody? linkBody;
 
   if(GetPlatform.isWeb) {
-    await Firebase.initializeApp(options: const FirebaseOptions(
-      apiKey: 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA',
-      appId: '1:491987943015:android:fe79b69339834d5c8f1ec2',
-      messagingSenderId: '491987943015',
-      projectId: 'stackmart-500c7',
+    await Firebase.initializeApp(options: FirebaseOptions(
+      apiKey: Environment.firebaseApiKey,
+      appId: Environment.firebaseAppId,
+      messagingSenderId: Environment.firebaseMessagingSenderId,
+      projectId: Environment.firebaseProjectId,
     ));
     MetaSEO().config();
   }else if(GetPlatform.isAndroid) {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA',
-        appId: '1:491987943015:android:fe79b69339834d5c8f1ec2',
-        messagingSenderId: '491987943015',
-        projectId: 'stackmart-500c7',
+      options: FirebaseOptions(
+        apiKey: Environment.firebaseApiKey,
+        appId: Environment.firebaseAppId,
+        messagingSenderId: Environment.firebaseMessagingSenderId,
+        projectId: Environment.firebaseProjectId,
       ),
     );
   } else {
@@ -85,7 +89,7 @@ Future<void> main() async {
 
   if (ResponsiveHelper.isWeb()) {
     await FacebookAuth.instance.webAndDesktopInitialize(
-      appId: "452131619626499",
+      appId: Environment.facebookAppId,
       cookie: true,
       xfbml: true,
       version: "v13.0",
