@@ -1,3 +1,6 @@
+/// Product bottom sheet shimmer loading widget for skeleton states
+/// Shows animated placeholders while product details are loading
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';

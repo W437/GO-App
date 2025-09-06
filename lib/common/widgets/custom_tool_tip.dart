@@ -1,3 +1,6 @@
+/// Custom tooltip widget for displaying contextual information
+/// Provides customizable tooltips with positioning and styling options
+
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:stackfood_multivendor/util/styles.dart';

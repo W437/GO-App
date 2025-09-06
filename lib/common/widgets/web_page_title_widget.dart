@@ -1,3 +1,6 @@
+/// Web page title widget for desktop screen headers
+/// Displays page titles with consistent styling across desktop views
+
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:flutter/material.dart';

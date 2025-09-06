@@ -1,3 +1,5 @@
+/// Product model containing paginated product data with price ranges
+/// Used for displaying product lists with filtering and pagination support
 class ProductModel {
   int? totalSize;
   double? minPrice;

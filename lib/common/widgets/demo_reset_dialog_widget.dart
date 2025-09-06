@@ -1,3 +1,6 @@
+/// Demo reset dialog widget for resetting demo data and preferences
+/// Provides functionality to reset app to demo state for testing purposes
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';

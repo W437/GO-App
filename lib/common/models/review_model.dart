@@ -1,3 +1,5 @@
+/// Review and rating model for food items
+/// Contains customer reviews with ratings, comments, and restaurant replies
 class ReviewModel {
   int? id;
   String? comment;

@@ -1,3 +1,6 @@
+/// Product widget for displaying food items and restaurants in lists
+/// Shows product information with rating, pricing, add to cart functionality
+
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_favourite_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';

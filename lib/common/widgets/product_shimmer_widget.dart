@@ -1,3 +1,6 @@
+/// Product shimmer loading widget for skeleton loading states
+/// Displays animated placeholders while product data is loading
+
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

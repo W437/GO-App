@@ -1,3 +1,6 @@
+/// Custom text field widget with validation and country code picker
+/// Provides styled input fields with error handling and phone number support
+
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';

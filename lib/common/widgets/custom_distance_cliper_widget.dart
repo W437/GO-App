@@ -1,3 +1,6 @@
+/// Custom distance clipper widget for creating curved UI elements
+/// Provides curved top clipping functionality for visual design
+
 import 'package:flutter/material.dart';
 class CurvedTopClipper extends CustomClipper<Path> {
   @override

@@ -1,3 +1,6 @@
+/// Web restaurant widget for desktop grid layouts with hover effects
+/// Displays restaurant cards with ratings, discount tags, and favorite functionality
+
 import 'package:stackfood_multivendor/common/widgets/hover_widgets/on_hover_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';

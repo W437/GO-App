@@ -1,3 +1,6 @@
+/// Read more widget for expandable text content with show more/less functionality
+/// Provides collapsible text sections with customizable expand/collapse controls
+
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/gestures.dart';

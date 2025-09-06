@@ -1,3 +1,6 @@
+/// My text field widget for custom styled text input fields
+/// Provides styled text inputs with consistent design across the app
+
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:flutter/material.dart';

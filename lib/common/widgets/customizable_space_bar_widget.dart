@@ -1,3 +1,6 @@
+/// Customizable space bar widget for flexible app bar layouts
+/// Provides customizable spacing and layout options for app bars
+
 import 'package:flutter/material.dart';
 
 class CustomizableSpaceBarWidget extends StatelessWidget {

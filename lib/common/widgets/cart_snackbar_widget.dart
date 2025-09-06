@@ -1,3 +1,6 @@
+/// Cart snackbar widget for displaying cart-related notifications
+/// Shows styled messages when items are added or removed from cart
+
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

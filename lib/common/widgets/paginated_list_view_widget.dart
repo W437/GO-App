@@ -1,3 +1,6 @@
+/// Paginated list view widget for infinite scroll functionality
+/// Handles loading more items as user scrolls with loading indicators
+
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';

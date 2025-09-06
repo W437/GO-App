@@ -1,3 +1,6 @@
+/// Product bottom sheet widget for detailed product view and cart interactions
+/// Displays product details, variations, add-ons, and add to cart functionality
+
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';

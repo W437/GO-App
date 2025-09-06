@@ -1,3 +1,6 @@
+/// Custom dialog widget with animated transitions and customization
+/// Provides flip animations and dismissible dialog functionality
+
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 

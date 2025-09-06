@@ -1,3 +1,6 @@
+/// Confirmation dialog widget for user action confirmations
+/// Displays styled dialogs with yes/no options for critical actions
+
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';

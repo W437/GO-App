@@ -1,3 +1,6 @@
+/// Discount tag widget for displaying product discount labels
+/// Shows percentage discounts and free delivery badges on products
+
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

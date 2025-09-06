@@ -1,4 +1,7 @@
 
+/// Validation check utility functions for form input validation
+/// Provides common validation methods for phone numbers and other inputs
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';

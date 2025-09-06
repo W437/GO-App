@@ -1,3 +1,6 @@
+/// Title widget for displaying section headers with consistent styling
+/// Provides formatted titles for different app sections with responsive design
+
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';

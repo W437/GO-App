@@ -1,3 +1,6 @@
+/// Custom bottom sheet widget for modal presentations
+/// Provides styled bottom sheet functionality with customizable height
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

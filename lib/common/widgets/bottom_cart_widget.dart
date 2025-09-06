@@ -1,3 +1,6 @@
+/// Bottom cart widget displaying cart summary and checkout button
+/// Shows cart item count, total price, and navigation to cart screen
+
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:stackfood_multivendor/common/models/restaurant_model.dart';

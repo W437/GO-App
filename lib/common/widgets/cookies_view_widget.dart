@@ -1,3 +1,6 @@
+/// Cookies view widget for displaying cookie acceptance dialog
+/// Shows privacy policy and cookie consent for web compliance
+
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

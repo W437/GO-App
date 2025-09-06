@@ -1,3 +1,6 @@
+/// Web product widget for desktop grid displays with hover interactions
+/// Shows product information including pricing, ratings, and restaurant details
+
 import 'package:stackfood_multivendor/common/widgets/hover_widgets/on_hover_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';

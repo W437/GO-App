@@ -1,3 +1,6 @@
+/// Web item widget for desktop product display with detailed information
+/// Shows product cards with images, pricing, ratings, and availability status
+
 import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
 import 'package:stackfood_multivendor/common/widgets/rating_bar_widget.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';

@@ -1,3 +1,6 @@
+/// Menu drawer widget for mobile navigation sidebar
+/// Provides navigation menu with user profile, settings, and app links
+
 import 'package:stackfood_multivendor/common/widgets/hover_widgets/on_hover_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';

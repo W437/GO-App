@@ -1,3 +1,5 @@
+/// Restaurant data model with pagination support
+/// Contains restaurant listings with metadata for displaying restaurant grids and lists
 import 'package:stackfood_multivendor/features/wallet/domain/models/fund_bonus_model.dart';
 
 class RestaurantModel {

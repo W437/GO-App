@@ -1,4 +1,7 @@
 
+/// Web search field widget with custom styling for desktop browsers
+/// Provides search functionality with responsive design and input validation
+
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:flutter/material.dart';

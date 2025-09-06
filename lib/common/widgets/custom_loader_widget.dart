@@ -1,3 +1,6 @@
+/// Custom loader widget for displaying loading states with consistent styling
+/// Shows circular progress indicator in a styled container
+
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:flutter/material.dart';
 

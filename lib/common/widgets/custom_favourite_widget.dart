@@ -1,3 +1,6 @@
+/// Custom favourite widget for adding/removing items from wishlist
+/// Handles favorite functionality for both products and restaurants
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/common/models/product_model.dart';

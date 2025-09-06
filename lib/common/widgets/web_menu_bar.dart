@@ -1,3 +1,5 @@
+/// Web menu bar widget with language selector, theme toggle and navigation menu
+/// Provides header navigation for desktop browsers with location display and user actions
 import 'package:flutter/cupertino.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';

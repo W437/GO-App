@@ -1,3 +1,6 @@
+/// Not logged in screen widget for guest user handling
+/// Shows login prompt and authentication options for restricted content
+
 import 'package:stackfood_multivendor/features/auth/widgets/auth_dialog_widget.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';

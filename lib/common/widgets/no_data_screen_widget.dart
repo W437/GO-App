@@ -1,3 +1,6 @@
+/// No data screen widget for empty state displays
+/// Shows appropriate messages and icons when no data is available
+
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';

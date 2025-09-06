@@ -1,3 +1,6 @@
+/// Not found widget for displaying 404-style error screens
+/// Shows user-friendly messages when content is not found
+
 import 'package:flutter/material.dart';
 
 class NotFoundWidget extends StatelessWidget {

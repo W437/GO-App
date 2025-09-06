@@ -1,3 +1,6 @@
+/// Custom ink well widget with customizable styling and tap effects
+/// Provides consistent touch interactions with custom radius and padding
+
 import 'package:flutter/material.dart';
 
 class CustomInkWellWidget extends StatelessWidget {

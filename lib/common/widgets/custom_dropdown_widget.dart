@@ -1,3 +1,6 @@
+/// Custom dropdown widget with enhanced styling and customization options
+/// Provides flexible dropdown functionality with custom child widgets
+
 import 'package:flutter/material.dart';
 
 class CustomDropdown<T> extends StatefulWidget {

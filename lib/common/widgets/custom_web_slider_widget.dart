@@ -1,3 +1,6 @@
+/// Custom web slider widget for desktop horizontal scrolling content
+/// Provides paginated navigation through product lists with arrow controls
+
 import 'package:flutter/material.dart';
 class CustomWebSliderWidget extends StatefulWidget {
   final double height;

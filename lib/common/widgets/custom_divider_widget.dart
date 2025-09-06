@@ -1,3 +1,6 @@
+/// Custom divider widget for consistent visual separation
+/// Provides customizable height and color options for dividers
+
 import 'package:flutter/material.dart';
 
 class CustomDividerWidget extends StatelessWidget {

@@ -1,3 +1,6 @@
+/// No internet screen widget for handling connectivity issues
+/// Displays network error message with retry functionality
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

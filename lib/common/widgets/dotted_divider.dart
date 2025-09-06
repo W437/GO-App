@@ -1,3 +1,6 @@
+/// Dotted divider widget for creating dashed line separators
+/// Provides customizable dotted lines for visual separation
+
 import 'package:flutter/material.dart';
 
 class DottedDivider extends StatelessWidget {

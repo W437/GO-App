@@ -1,3 +1,6 @@
+/// Custom toast widget for showing temporary notification messages
+/// Displays styled toast notifications with responsive design
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

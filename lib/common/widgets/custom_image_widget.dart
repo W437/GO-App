@@ -1,3 +1,6 @@
+/// Custom image widget for loading and caching network images
+/// Handles food and restaurant images with fallback and placeholder support
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';

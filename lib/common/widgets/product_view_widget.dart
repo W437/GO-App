@@ -1,3 +1,6 @@
+/// Product view container widget for displaying product grids and lists
+/// Handles both products and restaurants with responsive layouts and shimmer loading
+
 import 'package:stackfood_multivendor/common/models/product_model.dart';
 import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
 import 'package:stackfood_multivendor/common/widgets/no_data_screen_widget.dart';

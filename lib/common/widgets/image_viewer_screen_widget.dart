@@ -1,3 +1,6 @@
+/// Image viewer screen widget for full-screen image gallery viewing
+/// Provides swipeable image gallery with zoom and navigation controls
+
 import 'package:stackfood_multivendor/common/models/product_model.dart';
 import 'package:stackfood_multivendor/features/product/controllers/product_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';

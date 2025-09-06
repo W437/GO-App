@@ -1,3 +1,6 @@
+/// Custom app bar widget with responsive design for mobile and web
+/// Provides navigation, search, cart, and veg filter functionality
+
 import 'package:stackfood_multivendor/common/widgets/web_menu_bar.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';

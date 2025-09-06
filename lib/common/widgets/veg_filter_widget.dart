@@ -1,3 +1,6 @@
+/// Veg filter widget for filtering vegetarian and non-vegetarian items
+/// Provides toggle functionality for dietary preference filtering
+
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/product/controllers/product_controller.dart';

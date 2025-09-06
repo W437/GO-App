@@ -1,3 +1,7 @@
+/// HTTP client for REST API communication
+/// Provides GET, POST, PUT, DELETE methods with authentication and error handling
+/// Supports multipart file uploads for images and documents
+/// Manages request headers including JWT tokens, location data, and localization
 import 'dart:convert';
 import 'dart:developer';
 import 'package:stackfood_multivendor/api/api_checker.dart';

@@ -1,3 +1,6 @@
+/// Local data storage and caching client
+/// Manages offline data persistence using Drift database for mobile and SharedPreferences for web
+/// Provides unified interface for storing and retrieving cached API responses
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';

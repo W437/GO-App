@@ -1,3 +1,6 @@
+/// Code picker widget for selecting country codes in phone number inputs
+/// Provides country code selection functionality for international phone numbers
+
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

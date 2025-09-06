@@ -1,3 +1,6 @@
+/// Text hover widget for desktop text hover interactions
+/// Provides hover effects specifically for text elements on desktop
+
 import 'package:flutter/material.dart';
 
 class TextHoverWidget extends StatefulWidget {

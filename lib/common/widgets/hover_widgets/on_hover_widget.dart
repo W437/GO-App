@@ -1,3 +1,6 @@
+/// On hover widget for desktop hover effects and interactions
+/// Provides hover state management for desktop UI elements
+
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:flutter/material.dart';
 

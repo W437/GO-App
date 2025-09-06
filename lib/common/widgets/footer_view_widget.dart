@@ -1,3 +1,6 @@
+/// Footer view widget for displaying app footer with links and information
+/// Shows app links, social media, and company information in footer section
+
 import 'package:stackfood_multivendor/common/widgets/hover_widgets/text_hover_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';

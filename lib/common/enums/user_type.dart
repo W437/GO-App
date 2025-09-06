@@ -1,3 +1,5 @@
+/// Enum defining different user types in the multi-vendor food delivery system
+/// Supports role-based access control and user-specific functionality
 enum UserType {
   user,
   customer,

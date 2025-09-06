@@ -1,3 +1,6 @@
+/// Search field widget with input validation and custom styling
+/// Provides search functionality with responsive design and input filtering
+
 import 'package:flutter/services.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';

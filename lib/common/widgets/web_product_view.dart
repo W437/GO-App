@@ -1,3 +1,6 @@
+/// Web product view container widget for desktop grid layouts
+/// Displays products or restaurants in responsive grids with shimmer loading
+
 import 'package:stackfood_multivendor/common/models/product_model.dart';
 import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
 import 'package:stackfood_multivendor/common/widgets/no_data_screen_widget.dart';

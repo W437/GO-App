@@ -1,3 +1,6 @@
+/// Custom snackbar widget for displaying toast messages and notifications
+/// Provides styled error and success messages with consistent appearance
+
 import 'package:stackfood_multivendor/common/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

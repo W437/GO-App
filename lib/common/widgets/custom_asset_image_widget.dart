@@ -1,3 +1,6 @@
+/// Custom asset image widget for displaying local app assets and SVG files
+/// Provides consistent handling of asset images with SVG support
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
