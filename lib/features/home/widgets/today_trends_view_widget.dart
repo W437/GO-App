@@ -97,7 +97,7 @@ class _TodayTrendsViewWidgetState extends State<TodayTrendsViewWidget> {
                   padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
                   child: Center(
                     child: SizedBox(
-                      height: 15, width: context.width*0.3,
+                      height: 15, width: MediaQuery.of(context).size.width * 0.3,
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall),
                         width: 30, height: 5,
