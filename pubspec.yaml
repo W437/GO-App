@@ -94,6 +94,26 @@ flutter:
 
   assets:
     - assets/image/
+    - assets/image/auth/
+    - assets/image/ui/
+    - assets/image/location/
+    - assets/image/orders/
+    - assets/image/payment/
+    - assets/image/restaurants/
+    - assets/image/delivery/
+    - assets/image/notifications/
+    - assets/image/empty_states/
+    - assets/image/onboarding/
+    - assets/image/profile/
+    - assets/image/chat/
+    - assets/image/coupons/
+    - assets/image/food/
+    - assets/image/branding/
+    - assets/image/language/
+    - assets/image/placeholders/
+    - assets/image/animations/
+    - assets/image/policies/
+    - assets/image/misc/
     - assets/language/
     - assets/map/
     - assets/brand/
