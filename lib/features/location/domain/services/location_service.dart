@@ -1,5 +1,6 @@
 import 'package:godelivery_user/features/location/domain/models/prediction_model.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/domain/reposotories/location_repo_interface.dart';
 import 'package:godelivery_user/features/location/domain/services/location_service_interface.dart';
@@ -145,6 +146,18 @@ class LocationService implements LocationServiceInterface{
   @override
   Future<void> updateZone() async {
      await locationRepoInterface.updateZone();
+  }
+
+  @override
+  Future<List<ZoneListModel>> getZoneList() async {
+    List<ZoneListModel> zoneList = [];
+    Response response = await locationRepoInterface.getZoneList();
+    if (response.statusCode == 200) {
+      response.body.forEach((zone) {
+        zoneList.add(ZoneListModel.fromJson(zone));
+      });
+    }
+    return zoneList;
   }
 
 }

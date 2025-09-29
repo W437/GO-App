@@ -75,6 +75,7 @@ class AppConstants {
   static const String searchLocationUri = '/api/v1/config/place-api-autocomplete';
   static const String placeDetailsUri = '/api/v1/config/place-api-details';
   static const String geocodeUri = '/api/v1/config/geocode-api';
+  static const String zoneListUri = '/api/v1/zone/list';
   static const String updateZoneUri = '/api/v1/customer/update-zone';
   static const String walletTransactionUri = '/api/v1/customer/wallet/transactions';
   static const String loyaltyTransactionUri = '/api/v1/customer/loyalty-point/transactions';
@@ -84,7 +85,6 @@ class AppConstants {
   static const String searchConversationListUri = '/api/v1/customer/message/search-list';
   static const String messageListUri = '/api/v1/customer/message/details';
   static const String sendMessageUri = '/api/v1/customer/message/send';
-  static const String zoneListUri = '/api/v1/zone/list';
   static const String restaurantRegisterUri = '/api/v1/auth/vendor/register';
   static const String dmRegisterUri = '/api/v1/auth/delivery-man/store';
   static const String refundReasonsUri = '/api/v1/customer/order/refund-reasons';

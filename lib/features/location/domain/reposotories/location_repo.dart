@@ -89,4 +89,9 @@ class LocationRepo implements LocationRepoInterface {
     throw UnimplementedError();
   }
 
+  @override
+  Future<Response> getZoneList() async {
+    return await apiClient.getData(AppConstants.zoneListUri);
+  }
+
 }

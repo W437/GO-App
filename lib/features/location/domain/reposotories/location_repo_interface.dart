@@ -8,4 +8,5 @@ abstract class LocationRepoInterface extends RepositoryInterface {
   Future<String> getAddressFromGeocode(LatLng latLng);
   Future<Response> searchLocation(String text);
   Future<Response> updateZone();
+  Future<Response> getZoneList();
 }

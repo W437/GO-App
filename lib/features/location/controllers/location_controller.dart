@@ -2,6 +2,7 @@ import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/home/screens/home_screen.dart';
 import 'package:godelivery_user/features/location/domain/models/prediction_model.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
@@ -59,6 +60,12 @@ class LocationController extends GetxController implements GetxService {
   List<PredictionModel> _predictionList = [];
   List<PredictionModel> get predictionList => _predictionList;
 
+  List<ZoneListModel> _zoneList = [];
+  List<ZoneListModel> get zoneList => _zoneList;
+
+  bool _loadingZoneList = false;
+  bool get loadingZoneList => _loadingZoneList;
+
   bool _updateAddressData = true;
   bool _changeAddress = true;
 
@@ -71,8 +78,8 @@ class LocationController extends GetxController implements GetxService {
     Position myPosition = await locationServiceInterface.getPosition(
       defaultLatLng,
       LatLng(
-        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '0'),
-        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '0'),
+        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '37.7749'),
+        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '-122.4194'),
       ),
     );
     fromAddress ? _position = myPosition : _pickPosition = myPosition;
@@ -276,6 +283,48 @@ class LocationController extends GetxController implements GetxService {
 
   Future<void> updateZone() async {
     await locationServiceInterface.updateZone();
+  }
+
+  Future<void> getZoneList() async {
+    _loadingZoneList = true;
+    update();
+    _zoneList = await locationServiceInterface.getZoneList();
+    _loadingZoneList = false;
+    update();
+  }
+
+  void selectZone(ZoneListModel zone) {
+    if (zone.formattedCoordinates != null && zone.formattedCoordinates!.isNotEmpty) {
+      // Calculate center point of the zone polygon for better positioning
+      double totalLat = 0;
+      double totalLng = 0;
+      int count = zone.formattedCoordinates!.length;
+
+      for (FormattedCoordinates coord in zone.formattedCoordinates!) {
+        totalLat += coord.lat!;
+        totalLng += coord.lng!;
+      }
+
+      double centerLat = totalLat / count;
+      double centerLng = totalLng / count;
+
+      _pickPosition = Position(
+        latitude: centerLat, longitude: centerLng, timestamp: DateTime.now(),
+        heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
+      );
+      _pickAddress = zone.displayName ?? zone.name ?? 'Selected Zone';
+      _inZone = true;
+      _zoneID = zone.id!;
+      _buttonDisabled = false;
+
+      if (_mapController != null) {
+        _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: LatLng(centerLat, centerLng), zoom: 12)
+        ));
+      }
+
+      update();
+    }
   }
 
 }
