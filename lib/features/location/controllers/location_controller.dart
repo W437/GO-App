@@ -288,9 +288,16 @@ class LocationController extends GetxController implements GetxService {
   Future<void> getZoneList() async {
     _loadingZoneList = true;
     update();
-    _zoneList = await locationServiceInterface.getZoneList();
-    _loadingZoneList = false;
-    update();
+    try {
+      _zoneList = await locationServiceInterface.getZoneList();
+      print('Zone list loaded: ${_zoneList.length} zones');
+    } catch (e) {
+      print('Error loading zone list: $e');
+      _zoneList = [];
+    } finally {
+      _loadingZoneList = false;
+      update();
+    }
   }
 
   void selectZone(ZoneListModel zone) {

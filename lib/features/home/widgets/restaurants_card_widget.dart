@@ -21,8 +21,8 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 
 class RestaurantsCardWidget extends StatelessWidget {
   final Restaurant restaurant;
-  final bool? isNewOnStackFood;
-  const RestaurantsCardWidget({super.key, this.isNewOnStackFood, required this.restaurant});
+  final bool? isNewOnGO;
+  const RestaurantsCardWidget({super.key, this.isNewOnGO, required this.restaurant});
 
 
   @override
@@ -41,7 +41,7 @@ class RestaurantsCardWidget extends StatelessWidget {
     return Stack(
       children: [
         Container(
-          width: isNewOnStackFood! ? ResponsiveHelper.isMobile(context) ? 350 : 380  : ResponsiveHelper.isMobile(context) ? 330: 355,
+          width: isNewOnGO! ? ResponsiveHelper.isMobile(context) ? 350 : 380  : ResponsiveHelper.isMobile(context) ? 330: 355,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
@@ -62,8 +62,8 @@ class RestaurantsCardWidget extends StatelessWidget {
                       Stack(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(isNewOnStackFood! ? 2 : 3),
-                            height: isNewOnStackFood! ? 95 : 65, width: isNewOnStackFood! ? 95 : 65,
+                            padding: EdgeInsets.all(isNewOnGO! ? 2 : 3),
+                            height: isNewOnGO! ? 95 : 65, width: isNewOnGO! ? 95 : 65,
                             decoration:  BoxDecoration(
                               color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
@@ -72,7 +72,7 @@ class RestaurantsCardWidget extends StatelessWidget {
                               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                               child:  CustomImageWidget(
                                 image: '${restaurant.logoFullUrl}',
-                                    fit: BoxFit.cover, height: isNewOnStackFood! ? 95 : 65, width: isNewOnStackFood! ? 95 : 65,
+                                    fit: BoxFit.cover, height: isNewOnGO! ? 95 : 65, width: isNewOnGO! ? 95 : 65,
                                 isRestaurant: true,
                               ),
                             ),
@@ -94,35 +94,35 @@ class RestaurantsCardWidget extends StatelessWidget {
                               overflow: TextOverflow.ellipsis, maxLines: 1,
                               style: robotoMedium.copyWith(fontWeight: FontWeight.w600),
                             ),
-                            SizedBox(height: isNewOnStackFood! ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeExtraSmall),
+                            SizedBox(height: isNewOnGO! ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeExtraSmall),
 
                             characteristics != '' ? Text(
                               characteristics,
                               overflow: TextOverflow.ellipsis, maxLines: 1,
                               style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
                             ) : const SizedBox(),
-                            SizedBox(height: isNewOnStackFood! ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeExtraSmall),
+                            SizedBox(height: isNewOnGO! ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeExtraSmall),
 
                             Row(mainAxisAlignment: MainAxisAlignment.start, children: [
 
-                              isNewOnStackFood! ? restaurant.freeDelivery! ? ImageWithTextRowWidget(
+                              isNewOnGO! ? restaurant.freeDelivery! ? ImageWithTextRowWidget(
                                 widget: Image.asset(Images.deliveryIcon, height: 20, width: 20),
                                 text: 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
                               ) : const SizedBox() : IconWithTextRowWidget(
                                 icon: Icons.star_border, text: restaurant.avgRating!.toStringAsFixed(1),
                                 style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)
                               ),
-                              isNewOnStackFood! ? const SizedBox(width : Dimensions.paddingSizeExtraSmall) : const SizedBox(width: Dimensions.paddingSizeSmall),
+                              isNewOnGO! ? const SizedBox(width : Dimensions.paddingSizeExtraSmall) : const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                              isNewOnStackFood! ? ImageWithTextRowWidget(
+                              isNewOnGO! ? ImageWithTextRowWidget(
                                 widget: Image.asset(Images.distanceKm, height: 20, width: 20),
                                 text: '${distance > 100 ? '100+' : distance.toStringAsFixed(2)} ${'km'.tr}',
                                 style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
                               ) : restaurant.freeDelivery! ? ImageWithTextRowWidget(widget: Image.asset(Images.deliveryIcon, height: 20, width: 20),
                                   text: 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)) : const SizedBox(),
-                              isNewOnStackFood! ? const SizedBox(width : Dimensions.paddingSizeExtraSmall) : restaurant.freeDelivery! ? const SizedBox(width: Dimensions.paddingSizeSmall) : const SizedBox(),
+                              isNewOnGO! ? const SizedBox(width : Dimensions.paddingSizeExtraSmall) : restaurant.freeDelivery! ? const SizedBox(width: Dimensions.paddingSizeSmall) : const SizedBox(),
 
-                              isNewOnStackFood! ? ImageWithTextRowWidget(
+                              isNewOnGO! ? ImageWithTextRowWidget(
                                   widget: Image.asset(Images.itemCount, height: 20, width: 20),
                                   text: '${restaurant.foodsCount} + ${'item'.tr}',
                                   style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)
@@ -139,7 +139,7 @@ class RestaurantsCardWidget extends StatelessWidget {
                     ],
                   ),
 
-                  isNewOnStackFood! ? const SizedBox() : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  isNewOnGO! ? const SizedBox() : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     restaurant.foods != null && restaurant.foods!.isNotEmpty ? Expanded(
                       child: Stack(children: [
 
@@ -210,14 +210,14 @@ class RestaurantsCardWidget extends StatelessWidget {
 
 
 class RestaurantsCardShimmer extends StatelessWidget {
-  final bool? isNewOnStackFood;
-  const RestaurantsCardShimmer({super.key, this.isNewOnStackFood});
+  final bool? isNewOnGO;
+  const RestaurantsCardShimmer({super.key, this.isNewOnGO});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: isNewOnStackFood! ? 300 : ResponsiveHelper.isDesktop(context) ? 160 : 130,
-      child: isNewOnStackFood! ? GridView.builder(
+      height: isNewOnGO! ? 300 : ResponsiveHelper.isDesktop(context) ? 160 : 130,
+      child: isNewOnGO! ? GridView.builder(
         padding: const EdgeInsets.only(left: 17, right: 17, bottom: 17),
         itemCount: 6,
         shrinkWrap: true,

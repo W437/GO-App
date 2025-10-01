@@ -1,5 +1,5 @@
 {
-  "your_business_name": "StackFood",
+  "your_business_name": "GO",
   "connection_to_api_server_failed": "Connection to API server failed due to internet connection",
   "select_language": "Select Language",
   "save": "Save",
@@ -878,7 +878,7 @@
   "order_again": "Order Again!",
   "recently_you_ordered_from": "Recently You Ordered from",
   "best_review_item": "Best Review Item",
-  "new_on_stackFood": "New on StackFood",
+  "new_on_app": "New on GO",
   "refer_now": "Refer Now",
   "refer_an_friend": "Refer an Friend",
   "earn": "Earn",
@@ -1293,5 +1293,6 @@
   "login_in" : "Log In",
   "sorry_something_went_wrong" : "Sorry, something went wrong",
   "please_try_again_after_some_time_or_contact_with_our_support_team" : "Please try again after some time or Contact with our support team.",
-  "regular" : "Regular"
+  "regular" : "Regular",
+  "select_delivery_zone": "בחר אזור משלוח"
 }

@@ -151,11 +151,25 @@ class LocationService implements LocationServiceInterface{
   @override
   Future<List<ZoneListModel>> getZoneList() async {
     List<ZoneListModel> zoneList = [];
-    Response response = await locationRepoInterface.getZoneList();
-    if (response.statusCode == 200) {
-      response.body.forEach((zone) {
-        zoneList.add(ZoneListModel.fromJson(zone));
-      });
+    try {
+      Response response = await locationRepoInterface.getZoneList();
+      print('Zone list API response status: ${response.statusCode}');
+      print('Zone list API response body type: ${response.body.runtimeType}');
+
+      if (response.statusCode == 200) {
+        if (response.body is List) {
+          response.body.forEach((zone) {
+            zoneList.add(ZoneListModel.fromJson(zone));
+          });
+        } else {
+          print('Unexpected response body type: ${response.body}');
+        }
+      } else {
+        print('Zone list API error: ${response.statusText}');
+      }
+    } catch (e, stackTrace) {
+      print('Error fetching zone list: $e');
+      print('Stack trace: $stackTrace');
     }
     return zoneList;
   }

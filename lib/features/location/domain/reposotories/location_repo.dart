@@ -91,7 +91,25 @@ class LocationRepo implements LocationRepoInterface {
 
   @override
   Future<Response> getZoneList() async {
-    return await apiClient.getData(AppConstants.zoneListUri);
+    try {
+      print('Fetching zone list from: ${AppConstants.zoneListUri}');
+      Response response = await apiClient.getData(AppConstants.zoneListUri);
+      print('Zone list response received - status: ${response.statusCode}, body type: ${response.body.runtimeType}');
+      print('Response statusText: ${response.statusText}');
+      if (response.body != null) {
+        print('Zone list body length: ${response.body is List ? (response.body as List).length : 'not a list'}');
+        if (response.body is! List) {
+          print('Zone list body content: ${response.body}');
+        }
+      } else {
+        print('Zone list body is null!');
+      }
+      return response;
+    } catch (e, stackTrace) {
+      print('EXCEPTION in getZoneList: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
 }

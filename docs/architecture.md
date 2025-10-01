@@ -1,7 +1,7 @@
-# StackFood Multivendor - Architecture Documentation
+# GO Multivendor - Architecture Documentation
 
 ## Project Overview
-StackFood Multivendor is a Flutter-based food delivery application supporting multiple vendors, built with a modular architecture pattern. The app provides a comprehensive platform for ordering food from various restaurants with features like cart management, order tracking, user authentication, and real-time notifications.
+GO Multivendor is a Flutter-based food delivery application supporting multiple vendors, built with a modular architecture pattern. The app provides a comprehensive platform for ordering food from various restaurants with features like cart management, order tracking, user authentication, and real-time notifications.
 
 ## Architecture Pattern
 The project follows a **Feature-Based Clean Architecture** with clear separation of concerns:

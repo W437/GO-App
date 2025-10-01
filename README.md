@@ -1,4 +1,4 @@
-# Stackfood Multivendor App
+# GO Multivendor App
 
 A new Flutter application.
 

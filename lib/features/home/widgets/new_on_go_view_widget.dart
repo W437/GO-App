@@ -10,9 +10,9 @@ import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.da
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class NewOnStackFoodViewWidget extends StatelessWidget {
+class NewOnGOViewWidget extends StatelessWidget {
   final bool isLatest;
-  const NewOnStackFoodViewWidget({super.key, required this.isLatest});
+  const NewOnGOViewWidget({super.key, required this.isLatest});
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +57,14 @@ class NewOnStackFoodViewWidget extends StatelessWidget {
                               );
                             },
                             child: RestaurantsCardWidget(
-                              isNewOnStackFood: true,
+                              isNewOnGO: true,
                               restaurant: restController.latestRestaurantList![index],
                             ),
                           ),
                         );
                       },
                   ),
-                ) : const RestaurantsCardShimmer(isNewOnStackFood: false),
+                ) : const RestaurantsCardShimmer(isNewOnGO: false),
              ],
             ),
 

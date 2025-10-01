@@ -9,6 +9,11 @@ import 'package:godelivery_user/features/dine_in/domain/repositories/dine_in_rep
 import 'package:godelivery_user/features/dine_in/domain/repositories/dine_in_repository_interface.dart';
 import 'package:godelivery_user/features/dine_in/domain/services/dine_in_service.dart';
 import 'package:godelivery_user/features/dine_in/domain/services/dine_in_service_interface.dart';
+import 'package:godelivery_user/features/story/controllers/story_controller.dart';
+import 'package:godelivery_user/features/story/domain/repositories/story_repository.dart';
+import 'package:godelivery_user/features/story/domain/repositories/story_repository_interface.dart';
+import 'package:godelivery_user/features/story/domain/services/story_service.dart';
+import 'package:godelivery_user/features/story/domain/services/story_service_interface.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
 import 'package:godelivery_user/features/home/domain/repositories/advertisement_repository.dart';
 import 'package:godelivery_user/features/home/domain/repositories/advertisement_repository_interface.dart';
@@ -314,6 +319,10 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => dineInRepositoryInterface);
   DineInServiceInterface dineInServiceInterface = DineInService(dineInRepositoryInterface: Get.find());
   Get.lazyPut(() => dineInServiceInterface);
+  StoryRepositoryInterface storyRepositoryInterface = StoryRepository(apiClient: Get.find());
+  Get.lazyPut(() => storyRepositoryInterface);
+  StoryServiceInterface storyServiceInterface = StoryService(storyRepositoryInterface: Get.find(), sharedPreferences: Get.find());
+  Get.lazyPut(() => storyServiceInterface);
 
 
   /// Controller
@@ -352,6 +361,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => CheckoutController(checkoutServiceInterface: Get.find()));
   Get.lazyPut(() => AdvertisementController(advertisementServiceInterface: Get.find()));
   Get.lazyPut(() => DineInController(dineInServiceInterface: Get.find()));
+  Get.lazyPut(() => StoryController(storyServiceInterface: Get.find()));
 
 
   /// Retrieving localized data

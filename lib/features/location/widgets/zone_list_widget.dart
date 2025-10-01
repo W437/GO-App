@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/custom_loader_widget.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
+import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -110,10 +115,45 @@ class ZoneListWidget extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          onTap: isActive ? () {
+          onTap: isActive ? () async {
             locationController.selectZone(zone);
             if (isBottomSheet) {
               Get.back();
+            }
+
+            // Navigate after zone selection
+            Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
+
+            // Create an address from the zone's center point
+            if (zone.formattedCoordinates != null && zone.formattedCoordinates!.isNotEmpty) {
+              double totalLat = 0;
+              double totalLng = 0;
+              int count = zone.formattedCoordinates!.length;
+
+              for (var coord in zone.formattedCoordinates!) {
+                totalLat += coord.lat!;
+                totalLng += coord.lng!;
+              }
+
+              double centerLat = totalLat / count;
+              double centerLng = totalLng / count;
+
+              AddressModel address = AddressModel(
+                latitude: centerLat.toString(),
+                longitude: centerLng.toString(),
+                address: zone.displayName ?? zone.name ?? 'Selected Zone',
+                addressType: 'others',
+              );
+
+              if (!Get.find<AuthController>().isGuestLoggedIn() || !Get.find<AuthController>().isLoggedIn()) {
+                var response = await Get.find<AuthController>().guestLogin();
+                if (response.isSuccess) {
+                  Get.find<ProfileController>().setForceFullyUserEmpty();
+                  locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
+                }
+              } else {
+                locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
+              }
             }
           } : null,
           child: Padding(

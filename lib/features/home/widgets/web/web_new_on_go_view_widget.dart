@@ -8,9 +8,9 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class WebNewOnStackFoodViewWidget extends StatelessWidget {
+class WebNewOnGOViewWidget extends StatelessWidget {
   final bool isLatest;
-  const WebNewOnStackFoodViewWidget({super.key, required this.isLatest});
+  const WebNewOnGOViewWidget({super.key, required this.isLatest});
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +53,11 @@ class WebNewOnStackFoodViewWidget extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   return RestaurantsCardWidget(
-                    isNewOnStackFood: true,
+                    isNewOnGO: true,
                     restaurant: restController.latestRestaurantList![index],
                   );
                 },
-              ) : const RestaurantsCardShimmer(isNewOnStackFood: true),
+              ) : const RestaurantsCardShimmer(isNewOnGO: true),
             ],
           ),
 

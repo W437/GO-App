@@ -14,6 +14,7 @@ import 'package:godelivery_user/features/checkout/screens/order_successful_scree
 import 'package:godelivery_user/features/checkout/screens/payment_screen.dart';
 import 'package:godelivery_user/features/checkout/screens/payment_webview_screen.dart';
 import 'package:godelivery_user/features/dine_in/screens/dine_in_restaurant_screen.dart';
+import 'package:godelivery_user/features/story/screens/story_viewer_screen.dart';
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
 import 'package:godelivery_user/features/home/screens/map_view_screen.dart';
 import 'package:godelivery_user/features/html/enums/html_type.dart';
@@ -145,6 +146,7 @@ class RouteHelper {
   static const String favourite = '/favourite-screen';
   static const String newUserSetupScreen = '/new-user-setup-screen';
   static const String dineInRestaurant = '/dine-in-restaurant';
+  static const String storyViewer = '/story-viewer';
 
   static String getInitialRoute({bool fromSplash = false}) => '$initial?from-splash=$fromSplash';
   static String getSplashRoute(NotificationBodyModel? body, DeepLinkBody? linkBody) {
@@ -297,6 +299,7 @@ class RouteHelper {
     return '$newUserSetupScreen?name=$name&login_type=$loginType&phone=$phone&email=$email';
   }
   static String getDineInRestaurantScreen() => dineInRestaurant;
+  static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
 
   static List<GetPage> routes = [
     GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 0, fromSplash: (Get.parameters['from-splash'] == 'true')))),
@@ -556,6 +559,13 @@ class RouteHelper {
       email: Get.parameters['email'] != '' && Get.parameters['email'] != 'null' ? Get.parameters['email']!.replaceAll(' ', '+') : null,
     )),
     GetPage(name: dineInRestaurant, page: () => getRoute(const DineInRestaurantScreen())),
+    GetPage(name: storyViewer, page: () {
+      final args = Get.arguments as Map<String, dynamic>;
+      return StoryViewerScreen(
+        collections: args['collections'],
+        initialIndex: args['initialIndex'],
+      );
+    }),
   ];
 
   static getRoute(Widget? navigateTo, {bool byPuss = false}) {

@@ -52,7 +52,7 @@ class OrderAgainViewWidget extends StatelessWidget {
                   return Padding(
                     padding: EdgeInsets.only(left: (ResponsiveHelper.isDesktop(context) && index == 0 && Get.find<LocalizationController>().isLtr) ? 0 : Dimensions.paddingSizeDefault),
                     child: RestaurantsCardWidget(
-                      isNewOnStackFood: false,
+                      isNewOnGO: false,
                       restaurant: restController.orderAgainRestaurantList![index],
                     ),
                   );

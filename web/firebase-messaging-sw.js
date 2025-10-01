@@ -2,12 +2,12 @@ importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js");
 
 firebase.initializeApp({
-  apiKey: "AIzaSyCeaw_gVN0iQwFHyuF8pQ6PbVDmSVQw8AY",
-  authDomain: "stackfood-bd3ee.firebaseapp.com",
-  projectId: "stackfood-bd3ee",
-  storageBucket: "stackfood-bd3ee.appspot.com",
-  messagingSenderId: "1049699819506",
-  appId: "1:1049699819506:web:a4b5e3bedc729aab89956b",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
   databaseURL: "...",
 });
 

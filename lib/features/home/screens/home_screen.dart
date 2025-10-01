@@ -1,6 +1,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
+import 'package:godelivery_user/features/story/controllers/story_controller.dart';
+import 'package:godelivery_user/features/story/widgets/story_strip_widget.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
 import 'package:godelivery_user/features/home/widgets/cashback_dialog_widget.dart';
 import 'package:godelivery_user/features/home/widgets/cashback_logo_widget.dart';
@@ -18,7 +20,7 @@ import 'package:godelivery_user/features/home/widgets/best_review_item_view_widg
 import 'package:godelivery_user/features/home/widgets/cuisine_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/enjoy_off_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/location_banner_view_widget.dart';
-import 'package:godelivery_user/features/home/widgets/new_on_stackfood_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/new_on_go_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/order_again_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/popular_foods_nearby_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/popular_restaurants_view_widget.dart';
@@ -63,6 +65,7 @@ class HomeScreen extends StatefulWidget {
     Get.find<CuisineController>().getCuisineList();
     Get.find<AdvertisementController>().getAdvertisementList();
     Get.find<DineInController>().getDineInRestaurantList(1, reload);
+    Get.find<StoryController>().getStories(reload: reload);
     if(Get.find<SplashController>().configModel!.popularRestaurant == 1) {
       Get.find<RestaurantController>().getPopularRestaurantList(reload, 'all', false);
     }
@@ -215,55 +218,71 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Center(child: Container(
                               width: Dimensions.webMaxWidth, color: Theme.of(context).primaryColor,
                               padding: const EdgeInsets.only(top: 30),
-                              child: Opacity(
-                                opacity: 1 - scrollPoint,
-                                child: Row(children: [
+                              child: Stack(
+                                children: [
+                                  // Expanded logo (visible when not scrolled)
+                                  Opacity(
+                                    opacity: 1 - scrollPoint,
+                                    child: Row(children: [
+                                      Expanded(child: Transform.translate(
+                                        offset: Offset(0, -(scrollingRate * 20)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Image.asset(
+                                              'assets/brand/app-icon-white.png',
+                                              height: 60,
+                                              width: 60,
+                                            ),
+                                          ),
+                                        ),
+                                      )),
 
-                                  Expanded(child: Transform.translate(
-                                    offset: Offset(0, -(scrollingRate * 20)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Image.asset(
-                                          'assets/brand/app-icon-white.png',
-                                          height: 60,
-                                          width: 60,
+                                      Transform.translate(
+                                        offset: Offset(0, -(scrollingRate * 10)),
+                                        child: InkWell(
+                                          child: GetBuilder<NotificationController>(builder: (notificationController) {
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).cardColor.withValues(alpha: 0.9),
+                                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                              ),
+                                              padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                                              child: Stack(children: [
+                                                Transform.translate(
+                                                  offset: Offset(0, -(scrollingRate * 10)),
+                                                  child: Icon(Icons.notifications_outlined, size: 25, color: Theme.of(context).primaryColor),
+                                              ),
+                                                notificationController.hasNotification ? Positioned(top: 0, right: 0, child: Container(
+                                                  height: 10, width: 10, decoration: BoxDecoration(
+                                                  color: Theme.of(context).primaryColor, shape: BoxShape.circle,
+                                                  border: Border.all(width: 1, color: Theme.of(context).cardColor),
+                                                ),
+                                                )) : const SizedBox(),
+                                              ]),
+                                            );
+                                          }),
+                                          onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
                                         ),
                                       ),
-                                    ),
-                                  )),
 
-                                  Transform.translate(
-                                    offset: Offset(0, -(scrollingRate * 10)),
-                                    child: InkWell(
-                                      child: GetBuilder<NotificationController>(builder: (notificationController) {
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).cardColor.withValues(alpha: 0.9),
-                                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                          ),
-                                          padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                                          child: Stack(children: [
-                                            Transform.translate(
-                                              offset: Offset(0, -(scrollingRate * 10)),
-                                              child: Icon(Icons.notifications_outlined, size: 25, color: Theme.of(context).primaryColor),
-                                          ),
-                                            notificationController.hasNotification ? Positioned(top: 0, right: 0, child: Container(
-                                              height: 10, width: 10, decoration: BoxDecoration(
-                                              color: Theme.of(context).primaryColor, shape: BoxShape.circle,
-                                              border: Border.all(width: 1, color: Theme.of(context).cardColor),
-                                            ),
-                                            )) : const SizedBox(),
-                                          ]),
-                                        );
-                                      }),
-                                      onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
-                                    ),
+                                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                                    ]),
                                   ),
 
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                                ]),
+                                  // Small centered logo (visible when scrolled)
+                                  Center(
+                                    child: Opacity(
+                                      opacity: scrollPoint > 0.3 ? (scrollPoint - 0.3) / 0.7 : 0,
+                                      child: Image.asset(
+                                        'assets/brand/app-icon-white.png',
+                                        height: 35,
+                                        width: 35,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ));
                           },
@@ -272,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     actions: const [SizedBox()],
                   ),
 
-                  // Search Button
+                  // Search Button & Location
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: SliverDelegate(height: 65, child: Center(child: Stack(
@@ -289,60 +308,80 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         Positioned(
                           left: 10, right: 10, top: 8, bottom: 5,
-                          child: InkWell(
-                            onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
-                            child: Container(
-                              transform: Matrix4.translationValues(0, -3, 0),
-                              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).cardColor,
-                                borderRadius: BorderRadius.circular(25),
-                                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                          child: Row(
+                            children: [
+                              // Search Bar
+                              Expanded(
+                                flex: 3,
+                                child: InkWell(
+                                  onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
+                                  child: Container(
+                                    height: 52,
+                                    transform: Matrix4.translationValues(0, -3, 0),
+                                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).cardColor,
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                                    ),
+                                    child: Row(children: [
+                                      Image.asset(Images.searchIcon, width: 25, height: 25),
+                                      const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                      Expanded(child: Text('are_you_hungry'.tr, style: robotoRegular.copyWith(
+                                        fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                                      ))),
+                                    ]),
+                                  ),
+                                ),
                               ),
-                              child: Row(children: [
-                                Image.asset(Images.searchIcon, width: 25, height: 25),
-                                const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                                Expanded(child: Text('are_you_hungry'.tr, style: robotoRegular.copyWith(
-                                  fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
-                                ))),
-                              ]),
-                            ),
+                              const SizedBox(width: 8),
+                              // Location Selector
+                              Expanded(
+                                flex: 2,
+                                child: GetBuilder<LocationController>(builder: (locationController) {
+                                  return InkWell(
+                                    onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
+                                    child: Container(
+                                      height: 52,
+                                      transform: Matrix4.translationValues(0, -3, 0),
+                                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).cardColor,
+                                        borderRadius: BorderRadius.circular(25),
+                                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                                      ),
+                                      child: Row(children: [
+                                        Icon(
+                                          AuthHelper.isLoggedIn() ? (
+                                            AddressHelper.getAddressFromSharedPref()!.addressType == 'home' ? Icons.home_filled
+                                              : AddressHelper.getAddressFromSharedPref()!.addressType == 'office' ? Icons.work : Icons.location_on
+                                          ) : Icons.location_on,
+                                          size: 18, color: Theme.of(context).primaryColor,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            AddressHelper.getAddressFromSharedPref()!.address!,
+                                            style: robotoRegular.copyWith(
+                                              color: Theme.of(context).textTheme.bodyMedium!.color,
+                                              fontSize: Dimensions.fontSizeExtraSmall,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).primaryColor),
+                                      ]),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ],
                           ),
                         )
                       ],
                     ))),
-                  ),
-
-                  // Location Display
-                  SliverToBoxAdapter(
-                    child: Center(child: Container(
-                      width: Dimensions.webMaxWidth,
-                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                      child: GetBuilder<LocationController>(builder: (locationController) {
-                        return InkWell(
-                          onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
-                          child: Row(children: [
-                            AuthHelper.isLoggedIn() ? Icon(
-                              AddressHelper.getAddressFromSharedPref()!.addressType == 'home' ? Icons.home_filled
-                                  : AddressHelper.getAddressFromSharedPref()!.addressType == 'office' ? Icons.work : Icons.location_on,
-                              size: 18, color: Theme.of(context).primaryColor,
-                            ) : Icon(Icons.location_on, size: 18, color: Theme.of(context).primaryColor),
-                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                            Flexible(
-                              child: Text(
-                                AddressHelper.getAddressFromSharedPref()!.address!,
-                                style: robotoRegular.copyWith(
-                                  color: Theme.of(context).textTheme.bodyMedium!.color, 
-                                  fontSize: Dimensions.fontSizeSmall,
-                                ),
-                                maxLines: 1, 
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ]),
-                        );
-                      }),
-                    )),
                   ),
 
                   SliverToBoxAdapter(
@@ -359,6 +398,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const TodayTrendsViewWidget(),
 
                         const LocationBannerViewWidget(),
+
+                        const StoryStripWidget(),
 
                         const HighlightWidgetView(),
 
@@ -378,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         _configModel.popularFood == 1 ? const PopularFoodNearbyViewWidget() : const SizedBox(),
 
-                        _configModel.newRestaurant == 1 ? const NewOnStackFoodViewWidget(isLatest: true) : const SizedBox(),
+                        _configModel.newRestaurant == 1 ? const NewOnGOViewWidget(isLatest: true) : const SizedBox(),
 
                         const PromotionalBannerViewWidget(),
 

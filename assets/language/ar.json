@@ -1,5 +1,5 @@
 {
-  "your_business_name": "StackFood",
+  "your_business_name": "GO",
   "connection_to_api_server_failed": "فشل الاتصال بخادم API بسبب الاتصال بالإنترنت",
   "select_language": "اختر اللغة",
   "save": "يحفظ",
@@ -878,7 +878,7 @@
   "order_again": "اطلب مرة أخرى!",
   "recently_you_ordered_from": "قمت مؤخرا بالطلب من",
   "best_review_item": "أفضل عنصر مراجعة",
-  "new_on_stackFood": "جديد على StackFood",
+  "new_on_app": "جديد على GO",
   "refer_now": "الرجوع الآن",
   "refer_an_friend": "إحالة صديق",
   "earn": "يكسب",
@@ -1293,5 +1293,6 @@
   "login_in": "تسجيل الدخول",
   "sorry_something_went_wrong": "عذرًا، حدث خطأ ما",
   "please_try_again_after_some_time_or_contact_with_our_support_team": "يرجى المحاولة مرة أخرى بعد فترة أو الاتصال بفريق الدعم الخاص بنا.",
-  "regular": "عادي"
+  "regular": "عادي",
+  "select_delivery_zone": "اختر منطقة التوصيل"
 }

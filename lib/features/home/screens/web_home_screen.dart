@@ -13,7 +13,7 @@ import 'package:godelivery_user/features/home/widgets/web/web_cuisine_view_widge
 import 'package:godelivery_user/features/home/widgets/web/web_dine_in_widget.dart';
 import 'package:godelivery_user/features/home/widgets/web/web_highlight_widget_view.dart';
 import 'package:godelivery_user/features/home/widgets/web/web_loaction_and_refer_banner_view_widget.dart';
-import 'package:godelivery_user/features/home/widgets/web/web_new_on_stackfood_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/web/web_new_on_go_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/what_on_your_mind_view_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
@@ -90,7 +90,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
                 const WebLocationAndReferBannerViewWidget(),
 
-                _configModel!.newRestaurant == 1 ? const WebNewOnStackFoodViewWidget(isLatest: true) : const SizedBox(),
+                _configModel!.newRestaurant == 1 ? const WebNewOnGOViewWidget(isLatest: true) : const SizedBox(),
 
                 const PromotionalBannerViewWidget(),
 

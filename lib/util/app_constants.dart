@@ -126,6 +126,10 @@ class AppConstants {
   static const String checkRestaurantValidation = '/api/v1/customer/order/check-restaurant-validation';
   static const String getOrderTaxUri = '/api/v1/customer/order/get-Tax';
 
+  /// Stories
+  static const String storyFeedUri = '/api/v1/stories';
+  static const String storyViewUri = '/api/v1/stories';
+
   ///Subscription
   static const String businessPlanUri = '/api/v1/vendor/business_plan';
   static const String businessPlanPaymentUri = '/api/v1/vendor/subscription/payment/api';
@@ -162,19 +166,20 @@ class AppConstants {
   static const String localizationKey = 'X-localization';
   static const String latitude = 'latitude';
   static const String longitude = 'longitude';
-  static const String earnPoint = 'stackfood_earn_point';
-  static const String acceptCookies = '6ammart_accept_cookies';
+  static const String earnPoint = 'go_earn_point';
+  static const String acceptCookies = 'go_accept_cookies';
   static const String cookiesManagement = 'cookies_management';
-  static const String dmTipIndex = 'stackfood_dm_tip_index';
-  static const String walletAccessToken = '6ammart_wallet_access_token';
-  static const String guestId = 'stackfood_guest_id';
-  static const String guestNumber = 'stackfood_guest_number';
-  static const String dmRegisterSuccess = 'stackfood_dm_registration_success';
-  static const String isRestaurantRegister = 'stackfood_restaurant_registration';
-  static const String referBottomSheet = 'stackfood_reffer_bottomsheet_show';
+  static const String dmTipIndex = 'go_dm_tip_index';
+  static const String walletAccessToken = 'go_wallet_access_token';
+  static const String guestId = 'go_guest_id';
+  static const String guestNumber = 'go_guest_number';
+  static const String dmRegisterSuccess = 'go_dm_registration_success';
+  static const String isRestaurantRegister = 'go_restaurant_registration';
+  static const String referBottomSheet = 'go_reffer_bottomsheet_show';
+  static const String storySeenPrefix = 'go_story_seen';
   static const String maintenanceModeTopic = 'maintenance_mode_user_app';
-  static const String demoResetTopic = 'stackfood_demo_reset';
-  static const String configCacheKey = 'stackfood_config_cache';
+  static const String demoResetTopic = 'go_demo_reset';
+  static const String configCacheKey = 'go_config_cache';
 
 
   ///Refer & Earn work flow list..

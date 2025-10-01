@@ -10,6 +10,7 @@ import 'package:godelivery_user/features/location/controllers/location_controlle
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
 import 'package:godelivery_user/features/location/widgets/bottom_button.dart';
 import 'package:godelivery_user/features/location/widgets/pick_map_dialog.dart';
+import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
@@ -39,6 +40,11 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Load zone list after build is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<LocationController>().getZoneList();
+    });
 
     if(ResponsiveHelper.isDesktop(Get.context!)) {
       Future.delayed(const Duration(milliseconds: 600), () {
@@ -129,7 +135,36 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
                   )));
                 },
               ) : NoDataScreen(title: 'no_saved_address_found'.tr, isEmptyAddress: true) : const Center(child: CircularProgressIndicator()),
-              SizedBox(height: (addressController.addressList != null && addressController.addressList!.length < 4) ? 200 : Dimensions.paddingSizeLarge),
+
+              const SizedBox(height: Dimensions.paddingSizeLarge),
+
+              // Zone List Section
+              Padding(
+                padding: ResponsiveHelper.isDesktop(context)
+                  ? const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge)
+                  : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'select_delivery_zone'.tr,
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                        color: Theme.of(context).textTheme.bodyLarge!.color,
+                      ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    const Center(
+                      child: SizedBox(
+                        width: 700,
+                        child: ZoneListWidget(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: (addressController.addressList != null && addressController.addressList!.length < 4) ? 100 : Dimensions.paddingSizeLarge),
 
               ResponsiveHelper.isDesktop(context) ? BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route) : const SizedBox(),
 
@@ -155,6 +190,27 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
                 BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
+
+                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                // Zone List for non-logged-in users
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'select_delivery_zone'.tr,
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeLarge,
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                      ),
+                      const SizedBox(height: Dimensions.paddingSizeSmall),
+                      const ZoneListWidget(),
+                    ],
+                  ),
+                ),
               ])),
             )),
           ),
