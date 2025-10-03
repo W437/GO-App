@@ -82,24 +82,24 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                       child: Icon(
                         widget.iconData,
                         color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
-                        size: 24,
+                        size: 28,
                       ),
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 2),
-              Flexible(
-                child: Text(
-                  widget.label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              // const SizedBox(height: 2),
+              // Flexible(
+              //   child: Text(
+              //     widget.label,
+              //     style: TextStyle(
+              //       fontSize: 11,
+              //       color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+              //     ),
+              //     maxLines: 1,
+              //     overflow: TextOverflow.ellipsis,
+              //   ),
+              // ),
             ],
           ),
         ),
