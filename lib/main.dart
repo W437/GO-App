@@ -158,7 +158,7 @@ class _MyAppState extends State<MyApp> {
             builder: (BuildContext context, widget) {
               return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)), child: Material(
                 child: SafeArea(
-                  top: false, bottom: GetPlatform.isAndroid,
+                  top: false, bottom: false,
                   child: Stack(children: [
                     widget!,
 

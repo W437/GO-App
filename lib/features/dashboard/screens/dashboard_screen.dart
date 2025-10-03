@@ -155,7 +155,7 @@ class DashboardScreenState extends State<DashboardScreen> {
 
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
             ? const SizedBox() : Container(
-              height: 65,
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 boxShadow: [
@@ -166,7 +166,9 @@ class DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ],
               ),
-              child: Row(
+              child: SizedBox(
+                height: 65,
+                child: Row(
                 children: [
                   BottomNavItem(
                     iconData: Icons.home,
@@ -199,6 +201,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                     onTap: () => _setPage(4),
                   ),
                 ],
+                ),
               ),
             );
           }
