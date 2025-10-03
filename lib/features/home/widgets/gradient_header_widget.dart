@@ -247,11 +247,6 @@ class GradientHeaderWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Icon(
-                        Icons.tune,
-                        color: Theme.of(context).hintColor,
-                        size: 22,
-                      ),
                     ],
                   ),
                 ),

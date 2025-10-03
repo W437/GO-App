@@ -30,6 +30,10 @@ import 'package:godelivery_user/features/home/screens/theme2_home_screen.dart';
 import 'package:godelivery_user/features/home/widgets/simple_app_bar_widget.dart';
 import 'package:godelivery_user/features/home/widgets/simple_search_location_widget.dart';
 import 'package:godelivery_user/features/home/widgets/gradient_header_widget.dart';
+import 'package:godelivery_user/features/home/widgets/sticky_header_delegate.dart';
+import 'package:godelivery_user/features/home/widgets/header_content_widget.dart';
+import 'package:godelivery_user/features/home/widgets/sticky_top_bar_widget.dart';
+import 'package:godelivery_user/features/home/widgets/header_content_below_sticky.dart';
 import 'package:godelivery_user/features/home/widgets/today_trends_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/what_on_your_mind_view_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -104,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   final ScrollController _scrollController = ScrollController();
   final ConfigModel? _configModel = Get.find<SplashController>().configModel;
   bool _isLogin = false;
+  double _scrollOffset = 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -113,6 +118,13 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     super.initState();
 
     _isLogin = Get.find<AuthController>().isLoggedIn();
+
+    _scrollController.addListener(() {
+      setState(() {
+        _scrollOffset = _scrollController.offset;
+      });
+    });
+
     HomeScreen.loadData(false).then((value) {
       Get.find<SplashController>().getReferBottomSheetStatus();
 
@@ -213,9 +225,18 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
 
-                  /// Gradient Header
+                  /// Sticky Top Bar (Profile, Location, Notification)
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: SliverDelegate(
+                      height: 100,
+                      child: StickyTopBarWidget(scrollOffset: _scrollOffset),
+                    ),
+                  ),
+
+                  /// Header Content (Title + Search) - Scrollable
                   SliverToBoxAdapter(
-                    child: const GradientHeaderWidget(),
+                    child: const HeaderContentBelowSticky(),
                   ),
 
                   SliverToBoxAdapter(
