@@ -154,36 +154,52 @@ class DashboardScreenState extends State<DashboardScreen> {
         bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
 
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
-            ? const SizedBox() : BottomNavigationBar(
-              currentIndex: _pageIndex,
-              onTap: _setPage,
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
-              selectedItemColor: Theme.of(context).primaryColor,
-              unselectedItemColor: Colors.grey,
-              elevation: 0,
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.favorite),
-                  label: 'Favorites',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.shopping_cart),
-                  label: 'Cart',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.shopping_bag),
-                  label: 'Orders',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.menu),
-                  label: 'Menu',
-                ),
-              ],
+            ? const SizedBox() : Container(
+              height: 65,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  BottomNavItem(
+                    iconData: Icons.home,
+                    label: 'Home',
+                    isSelected: _pageIndex == 0,
+                    onTap: () => _setPage(0),
+                  ),
+                  BottomNavItem(
+                    iconData: Icons.favorite,
+                    label: 'Favorites',
+                    isSelected: _pageIndex == 1,
+                    onTap: () => _setPage(1),
+                  ),
+                  BottomNavItem(
+                    iconData: Icons.shopping_cart,
+                    label: 'Cart',
+                    isSelected: _pageIndex == 2,
+                    onTap: () => _setPage(2),
+                  ),
+                  BottomNavItem(
+                    iconData: Icons.shopping_bag,
+                    label: 'Orders',
+                    isSelected: _pageIndex == 3,
+                    onTap: () => _setPage(3),
+                  ),
+                  BottomNavItem(
+                    iconData: Icons.menu,
+                    label: 'Menu',
+                    isSelected: _pageIndex == 4,
+                    onTap: () => _setPage(4),
+                  ),
+                ],
+              ),
             );
           }
         ),

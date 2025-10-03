@@ -20,10 +20,10 @@ class NotLoggedInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return SingleChildScrollView(
-      controller: scrollController,
-      child: FooterViewWidget(
-        child: Center(
+    return Center(
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: FooterViewWidget(
           child: Padding(
             padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [

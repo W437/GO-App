@@ -1,4 +1,5 @@
 import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/features/home/widgets/all_categories_bottom_sheet.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
@@ -25,13 +26,18 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
             right: Get.find<LocalizationController>().isLtr ? 0 : Dimensions.paddingSizeExtraSmall,
             bottom: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeOverLarge,
           ),
-          child: ResponsiveHelper.isDesktop(context) ? Text('what_on_your_mind'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)) :
-          Padding(padding: const EdgeInsets.only(left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeDefault),
+          child: Padding(padding: const EdgeInsets.only(left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeDefault),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('what_on_your_mind'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
-              ArrowIconButtonWidget(onTap: () => Get.toNamed(RouteHelper.getCategoryRoute())),
-            ],
-            ),
+              Text('what_on_your_mind'.tr, style: ResponsiveHelper.isDesktop(context) ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600) : robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
+              ArrowIconButtonWidget(onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const AllCategoriesBottomSheet(),
+                );
+              }),
+            ]),
           ),
         ),
 
@@ -42,35 +48,8 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-            itemCount: categoryController.categoryList!.length > 10 ? 10 : categoryController.categoryList!.length,
+            itemCount: categoryController.categoryList!.length,
             itemBuilder: (context, index) {
-
-              if(index == 9) {
-                return ResponsiveHelper.isDesktop(context) ? Padding(
-                  padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall, top: Dimensions.paddingSizeSmall),
-                  child: Container(
-                    width: 70,
-                    padding: const EdgeInsets.only(left: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall, top: Dimensions.paddingSizeSmall, bottom: Dimensions.paddingSizeSmall),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: InkWell(
-                        hoverColor: Colors.transparent,
-                        onTap: () => Get.toNamed(RouteHelper.getCategoryRoute()),
-                        child: Container(
-                          height: 40, width: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Theme.of(context).cardColor,
-                            border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3)),
-                          ),
-                          child: Icon(Icons.arrow_forward, color: Theme.of(context).primaryColor),
-                        ),
-                      ),
-                    ),
-                  ),
-                ): const SizedBox();
-              }
-
               return Padding(
                 padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeDefault),
                 child: Column(

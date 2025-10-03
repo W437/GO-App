@@ -117,7 +117,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
             Expanded(child: SingleChildScrollView(
               child: Ink(
-                color: Get.find<ThemeController>().darkTheme ? Theme.of(context).colorScheme.surface : Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                color: Get.find<ThemeController>().darkTheme ? Theme.of(context).colorScheme.surface : Colors.white,
                 padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge),
                 child: Column(children: [
 

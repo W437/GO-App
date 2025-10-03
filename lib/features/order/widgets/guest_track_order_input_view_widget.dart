@@ -43,20 +43,25 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: Dimensions.radiusExtraLarge, vertical: Dimensions.paddingSizeLarge),
-      child: Center(
+    return Center(
+      child: Padding(
+        padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: Dimensions.radiusExtraLarge, vertical: Dimensions.paddingSizeLarge),
         child: SingleChildScrollView(
           child: FooterViewWidget(
             child: SizedBox(
               width: Dimensions.webMaxWidth,
               child: Form(
                 key: _formKeyOrder,
-                child: Column(children: [
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
 
                   SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : Dimensions.paddingSizeLarge),
 
-                  CustomTextFieldWidget(
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
+                    child: CustomTextFieldWidget(
                     titleText: 'order_id'.tr,
                     hintText: '',
                     controller: _orderIdController,
@@ -68,10 +73,13 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                     labelText: 'order_id'.tr,
                     required: true,
                     validator: (value) => ValidateCheck.validateEmptyText(value, null),
+                    ),
                   ),
                   const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                  CustomTextFieldWidget(
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
+                    child: CustomTextFieldWidget(
                     titleText: 'enter_phone_number'.tr,
                     hintText: '',
                     controller: _phoneNumberController,
@@ -87,6 +95,7 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                     labelText: 'phone'.tr,
                     required: true,
                     validator: (value) => ValidateCheck.validateEmptyText(value, "phone_number_field_is_required".tr),
+                    ),
                   ),
                   const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 

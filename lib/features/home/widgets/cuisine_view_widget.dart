@@ -1,4 +1,5 @@
 import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/features/home/widgets/all_cuisines_bottom_sheet.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/cuisine_card_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
@@ -35,7 +36,14 @@ class CuisineViewWidget extends StatelessWidget {
               Padding(padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   Text('cuisine'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
-                  ArrowIconButtonWidget(onTap: () => Get.toNamed(RouteHelper.getCuisineRoute())),
+                  ArrowIconButtonWidget(onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const AllCuisinesBottomSheet(),
+                    );
+                  }),
                 ]),
               ),
 

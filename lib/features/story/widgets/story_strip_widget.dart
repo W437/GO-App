@@ -91,14 +91,14 @@ class StoryStripWidget extends StatelessWidget {
                               imageUrl: restaurant.logoFullUrl ?? '',
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Colors.grey[200],
+                                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                                 child: const Center(
                                   child: CircularProgressIndicator(),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: Colors.grey[200],
-                                child: const Icon(Icons.restaurant),
+                                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
                               ),
                             ),
                           ),
@@ -151,7 +151,7 @@ class StoryStripWidget extends StatelessWidget {
                     height: 70,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.grey[300],
+                      color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                     ),
                   ),
                 ),
@@ -163,7 +163,7 @@ class StoryStripWidget extends StatelessWidget {
                     height: 10,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
-                      color: Colors.grey[300],
+                      color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                     ),
                   ),
                 ),
@@ -216,9 +216,9 @@ class StoryStripWidget extends StatelessWidget {
                         width: 3,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.restaurant,
-                      color: Colors.grey,
+                      color: Theme.of(context).disabledColor,
                       size: 24,
                     ),
                   ),
@@ -230,7 +230,7 @@ class StoryStripWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
+                        color: Theme.of(context).disabledColor,
                         fontSize: 11,
                       ),
                 ),

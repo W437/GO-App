@@ -393,13 +393,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         const BadWeatherWidget(),
 
+                        const StoryStripWidget(),
+
                         const WhatOnYourMindViewWidget(),
 
                         const TodayTrendsViewWidget(),
 
                         const LocationBannerViewWidget(),
-
-                        const StoryStripWidget(),
 
                         const HighlightWidgetView(),
 
