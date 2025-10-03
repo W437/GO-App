@@ -23,9 +23,9 @@ class OnboardRepository implements OnboardRepositoryInterface {
   @override
   Future<List<OnBoardingModel>> getList({int? offset}) async {
     List<OnBoardingModel> onBoardingList = [
-      OnBoardingModel(Images.onboarding_1, Images.onboardFrame_1, 'on_boarding_1_title'.tr, 'on_boarding_1_description'.tr),
-      OnBoardingModel(Images.onboarding_2, Images.onboardFrame_2, 'on_boarding_2_title'.tr, 'on_boarding_2_description'.tr),
-      OnBoardingModel(Images.onboarding_3, Images.onboardFrame_3, 'on_boarding_3_title'.tr, 'on_boarding_3_description'.tr),
+      OnBoardingModel(Images.onboarding_1, 'on_boarding_1_title'.tr, 'on_boarding_1_description'.tr),
+      OnBoardingModel(Images.onboarding_2, 'on_boarding_2_title'.tr, 'on_boarding_2_description'.tr),
+      OnBoardingModel(Images.onboarding_3, 'on_boarding_3_title'.tr, 'on_boarding_3_description'.tr),
     ];
     return onBoardingList;
   }

@@ -77,7 +77,7 @@ void _newlyRegisteredRouteProcess() {
   if(AppConstants.languages.length > 1) {
     Get.offNamed(RouteHelper.getLanguageRoute('splash'));
   }else {
-    Get.offNamed(RouteHelper.getOnBoardingRoute());
+    Get.offNamed(RouteHelper.getWelcomeRoute());
   }
 }
 

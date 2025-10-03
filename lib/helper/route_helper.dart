@@ -26,6 +26,7 @@ import 'package:godelivery_user/features/location/screens/pick_map_screen.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
 import 'package:godelivery_user/features/notification/screens/notification_screen.dart';
 import 'package:godelivery_user/features/onboard/screens/onboarding_screen.dart';
+import 'package:godelivery_user/features/onboard/screens/welcome_screen.dart';
 import 'package:godelivery_user/features/order/screens/guest_track_order_screen.dart';
 import 'package:godelivery_user/features/order/screens/order_details_screen.dart';
 import 'package:godelivery_user/features/order/screens/order_screen.dart';
@@ -88,6 +89,7 @@ class RouteHelper {
   static const String initial = '/';
   static const String splash = '/splash';
   static const String language = '/language';
+  static const String welcome = '/welcome';
   static const String onBoarding = '/on-boarding';
   static const String signIn = '/sign-in';
   static const String signUp = '/sign-up';
@@ -163,6 +165,7 @@ class RouteHelper {
     return '$splash?data=$data&link=$linkData';
   }
   static String getLanguageRoute(String page) => '$language?page=$page';
+  static String getWelcomeRoute() => welcome;
   static String getOnBoardingRoute() => onBoarding;
   static String getSignInRoute(String page) => '$signIn?page=$page';
   static String getSignUpRoute() => signUp;
@@ -317,6 +320,7 @@ class RouteHelper {
       return SplashScreen(notificationBody: data, linkBody: linkData);
     }),
     GetPage(name: language, page: () => LanguageScreen(fromMenu: Get.parameters['page'] == 'menu')),
+    GetPage(name: welcome, page: () => const WelcomeScreen()),
     GetPage(name: onBoarding, page: () => OnBoardingScreen()),
     GetPage(name: signIn, page: () => SignInScreen(
       exitFromApp: Get.parameters['page'] == signUp || Get.parameters['page'] == splash || Get.parameters['page'] == onBoarding,

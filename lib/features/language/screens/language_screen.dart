@@ -86,7 +86,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                   if (widget.fromMenu) {
                     Navigator.pop(context);
                   } else {
-                    Get.offNamed(RouteHelper.getOnBoardingRoute());
+                    Get.offNamed(RouteHelper.getWelcomeRoute());
                   }
                 }else {
                   showCustomSnackBar('select_a_language'.tr);

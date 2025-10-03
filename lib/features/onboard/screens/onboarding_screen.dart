@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/onboard/controllers/onboard_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/notification_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/main.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -18,154 +22,218 @@ class OnBoardingScreen extends StatelessWidget {
     Get.find<OnBoardingController>().getOnBoardingList();
     return GetBuilder<OnBoardingController>(builder: (onBoardingController) {
       return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-          actions: [
-            onBoardingController.selectedIndex == 2 ? const SizedBox() : InkWell(
-              onTap: () {
-                _configureToRouteInitialPage();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                child: Text('skip'.tr, style: robotoBold.copyWith(color: Theme.of(context).disabledColor)),
-              ),
-            ),
-            const SizedBox(width: 30),
-          ],
-        ),
-        body: onBoardingController.onBoardingList != null ? Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: onBoardingController.onBoardingList!.length,
-              itemBuilder: (context, index) {
-                return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-
-                  Stack(alignment: Alignment.bottomCenter, children: [
-
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.55, width: MediaQuery.of(context).size.width,
-                      child: CustomAssetImageWidget(
-                        onBoardingController.onBoardingList![index].frameImageUrl,
-                        width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.fill,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-
-                    Positioned(
-                      bottom: 120,
-                      child: CustomAssetImageWidget(
-                        onBoardingController.onBoardingList![index].imageUrl,
-                        width: MediaQuery.of(context).size.width * 0.60,
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-
-                  ]),
-
-                  Text(
-                    onBoardingController.onBoardingList![index].title,
-                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.75,
-                    child: Text(
-                      onBoardingController.onBoardingList![index].description,
-                      style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-
-                ]);
-              },
-              onPageChanged: (index) {
-                onBoardingController.changeSelectIndex(index);
-              },
-
-            ),
-          ),
-
-
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeExtraLarge),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: _pageIndicators(onBoardingController, context),
-              ),
-
-              Stack(children: [
-
-                Center(
-                  child: SizedBox(
-                    height: 50, width: 50,
-                    child: CircularProgressIndicator(
-                      value: (onBoardingController.selectedIndex + 1) / onBoardingController.onBoardingList!.length,
-                      valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-                      backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  top: 7, left: 7, right: 7, bottom: 7,
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    onTap: () {
-                      if(onBoardingController.selectedIndex != 2) {
-                        _pageController.nextPage(duration: const Duration(seconds: 1), curve: Curves.ease);
-                      }else {
-                        _configureToRouteInitialPage();
-                      }
-                    },
+        backgroundColor: Colors.white,
+        body: onBoardingController.onBoardingList != null
+            ? Stack(
+                children: [
+                  // Decorative background circles
+                  Positioned(
+                    top: 100,
+                    left: 30,
                     child: Container(
+                      width: 60,
+                      height: 60,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
+                        color: Colors.white.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.arrow_forward_ios, size: 15, color: Theme.of(context).cardColor),
                     ),
                   ),
+                  Positioned(
+                    top: 150,
+                    right: 50,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 400,
+                    right: 30,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 500,
+                    left: 50,
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 200,
+                    left: 20,
+                    child: Container(
+                      width: 35,
+                      height: 35,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 250,
+                    right: 60,
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+
+                  // Main content
+                  SafeArea(
+                    child: Container(
+                      margin: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      child: Column(
+                        children: [
+                          // PageView
+                          Expanded(
+                            child: PageView.builder(
+                              controller: _pageController,
+                              itemCount: onBoardingController.onBoardingList!.length,
+                              onPageChanged: (index) {
+                                onBoardingController.changeSelectIndex(index);
+                              },
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      // Illustration
+                                      CustomAssetImageWidget(
+                                        onBoardingController.onBoardingList![index].imageUrl,
+                                        width: MediaQuery.of(context).size.width * 0.6,
+                                        height: MediaQuery.of(context).size.height * 0.35,
+                                        fit: BoxFit.contain,
+                                      ),
+
+                                      const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                                      // Title
+                                      Text(
+                                        onBoardingController.onBoardingList![index].title,
+                                        style: robotoBold.copyWith(
+                                          fontSize: 28,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+
+                                      const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                                      // Description
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                                        child: Text(
+                                          onBoardingController.onBoardingList![index].description,
+                                          style: robotoRegular.copyWith(
+                                            fontSize: Dimensions.fontSizeDefault,
+                                            color: Theme.of(context).disabledColor,
+                                            height: 1.5,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+
+                          // Pagination dots
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                onBoardingController.onBoardingList!.length,
+                                (index) => AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  width: index == onBoardingController.selectedIndex ? 32 : 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: index == onBoardingController.selectedIndex
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Next/Get Started button
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              Dimensions.paddingSizeExtraLarge,
+                              0,
+                              Dimensions.paddingSizeExtraLarge,
+                              Dimensions.paddingSizeExtraLarge,
+                            ),
+                            child: CustomButtonWidget(
+                              buttonText: onBoardingController.selectedIndex == 2
+                                  ? 'get_started'.tr
+                                  : 'next'.tr,
+                              onPressed: () {
+                                if (onBoardingController.selectedIndex != 2) {
+                                  _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeInOut,
+                                  );
+                                } else {
+                                  _configureToRouteInitialPage();
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
                 ),
-
-              ]),
-
-            ]),
-          ),
-
-        ]) : const Center(child: CircularProgressIndicator()),
+              ),
       );
     });
   }
 
-  List<Widget> _pageIndicators(OnBoardingController onBoardingController, BuildContext context) {
-    List<Container> indicators = [];
-
-    for (int i = 0; i < onBoardingController.onBoardingList!.length; i++) {
-      indicators.add(
-        Container(
-          width: i == onBoardingController.selectedIndex ? 24 : 7, height: 7,
-          margin: const EdgeInsets.only(right: 10),
-          decoration: BoxDecoration(
-            color: i == onBoardingController.selectedIndex ? Theme.of(context).primaryColor : Theme.of(context).primaryColor.withValues(alpha: 0.40),
-            borderRadius: i == onBoardingController.selectedIndex ? BorderRadius.circular(50) : BorderRadius.circular(25),
-          ),
-        ),
-      );
-    }
-    return indicators;
-  }
-
   void _configureToRouteInitialPage() async {
     Get.find<SplashController>().disableIntro();
+
+    // Request notification permission after onboarding
+    await NotificationHelper.requestPermission(flutterLocalNotificationsPlugin);
+
     await Get.find<AuthController>().guestLogin();
     if (AddressHelper.getAddressFromSharedPref() != null) {
       Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
