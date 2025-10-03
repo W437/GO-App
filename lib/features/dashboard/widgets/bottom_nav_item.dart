@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BottomNavItem extends StatefulWidget {
   final IconData iconData;
   final String label;
-  final Function? onTap;
+  final Function(TapDownDetails)? onTap;
   final bool isSelected;
   const BottomNavItem({super.key, required this.iconData, required this.label, this.onTap, this.isSelected = false});
 
@@ -41,8 +41,8 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          widget.onTap?.call();
+        onTapDown: (details) {
+          widget.onTap?.call(details);
         },
         child: Container(
           color: Colors.transparent,

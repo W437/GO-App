@@ -25,28 +25,52 @@ class CustomToast extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 40.0),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF334257),
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
-            padding: padding,
-            margin: EdgeInsets.only(
-              right: ResponsiveHelper.isDesktop(Get.context) ? Get.context!.width * 0.7 : Dimensions.paddingSizeLarge,
-              left: Dimensions.paddingSizeLarge,
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(isError ? CupertinoIcons.multiply_circle_fill : Icons.check_circle, color: isError ? const Color(0xffFF9090).withValues(alpha: 0.5) : const Color(0xff039D55), size: 20),
-              const SizedBox(width: Dimensions.paddingSizeSmall),
+    return IgnorePointer(
+      ignoring: false,
+      child: Material(
+        color: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 80.0),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: EdgeInsets.only(
+                right: ResponsiveHelper.isDesktop(Get.context) ? Get.context!.width * 0.7 : Dimensions.paddingSizeLarge,
+                left: Dimensions.paddingSizeLarge,
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(
+                  isError ? CupertinoIcons.exclamationmark_circle_fill : Icons.check_circle,
+                  color: isError ? const Color(0xffFF3B30) : const Color(0xff34C759),
+                  size: 20,
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
 
-              Flexible(child: Text(text, style: robotoRegular.copyWith(color: textColor), maxLines: 3, overflow: TextOverflow.ellipsis)),
-            ]),
+                Flexible(
+                  child: Text(
+                    text,
+                    style: robotoMedium.copyWith(
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ]),
+            ),
           ),
         ),
       ),

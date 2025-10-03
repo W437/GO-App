@@ -10,19 +10,21 @@ Future<void> showCustomSnackBar(String? message, {bool isError = true}) async {
 
     Get.closeCurrentSnackbar();
     Get.showSnackbar(GetSnackBar(
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.transparent,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
       overlayBlur: 0.0,
-      margin: const EdgeInsets.only(bottom: 40, left: 20, right: 20),
+      margin: const EdgeInsets.all(0),
       messageText: CustomToast(text: message, isError: isError),
-      borderRadius: 10,
+      borderRadius: 0,
       padding: const EdgeInsets.all(0),
       snackStyle: SnackStyle.FLOATING,
       isDismissible: true,
-      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-      reverseAnimationCurve: Curves.fastEaseInToSlowEaseOut,
-      animationDuration: const Duration(milliseconds: 500),
+      dismissDirection: DismissDirection.horizontal,
+      blockBackgroundInteraction: false,
+      forwardAnimationCurve: Curves.easeOut,
+      reverseAnimationCurve: Curves.easeIn,
+      animationDuration: const Duration(milliseconds: 300),
     ));
 
   }

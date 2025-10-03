@@ -14,6 +14,7 @@ import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:godelivery_user/features/dashboard/widgets/address_bottom_sheet.dart';
 import 'package:godelivery_user/features/dashboard/widgets/bottom_nav_item.dart';
+import 'package:godelivery_user/features/dashboard/widgets/circular_reveal_clipper.dart';
 import 'package:godelivery_user/features/dashboard/widgets/running_order_view_widget.dart';
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
 import 'package:godelivery_user/features/loyalty/controllers/loyalty_controller.dart';
@@ -35,18 +36,32 @@ class DashboardScreen extends StatefulWidget {
   DashboardScreenState createState() => DashboardScreenState();
 }
 
-class DashboardScreenState extends State<DashboardScreen> {
+class DashboardScreenState extends State<DashboardScreen> with SingleTickerProviderStateMixin {
   PageController? _pageController;
   int _pageIndex = 0;
+  int _previousPageIndex = 0;
   late List<Widget> _screens;
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   bool _canExit = GetPlatform.isWeb ? true : false;
   late bool _isLogin;
   bool active = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  Offset? _tapPosition;
 
   @override
   void initState() {
     super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.value = 1.0;
 
     _isLogin = Get.find<AuthController>().isLoggedIn();
 
@@ -174,31 +189,31 @@ class DashboardScreenState extends State<DashboardScreen> {
                     iconData: Icons.home,
                     label: 'Home',
                     isSelected: _pageIndex == 0,
-                    onTap: () => _setPage(0),
+                    onTap: (details) => _setPage(0, details.globalPosition),
                   ),
                   BottomNavItem(
                     iconData: Icons.favorite,
                     label: 'Favorites',
                     isSelected: _pageIndex == 1,
-                    onTap: () => _setPage(1),
+                    onTap: (details) => _setPage(1, details.globalPosition),
                   ),
                   BottomNavItem(
                     iconData: Icons.shopping_cart,
                     label: 'Cart',
                     isSelected: _pageIndex == 2,
-                    onTap: () => _setPage(2),
+                    onTap: (details) => _setPage(2, details.globalPosition),
                   ),
                   BottomNavItem(
                     iconData: Icons.shopping_bag,
                     label: 'Orders',
                     isSelected: _pageIndex == 3,
-                    onTap: () => _setPage(3),
+                    onTap: (details) => _setPage(3, details.globalPosition),
                   ),
                   BottomNavItem(
                     iconData: Icons.menu,
                     label: 'Menu',
                     isSelected: _pageIndex == 4,
-                    onTap: () => _setPage(4),
+                    onTap: (details) => _setPage(4, details.globalPosition),
                   ),
                 ],
                 ),
@@ -212,12 +227,24 @@ class DashboardScreenState extends State<DashboardScreen> {
 
             List<OrderModel> reversOrder =  List.from(runningOrder.reversed);
             return ExpandableBottomSheet(
-              background: PageView.builder(
-                controller: _pageController,
-                itemCount: _screens.length,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return _screens[index];
+              background: AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return Stack(
+                    children: [
+                      // Previous screen
+                      if (_previousPageIndex != _pageIndex)
+                        _screens[_previousPageIndex],
+                      // New screen with circular reveal
+                      ClipPath(
+                        clipper: CircularRevealClipper(
+                          fraction: _animation.value,
+                          centerOffset: _tapPosition,
+                        ),
+                        child: _screens[_pageIndex],
+                      ),
+                    ],
+                  );
                 },
               ),
               persistentContentHeight: 100,
@@ -259,10 +286,21 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _setPage(int pageIndex) {
+  void _setPage(int pageIndex, [Offset? tapPosition]) {
+    if (pageIndex == _pageIndex) return;
+
     setState(() {
-      _pageController!.jumpToPage(pageIndex);
+      _previousPageIndex = _pageIndex;
       _pageIndex = pageIndex;
+      _tapPosition = tapPosition;
     });
+
+    _animationController.forward(from: 0.0);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
