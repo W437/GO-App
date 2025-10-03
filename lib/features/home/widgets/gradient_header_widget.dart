@@ -31,7 +31,24 @@ class GradientHeaderWidget extends StatelessWidget {
           bottomRight: Radius.circular(24),
         ),
       ),
-      child: SafeArea(
+      child: Stack(
+        children: [
+          // Background logo
+          Positioned(
+            right: -40,
+            top: 60,
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset(
+                Images.logo,
+                width: 180,
+                height: 180,
+                color: Colors.white,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,6 +260,8 @@ class GradientHeaderWidget extends StatelessWidget {
             ),
           ],
         ),
+          ),
+        ],
       ),
     );
   }
