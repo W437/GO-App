@@ -21,7 +21,6 @@ Future<void> showCustomSnackBar(String? message, {bool isError = true}) async {
       snackStyle: SnackStyle.FLOATING,
       isDismissible: true,
       dismissDirection: DismissDirection.horizontal,
-      blockBackgroundInteraction: false,
       forwardAnimationCurve: Curves.easeOut,
       reverseAnimationCurve: Curves.easeIn,
       animationDuration: const Duration(milliseconds: 300),

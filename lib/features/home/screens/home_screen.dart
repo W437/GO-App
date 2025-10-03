@@ -29,6 +29,7 @@ import 'package:godelivery_user/features/home/screens/theme1_home_screen.dart';
 import 'package:godelivery_user/features/home/screens/theme2_home_screen.dart';
 import 'package:godelivery_user/features/home/widgets/simple_app_bar_widget.dart';
 import 'package:godelivery_user/features/home/widgets/simple_search_location_widget.dart';
+import 'package:godelivery_user/features/home/widgets/gradient_header_widget.dart';
 import 'package:godelivery_user/features/home/widgets/today_trends_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/what_on_your_mind_view_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -208,9 +209,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
 
-                  /// Simple App Bar
+                  /// Gradient Header
                   SliverToBoxAdapter(
-                    child: const SimpleAppBarWidget(),
+                    child: const GradientHeaderWidget(),
                   ),
 
                   SliverToBoxAdapter(
