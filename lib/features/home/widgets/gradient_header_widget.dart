@@ -155,15 +155,15 @@ class GradientHeaderWidget extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white,
                             shape: BoxShape.circle,
                           ),
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.notifications_outlined,
-                                color: Colors.white,
+                                color: Theme.of(context).primaryColor,
                                 size: 24,
                               ),
                               if (notificationController.hasNotification)
