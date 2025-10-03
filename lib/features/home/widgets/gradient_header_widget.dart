@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
+import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
 import 'package:godelivery_user/helper/auth_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
@@ -65,31 +67,28 @@ class GradientHeaderWidget extends StatelessWidget {
                   GetBuilder<ProfileController>(
                     builder: (profileController) {
                       return InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getProfileRoute()),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              width: 2,
-                            ),
-                          ),
-                          child: CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.white,
-                            backgroundImage: AuthHelper.isLoggedIn() &&
-                                    profileController.userInfoModel?.imageFullUrl != null
-                                ? NetworkImage(profileController.userInfoModel!.imageFullUrl!)
-                                : null,
-                            child: AuthHelper.isLoggedIn() &&
-                                    profileController.userInfoModel?.imageFullUrl != null
-                                ? null
-                                : Icon(
-                                    Icons.person,
-                                    color: Theme.of(context).primaryColor,
-                                    size: 24,
-                                  ),
-                          ),
+                        onTap: () {
+                          if (AuthHelper.isLoggedIn()) {
+                            Get.toNamed(RouteHelper.getProfileRoute());
+                          } else {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => GuestLoginBottomSheet(
+                                onLoginSuccess: () {
+                                  profileController.getUserInfo();
+                                },
+                              ),
+                            );
+                          }
+                        },
+                        child: EmojiProfilePicture(
+                          emoji: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileEmoji : null,
+                          bgColorHex: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileBgColor : null,
+                          size: 44,
+                          borderWidth: 2,
+                          borderColor: Colors.white.withValues(alpha: 0.3),
                         ),
                       );
                     },

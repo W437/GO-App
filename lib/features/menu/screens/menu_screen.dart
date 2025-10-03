@@ -19,6 +19,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -51,17 +52,12 @@ class _MenuScreenState extends State<MenuScreen> {
                 ),
                 child: Row(children: [
 
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(1),
-                    child: ClipOval(child: CustomImageWidget(
-                      placeholder: isLoggedIn ? Images.profilePlaceholder : Images.guestIcon,
-                      image: '${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.imageFullUrl : ''}',
-                      height: 70, width: 70, fit: BoxFit.cover, imageColor: isLoggedIn ? Theme.of(context).hintColor : null,
-                    )),
+                  EmojiProfilePicture(
+                    emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
+                    bgColorHex: isLoggedIn ? profileController.userInfoModel?.profileBgColor : null,
+                    size: 70,
+                    borderWidth: 2,
+                    borderColor: Theme.of(context).cardColor,
                   ),
                   const SizedBox(width: Dimensions.paddingSizeDefault),
 

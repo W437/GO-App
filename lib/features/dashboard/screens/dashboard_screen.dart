@@ -54,7 +54,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
     super.initState();
 
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
     _animation = CurvedAnimation(

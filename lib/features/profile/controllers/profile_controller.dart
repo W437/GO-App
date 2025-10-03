@@ -112,6 +112,14 @@ class ProfileController extends GetxController implements GetxService {
     update();
   }
 
+  void setProfileEmoji(String emoji, String bgColor) {
+    if (_userInfoModel != null) {
+      _userInfoModel!.profileEmoji = emoji;
+      _userInfoModel!.profileBgColor = bgColor;
+      update();
+    }
+  }
+
   void initData() {
     _pickedFile = null;
   }

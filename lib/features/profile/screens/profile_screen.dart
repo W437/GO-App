@@ -4,6 +4,7 @@ import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/widgets/account_deletion_bottom_sheet.dart';
+import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
 import 'package:godelivery_user/features/profile/widgets/notification_status_change_bottom_sheet.dart';
 import 'package:godelivery_user/features/profile/widgets/profile_button_widget.dart';
 import 'package:godelivery_user/features/profile/widgets/profile_card_widget.dart';
@@ -19,6 +20,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
@@ -81,11 +83,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge, vertical: Dimensions.paddingSizeOverLarge),
                         child: Row(children: [
 
-                          ClipOval(child: CustomImageWidget(
-                            placeholder: isLoggedIn ? Images.profilePlaceholder : Images.guestIcon,
-                            image: '${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.imageFullUrl : ''}',
-                            height: 70, width: 70, fit: BoxFit.cover, imageColor: isLoggedIn ? Theme.of(context).hintColor : null,
-                          )),
+                          EmojiProfilePicture(
+                            emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
+                            bgColorHex: isLoggedIn ? profileController.userInfoModel?.profileBgColor : null,
+                            size: 70,
+                          ),
                           const SizedBox(width: Dimensions.paddingSizeDefault),
 
                           Expanded(
@@ -250,11 +252,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Center(
                     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
-                      ClipOval(child: CustomImageWidget(
-                        placeholder: isLoggedIn ? Images.profilePlaceholder : Images.guestIcon,
-                        image: '${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.imageFullUrl : ''}',
-                        height: 70, width: 70, fit: BoxFit.cover, imageColor: isLoggedIn ? Theme.of(context).hintColor : null,
-                      )),
+                      const EmojiProfilePicture(
+                        emoji: null, // Will use default
+                        bgColorHex: null, // Will use default
+                        size: 70,
+                      ),
                       const SizedBox(height: Dimensions.paddingSizeSmall),
 
                       Text(

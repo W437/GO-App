@@ -19,9 +19,11 @@ import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/not_logged_in_screen.dart';
+import 'package:godelivery_user/features/profile/widgets/emoji_profile_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -212,17 +214,31 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                       Positioned(
                         top: -50, left: 0, right: 0,
                         child: Center(child: Stack(children: [
-                          ClipOval(child: profileController.pickedFile != null ? GetPlatform.isWeb ? Image.network(
-                            profileController.pickedFile!.path, width: 100, height: 100, fit: BoxFit.cover) : Image.file(
-                            File(profileController.pickedFile!.path), width: 100, height: 100, fit: BoxFit.cover) : CustomImageWidget(
-                            image: '${profileController.userInfoModel!.imageFullUrl}',
-                            height: 100, width: 100, fit: BoxFit.cover, placeholder: isLoggedIn ? Images.profilePlaceholder : Images.guestIcon, imageColor: isLoggedIn ? Theme.of(context).hintColor : null,
-                          )),
+                          EmojiProfilePicture(
+                            emoji: profileController.userInfoModel!.profileEmoji,
+                            bgColorHex: profileController.userInfoModel!.profileBgColor,
+                            size: 100,
+                            borderWidth: 3,
+                            borderColor: Theme.of(context).primaryColor,
+                          ),
 
                           Positioned(
                             bottom: 0, right: 0, top: 0, left: 0,
                             child: InkWell(
-                              onTap: () => profileController.pickImage(),
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => EmojiProfileEditor(
+                                    currentEmoji: profileController.userInfoModel!.profileEmoji,
+                                    currentBgColor: profileController.userInfoModel!.profileBgColor,
+                                    onSave: (emoji, bgColor) {
+                                      profileController.setProfileEmoji(emoji, bgColor);
+                                    },
+                                  ),
+                                );
+                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle,
@@ -234,7 +250,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                     border: Border.all(width: 2, color: Colors.white),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.camera_alt, color: Colors.white),
+                                  child: const Icon(Icons.edit, color: Colors.white),
                                 ),
                               ),
                             ),
@@ -297,18 +313,32 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     alignment: Alignment.topCenter,
                     child: Stack(children: [
 
-                      ClipOval(child: profileController.pickedFile != null ? GetPlatform.isWeb ? Image.network(
-                        profileController.pickedFile!.path, width: 100, height: 100, fit: BoxFit.cover) : Image.file(
-                        File(profileController.pickedFile!.path), width: 100, height: 100, fit: BoxFit.cover) : CustomImageWidget(
-                        image: '${profileController.userInfoModel!.imageFullUrl}',
-                        height: 100, width: 100, fit: BoxFit.cover,
-                        placeholder: isLoggedIn ? Images.profilePlaceholder : Images.guestIcon, imageColor: isLoggedIn ? Theme.of(context).hintColor : null,
-                      )),
+                      EmojiProfilePicture(
+                        emoji: profileController.userInfoModel!.profileEmoji,
+                        bgColorHex: profileController.userInfoModel!.profileBgColor,
+                        size: 100,
+                        borderWidth: 3,
+                        borderColor: Theme.of(context).primaryColor,
+                      ),
 
                       Positioned(
                         bottom: 0, right: 0, top: 0, left: 0,
                         child: InkWell(
-                          onTap: () => profileController.pickImage(),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: EmojiProfileEditor(
+                                  currentEmoji: profileController.userInfoModel!.profileEmoji,
+                                  currentBgColor: profileController.userInfoModel!.profileBgColor,
+                                  onSave: (emoji, bgColor) {
+                                    profileController.setProfileEmoji(emoji, bgColor);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle,
@@ -319,7 +349,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                 border: Border.all(width: 2, color: Colors.white),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.camera_alt, color: Colors.white),
+                              child: const Icon(Icons.edit, color: Colors.white),
                             ),
                           ),
                         ),
@@ -467,7 +497,14 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     }else if (phoneNumber.length < 6) {
       showCustomSnackBar('enter_a_valid_phone_number'.tr);
     } else {
-      UpdateUserModel updatedUser = UpdateUserModel(name: name, email: email, phone: numberWithCountryCode, buttonType: fromButton ? '' : fromPhone ? 'phone' : 'email');
+      UpdateUserModel updatedUser = UpdateUserModel(
+        name: name,
+        email: email,
+        phone: numberWithCountryCode,
+        buttonType: fromButton ? '' : fromPhone ? 'phone' : 'email',
+        profileEmoji: profileController.userInfoModel?.profileEmoji,
+        profileBgColor: profileController.userInfoModel?.profileBgColor,
+      );
       await profileController.updateUserInfo(updatedUser, Get.find<AuthController>().getUserToken(), fromButton: fromButton);
     }
   }

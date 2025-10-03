@@ -7,8 +7,21 @@ class UpdateUserModel {
   String? sessionInfo;
   String? verificationOn;
   String? verificationMedium;
+  String? profileEmoji;
+  String? profileBgColor;
 
-  UpdateUserModel({this.name, this.email, this.phone, this.otp, this.buttonType, this.sessionInfo, this.verificationOn, this.verificationMedium});
+  UpdateUserModel({
+    this.name,
+    this.email,
+    this.phone,
+    this.otp,
+    this.buttonType,
+    this.sessionInfo,
+    this.verificationOn,
+    this.verificationMedium,
+    this.profileEmoji,
+    this.profileBgColor,
+  });
 
   UpdateUserModel.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -19,6 +32,8 @@ class UpdateUserModel {
     sessionInfo = json['session_info'];
     verificationOn = json['verification_on'];
     verificationMedium = json['verification_medium'];
+    profileEmoji = json['profile_emoji'];
+    profileBgColor = json['profile_bg_color'];
   }
 
   Map<String, String> toJson() {
@@ -36,6 +51,12 @@ class UpdateUserModel {
     }
     if (verificationMedium != null) {
       data['verification_medium'] = verificationMedium??'';
+    }
+    if (profileEmoji != null) {
+      data['profile_emoji'] = profileEmoji??'';
+    }
+    if (profileBgColor != null) {
+      data['profile_bg_color'] = profileBgColor??'';
     }
     return data;
   }

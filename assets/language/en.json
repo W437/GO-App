@@ -1297,5 +1297,9 @@
   "select_delivery_zone": "Select Delivery Zone",
   "delivery_location": "Delivery location",
   "what_you_like_to_eat": "What you'd like\nto eat for today?",
-  "search_menu_restaurant_craving": "Search menu, restaurant or craving"
+  "search_menu_restaurant_craving": "Search menu, restaurant or craving",
+  "customize_avatar": "Customize Avatar",
+  "choose_background_color": "Choose Background Color",
+  "select_shade": "Select Shade",
+  "choose_emoji": "Choose Emoji"
 }

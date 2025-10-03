@@ -22,6 +22,8 @@ class UserInfoModel {
   String? discountAmountType;
   bool? isPhoneVerified;
   bool? isEmailVerified;
+  String? profileEmoji;
+  String? profileBgColor;
 
   UserInfoModel({
     this.id,
@@ -45,6 +47,8 @@ class UserInfoModel {
     this.discountAmountType,
     this.isPhoneVerified,
     this.isEmailVerified,
+    this.profileEmoji,
+    this.profileBgColor,
   });
 
   UserInfoModel.fromJson(Map<String, dynamic> json) {
@@ -69,6 +73,8 @@ class UserInfoModel {
     discountAmountType = json['discount_amount_type'];
     isPhoneVerified = json['is_phone_verified'] == 1;
     isEmailVerified = json['is_email_verified'] == 1;
+    profileEmoji = json['profile_emoji'];
+    profileBgColor = json['profile_bg_color'];
   }
 
   Map<String, dynamic> toJson() {
@@ -95,6 +101,8 @@ class UserInfoModel {
     data['discount_amount_type'] = discountAmountType;
     data['is_phone_verified'] = isPhoneVerified;
     data['is_email_verified'] = isEmailVerified;
+    data['profile_emoji'] = profileEmoji;
+    data['profile_bg_color'] = profileBgColor;
     return data;
   }
 }
