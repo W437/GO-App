@@ -81,9 +81,9 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
     _pageController = PageController(initialPage: widget.pageIndex);
 
     _screens = [
-      const HomeScreen(),
       const FavouriteScreen(),
       const CartScreen(fromNav: true),
+      const HomeScreen(),
       const OrderScreen(),
       const MenuScreen()
     ];
@@ -136,8 +136,8 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       canPop: Navigator.canPop(context),
       onPopInvokedWithResult: (didPop, result) async{
         debugPrint('$_canExit');
-        if (_pageIndex != 0) {
-          _setPage(0);
+        if (_pageIndex != 2) {
+          _setPage(2);
         } else {
           if(_canExit) {
             if (GetPlatform.isAndroid) {
@@ -197,31 +197,31 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                       child: Row(
                 children: [
                   BottomNavItem(
-                    iconData: Icons.home,
-                    label: 'Home',
+                    iconPath: 'assets/image/ui/explore_icon.png',
+                    label: 'Favorites',
                     isSelected: _pageIndex == 0,
                     onTap: (details) => _setPage(0, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconData: Icons.favorite,
-                    label: 'Favorites',
+                    iconPath: 'assets/image/ui/cart_icon.png',
+                    label: 'Cart',
                     isSelected: _pageIndex == 1,
                     onTap: (details) => _setPage(1, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconData: Icons.shopping_cart,
-                    label: 'Cart',
+                    iconPath: 'assets/image/ui/home_icon.png',
+                    label: 'Home',
                     isSelected: _pageIndex == 2,
                     onTap: (details) => _setPage(2, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconData: Icons.shopping_bag,
+                    iconPath: 'assets/image/ui/orders_icon.png',
                     label: 'Orders',
                     isSelected: _pageIndex == 3,
                     onTap: (details) => _setPage(3, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconData: Icons.menu,
+                    iconPath: 'assets/image/ui/profile_icon.png',
                     label: 'Menu',
                     isSelected: _pageIndex == 4,
                     onTap: (details) => _setPage(4, details.globalPosition),

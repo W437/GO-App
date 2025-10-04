@@ -305,7 +305,7 @@ class RouteHelper {
   static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
 
   static List<GetPage> routes = [
-    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 0, fromSplash: (Get.parameters['from-splash'] == 'true')))),
+    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true')))),
     GetPage(name: splash, page: () {
       NotificationBodyModel? data;
       DeepLinkBody? linkData;
@@ -363,8 +363,8 @@ class RouteHelper {
     }),
     GetPage(name: interest, page: () => const InterestScreen()),
     GetPage(name: main, page: () => getRoute(DashboardScreen(
-      pageIndex: Get.parameters['page'] == 'home' ? 0 : Get.parameters['page'] == 'favourite' ? 1
-          : Get.parameters['page'] == 'cart' ? 2 : Get.parameters['page'] == 'order' ? 3 : Get.parameters['page'] == 'menu' ? 4 : 0,
+      pageIndex: Get.parameters['page'] == 'home' ? 2 : Get.parameters['page'] == 'favourite' ? 0
+          : Get.parameters['page'] == 'cart' ? 1 : Get.parameters['page'] == 'order' ? 3 : Get.parameters['page'] == 'menu' ? 4 : 2,
     ))),
     GetPage(name: forgotPassword, page: () => ForgetPassScreen()),
     /*GetPage(name: resetPassword, page: () => NewPassScreen(

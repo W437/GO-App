@@ -70,6 +70,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   emoji_picker_flutter: ^2.2.0
   flex_color_picker: ^3.5.1
+  lottie: ^3.1.0
 
 #  wakelock_plus: ^1.2.8
 #  video_player_avfoundation: ^2.6.2
@@ -119,6 +120,7 @@ flutter:
     - assets/language/
     - assets/map/
     - assets/brand/
+    - assets/go_pull_loading.json
     - .env
 
   fonts:

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 class BottomNavItem extends StatefulWidget {
-  final IconData iconData;
+  final IconData? iconData;
+  final String? iconPath;
   final String label;
   final Function(TapDownDetails)? onTap;
   final bool isSelected;
-  const BottomNavItem({super.key, required this.iconData, required this.label, this.onTap, this.isSelected = false});
+  const BottomNavItem({super.key, this.iconData, this.iconPath, required this.label, this.onTap, this.isSelected = false});
 
   @override
   State<BottomNavItem> createState() => _BottomNavItemState();
@@ -79,11 +80,23 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                     scale: scale,
                     child: Transform.rotate(
                       angle: rotation,
-                      child: Icon(
-                        widget.iconData,
-                        color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
-                        size: 28,
-                      ),
+                      child: widget.iconPath != null
+                          ? ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                                BlendMode.srcIn,
+                              ),
+                              child: Image.asset(
+                                widget.iconPath!,
+                                width: 32,
+                                height: 32,
+                              ),
+                            )
+                          : Icon(
+                              widget.iconData!,
+                              color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                              size: 32,
+                            ),
                     ),
                   );
                 },
