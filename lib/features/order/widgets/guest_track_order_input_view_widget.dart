@@ -44,20 +44,19 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: Dimensions.radiusExtraLarge, vertical: Dimensions.paddingSizeLarge),
-        child: SingleChildScrollView(
-          child: FooterViewWidget(
-            child: SizedBox(
-              width: Dimensions.webMaxWidth,
-              child: Form(
-                key: _formKeyOrder,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
+        child: FooterViewWidget(
+          child: SizedBox(
+            width: Dimensions.webMaxWidth,
+            child: Form(
+              key: _formKeyOrder,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
 
-                  SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : Dimensions.paddingSizeLarge),
+                  SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : MediaQuery.of(context).size.height * 0.15),
 
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
@@ -132,14 +131,13 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                           },
                         );
                       }
-                  )
+                  ),
 
                 ]),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

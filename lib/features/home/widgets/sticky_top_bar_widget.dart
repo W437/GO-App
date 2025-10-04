@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
@@ -23,14 +24,22 @@ class StickyTopBarWidget extends StatelessWidget {
     final borderRadiusProgress = ((scrollOffset - 50.0) / 50.0).clamp(0.0, 1.0);
     final borderRadius = (borderRadiusProgress * 24.0).clamp(0.0, 24.0);
 
-    return Container(
+    // Calculate opacity and blur - starts after 200px scroll, completes at 400px
+    final fadeProgress = ((scrollOffset - 200.0) / 200.0).clamp(0.0, 1.0);
+    final backgroundOpacity = 1.0 - (fadeProgress * 0.25); // Goes from 1.0 to 0.75
+    final blurAmount = fadeProgress * 10.0; // Blur from 0 to 10
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
+        child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                Theme.of(context).primaryColor.withValues(alpha: backgroundOpacity),
+                Theme.of(context).primaryColor.withValues(alpha: backgroundOpacity),
               ],
             ),
             borderRadius: BorderRadius.only(
@@ -178,6 +187,8 @@ class StickyTopBarWidget extends StatelessWidget {
           ),
         ),
           ),
+        ),
+      ),
     );
   }
 }

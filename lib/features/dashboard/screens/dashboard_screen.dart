@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:godelivery_user/features/cart/screens/cart_screen.dart';
 import 'package:godelivery_user/features/checkout/widgets/congratulation_dialogue.dart';
@@ -163,16 +164,16 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       },
       child: Scaffold(
         key: _scaffoldKey,
-
-
         extendBody: true,
         bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
 
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
             ? const SizedBox() : Container(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
@@ -181,9 +182,19 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                   ),
                 ],
               ),
-              child: SizedBox(
-                height: 65,
-                child: Row(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                    color: Theme.of(context).cardColor.withValues(alpha: 0.75),
+                    child: SizedBox(
+                      height: 65,
+                      child: Row(
                 children: [
                   BottomNavItem(
                     iconData: Icons.home,
@@ -216,6 +227,9 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                     onTap: (details) => _setPage(4, details.globalPosition),
                   ),
                 ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             );

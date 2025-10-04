@@ -5,6 +5,7 @@ import 'package:godelivery_user/features/language/widgets/language_bottom_sheet_
 import 'package:godelivery_user/features/menu/widgets/portion_widget.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/widgets/profile_button_widget.dart';
+import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/features/auth/screens/sign_in_screen.dart';
@@ -44,7 +45,13 @@ class _MenuScreenState extends State<MenuScreen> {
           return Column(children: [
 
             Container(
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+              ),
               child: Padding(
                 padding: const EdgeInsets.only(
                   left: Dimensions.paddingSizeOverLarge, right: Dimensions.paddingSizeOverLarge,
@@ -122,7 +129,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                       child: Text(
                         'general'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor.withValues(alpha: 0.5)),
+                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
                       ),
                     ),
 
@@ -135,7 +142,27 @@ class _MenuScreenState extends State<MenuScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
                       margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
                       child: Column(children: [
-                        PortionWidget(icon: Images.profileIcon, title: 'profile'.tr, route: RouteHelper.getProfileRoute()),
+                        PortionWidget(
+                          icon: Images.profileIcon,
+                          title: 'profile'.tr,
+                          route: RouteHelper.getProfileRoute(),
+                          onTap: () {
+                            if (AuthHelper.isLoggedIn()) {
+                              Get.toNamed(RouteHelper.getProfileRoute());
+                            } else {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => GuestLoginBottomSheet(
+                                  onLoginSuccess: () {
+                                    profileController.getUserInfo();
+                                  },
+                                ),
+                              );
+                            }
+                          },
+                        ),
                         PortionWidget(icon: Images.addressIcon, title: 'my_address'.tr, route: RouteHelper.getAddressRoute()),
                         PortionWidget(icon: Images.languageIcon, title: 'language'.tr, onTap: ()=> _manageLanguageFunctionality(), route: ''),
 
@@ -154,7 +181,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                       child: Text(
                         'promotional_activity'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor.withValues(alpha: 0.5)),
+                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
                       ),
                     ),
 
@@ -190,7 +217,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                       child: Text(
                         'earnings'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor.withValues(alpha: 0.5)),
+                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
                       ),
                     ),
 
@@ -224,7 +251,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                       child: Text(
                         'help_and_support'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor.withValues(alpha: 0.5)),
+                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
                       ),
                     ),
 

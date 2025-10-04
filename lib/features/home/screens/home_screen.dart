@@ -192,8 +192,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
           endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
           backgroundColor: Theme.of(context).colorScheme.surface,
+          extendBody: true,
           body: SafeArea(
             top: (Get.find<SplashController>().configModel!.theme == 2),
+            bottom: false,
             child: RefreshIndicator(
               onRefresh: () async {
                 await Get.find<HomeController>().getBannerList(true);
@@ -293,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
                   SliverToBoxAdapter(child: Center(child: FooterViewWidget(
                     child: Padding(
-                      padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.only(bottom: Dimensions.paddingSizeOverLarge),
+                      padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : EdgeInsets.only(bottom: 65 + MediaQuery.of(context).padding.bottom + Dimensions.paddingSizeDefault),
                       child: AllRestaurantsWidget(scrollController: _scrollController),
                     ),
                   ))),

@@ -38,9 +38,9 @@ class ProfileButtonWidget extends StatelessWidget {
 
           isButtonActive != null ? CupertinoSwitch(
             value: isButtonActive!,
-            activeTrackColor: Theme.of(context).primaryColor,
+            activeColor: Theme.of(context).primaryColor,
             onChanged: (bool? value) => onTap(),
-            inactiveTrackColor: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+            trackColor: Colors.grey.shade300,
           ) : const SizedBox()
         ]),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/features/search/screens/search_screen.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
@@ -17,7 +18,7 @@ class HeaderContentBelowSticky extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withValues(alpha: 0.8),
+            Theme.of(context).primaryColor,
           ],
         ),
         borderRadius: const BorderRadius.only(
@@ -30,7 +31,7 @@ class HeaderContentBelowSticky extends StatelessWidget {
           // Background logo
           Positioned(
             right: -40,
-            top: 10,
+            top: -40,
             child: Opacity(
               opacity: 0.15,
               child: Image.asset(
@@ -72,7 +73,32 @@ class HeaderContentBelowSticky extends StatelessWidget {
                   Dimensions.paddingSizeLarge,
                 ),
                 child: InkWell(
-                  onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => DraggableScrollableSheet(
+                        initialChildSize: 0.9,
+                        minChildSize: 0.5,
+                        maxChildSize: 0.95,
+                        builder: (context, scrollController) => ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(24),
+                            topRight: Radius.circular(24),
+                          ),
+                          child: Container(
+                            color: Theme.of(context).colorScheme.surface,
+                            child: Navigator(
+                              onGenerateRoute: (settings) => MaterialPageRoute(
+                                builder: (context) => const SearchScreen(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: Dimensions.paddingSizeDefault,
