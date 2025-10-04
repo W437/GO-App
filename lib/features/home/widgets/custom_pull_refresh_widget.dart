@@ -7,7 +7,7 @@ class SliverPullRefreshIndicator extends StatefulWidget {
   final ScrollController scrollController;
 
   /// Maximum stretch allowed for the pull gap so the header never detaches.
-  static const double maxStretchExtent = 80.0;
+  static const double maxStretchExtent = 120.0;
 
   const SliverPullRefreshIndicator({
     super.key,
@@ -57,6 +57,12 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
 
     if (position.pixels < 0) {
       if (_isRefreshing) {
+        // Keep scroll position at refresh extent while refreshing
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (widget.scrollController.hasClients && _isRefreshing) {
+            widget.scrollController.jumpTo(-_kRefreshExtent);
+          }
+        });
         return;
       }
 
@@ -107,6 +113,9 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
       _canRefresh = false;
     });
 
+    // Keep scroll at refresh position
+    widget.scrollController.jumpTo(-_kRefreshExtent);
+
     HapticFeedback.mediumImpact();
 
     try {
@@ -118,20 +127,31 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
           _dragOffset = 0.0;
           _canRefresh = false;
         });
+
+        // Animate back to top
+        widget.scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     }
   }
 
   double _calculateOpacity() {
     if (_isRefreshing) return 1.0;
-    final progress = (_dragOffset.clamp(0.0, _kDragThreshold) / _kDragThreshold).clamp(0.0, 1.0);
+    // Don't show until 30px drag
+    if (_dragOffset < 30.0) return 0.0;
+    final progress = ((_dragOffset - 30.0).clamp(0.0, _kDragThreshold - 30.0) / (_kDragThreshold - 30.0)).clamp(0.0, 1.0);
     return progress;
   }
 
   double _calculateScale() {
     if (_isRefreshing) return 1.0;
-    final progress = (_dragOffset.clamp(0.0, _kDragThreshold) / _kDragThreshold).clamp(0.0, 1.0);
-    return 0.5 + (0.5 * progress);
+    // Don't scale until 30px drag
+    if (_dragOffset < 30.0) return 0.0;
+    final progress = ((_dragOffset - 30.0).clamp(0.0, _kDragThreshold - 30.0) / (_kDragThreshold - 30.0)).clamp(0.0, 1.0);
+    return 0.2 + (0.8 * progress);
   }
 
   @override
@@ -166,13 +186,18 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
               opacity: _calculateOpacity(),
               child: Transform.scale(
                 scale: _calculateScale(),
-                child: SizedBox(
-                  width: 240,
-                  height: 240,
-                  child: Lottie.asset(
-                    'assets/go_pull_loading.json',
-                    animate: true,
-                    repeat: true,
+                child: OverflowBox(
+                  maxWidth: 240,
+                  maxHeight: 240,
+                  child: SizedBox(
+                    width: 240,
+                    height: 240,
+                    child: Lottie.asset(
+                      'assets/go_pull_loading.json',
+                      animate: true,
+                      repeat: true,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
