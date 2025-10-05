@@ -7,6 +7,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/gradient_screen_header_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -40,18 +41,19 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
   @override
   Widget build(BuildContext context) {
     bool isLoggedIn = AuthHelper.isLoggedIn();
+    bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'my_orders'.tr, isBackButtonExist: ResponsiveHelper.isDesktop(context)),
+      appBar: isDesktop ? CustomAppBarWidget(title: 'my_orders'.tr, isBackButtonExist: true) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: isLoggedIn ? GetBuilder<OrderController>(
         builder: (orderController) {
           return Column(children: [
 
             Container(
-              color: ResponsiveHelper.isDesktop(context) ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
+              color: isDesktop ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
               child: Column(children: [
 
-                ResponsiveHelper.isDesktop(context) ? Center(child: Padding(
+                isDesktop ? Center(child: Padding(
                   padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
                   child: Text('my_orders'.tr, style: robotoMedium),
                 )) : const SizedBox(),

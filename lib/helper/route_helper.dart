@@ -16,6 +16,8 @@ import 'package:godelivery_user/features/checkout/screens/payment_webview_screen
 import 'package:godelivery_user/features/dine_in/screens/dine_in_restaurant_screen.dart';
 import 'package:godelivery_user/features/story/screens/story_viewer_screen.dart';
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
+import 'package:godelivery_user/features/explore/screens/explore_screen.dart';
+import 'package:godelivery_user/features/game/screens/flappy_bird_game_screen.dart';
 import 'package:godelivery_user/features/home/screens/map_view_screen.dart';
 import 'package:godelivery_user/features/html/enums/html_type.dart';
 import 'package:godelivery_user/features/html/screens/html_viewer_screen.dart';
@@ -146,7 +148,9 @@ class RouteHelper {
   static const String offlinePaymentScreen = '/offline-payment-screen';
   static const String guestTrackOrderScreen = '/guest-track-order-screen';
   static const String favourite = '/favourite-screen';
+  static const String explore = '/explore-screen';
   static const String newUserSetupScreen = '/new-user-setup-screen';
+  static const String flappyBirdGame = '/flappy-bird-game';
   static const String dineInRestaurant = '/dine-in-restaurant';
   static const String storyViewer = '/story-viewer';
 
@@ -298,9 +302,11 @@ class RouteHelper {
   }
   static String getGuestTrackOrderScreen(String orderId, String number) => '$guestTrackOrderScreen?order_id=$orderId&number=$number';
   static String getFavouriteScreen() => favourite;
+  static String getExploreScreen() => explore;
   static String getNewUserSetupScreen({required String name, required String loginType, required String? phone, required String? email}) {
     return '$newUserSetupScreen?name=$name&login_type=$loginType&phone=$phone&email=$email';
   }
+  static String getFlappyBirdGameScreen() => flappyBirdGame;
   static String getDineInRestaurantScreen() => dineInRestaurant;
   static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
 
@@ -557,6 +563,8 @@ class RouteHelper {
       orderId: Get.parameters['order_id']!, number: Get.parameters['number']!,
     )),
     GetPage(name: favourite, page: () => getRoute(const FavouriteScreen())),
+    GetPage(name: explore, page: () => getRoute(const ExploreScreen())),
+    GetPage(name: flappyBirdGame, page: () => getRoute(const FlappyBirdGameScreen())),
     GetPage(name: newUserSetupScreen, page: () => NewUserSetupScreen(
       name: Get.parameters['name']!, loginType: Get.parameters['login_type']!,
       phone: Get.parameters['phone'] != '' && Get.parameters['phone'] != 'null' ? Get.parameters['phone']!.replaceAll(' ', '+') : null,

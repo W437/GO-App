@@ -36,6 +36,8 @@ import 'package:godelivery_user/features/checkout/domain/repositories/checkout_r
 import 'package:godelivery_user/features/checkout/domain/services/checkout_service.dart';
 import 'package:godelivery_user/features/checkout/domain/services/checkout_service_interface.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
+import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
+import 'package:godelivery_user/features/game/controllers/game_controller.dart';
 import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/home/domain/repositories/home_repository.dart';
 import 'package:godelivery_user/features/home/domain/repositories/home_repository_interface.dart';
@@ -342,6 +344,12 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => ChatController(chatServiceInterface: Get.find()));
   Get.lazyPut(() => CuisineController(cuisineServiceInterface: Get.find()));
   Get.lazyPut(() => FavouriteController(favouriteServiceInterface: Get.find()));
+  Get.lazyPut(() => ExploreController(
+    restaurantController: Get.find(),
+    categoryController: Get.find(),
+    locationController: Get.find(),
+  ));
+  Get.lazyPut(() => GameController());
   Get.lazyPut(() => ProductController(productServiceInterface: Get.find()));
   Get.lazyPut(() => ReviewController(reviewServiceInterface: Get.find()));
   Get.lazyPut(() => InterestController(interestServiceInterface: Get.find()));

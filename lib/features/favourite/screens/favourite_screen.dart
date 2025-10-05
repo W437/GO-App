@@ -7,6 +7,8 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/not_logged_in_screen.dart';
+import 'package:godelivery_user/common/widgets/gradient_screen_header_widget.dart';
+import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,8 +38,9 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
 
   @override
   Widget build(BuildContext context) {
+    bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'favourite'.tr, isBackButtonExist: false),
+      appBar: CustomAppBarWidget(title: 'favourite'.tr),
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: Get.find<AuthController>().isLoggedIn() ? SafeArea(child: Column(children: [
 

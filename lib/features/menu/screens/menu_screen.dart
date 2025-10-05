@@ -163,6 +163,16 @@ class _MenuScreenState extends State<MenuScreen> {
                             }
                           },
                         ),
+                        PortionWidget(
+                          iconData: Icons.favorite_border,
+                          title: 'favourite'.tr,
+                          route: RouteHelper.getFavouriteScreen(),
+                        ),
+                        PortionWidget(
+                          iconData: Icons.sports_esports,
+                          title: 'GO! Bird Game',
+                          route: RouteHelper.getFlappyBirdGameScreen(),
+                        ),
                         PortionWidget(icon: Images.addressIcon, title: 'my_address'.tr, route: RouteHelper.getAddressRoute()),
                         PortionWidget(icon: Images.languageIcon, title: 'language'.tr, onTap: ()=> _manageLanguageFunctionality(), route: ''),
 

@@ -1303,5 +1303,9 @@
   "customize_avatar": "Customize Avatar",
   "choose_background_color": "Choose Background Color",
   "select_shade": "Select Shade",
-  "choose_emoji": "Choose Emoji"
+  "choose_emoji": "Choose Emoji",
+  "exploring_all_restaurants": "Exploring all restaurants",
+  "filtered_view": "Filtered view",
+  "no_restaurants_found": "No restaurants found",
+  "view_restaurant": "View Restaurant"
 }

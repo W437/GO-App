@@ -23,6 +23,7 @@ import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/web_constrained_box.dart';
 import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/common/widgets/gradient_screen_header_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -107,7 +108,7 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'my_cart'.tr, isBackButtonExist: (isDesktop || !widget.fromNav)),
+      appBar: isDesktop ? CustomAppBarWidget(title: 'my_cart'.tr, isBackButtonExist: true) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: GetBuilder<RestaurantController>(builder: (restaurantController) {
         return GetBuilder<CartController>(builder: (cartController) {

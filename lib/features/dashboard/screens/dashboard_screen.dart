@@ -18,6 +18,7 @@ import 'package:godelivery_user/features/dashboard/widgets/bottom_nav_item.dart'
 import 'package:godelivery_user/features/dashboard/widgets/circular_reveal_clipper.dart';
 import 'package:godelivery_user/features/dashboard/widgets/running_order_view_widget.dart';
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
+import 'package:godelivery_user/features/explore/screens/explore_screen.dart';
 import 'package:godelivery_user/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
@@ -81,7 +82,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
     _pageController = PageController(initialPage: widget.pageIndex);
 
     _screens = [
-      const FavouriteScreen(),
+      const ExploreScreen(),
       const CartScreen(fromNav: true),
       const HomeScreen(),
       const OrderScreen(),
@@ -198,7 +199,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                 children: [
                   BottomNavItem(
                     iconPath: 'assets/image/ui/explore_icon.png',
-                    label: 'Favorites',
+                    label: 'Explore',
                     isSelected: _pageIndex == 0,
                     onTap: (details) => _setPage(0, details.globalPosition),
                   ),

@@ -71,6 +71,7 @@ dependencies:
   emoji_picker_flutter: ^2.2.0
   flex_color_picker: ^3.5.1
   lottie: ^3.1.0
+  audioplayers: ^6.0.0
 
 #  wakelock_plus: ^1.2.8
 #  video_player_avfoundation: ^2.6.2
@@ -121,6 +122,10 @@ flutter:
     - assets/map/
     - assets/brand/
     - assets/go_pull_loading.json
+    - assets/game/bg/
+    - assets/game/char/
+    - assets/game/pipe/
+    - assets/game/sfx/
     - .env
 
   fonts:

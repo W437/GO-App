@@ -30,6 +30,9 @@ class Environment {
   static String get yourScheme => dotenv.env['YOUR_SCHEME'] ?? 'GoDelivery';
   static String get yourHost => dotenv.env['YOUR_HOST'] ?? 'godelivery.com';
 
+  // Google Maps Configuration
+  static String get googleMapsApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+
   /// Check if running in development mode
   static bool get isDevelopment => baseUrl.contains('localhost') || baseUrl.contains('127.0.0.1');
 

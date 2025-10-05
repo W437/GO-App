@@ -1,0 +1,324 @@
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
+import 'package:godelivery_user/features/explore/widgets/fullscreen_map_view.dart';
+import 'package:godelivery_user/features/explore/widgets/restaurant_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
+import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+
+class ExploreMapViewWidget extends StatefulWidget {
+  final ExploreController exploreController;
+
+  const ExploreMapViewWidget({
+    super.key,
+    required this.exploreController,
+  });
+
+  @override
+  State<ExploreMapViewWidget> createState() => _ExploreMapViewWidgetState();
+}
+
+class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
+  GoogleMapController? _mapController;
+  Set<Marker> _markers = {};
+  LatLng? _initialPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeMap();
+  }
+
+  void _initializeMap() {
+    // Get user's current location or default location
+    final addressModel = AddressHelper.getAddressFromSharedPref();
+    if (addressModel != null &&
+        addressModel.latitude != null &&
+        addressModel.longitude != null) {
+      _initialPosition = LatLng(
+        double.parse(addressModel.latitude!),
+        double.parse(addressModel.longitude!),
+      );
+    } else {
+      _initialPosition = LatLng(
+        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '37.7749'),
+        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '-122.4194'),
+      );
+    }
+  }
+
+  Future<void> _createMarkers() async {
+    _markers.clear();
+
+    // Add user location marker
+    if (_initialPosition != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('user_location'),
+          position: _initialPosition!,
+          icon: await _getMarkerIcon('assets/image/location/my_location_marker.png', 80),
+          zIndex: 1,
+        ),
+      );
+    }
+
+    // Add restaurant markers
+    if (widget.exploreController.filteredRestaurants != null) {
+      for (int i = 0; i < widget.exploreController.filteredRestaurants!.length; i++) {
+        final restaurant = widget.exploreController.filteredRestaurants![i];
+        if (restaurant.latitude != null && restaurant.longitude != null) {
+          _markers.add(
+            Marker(
+              markerId: MarkerId('restaurant_${restaurant.id}'),
+              position: LatLng(
+                double.parse(restaurant.latitude!),
+                double.parse(restaurant.longitude!),
+              ),
+              icon: await _getMarkerIcon('assets/image/location/restaurant_marker.png', 100),
+              onTap: () => _onMarkerTapped(restaurant, i),
+              zIndex: 2,
+            ),
+          );
+        }
+      }
+    }
+
+    setState(() {});
+  }
+
+  Future<BitmapDescriptor> _getMarkerIcon(String assetPath, int size) async {
+    try {
+      final ByteData data = await rootBundle.load(assetPath);
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+        targetWidth: size,
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final ByteData? byteData = await frameInfo.image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      final Uint8List resizedData = byteData!.buffer.asUint8List();
+      return BitmapDescriptor.fromBytes(resizedData);
+    } catch (e) {
+      // Fallback to default marker
+      return BitmapDescriptor.defaultMarker;
+    }
+  }
+
+  void _onMarkerTapped(Restaurant restaurant, int index) {
+    widget.exploreController.selectRestaurant(index);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => RestaurantBottomSheetWidget(
+        restaurant: restaurant,
+        onClose: () {
+          widget.exploreController.clearSelectedRestaurant();
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ExploreController>(
+      builder: (controller) {
+        // Update markers when filtered restaurants change
+        if (controller.filteredRestaurants != null) {
+          _createMarkers();
+        }
+
+        return Stack(
+          children: [
+            _initialPosition == null
+                ? const Center(child: CircularProgressIndicator())
+                : GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: _initialPosition!,
+                      zoom: 14.0,
+                    ),
+                    markers: _markers,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    onMapCreated: (GoogleMapController mapController) {
+                      _mapController = mapController;
+                      controller.setMapController(mapController);
+                    },
+                    onCameraMove: (CameraPosition position) {
+                      controller.updateMapPosition(
+                        position.target,
+                        position.zoom,
+                      );
+                    },
+                    style: Get.isDarkMode
+                        ? Get.find<ThemeController>().darkMap
+                        : Get.find<ThemeController>().lightMap,
+                  ),
+
+            // My Location Button
+            Positioned(
+              bottom: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              child: FloatingActionButton(
+                mini: true,
+                backgroundColor: Theme.of(context).cardColor,
+                onPressed: () async {
+                  try {
+                    // Check if location services are enabled
+                    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                    if (!serviceEnabled) {
+                      // Location services are not enabled
+                      showCustomSnackBar('Please enable location services');
+                      return;
+                    }
+
+                    // Check location permission
+                    LocationPermission permission = await Geolocator.checkPermission();
+                    if (permission == LocationPermission.denied) {
+                      permission = await Geolocator.requestPermission();
+                      if (permission == LocationPermission.denied) {
+                        showCustomSnackBar('Location permissions are denied');
+                        return;
+                      }
+                    }
+
+                    if (permission == LocationPermission.deniedForever) {
+                      showCustomSnackBar('Location permissions are permanently denied');
+                      return;
+                    }
+
+                    // Get the raw position without geocoding
+                    Position position = await Geolocator.getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.high,
+                    );
+
+                    if (_mapController != null) {
+                      // Animate camera to user's location
+                      _mapController!.animateCamera(
+                        CameraUpdate.newLatLngZoom(
+                          LatLng(position.latitude, position.longitude),
+                          15.0,
+                        ),
+                      );
+
+                      // Update the user location marker
+                      setState(() {
+                        _initialPosition = LatLng(position.latitude, position.longitude);
+                      });
+                      _createMarkers();
+                    }
+                  } catch (e) {
+                    debugPrint('Error getting location: $e');
+                    // Fallback to the existing location if available
+                    if (_initialPosition != null && _mapController != null) {
+                      _mapController!.animateCamera(
+                        CameraUpdate.newLatLngZoom(_initialPosition!, 15.0),
+                      );
+                    }
+                  }
+                },
+                child: Icon(
+                  Icons.my_location,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+
+            // Expand Map Button
+            Positioned(
+              top: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              child: FloatingActionButton(
+                mini: true,
+                backgroundColor: Theme.of(context).cardColor,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FullscreenMapView(
+                        controller: widget.exploreController,
+                        initialPosition: _initialPosition!,
+                      ),
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.fullscreen,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+
+            // Search/Filter Indicator
+            Positioned(
+              top: Dimensions.paddingSizeDefault,
+              left: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault + 50,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Dimensions.paddingSizeDefault,
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.explore,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(width: Dimensions.paddingSizeSmall),
+                    Expanded(
+                      child: Text(
+                        controller.selectedCategoryId == null
+                            ? 'exploring_all_restaurants'.tr
+                            : 'filtered_view'.tr,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium!.color,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${controller.filteredRestaurants?.length ?? 0}',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
+}
