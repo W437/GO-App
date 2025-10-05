@@ -91,7 +91,9 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
       }
     }
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<BitmapDescriptor> _getMarkerIcon(String assetPath, int size) async {
@@ -213,10 +215,12 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
                       );
 
                       // Update the user location marker
-                      setState(() {
-                        _initialPosition = LatLng(position.latitude, position.longitude);
-                      });
-                      _createMarkers();
+                      if (mounted) {
+                        setState(() {
+                          _initialPosition = LatLng(position.latitude, position.longitude);
+                        });
+                        _createMarkers();
+                      }
                     }
                   } catch (e) {
                     debugPrint('Error getting location: $e');

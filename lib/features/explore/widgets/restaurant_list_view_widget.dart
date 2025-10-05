@@ -12,10 +12,12 @@ import 'package:godelivery_user/util/styles.dart';
 
 class RestaurantListViewWidget extends StatelessWidget {
   final ExploreController exploreController;
+  final ScrollController? scrollController;
 
   const RestaurantListViewWidget({
     super.key,
     required this.exploreController,
+    this.scrollController,
   });
 
   @override
@@ -29,22 +31,26 @@ class RestaurantListViewWidget extends StatelessWidget {
         if (controller.filteredRestaurants == null ||
             controller.filteredRestaurants!.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.restaurant_outlined,
-                  size: 80,
-                  color: Theme.of(context).disabledColor,
-                ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                Text(
-                  'no_restaurants_found'.tr,
-                  style: robotoMedium.copyWith(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.restaurant_outlined,
+                    size: 60,
                     color: Theme.of(context).disabledColor,
                   ),
-                ),
-              ],
+                  const SizedBox(height: Dimensions.paddingSizeDefault),
+                  Text(
+                    'no_restaurants_found'.tr,
+                    style: robotoMedium.copyWith(
+                      color: Theme.of(context).disabledColor,
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -54,6 +60,7 @@ class RestaurantListViewWidget extends StatelessWidget {
             await controller.getNearbyRestaurants(reload: true);
           },
           child: ListView.separated(
+            controller: scrollController,
             padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
             itemCount: controller.filteredRestaurants!.length,
             separatorBuilder: (context, index) =>
@@ -130,14 +137,41 @@ class RestaurantListViewWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name
-                  Text(
-                    restaurant.name ?? '',
-                    style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // Name and Status
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          restaurant.name ?? '',
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isOpen
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          isOpen ? 'OPEN' : 'CLOSED',
+                          style: robotoMedium.copyWith(
+                            fontSize: 10,
+                            color: isOpen ? Colors.green : Colors.red,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
 
@@ -185,9 +219,10 @@ class RestaurantListViewWidget extends StatelessWidget {
                     ),
                   const SizedBox(height: 4),
 
-                  // Delivery Time & Distance
+                  // Delivery Time, Distance & Free Delivery
                   Row(
                     children: [
+                      // Delivery Time
                       Icon(
                         Icons.access_time,
                         size: 14,
@@ -202,6 +237,8 @@ class RestaurantListViewWidget extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                      // Distance
                       Icon(
                         Icons.location_on,
                         size: 14,
@@ -215,6 +252,33 @@ class RestaurantListViewWidget extends StatelessWidget {
                           color: Theme.of(context).disabledColor,
                         ),
                       ),
+
+                      // Free Delivery Badge
+                      if (restaurant.freeDelivery == true) ...[
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: Colors.green.withValues(alpha: 0.3),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            'FREE',
+                            style: robotoMedium.copyWith(
+                              fontSize: 10,
+                              color: Colors.green,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ],

@@ -199,7 +199,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                 left: Dimensions.paddingSizeDefault,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -224,14 +224,14 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                           children: [
                             Icon(
                               Icons.arrow_back,
-                              color: Colors.black87,
+                              color: Theme.of(context).textTheme.bodyMedium!.color,
                               size: 20,
                             ),
                             const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                             Text(
                               'Back',
                               style: TextStyle(
-                                color: Colors.black87,
+                                color: Theme.of(context).textTheme.bodyMedium!.color,
                                 fontWeight: FontWeight.w600,
                                 fontSize: Dimensions.fontSizeDefault,
                               ),
@@ -254,7 +254,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                     vertical: Dimensions.paddingSizeSmall,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(100),
                     boxShadow: [
                       BoxShadow(
@@ -269,8 +269,8 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                     children: [
                       Text(
                         'Total: ',
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium!.color,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
@@ -300,7 +300,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                       // My Location Button
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -331,7 +331,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                       // Zoom In Button
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -357,7 +357,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                               padding: const EdgeInsets.all(12),
                               child: Icon(
                                 Icons.add,
-                                color: Colors.black87,
+                                color: Theme.of(context).textTheme.bodyMedium!.color,
                                 size: 24,
                               ),
                             ),
@@ -368,7 +368,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                       // Zoom Out Button
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -394,7 +394,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                               padding: const EdgeInsets.all(12),
                               child: Icon(
                                 Icons.remove,
-                                color: Colors.black87,
+                                color: Theme.of(context).textTheme.bodyMedium!.color,
                                 size: 24,
                               ),
                             ),
@@ -436,7 +436,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                                 label: Text(
                                   isAll ? 'All' : category!.name ?? '',
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium!.color,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -444,7 +444,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                                 onSelected: (selected) {
                                   controller.filterByCategory(isAll ? null : category?.id);
                                 },
-                                backgroundColor: Colors.white,
+                                backgroundColor: Theme.of(context).cardColor,
                                 selectedColor: Theme.of(context).primaryColor,
                                 side: BorderSide(
                                   color: isSelected

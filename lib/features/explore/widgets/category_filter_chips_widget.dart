@@ -22,19 +22,24 @@ class CategoryFilterChipsWidget extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: Dimensions.paddingSizeDefault,
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+        return SizedBox(
+          width: double.infinity,
+          child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: Dimensions.paddingSizeDefault,
+              vertical: Dimensions.paddingSizeDefault,
             ),
             child: GetBuilder<ExploreController>(
               builder: (controller) {
-                return Row(
-                  children: [
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(
+                    left: Dimensions.paddingSizeDefault,
+                    right: Dimensions.paddingSizeDefault,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                     // "All" chip
                     _buildCategoryChip(
                       context: context,
@@ -62,9 +67,10 @@ class CategoryFilterChipsWidget extends StatelessWidget {
                       );
                     }).toList(),
                   ],
-                );
-              },
-            ),
+                ),
+              );
+            },
+          ),
           ),
         );
       },

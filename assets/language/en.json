@@ -1306,6 +1306,13 @@
   "choose_emoji": "Choose Emoji",
   "exploring_all_restaurants": "Exploring all restaurants",
   "filtered_view": "Filtered view",
+  "search_results": "Search Results",
+  "restaurants_found": "restaurants found",
+  "search_restaurants_cuisines": "Search restaurants or cuisines...",
+  "sort_by": "Sort By",
+  "open_now": "Open Now",
+  "fast_delivery": "Fast Delivery",
+  "clear_all": "Clear All",
   "no_restaurants_found": "No restaurants found",
   "view_restaurant": "View Restaurant"
 }
