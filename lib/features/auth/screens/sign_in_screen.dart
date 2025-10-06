@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/widgets/sign_in/sign_in_view.dart';
@@ -62,16 +63,21 @@ class SignInScreenState extends State<SignInScreen> {
       },
       child: Scaffold(
         backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
-        appBar: ResponsiveHelper.isDesktop(context) ? null : !widget.exitFromApp ? AppBar(leading: IconButton(
-          onPressed: () {
-            if(Get.find<AuthController>().isOtpViewEnable){
-              Get.find<AuthController>().enableOtpView(enable: false);
-            }else{
-              Get.back(result: false);
-            }
-          },
-          icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).textTheme.bodyLarge!.color),
-        ), elevation: 0, backgroundColor: Theme.of(context).cardColor) : null,
+        appBar: ResponsiveHelper.isDesktop(context) ? null : !widget.exitFromApp ? AppBar(
+          leadingWidth: 100,
+          leading: CircularBackButtonWidget(
+            onPressed: () {
+              if(Get.find<AuthController>().isOtpViewEnable){
+                Get.find<AuthController>().enableOtpView(enable: false);
+              }else{
+                Get.back(result: false);
+              }
+            },
+            showText: true,
+          ),
+          elevation: 0,
+          backgroundColor: Theme.of(context).cardColor,
+        ) : null,
         body: SafeArea(child: Align(
           alignment: Alignment.center,
           child: Container(

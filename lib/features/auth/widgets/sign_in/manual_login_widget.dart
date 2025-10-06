@@ -145,7 +145,6 @@ class ManualLoginWidget extends StatelessWidget {
           height: isDesktop ? 50 : null,
           width:  isDesktop ? 250 : null,
           buttonText: 'login'.tr,
-          radius: isDesktop ? Dimensions.radiusSmall : Dimensions.radiusDefault,
           isBold: isDesktop ? false : true,
           isLoading: authController.isLoading,
           onPressed: onClickLoginButton,
@@ -304,7 +303,6 @@ class ManualLoginWidget extends StatelessWidget {
 
             CustomButtonWidget(
               buttonText: 'login'.tr,
-              radius: Dimensions.radiusDefault,
               isBold: isDesktop ? false : true,
               isLoading: authController.isLoading,
               onPressed: onClickLoginButton,

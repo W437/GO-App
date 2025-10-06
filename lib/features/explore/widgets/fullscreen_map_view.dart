@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/explore/widgets/restaurant_bottom_sheet_widget.dart';
@@ -199,7 +200,6 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                 left: Dimensions.paddingSizeDefault,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(100),
                     boxShadow: [
                       BoxShadow(
@@ -209,37 +209,9 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                       ),
                     ],
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(100),
-                      onTap: () => Navigator.pop(context),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Dimensions.paddingSizeDefault,
-                          vertical: Dimensions.paddingSizeSmall + 2,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.arrow_back,
-                              color: Theme.of(context).textTheme.bodyMedium!.color,
-                              size: 20,
-                            ),
-                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                            Text(
-                              'Back',
-                              style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium!.color,
-                                fontWeight: FontWeight.w600,
-                                fontSize: Dimensions.fontSizeDefault,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  child: CircularBackButtonWidget(
+                    showText: true,
+                    backgroundColor: Theme.of(context).cardColor,
                   ),
                 ),
               ),
@@ -368,7 +340,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                   final categories = categoryController.categoryList;
                   if (categories != null && categories.isNotEmpty) {
                     return Positioned(
-                      bottom: Dimensions.paddingSizeLarge,
+                      bottom: Dimensions.paddingSizeExtraLarge + Dimensions.paddingSizeLarge,
                       left: 0,
                       right: 0,
                       child: SizedBox(
