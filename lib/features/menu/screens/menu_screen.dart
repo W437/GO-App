@@ -45,20 +45,19 @@ class _MenuScreenState extends State<MenuScreen> {
 
           return Column(children: [
 
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 6, right: 6),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: Dimensions.paddingSizeOverLarge, right: Dimensions.paddingSizeOverLarge,
-                  top: 50, bottom: Dimensions.paddingSizeOverLarge,
-                ),
-                child: Row(children: [
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: Dimensions.paddingSizeOverLarge, right: Dimensions.paddingSizeOverLarge,
+                    top: 50, bottom: Dimensions.paddingSizeOverLarge,
+                  ),
+                  child: Row(children: [
 
                   EmojiProfilePicture(
                     emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
@@ -115,7 +114,8 @@ class _MenuScreenState extends State<MenuScreen> {
                     ]),
                   ),
 
-                ]),
+                  ]),
+                ),
               ),
             ),
 

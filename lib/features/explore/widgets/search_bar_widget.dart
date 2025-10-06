@@ -110,78 +110,27 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           GetBuilder<ExploreController>(
             builder: (controller) {
               if (controller.searchQuery.isEmpty) {
-                return const SizedBox.shrink();
+                return SizedBox(width: Dimensions.paddingSizeDefault);
               }
-              return IconButton(
-                onPressed: () {
-                  _searchController.clear();
-                  controller.clearSearch();
-                  _focusNode.unfocus();
-                },
-                icon: Icon(
-                  Icons.clear,
-                  color: Theme.of(context).disabledColor,
-                  size: 20,
-                ),
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      _searchController.clear();
+                      controller.clearSearch();
+                      _focusNode.unfocus();
+                    },
+                    icon: Icon(
+                      Icons.clear,
+                      color: Theme.of(context).disabledColor,
+                      size: 20,
+                    ),
+                  ),
+                  SizedBox(width: Dimensions.paddingSizeSmall),
+                ],
               );
             },
-          ),
-
-          // Filter Button
-          Container(
-            margin: const EdgeInsets.only(right: 4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              onPressed: () {
-                // Show filter bottom sheet
-                widget.exploreController.showFilterBottomSheet();
-              },
-              icon: Stack(
-                children: [
-                  Icon(
-                    Icons.tune,
-                    color: Theme.of(context).primaryColor,
-                    size: 20,
-                  ),
-                  // Filter count badge
-                  GetBuilder<ExploreController>(
-                    builder: (controller) {
-                      final filterCount = controller.activeFilterCount;
-                      if (filterCount == 0) {
-                        return const SizedBox.shrink();
-                      }
-                      return Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 12,
-                            minHeight: 12,
-                          ),
-                          child: Text(
-                            filterCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
