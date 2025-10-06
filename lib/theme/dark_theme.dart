@@ -20,7 +20,7 @@ ThemeData dark({String? languageCode}) => ThemeData(
   popupMenuTheme: const PopupMenuThemeData(color: Color(0xFF242424), surfaceTintColor: Color(0xFF242424)),
   dialogTheme: const DialogThemeData(surfaceTintColor: Colors.white10),
   floatingActionButtonTheme: FloatingActionButtonThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(500))),
-  bottomAppBarTheme: const BottomAppBarTheme(
+  bottomAppBarTheme: const BottomAppBarThemeData(
     surfaceTintColor: Color(0xFF1a1a1a), height: 60,
     padding: EdgeInsets.symmetric(vertical: 5),
   ),
