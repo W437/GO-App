@@ -1296,5 +1296,22 @@
   "sorry_something_went_wrong" : "Sorry, something went wrong",
   "please_try_again_after_some_time_or_contact_with_our_support_team" : "Please try again after some time or Contact with our support team.",
   "regular" : "Regular",
-  "select_delivery_zone": "בחר אזור משלוח"
+  "select_delivery_zone": "בחר אזור משלוח",
+  "welcome_title": "Welcome to\nGO! 👋",
+  "welcome_description": "Discover nearby restaurants, order your favorite food, and enjoy fast delivery right to your doorstep.",
+  "delivery_location": "Delivery location",
+  "what_you_like_to_eat": "What you'd like\nto eat for today?",
+  "search_menu_restaurant_craving": "Search menu, restaurant or craving",
+  "customize_avatar": "Customize Avatar",
+  "choose_background_color": "Choose Background Color",
+  "select_shade": "Select Shade",
+  "choose_emoji": "Choose Emoji",
+  "exploring_all_restaurants": "Exploring all restaurants",
+  "filtered_view": "Filtered view",
+  "search_results": "Search Results",
+  "restaurants_found": "restaurants found",
+  "search_restaurants_cuisines": "Search restaurants or cuisines...",
+  "fast_delivery": "Fast Delivery",
+  "no_restaurants_found": "No restaurants found",
+  "view_restaurant": "View Restaurant"
 }
