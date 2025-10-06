@@ -308,7 +308,7 @@ class GamePainter extends CustomPainter {
 
       canvas.drawCircle(
         Offset.zero,
-        GameConstants.birdSize / 2 + 10,
+        GameConstants.birdSize / 2 + 20, // Increased from +10 to +20 for bigger shield
         shieldPaint,
       );
     }

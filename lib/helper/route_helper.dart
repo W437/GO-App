@@ -374,6 +374,7 @@ class RouteHelper {
     GetPage(name: interest, page: () => const InterestScreen()),
     GetPage(name: main, page: () => getRoute(DashboardScreen(
       pageIndex: Get.parameters['page'] == 'home' ? 2 : Get.parameters['page'] == 'favourite' ? 0
+          : Get.parameters['page'] == 'explore' ? 0
           : Get.parameters['page'] == 'cart' ? 1 : Get.parameters['page'] == 'order' ? 3 : Get.parameters['page'] == 'menu' ? 4 : 2,
     ))),
     GetPage(name: forgotPassword, page: () => ForgetPassScreen()),

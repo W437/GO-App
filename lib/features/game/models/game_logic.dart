@@ -19,16 +19,39 @@ class GameLogic {
     var pipeHeight = _random.nextDouble() * (maxPipeHeight - minPipeHeight) + minPipeHeight;
     pipeHeight = pipeHeight.clamp(80, double.infinity);
 
-    // 65% chance for a powerup
-    if (_random.nextDouble() < 0.65) {
+    // Dynamic powerup spawn rate based on pizza stack
+    final pizzaStack = getPizzaStack(state);
+    double baseSpawnChance = 0.65;
+    double pizzaChance = 0.278; // Base: (0.722 - 0.444)
+    double friesChance = 0.444; // Base: 0.444
+    double burgerChance = 0.278; // Base: (1.0 - 0.722)
+
+    // Reduce spawn rates based on pizza stack
+    if (pizzaStack >= 2) {
+      // At 2 pizzas: reduce all by 30%
+      baseSpawnChance *= 0.7;
+    }
+    if (pizzaStack >= 4) {
+      // At 4 pizzas: pizza drops by 80%, others by 60%
+      pizzaChance *= 0.2;
+      friesChance *= 0.4;
+      burgerChance *= 0.4;
+    }
+
+    if (_random.nextDouble() < baseSpawnChance) {
       final powerUpX = x - (GameConstants.pipeSpacing / 2);
       final powerUpY = _random.nextDouble() * (dynamicGap - 80) + (pipeHeight + 40);
 
+      // Normalize probabilities
+      final total = friesChance + pizzaChance + burgerChance;
+      final normalizedFries = friesChance / total;
+      final normalizedPizza = pizzaChance / total;
+
       final r = _random.nextDouble();
       PowerUpType type;
-      if (r < 0.444) {
+      if (r < normalizedFries) {
         type = PowerUpType.fries;
-      } else if (r < 0.722) {
+      } else if (r < normalizedFries + normalizedPizza) {
         type = PowerUpType.pizza;
       } else {
         type = PowerUpType.burger;
@@ -44,7 +67,8 @@ class GameLogic {
     if (stack <= 0) return 2;
     if (stack == 1) return 4;
     if (stack == 2) return 6;
-    return 8;
+    if (stack == 3) return 8;
+    return 10; // Max speed at 4+ pizzas
   }
 
   static int getPizzaStack(GameState state) {
@@ -186,8 +210,12 @@ class GameLogic {
       existing.timer = duration;
       existing.duration = duration;
       existing.flashing = false;
-      if (type == PowerUpType.pizza || type == PowerUpType.fries) {
-        existing.stack = (existing.stack ?? 1).clamp(1, 3) + 1;
+      if (type == PowerUpType.pizza) {
+        // Pizza max stack is 4
+        existing.stack = ((existing.stack ?? 1) + 1).clamp(1, 4);
+      } else if (type == PowerUpType.fries) {
+        // Fries max stack is 3 (for 6x multiplier)
+        existing.stack = ((existing.stack ?? 1) + 1).clamp(1, 3);
       }
     } else {
       final powerUp = ActivePowerUp(
