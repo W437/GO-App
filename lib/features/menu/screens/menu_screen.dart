@@ -26,6 +26,7 @@ import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
+import 'package:screen_corner_radius/screen_corner_radius.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -35,6 +36,87 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
+  BorderRadius? _headerRadius;
+  EdgeInsets? _headerPadding;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeHeaderRadius();
+  }
+
+  /// Fetches device screen corner radii and calculates appropriate header radius
+  ///
+  /// This method attempts to get the real physical corner radius from the device.
+  /// - On Android 12+: Returns actual device corner radii
+  /// - On iOS: May be restricted/unavailable due to privacy
+  /// - Fallback: If API fails, returns null and removes top/side margins for clean full-width layout
+  ///
+  /// The calculated radius accounts for any margins applied to the header container.
+  Future<void> _initializeHeaderRadius() async {
+    try {
+      // Attempt to fetch real device corner radii
+      print('📱 [Header] Fetching screen corner radii...');
+      final radii = await ScreenCornerRadius.get();
+      print('📱 [Header] API returned: $radii');
+
+      if (radii != null && mounted) {
+        // Successfully got device radii - apply with formula: outerRadius - gap = innerRadius
+        const margin = Dimensions.paddingSizeExtraSmall; // 5px margin
+        const gap = 2.0; // Smaller gap value for more rounding
+        final innerRadiusTopLeft = radii.topLeft - gap;
+        final innerRadiusTopRight = radii.topRight - gap;
+
+        print('📱 [Header] ✅ SUCCESS - Device radii found:');
+        print('   • Outer radius (device): ${radii.topLeft}px');
+        print('   • Margin: ${margin}px');
+        print('   • Gap (for radius calc): ${gap}px');
+        print('   • Inner radius (calculated): ${innerRadiusTopLeft}px');
+        print('   • Formula: outerRadius - gap = innerRadius');
+        print('   • Result: ${radii.topLeft}px - ${gap}px = ${innerRadiusTopLeft}px');
+
+        setState(() {
+          _headerRadius = BorderRadius.only(
+            topLeft: Radius.circular(innerRadiusTopLeft),
+            topRight: Radius.circular(innerRadiusTopRight),
+            bottomLeft: const Radius.circular(Dimensions.radiusExtraLarge),
+            bottomRight: const Radius.circular(Dimensions.radiusExtraLarge),
+          );
+          _headerPadding = const EdgeInsets.only(
+            top: margin,
+            left: margin,
+            right: margin,
+          );
+        });
+        print('📱 [Header] Margins and rounded corners applied');
+      } else if (mounted) {
+        // API returned null - graceful fallback: no top rounding, no margins
+        print('📱 [Header] ⚠️ FALLBACK - API returned null');
+        print('   • No top rounding will be applied');
+        print('   • No margins will be applied');
+        setState(() {
+          _headerRadius = const BorderRadius.only(
+            bottomLeft: Radius.circular(Dimensions.radiusExtraLarge),
+            bottomRight: Radius.circular(Dimensions.radiusExtraLarge),
+          );
+          _headerPadding = EdgeInsets.zero;
+        });
+      }
+    } catch (e) {
+      // API threw exception - graceful fallback: no top rounding, no margins
+      print('📱 [Header] ❌ EXCEPTION - Screen corner radius detection failed: $e');
+      print('   • Applying fallback: no top rounding, no margins');
+      if (mounted) {
+        setState(() {
+          _headerRadius = const BorderRadius.only(
+            bottomLeft: Radius.circular(Dimensions.radiusExtraLarge),
+            bottomRight: Radius.circular(Dimensions.radiusExtraLarge),
+          );
+          _headerPadding = EdgeInsets.zero;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +126,17 @@ class _MenuScreenState extends State<MenuScreen> {
         builder: (profileController) {
           final bool isLoggedIn = Get.find<AuthController>().isLoggedIn();
 
+          // Show placeholder while radius is being calculated
+          if (_headerRadius == null || _headerPadding == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           return Column(children: [
 
             Padding(
-              padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall, left: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall),
+              padding: _headerPadding!,
               child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(MediaQuery.of(context).viewPadding.top > 0 ? Dimensions.radiusExtraLarge : Dimensions.radiusDefault),
-                  topRight: Radius.circular(MediaQuery.of(context).viewPadding.top > 0 ? Dimensions.radiusExtraLarge : Dimensions.radiusDefault),
-                  bottomLeft: const Radius.circular(Dimensions.radiusExtraLarge),
-                  bottomRight: const Radius.circular(Dimensions.radiusExtraLarge),
-                ),
+                borderRadius: _headerRadius!,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,
