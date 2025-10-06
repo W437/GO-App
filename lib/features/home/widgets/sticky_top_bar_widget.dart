@@ -146,24 +146,16 @@ class StickyTopBarWidget extends StatelessWidget {
                 onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
                 child: GetBuilder<NotificationController>(
                   builder: (notificationController) {
-                    return Container(
+                    return SizedBox(
                       width: 53,
                       height: 53,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          width: 2.4,
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      alignment: Alignment.center,
                       child: Stack(
                         clipBehavior: Clip.none,
+                        alignment: Alignment.center,
                         children: [
                           Icon(
                             Icons.notifications_outlined,
-                            color: Theme.of(context).primaryColor,
+                            color: Colors.white,
                             size: 26,
                           ),
                           if (notificationController.hasNotification)
