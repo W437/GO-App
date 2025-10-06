@@ -183,6 +183,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
                       child: Column(
                         children: [
                           FloatingActionButton(
+                            heroTag: 'map_zoom_in_1',
                             mini: true,
                             child: const Icon(Icons.add),
                             onPressed: () async {
@@ -194,6 +195,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
                           const SizedBox(height: 10),
 
                           FloatingActionButton(
+                            heroTag: 'map_zoom_out_1',
                             mini: true,
                             child: const Icon(Icons.remove),
                             onPressed: () async {
@@ -265,6 +267,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
               child: Column(
                 children: [
                   FloatingActionButton(
+                    heroTag: 'map_zoom_in_2',
                     backgroundColor: Colors.white,
                     elevation: 5,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -279,6 +282,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
                   const SizedBox(height: 10),
 
                   FloatingActionButton(
+                    heroTag: 'map_zoom_out_2',
                     backgroundColor: Colors.white,
                     elevation: 5,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),

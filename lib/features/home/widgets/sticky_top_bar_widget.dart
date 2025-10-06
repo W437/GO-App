@@ -147,23 +147,29 @@ class StickyTopBarWidget extends StatelessWidget {
                 child: GetBuilder<NotificationController>(
                   builder: (notificationController) {
                     return Container(
-                      padding: const EdgeInsets.all(8),
+                      width: 53,
+                      height: 53,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          width: 2.4,
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
                       ),
+                      alignment: Alignment.center,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
                           Icon(
                             Icons.notifications_outlined,
                             color: Theme.of(context).primaryColor,
-                            size: 24,
+                            size: 26,
                           ),
                           if (notificationController.hasNotification)
                             Positioned(
-                              top: -2,
-                              right: -2,
+                              top: 2,
+                              right: 2,
                               child: Container(
                                 height: 10,
                                 width: 10,
@@ -172,7 +178,7 @@ class StickyTopBarWidget extends StatelessWidget {
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     width: 1.5,
-                                    color: Theme.of(context).primaryColor,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),

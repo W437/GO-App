@@ -220,6 +220,11 @@ class DateConverter {
     // return DateFormat('${_timeFormatter()} | d-MMM-yyyy ').format(dateTime.toLocal());
   }
 
+  static String memberSinceFormat(String time) {
+    var newTime = '${time.substring(0,10)} ${time.substring(11,23)}';
+    return 'Member since ${DateFormat('MMM yyyy').format(DateFormat('yyyy-MM-dd HH:mm:ss').parse(newTime))}';
+  }
+
   static String convertOnlyTodayTime(String createdAt) {
     final now = DateTime.now();
     final createdAtDate = DateTime.parse(createdAt).toLocal();

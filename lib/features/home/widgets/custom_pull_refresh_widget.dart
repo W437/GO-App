@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 
 class SliverPullRefreshIndicator extends StatefulWidget {
   final Future<void> Function() onRefresh;
@@ -165,9 +166,9 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
 
     final height = realTimeHeight;
 
-    // Positioned overlay anchored to sticky header (110px from top)
+    // Positioned overlay anchored to sticky header
     return Positioned(
-      top: 110, // Height of sticky header
+      top: Dimensions.stickyHeaderHeight,
       left: 0,
       right: 0,
       child: IgnorePointer(

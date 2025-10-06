@@ -138,9 +138,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
             Positioned(
               bottom: 80, right: Dimensions.paddingSizeSmall,
               child: FloatingActionButton(
+                heroTag: 'pick_map_screen_my_location',
                 mini: true,
                 backgroundColor: Theme.of(context).cardColor,
-                heroTag: "my_location",
                 onPressed: () => _checkPermission(() {
                   Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
                 }),

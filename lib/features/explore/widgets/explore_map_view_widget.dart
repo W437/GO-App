@@ -180,6 +180,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
               bottom: Dimensions.paddingSizeDefault,
               right: Dimensions.paddingSizeDefault,
               child: FloatingActionButton(
+                heroTag: 'explore_my_location',
                 mini: true,
                 backgroundColor: Theme.of(context).cardColor,
                 onPressed: () async {
@@ -271,6 +272,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
           top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
           right: Dimensions.paddingSizeDefault,
           child: FloatingActionButton(
+            heroTag: 'explore_fullscreen_toggle',
             mini: true,
             backgroundColor: Theme.of(context).cardColor,
             onPressed: widget.onFullscreenToggle,

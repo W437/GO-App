@@ -132,6 +132,7 @@ class _PickMapDialogState extends State<PickMapDialog> {
                         Positioned(
                           bottom: 25, right: Dimensions.paddingSizeSmall,
                           child: FloatingActionButton(
+                            heroTag: 'pick_map_dialog_my_location',
                             mini: true, backgroundColor: Theme.of(context).cardColor,
                             onPressed: () => Get.find<LocationController>().checkPermission(() {
                               Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
@@ -240,6 +241,7 @@ class _PickMapDialogState extends State<PickMapDialog> {
             Positioned(
               bottom: 80, right: Dimensions.paddingSizeLarge,
               child: FloatingActionButton(
+                heroTag: 'pick_map_dialog_my_location_2',
                 mini: true, backgroundColor: Theme.of(context).cardColor,
                 onPressed: () => Get.find<LocationController>().checkPermission(() {
                   Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);

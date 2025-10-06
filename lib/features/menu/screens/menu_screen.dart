@@ -46,16 +46,18 @@ class _MenuScreenState extends State<MenuScreen> {
           return Column(children: [
 
             Padding(
-              padding: const EdgeInsets.only(top: 6, left: 6, right: 6),
+              padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall, left: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall),
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: Dimensions.paddingSizeOverLarge, right: Dimensions.paddingSizeOverLarge,
-                    top: 50, bottom: Dimensions.paddingSizeOverLarge,
+                  padding: EdgeInsets.only(
+                    left: Dimensions.paddingSizeOverLarge,
+                    right: Dimensions.paddingSizeOverLarge,
+                    top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
+                    bottom: Dimensions.paddingSizeOverLarge,
                   ),
                   child: Row(children: [
 
@@ -87,7 +89,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
                       isLoggedIn && profileController.userInfoModel != null ? Text(
-                        DateConverter.containTAndZToUTCFormat(profileController.userInfoModel!.createdAt!),
+                        DateConverter.memberSinceFormat(profileController.userInfoModel!.createdAt!),
                         style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).cardColor),
                       ) : InkWell(
                         onTap: () async {
@@ -127,18 +129,22 @@ class _MenuScreenState extends State<MenuScreen> {
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                      child: Text(
-                        'general'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                      child: Row(children: [
+                        Icon(Icons.settings_outlined, size: 18, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        Text(
+                          'general'.tr,
+                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        ),
+                      ]),
                     ),
 
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
                       margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -187,18 +193,22 @@ class _MenuScreenState extends State<MenuScreen> {
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                      child: Text(
-                        'promotional_activity'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                      child: Row(children: [
+                        Icon(Icons.local_offer_outlined, size: 18, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        Text(
+                          'promotional_activity'.tr,
+                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        ),
+                      ]),
                     ),
 
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
                       margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -208,12 +218,12 @@ class _MenuScreenState extends State<MenuScreen> {
                         (Get.find<SplashController>().configModel!.loyaltyPointStatus == 1) ? PortionWidget(
                           icon: Images.pointIcon, title: 'loyalty_points'.tr, route: RouteHelper.getLoyaltyRoute(),
                           hideDivider: Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? false : true,
-                          suffix: !isLoggedIn ? null : '${profileController.userInfoModel?.loyaltyPoint != null ? Get.find<ProfileController>().userInfoModel!.loyaltyPoint.toString() : '0'} ${'points'.tr}' ,
+                          suffix: !isLoggedIn ? null : profileController.userInfoModel == null ? null : '${Get.find<ProfileController>().userInfoModel!.loyaltyPoint ?? 0} ${'points'.tr}' ,
                         ) : const SizedBox(),
 
                         (Get.find<SplashController>().configModel!.customerWalletStatus == 1) ? PortionWidget(
                           icon: Images.walletIcon, title: 'my_wallet'.tr, hideDivider: true, route: RouteHelper.getWalletRoute(fromMenuPage: true),
-                          suffix: !isLoggedIn ? null : PriceConverter.convertPrice(profileController.userInfoModel != null ? Get.find<ProfileController>().userInfoModel!.walletBalance : 0),
+                          suffix: !isLoggedIn ? null : profileController.userInfoModel == null ? null : PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance ?? 0),
                         ) : const SizedBox(),
                       ]),
                     )
@@ -223,18 +233,22 @@ class _MenuScreenState extends State<MenuScreen> {
                    || (Get.find<SplashController>().configModel!.toggleDmRegistration! && !ResponsiveHelper.isDesktop(context))
                    || (Get.find<SplashController>().configModel!.toggleRestaurantRegistration! && !ResponsiveHelper.isDesktop(context)) ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                      child: Text(
-                        'earnings'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                      child: Row(children: [
+                        Icon(Icons.monetization_on_outlined, size: 18, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        Text(
+                          'earnings'.tr,
+                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        ),
+                      ]),
                     ),
 
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
                       margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -257,18 +271,22 @@ class _MenuScreenState extends State<MenuScreen> {
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                      child: Text(
-                        'help_and_support'.tr,
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.6)),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                      child: Row(children: [
+                        Icon(Icons.help_outline, size: 18, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        Text(
+                          'help_and_support'.tr,
+                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6)),
+                        ),
+                      ]),
                     ),
 
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
                       margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),

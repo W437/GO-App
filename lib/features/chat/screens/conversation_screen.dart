@@ -98,7 +98,7 @@ class _ConversationScreenState extends State<ConversationScreen>  with TickerPro
       return Scaffold(
         appBar: CustomAppBarWidget(title: 'conversation_list'.tr),
         endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-        floatingActionButton: !ResponsiveHelper.isDesktop(context) ? (chatController.conversationModel != null && chatController.showFloatingButton) ? FloatingActionButton(
+        floatingActionButton: !ResponsiveHelper.isDesktop(context) ? (chatController.conversationModel != null && chatController.showFloatingButton) ? FloatingActionButton(heroTag: 'chat_conversation_new', 
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () => Get.toNamed(RouteHelper.getChatRoute(notificationBody: NotificationBodyModel(
             notificationType: NotificationType.message, adminId: 0,

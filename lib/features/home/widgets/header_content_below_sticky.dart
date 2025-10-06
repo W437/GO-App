@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/features/search/screens/search_screen.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -14,23 +14,17 @@ class HeaderContentBelowSticky extends StatefulWidget {
 }
 
 class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> with SingleTickerProviderStateMixin {
-  bool _isSearchExpanded = false;
+  bool _isExpanded = false;
   late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
-
-    _scaleAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 400),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -38,13 +32,10 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
       curve: Curves.easeInOut,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
+    _scaleAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+      curve: Curves.elasticOut,
+    );
   }
 
   @override
@@ -53,10 +44,10 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
     super.dispose();
   }
 
-  void _toggleSearch() {
+  void _toggleExpansion() {
     setState(() {
-      _isSearchExpanded = !_isSearchExpanded;
-      if (_isSearchExpanded) {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
         _animationController.forward();
       } else {
         _animationController.reverse();
@@ -64,7 +55,7 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
     });
   }
 
-  void _openSearchSheet() {
+  void _openSearchSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -93,167 +84,156 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 350),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
-      alignment: Alignment.topCenter,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor,
-            ],
-          ),
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(24),
-            bottomRight: Radius.circular(24),
-          ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).primaryColor,
+          ],
         ),
-        child: Stack(
-          children: [
-            // Background logo
-            Positioned(
-              right: -40,
-              top: -40,
-              child: Opacity(
-                opacity: 0.15,
-                child: Image.asset(
-                  Images.logo,
-                  width: 180,
-                  height: 180,
-                  color: Colors.white,
-                  fit: BoxFit.contain,
-                ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Background logo
+          Positioned(
+            right: -40,
+            top: -40,
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset(
+                Images.logo,
+                width: 180,
+                height: 180,
+                color: Colors.white,
+                fit: BoxFit.contain,
               ),
             ),
+          ),
 
-            // Main content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Dimensions.paddingSizeLarge,
-                Dimensions.paddingSizeDefault,
-                Dimensions.paddingSizeLarge,
-                Dimensions.paddingSizeSmall,
-              ),
+          // Main content with Column
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeDefault,
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeDefault,
+            ),
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Large heading
-                  Text(
-                    'what_you_like_to_eat'.tr,
-                    style: robotoBold.copyWith(
-                      fontSize: 28,
-                      color: Colors.white,
-                      height: 1.2,
+                // Title and search button row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Large heading
+                    Expanded(
+                      child: Text(
+                        'what_you_like_to_eat'.tr,
+                        style: robotoBold.copyWith(
+                          fontSize: 28,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                    // Circular search button (only shows when not expanded)
+                    if (!_isExpanded)
+                      CustomButtonWidget(
+                        onPressed: _toggleExpansion,
+                        isCircular: true,
+                        icon: Icons.search,
+                        width: 48,
+                        height: 48,
+                        iconSize: 24,
+                        color: Colors.white,
+                        iconColor: Theme.of(context).primaryColor,
+                      ),
+                  ],
+                ),
+
+                // Expanded search bar (only shows when expanded)
+                if (_isExpanded) ...[
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Dimensions.paddingSizeDefault,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              color: Theme.of(context).hintColor,
+                              size: 22,
+                            ),
+                            const SizedBox(width: Dimensions.paddingSizeSmall),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => _openSearchSheet(context),
+                                child: Text(
+                                  'search_menu_restaurant_craving'.tr,
+                                  style: robotoRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeDefault,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: Dimensions.paddingSizeSmall),
+                            InkWell(
+                              onTap: _toggleExpansion,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Theme.of(context).hintColor,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                  // Animated search bar
-                  if (_isSearchExpanded)
-                    FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: InkWell(
-                            onTap: _openSearchSheet,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: Dimensions.paddingSizeDefault,
-                                vertical: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.search,
-                                    color: Theme.of(context).hintColor,
-                                    size: 22,
-                                  ),
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                                  Expanded(
-                                    child: Text(
-                                      'search_menu_restaurant_craving'.tr,
-                                      style: robotoRegular.copyWith(
-                                        fontSize: Dimensions.fontSizeDefault,
-                                        color: Theme.of(context).hintColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
+              ],
               ),
             ),
-
-            // Floating search button (bottom right)
-            Positioned(
-              right: Dimensions.paddingSizeDefault,
-              bottom: Dimensions.paddingSizeDefault,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(
-                    scale: animation,
-                    child: child,
-                  );
-                },
-                child: _isSearchExpanded
-                    ? Material(
-                        key: const ValueKey('close'),
-                        color: Colors.white,
-                        shape: const CircleBorder(),
-                        elevation: 4,
-                        child: InkWell(
-                          onTap: _toggleSearch,
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.close,
-                              color: Theme.of(context).primaryColor,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      )
-                    : Material(
-                        key: const ValueKey('search'),
-                        color: Colors.white,
-                        shape: const CircleBorder(),
-                        elevation: 6,
-                        child: InkWell(
-                          onTap: _toggleSearch,
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.search,
-                              color: Theme.of(context).primaryColor,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

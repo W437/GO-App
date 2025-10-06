@@ -52,7 +52,7 @@ class _AddressScreenState extends State<AddressScreen> {
 
         endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
 
-        floatingActionButton:  ResponsiveHelper.isDesktop(context) || !isLoggedIn ? null : (addressController.addressList?.isEmpty ?? true) ? null : FloatingActionButton(
+        floatingActionButton:  ResponsiveHelper.isDesktop(context) || !isLoggedIn ? null : (addressController.addressList?.isEmpty ?? true) ? null : FloatingActionButton(heroTag: 'address_screen_add', 
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () => Get.toNamed(RouteHelper.getAddAddressRoute(false, 0)),
           child: Icon(Icons.add, color: Theme.of(context).cardColor),

@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 
 class CustomButtonWidget extends StatelessWidget {
   final Function? onPressed;
-  final String buttonText;
+  final String? buttonText;
   final bool transparent;
   final EdgeInsets? margin;
   final double? height;
@@ -18,13 +18,79 @@ class CustomButtonWidget extends StatelessWidget {
   final IconData? icon;
   final Color? color;
   final Color? textColor;
+  final Color? iconColor;
+  final double? iconSize;
   final bool isLoading;
   final bool isBold;
-  const CustomButtonWidget({super.key, this.onPressed, required this.buttonText, this.transparent = false, this.margin, this.width, this.height,
-    this.fontSize, this.radius = 24, this.icon, this.color, this.textColor, this.isLoading = false, this.isBold = true});
+  final bool isCircular;
+  final Widget? child;
+  final BoxBorder? border;
+
+  const CustomButtonWidget({
+    super.key,
+    this.onPressed,
+    this.buttonText,
+    this.transparent = false,
+    this.margin,
+    this.width,
+    this.height,
+    this.fontSize,
+    this.radius = 24,
+    this.icon,
+    this.color,
+    this.textColor,
+    this.iconColor,
+    this.iconSize,
+    this.isLoading = false,
+    this.isBold = true,
+    this.isCircular = false,
+    this.child,
+    this.border,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // For circular buttons (icon-only)
+    if (isCircular) {
+      final size = width ?? height ?? 44.0;
+      return Padding(
+        padding: margin ?? EdgeInsets.zero,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: onPressed == null
+              ? Theme.of(context).disabledColor.withValues(alpha: 0.6)
+              : transparent
+                ? Colors.transparent
+                : color ?? Theme.of(context).primaryColor,
+            shape: BoxShape.circle,
+            border: border,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isLoading ? null : onPressed as void Function()?,
+              borderRadius: BorderRadius.circular(size / 2),
+              splashFactory: InkRipple.splashFactory,
+              splashColor: Colors.black.withOpacity(0.1),
+              highlightColor: Colors.black.withOpacity(0.05),
+              child: Center(
+                child: child ?? (icon != null
+                  ? Icon(
+                      icon,
+                      color: iconColor ?? (transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                      size: iconSize ?? 24,
+                    )
+                  : null),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // For regular buttons (existing behavior)
     return Center(child: SizedBox(width: width ?? Dimensions.webMaxWidth, child: Padding(
       padding: margin == null ? const EdgeInsets.all(0) : margin!,
       child: Material(
@@ -38,11 +104,15 @@ class CustomButtonWidget extends StatelessWidget {
           splashColor: Colors.black.withOpacity(0.1),
           highlightColor: Colors.black.withOpacity(0.05),
           child: Container(
+            decoration: border != null ? BoxDecoration(
+              borderRadius: BorderRadius.circular(radius),
+              border: border,
+            ) : null,
             constraints: BoxConstraints(
               minWidth: width ?? Dimensions.webMaxWidth,
               minHeight: height ?? 56,
             ),
-            child: Center(
+            child: child ?? Center(
               child: isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                 const SizedBox(
                   height: 15, width: 15,
@@ -57,16 +127,16 @@ class CustomButtonWidget extends StatelessWidget {
               ]) : Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                 icon != null ? Padding(
                   padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
-                  child: Icon(icon, color: transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                  child: Icon(icon, color: iconColor ?? (transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
                 ) : const SizedBox(),
-                Text(buttonText, textAlign: TextAlign.center,  style: isBold ? robotoBold.copyWith(
+                buttonText != null ? Text(buttonText!, textAlign: TextAlign.center,  style: isBold ? robotoBold.copyWith(
                     color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
                     fontSize: fontSize ?? Dimensions.fontSizeLarge,
                   ) : robotoRegular.copyWith(
                     color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
                     fontSize: fontSize ?? Dimensions.fontSizeLarge,
                   )
-                ),
+                ) : const SizedBox(),
               ]),
             ),
           ),
