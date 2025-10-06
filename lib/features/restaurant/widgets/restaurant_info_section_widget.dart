@@ -1,3 +1,4 @@
+import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -31,16 +32,8 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
       toolbarHeight: isDesktop ? 150 : 90,
       pinned: true, floating: false, elevation: 0.5,
       backgroundColor: Theme.of(context).cardColor,
-      leading: !isDesktop ? IconButton(
-        icon: Container(
-          height: 50, width: 50,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: Theme.of(context).primaryColor),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
-          child: Icon(Icons.chevron_left, color: Theme.of(context).cardColor, size: 28),
-        ),
-        onPressed: () => Get.back(),
-      ) : const SizedBox(),
+      leading: const SizedBox(),
+      leadingWidth: 0,
 
       flexibleSpace: GetBuilder<CouponController>(
         builder: (couponController) {
@@ -53,41 +46,55 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
               expandedTitleScale: isDesktop ? 1 : 1.1,
               title: CustomizableSpaceBarWidget(
                 builder: (context, scrollingRate) {
-                  return !isDesktop ? Container(
-                    color: Theme.of(context).cardColor.withValues(alpha: scrollingRate),
-                    padding: EdgeInsets.only(
-                      bottom: 0,
-                      left: Get.find<LocalizationController>().isLtr ? 40 * scrollingRate : 0,
-                      right: Get.find<LocalizationController>().isLtr ? 0 : 40 * scrollingRate,
-                    ),
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Container(
-                        height: (hasCoupon ? 260 : 160) - (scrollingRate * 25),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1 - (0.1 * scrollingRate)), blurRadius: 10)]
-                        ),
-                        margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                  final showText = scrollingRate < 0.5;
+                  return !isDesktop ? Stack(
+                    children: [
+                      Container(
+                        color: Theme.of(context).cardColor.withValues(alpha: scrollingRate),
                         padding: EdgeInsets.only(
-                          left: Get.find<LocalizationController>().isLtr ? 20 : 0,
-                          right: Get.find<LocalizationController>().isLtr ? 0 : 20,
-                          top: scrollingRate * (context.height * 0.035)
+                          bottom: 0,
+                          left: Get.find<LocalizationController>().isLtr ? 40 * scrollingRate : 0,
+                          right: Get.find<LocalizationController>().isLtr ? 0 : 40 * scrollingRate,
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall - (scrollingRate * Dimensions.paddingSizeSmall)),
-                          child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Container(
+                            height: (hasCoupon ? 260 : 160) - (scrollingRate * 25),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1 - (0.1 * scrollingRate)), blurRadius: 10)]
+                            ),
+                            margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                            padding: EdgeInsets.only(
+                              left: Get.find<LocalizationController>().isLtr ? 20 : 0,
+                              right: Get.find<LocalizationController>().isLtr ? 0 : 20,
+                              top: scrollingRate * (context.height * 0.035)
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall - (scrollingRate * Dimensions.paddingSizeSmall)),
+                              child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
 
-                            InfoViewWidget(restaurant: restaurant, restController: restController, scrollingRate: scrollingRate),
-                            SizedBox(height: Dimensions.paddingSizeLarge - (scrollingRate * (isDesktop ? 2 : Dimensions.paddingSizeLarge))),
+                                InfoViewWidget(restaurant: restaurant, restController: restController, scrollingRate: scrollingRate),
+                                SizedBox(height: Dimensions.paddingSizeLarge - (scrollingRate * (isDesktop ? 2 : Dimensions.paddingSizeLarge))),
 
-                            scrollingRate < 0.8 ? CouponViewWidget(scrollingRate: scrollingRate) : const SizedBox(),
+                                scrollingRate < 0.8 ? CouponViewWidget(scrollingRate: scrollingRate) : const SizedBox(),
 
-                          ]),
+                              ]),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      // Floating back button - positioned below status bar dynamically
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
+                        left: Dimensions.paddingSizeDefault,
+                        child: CircularBackButtonWidget(
+                          showText: showText,
+                          backgroundColor: Theme.of(context).cardColor.withOpacity(showText ? 1.0 : 0.95),
+                        ),
+                      ),
+                    ],
                   ) : Align(
                     alignment: Alignment.bottomLeft,
                     child: Container(

@@ -1,3 +1,4 @@
+import 'package:godelivery_user/common/widgets/bouncy_bottom_sheet.dart';
 import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/home/widgets/all_categories_bottom_sheet.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
@@ -30,10 +31,8 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text('what_on_your_mind'.tr, style: ResponsiveHelper.isDesktop(context) ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600) : robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
               ArrowIconButtonWidget(onTap: () {
-                showModalBottomSheet(
+                showBouncyBottomSheet(
                   context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
                   builder: (context) => const AllCategoriesBottomSheet(),
                 );
               }),

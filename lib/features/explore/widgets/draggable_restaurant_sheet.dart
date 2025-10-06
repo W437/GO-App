@@ -232,26 +232,35 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                         color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: IconButton(
-                        onPressed: () {
-                          if (!_draggableController.isAttached) return;
+                      child: AnimatedBuilder(
+                        animation: _draggableController,
+                        builder: (context, child) {
+                          final isExpanded = _draggableController.isAttached && _draggableController.size >= 0.725;
+                          return IconButton(
+                            onPressed: () {
+                              if (!_draggableController.isAttached) return;
 
-                          final currentSize = _draggableController.size;
-                          // Toggle between default (0.5) and expanded (0.95)
-                          final targetSize = currentSize < 0.725 ? 0.95 : 0.5;
-                          _draggableController.animateTo(
-                            targetSize,
-                            duration: const Duration(milliseconds: 350),
-                            curve: Curves.easeOutCubic,
+                              final currentSize = _draggableController.size;
+                              // Toggle between default (0.5) and expanded (0.95)
+                              final targetSize = currentSize < 0.725 ? 0.95 : 0.5;
+                              _draggableController.animateTo(
+                                targetSize,
+                                duration: const Duration(milliseconds: 350),
+                                curve: Curves.easeOutCubic,
+                              );
+                            },
+                            icon: AnimatedRotation(
+                              turns: isExpanded ? 0.5 : 0,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: Icon(
+                                Icons.keyboard_arrow_up,
+                                size: 28,
+                                color: Theme.of(context).textTheme.bodyMedium!.color,
+                              ),
+                            ),
                           );
                         },
-                        icon: Icon(
-                          _draggableController.isAttached && _draggableController.size < 0.725
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          size: 28,
-                          color: Theme.of(context).textTheme.bodyMedium!.color,
-                        ),
                       ),
                     ),
                   ],

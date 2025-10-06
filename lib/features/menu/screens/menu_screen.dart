@@ -1,3 +1,4 @@
+import 'package:godelivery_user/common/widgets/bouncy_bottom_sheet.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -150,10 +151,8 @@ class _MenuScreenState extends State<MenuScreen> {
                             if (AuthHelper.isLoggedIn()) {
                               Get.toNamed(RouteHelper.getProfileRoute());
                             } else {
-                              showModalBottomSheet(
+                              showBouncyBottomSheet(
                                 context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
                                 builder: (context) => GuestLoginBottomSheet(
                                   onLoginSuccess: () {
                                     profileController.getUserInfo();

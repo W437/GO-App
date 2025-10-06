@@ -44,18 +44,25 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: Dimensions.radiusExtraLarge, vertical: Dimensions.paddingSizeLarge),
-        child: FooterViewWidget(
-          child: SizedBox(
-            width: Dimensions.webMaxWidth,
-            child: Form(
-              key: _formKeyOrder,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
+    return Stack(
+      children: [
+        Center(
+          child: SingleChildScrollView(
+            padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.fromLTRB(
+              Dimensions.radiusExtraLarge,
+              Dimensions.paddingSizeLarge,
+              Dimensions.radiusExtraLarge,
+              100, // Bottom padding for fixed button
+            ),
+            child: FooterViewWidget(
+              child: SizedBox(
+                width: Dimensions.webMaxWidth,
+                child: Form(
+                  key: _formKeyOrder,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
 
                   SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : MediaQuery.of(context).size.height * 0.10),
 
@@ -130,46 +137,62 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                   ),
                   const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                  GetBuilder<OrderController>(
-                      builder: (orderController) {
-                        return CustomButtonWidget(
-                          buttonText: 'track_order'.tr,
-                          isLoading: orderController.isLoading,
-                          width: ResponsiveHelper.isDesktop(context) ? 300 : double.infinity,
-                          onPressed: () async {
-                            String phone = _phoneNumberController.text.trim();
-                            String orderId = _orderIdController.text.trim();
-                            String numberWithCountryCode = _countryDialCode! + phone;
-                            PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-                            numberWithCountryCode = phoneValid.phone;
-
-                            if(_formKeyOrder!.currentState!.validate()) {
-                              if (orderId.isEmpty) {
-                                showCustomSnackBar('please_enter_order_id'.tr);
-                              } else if (phone.isEmpty) {
-                                showCustomSnackBar('enter_phone_number'.tr);
-                              } else if (!phoneValid.isValid) {
-                                showCustomSnackBar('invalid_phone_number'.tr);
-                              } else {
-                                orderController.trackOrder(
-                                    orderId, null, false, contactNumber: numberWithCountryCode, fromGuestInput: true)
-                                    .then((response) {
-                                  if (response.isSuccess) {
-                                    Get.toNamed(RouteHelper.getGuestTrackOrderScreen(orderId, numberWithCountryCode));
-                                  }
-                                });
-                              }
-                            }
-                          },
-                        );
-                      }
+                    ],
                   ),
-
-                ]),
+                ),
               ),
             ),
           ),
         ),
-      );
+
+        // Fixed Track Order Button
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeDefault,
+              Dimensions.paddingSizeLarge,
+              MediaQuery.of(context).padding.bottom + Dimensions.paddingSizeDefault,
+            ),
+            child: GetBuilder<OrderController>(
+              builder: (orderController) {
+                return CustomButtonWidget(
+                  buttonText: 'track_order'.tr,
+                  isLoading: orderController.isLoading,
+                  onPressed: () async {
+                    String phone = _phoneNumberController.text.trim();
+                    String orderId = _orderIdController.text.trim();
+                    String numberWithCountryCode = _countryDialCode! + phone;
+                    PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+                    numberWithCountryCode = phoneValid.phone;
+
+                    if(_formKeyOrder!.currentState!.validate()) {
+                      if (orderId.isEmpty) {
+                        showCustomSnackBar('please_enter_order_id'.tr);
+                      } else if (phone.isEmpty) {
+                        showCustomSnackBar('enter_phone_number'.tr);
+                      } else if (!phoneValid.isValid) {
+                        showCustomSnackBar('invalid_phone_number'.tr);
+                      } else {
+                        orderController.trackOrder(
+                            orderId, null, false, contactNumber: numberWithCountryCode, fromGuestInput: true)
+                            .then((response) {
+                          if (response.isSuccess) {
+                            Get.toNamed(RouteHelper.getGuestTrackOrderScreen(orderId, numberWithCountryCode));
+                          }
+                        });
+                      }
+                    }
+                  },
+                );
+              }
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

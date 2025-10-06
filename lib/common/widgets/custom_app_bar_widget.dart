@@ -1,6 +1,7 @@
 /// Custom app bar widget with responsive design for mobile and web
 /// Provides navigation, search, cart, and veg filter functionality
 
+import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/web_menu_bar.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
@@ -28,9 +29,11 @@ class CustomAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
     return ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : AppBar(
       title: Text(title, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: bgColor == null ? Theme.of(context).textTheme.bodyLarge!.color : Theme.of(context).cardColor)),
       centerTitle: true,
-      leading: isBackButtonExist ? IconButton(
-        icon: const Icon(Icons.arrow_back_ios),
-        color: bgColor == null ? Theme.of(context).textTheme.bodyLarge!.color : Theme.of(context).cardColor,
+      leadingWidth: 100,
+      leading: isBackButtonExist ? CircularBackButtonWidget(
+        showText: true,
+        backgroundColor: bgColor ?? Theme.of(context).hoverColor.withOpacity(0.1),
+        iconColor: bgColor == null ? Theme.of(context).textTheme.bodyLarge!.color : Theme.of(context).cardColor,
         onPressed: () => onBackPressed != null ? onBackPressed!() : Navigator.pop(context),
       ) : const SizedBox(),
       backgroundColor: bgColor ?? Theme.of(context).cardColor,
