@@ -75,9 +75,9 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
               height: 50, width: 500,
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                borderRadius: BorderRadius.circular(25), // Pill shape
               ),
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
               child: Row(children: [
 
                 Icon(Icons.location_on, size: 25, color: Theme.of(context).primaryColor),

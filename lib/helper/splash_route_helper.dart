@@ -74,11 +74,8 @@ Future<void> _forLoggedInUserRouteProcess() async {
 }
 
 void _newlyRegisteredRouteProcess() {
-  if(AppConstants.languages.length > 1) {
-    Get.offNamed(RouteHelper.getLanguageRoute('splash'));
-  }else {
-    Get.offNamed(RouteHelper.getWelcomeRoute());
-  }
+  // Use unified onboarding that includes language selection
+  Get.offNamed(RouteHelper.getUnifiedOnboardingRoute());
 }
 
 void _forGuestUserRouteProcess() {

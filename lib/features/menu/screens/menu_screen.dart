@@ -48,12 +48,18 @@ class _MenuScreenState extends State<MenuScreen> {
 
             Padding(
               padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall, left: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(MediaQuery.of(context).viewPadding.top > 0 ? Dimensions.radiusExtraLarge : Dimensions.radiusDefault),
+                  topRight: Radius.circular(MediaQuery.of(context).viewPadding.top > 0 ? Dimensions.radiusExtraLarge : Dimensions.radiusDefault),
+                  bottomLeft: const Radius.circular(Dimensions.radiusExtraLarge),
+                  bottomRight: const Radius.circular(Dimensions.radiusExtraLarge),
                 ),
-                child: Stack(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  child: Stack(
                   children: [
                     // Background logo
                     Positioned(
@@ -139,6 +145,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       ]),
                     ),
                   ],
+                ),
                 ),
               ),
             ),

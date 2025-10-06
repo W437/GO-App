@@ -29,6 +29,7 @@ import 'package:godelivery_user/features/notification/domain/models/notification
 import 'package:godelivery_user/features/notification/screens/notification_screen.dart';
 import 'package:godelivery_user/features/onboard/screens/onboarding_screen.dart';
 import 'package:godelivery_user/features/onboard/screens/welcome_screen.dart';
+import 'package:godelivery_user/features/onboard/screens/unified_onboarding_screen.dart';
 import 'package:godelivery_user/features/order/screens/guest_track_order_screen.dart';
 import 'package:godelivery_user/features/order/screens/order_details_screen.dart';
 import 'package:godelivery_user/features/order/screens/order_screen.dart';
@@ -93,6 +94,7 @@ class RouteHelper {
   static const String language = '/language';
   static const String welcome = '/welcome';
   static const String onBoarding = '/on-boarding';
+  static const String unifiedOnboarding = '/unified-onboarding';
   static const String signIn = '/sign-in';
   static const String signUp = '/sign-up';
   static const String verification = '/verification';
@@ -171,6 +173,7 @@ class RouteHelper {
   static String getLanguageRoute(String page) => '$language?page=$page';
   static String getWelcomeRoute() => welcome;
   static String getOnBoardingRoute() => onBoarding;
+  static String getUnifiedOnboardingRoute() => unifiedOnboarding;
   static String getSignInRoute(String page) => '$signIn?page=$page';
   static String getSignUpRoute() => signUp;
   static String getVerificationRoute(String? number, String? email, String? token, String page, String? pass, String loginType, {String? session, UpdateUserModel? updateUserModel}) {
@@ -328,6 +331,7 @@ class RouteHelper {
     GetPage(name: language, page: () => LanguageScreen(fromMenu: Get.parameters['page'] == 'menu')),
     GetPage(name: welcome, page: () => const WelcomeScreen()),
     GetPage(name: onBoarding, page: () => OnBoardingScreen()),
+    GetPage(name: unifiedOnboarding, page: () => const UnifiedOnboardingScreen()),
     GetPage(name: signIn, page: () => SignInScreen(
       exitFromApp: Get.parameters['page'] == signUp || Get.parameters['page'] == splash || Get.parameters['page'] == onBoarding,
       backFromThis: Get.parameters['page'] != splash && Get.parameters['page'] != onBoarding,

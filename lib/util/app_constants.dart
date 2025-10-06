@@ -9,6 +9,16 @@ class AppConstants {
 
   static const String fontFamily = 'Omnes';
   static const bool payInWevView = false;
+
+  static String getFontFamily(String languageCode) {
+    print('🔤 getFontFamily called with languageCode: $languageCode');
+    if (languageCode == 'ar') {
+      print('🔤 Returning OmnesArabic font');
+      return 'OmnesArabic';
+    }
+    print('🔤 Returning Omnes font');
+    return 'Omnes';
+  }
   static String get webHostedUrl => Environment.webHostedUrl;
   static const bool useReactWebsite = false;
 

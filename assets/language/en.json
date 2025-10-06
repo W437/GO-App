@@ -1343,5 +1343,8 @@
   "Unfav": "Unfav",
   "no_results_found": "No Results Found",
   "try_adjusting_filters_or_search": "Try adjusting your filters or search terms",
-  "clear_all_filters": "Clear All Filters"
+  "clear_all_filters": "Clear All Filters",
+  "no_restaurants_nearby": "No Restaurants Nearby",
+  "try_adjusting_your_location": "Try adjusting your location or expanding your search area",
+  "change_location": "Change Location"
 }

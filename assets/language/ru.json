@@ -1342,5 +1342,8 @@
   "Unfav": "Удал",
   "no_results_found": "Результаты не найдены",
   "try_adjusting_filters_or_search": "Попробуйте изменить фильтры или поисковый запрос",
-  "clear_all_filters": "Очистить все фильтры"
+  "clear_all_filters": "Очистить все фильтры",
+  "no_restaurants_nearby": "Поблизости нет ресторанов",
+  "try_adjusting_your_location": "Попробуйте изменить свое местоположение или расширить область поиска",
+  "change_location": "Изменить местоположение"
 }

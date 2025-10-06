@@ -112,7 +112,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> with SingleTick
                             scale: _scaleAnimation.value,
                             child: Transform.rotate(
                               angle: _rotationAnimation.value,
-                              child: Lottie.asset('assets/location_lottie.json', width: 200, height: 150),
+                              child: Lottie.asset('assets/animations/location_lottie.json', width: 200, height: 150),
                             ),
                           );
                         },

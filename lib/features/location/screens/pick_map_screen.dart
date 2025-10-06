@@ -97,8 +97,11 @@ class _PickMapScreenState extends State<PickMapScreen> {
               style: Get.isDarkMode ? Get.find<ThemeController>().darkMap : Get.find<ThemeController>().lightMap,
             ),
 
-            Center(child: !locationController.loading ? Image.asset(Images.pickMarker, height: 50, width: 50)
-                : const CircularProgressIndicator()),
+            Center(child: !locationController.loading ? Icon(
+              Icons.location_on,
+              size: 50,
+              color: Theme.of(context).primaryColor,
+            ) : const CircularProgressIndicator()),
 
             Positioned(
               top: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
@@ -113,7 +116,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
                     width: 50,
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      borderRadius: BorderRadius.circular(25), // Pill shape (full circle for square)
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
@@ -125,7 +128,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        borderRadius: BorderRadius.circular(25), // Pill shape
                         onTap: () => _showZoneSelectionActionSheet(context),
                         child: const Icon(
                           Icons.list_alt,
@@ -161,26 +164,42 @@ class _PickMapScreenState extends State<PickMapScreen> {
             ),
 
             Positioned(
-              bottom: 80, right: Dimensions.paddingSizeSmall,
-              child: FloatingActionButton(
-                heroTag: 'pick_map_screen_my_location',
-                mini: true,
-                backgroundColor: Theme.of(context).cardColor,
-                onPressed: () => _checkPermission(() {
-                  Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
-                }),
-                child: Icon(Icons.my_location, color: Theme.of(context).primaryColor),
+              right: Dimensions.paddingSizeSmall,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: FloatingActionButton(
+                  heroTag: 'pick_map_screen_my_location',
+                  mini: true,
+                  backgroundColor: Theme.of(context).cardColor,
+                  onPressed: () => _checkPermission(() {
+                    Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
+                  }),
+                  child: Icon(Icons.my_location, color: Theme.of(context).primaryColor),
+                ),
               ),
             ),
 
             Positioned(
-              bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-              child: CustomButtonWidget(
-                buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
-                    : 'service_not_available_in_this_area'.tr,
-                isLoading: locationController.isLoading,
-                onPressed: (locationController.buttonDisabled || locationController.loading) ? null
-                    : () => _onPickAddressButtonPressed(locationController),
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Dimensions.paddingSizeExtraLarge,
+                    0,
+                    Dimensions.paddingSizeExtraLarge,
+                    Dimensions.paddingSizeDefault,
+                  ),
+                  child: CustomButtonWidget(
+                    buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
+                        : 'service_not_available_in_this_area'.tr,
+                    isLoading: locationController.isLoading,
+                    onPressed: (locationController.buttonDisabled || locationController.loading) ? null
+                        : () => _onPickAddressButtonPressed(locationController),
+                  ),
+                ),
               ),
             ),
 

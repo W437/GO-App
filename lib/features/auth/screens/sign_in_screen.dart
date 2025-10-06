@@ -101,7 +101,7 @@ class SignInScreenState extends State<SignInScreen> {
                 ) : const SizedBox(),
 
                 Lottie.asset(
-                  'assets/cooking_loader_lottie.json',
+                  'assets/animations/cooking_loader_lottie.json',
                   height: 150,
                   width: 150,
                   fit: BoxFit.contain,

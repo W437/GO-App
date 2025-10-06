@@ -1342,5 +1342,8 @@
   "Unfav": "בטל",
   "no_results_found": "לא נמצאו תוצאות",
   "try_adjusting_filters_or_search": "נסה להתאים את הסינונים או תנאי החיפוש",
-  "clear_all_filters": "נקה את כל הסינונים"
+  "clear_all_filters": "נקה את כל הסינונים",
+  "no_restaurants_nearby": "אין מסעדות בקרבת מקום",
+  "try_adjusting_your_location": "נסה להתאים את המיקום שלך או להרחיב את אזור החיפוש",
+  "change_location": "שנה מיקום"
 }

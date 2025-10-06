@@ -1342,5 +1342,8 @@
   "Unfav": "إلغاء",
   "no_results_found": "لا توجد نتائج",
   "try_adjusting_filters_or_search": "حاول تعديل الفلاتر أو مصطلحات البحث",
-  "clear_all_filters": "مسح جميع الفلاتر"
+  "clear_all_filters": "مسح جميع الفلاتر",
+  "no_restaurants_nearby": "لا توجد مطاعم قريبة",
+  "try_adjusting_your_location": "حاول تعديل موقعك أو توسيع منطقة البحث",
+  "change_location": "تغيير الموقع"
 }

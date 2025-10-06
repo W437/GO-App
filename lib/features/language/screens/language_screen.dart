@@ -42,7 +42,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                     children: [
                       // Lottie animation
                       Lottie.asset(
-                        'assets/language_screen_lottie.json',
+                        'assets/animations/language_screen_lottie.json',
                         height: 200,
                         width: 200,
                         fit: BoxFit.contain,

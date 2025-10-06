@@ -226,7 +226,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
                         scale: _scaleAnimation.value,
                         child: Transform.rotate(
                           angle: _rotationAnimation.value,
-                          child: Lottie.asset('assets/location_lottie.json', height: 220),
+                          child: Lottie.asset('assets/animations/location_lottie.json', height: 220),
                         ),
                       );
                     },

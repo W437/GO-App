@@ -1,8 +1,9 @@
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-ThemeData dark = ThemeData(
-  fontFamily: AppConstants.fontFamily,
+ThemeData dark({String? languageCode}) => ThemeData(
+  fontFamily: AppConstants.getFontFamily(languageCode ?? Get.locale?.languageCode ?? 'en'),
   primaryColor: const Color(0xFFff6b00),
   secondaryHeaderColor: const Color(0x9Bff6b00),
   disabledColor: const Color(0xffa2a7ad),

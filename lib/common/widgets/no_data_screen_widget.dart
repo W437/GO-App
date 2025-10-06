@@ -202,7 +202,7 @@ class _NoDataScreenState extends State<NoDataScreen> with TickerProviderStateMix
                       child: Transform.rotate(
                         angle: _rotationAnimation.value,
                         child: Lottie.asset(
-                          widget.isEmptyCart ? 'assets/cart_empty_lottie.json' : 'assets/food_changing_orders_lottie.json',
+                          widget.isEmptyCart ? 'assets/animations/cart_empty_lottie.json' : 'assets/animations/food_changing_orders_lottie.json',
                           width: isDesktop ? 200 : 150,
                           height: isDesktop ? 200 : 150,
                           repeat: true,

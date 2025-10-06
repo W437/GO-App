@@ -194,7 +194,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
                     width: 240,
                     height: 240,
                     child: Lottie.asset(
-                      'assets/go_pull_loading.json',
+                      'assets/animations/go_pull_loading.json',
                       animate: true,
                       repeat: true,
                       fit: BoxFit.contain,
@@ -262,7 +262,7 @@ class _PullRefreshHeaderDelegate extends SliverPersistentHeaderDelegate {
                   width: 180,
                   height: 180,
                   child: Lottie.asset(
-                    'assets/go_pull_loading.json',
+                    'assets/animations/go_pull_loading.json',
                     animate: true,
                     repeat: true,
                   ),

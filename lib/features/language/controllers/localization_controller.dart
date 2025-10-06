@@ -2,7 +2,10 @@
 import 'package:godelivery_user/features/home/screens/home_screen.dart';
 import 'package:godelivery_user/features/language/domain/models/language_model.dart';
 import 'package:godelivery_user/features/language/domain/service/language_service_interface.dart';
+import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/theme/dark_theme.dart';
+import 'package:godelivery_user/theme/light_theme.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,6 +44,25 @@ class LocalizationController extends GetxController implements GetxService {
     if(AddressHelper.getAddressFromSharedPref() != null && !fromBottomSheet) {
       HomeScreen.loadData(true);
     }
+
+    // Update theme with new font family for the language
+    print('🌍 Language changed to: ${locale.languageCode}');
+    if (Get.isRegistered<ThemeController>()) {
+      final themeController = Get.find<ThemeController>();
+      print('🎨 ThemeController found, darkTheme: ${themeController.darkTheme}');
+      // Force theme change to apply new font
+      if (themeController.darkTheme) {
+        print('🎨 Applying dark theme with languageCode: ${locale.languageCode}');
+        Get.changeTheme(dark(languageCode: locale.languageCode));
+      } else {
+        print('🎨 Applying light theme with languageCode: ${locale.languageCode}');
+        Get.changeTheme(light(languageCode: locale.languageCode));
+      }
+      themeController.update();
+    } else {
+      print('⚠️ ThemeController not registered!');
+    }
+
     update();
   }
 

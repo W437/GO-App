@@ -122,12 +122,7 @@ flutter:
     - assets/language/
     - assets/map/
     - assets/brand/
-    - assets/go_pull_loading.json
-    - assets/cart_empty_lottie.json
-    - assets/cooking_loader_lottie.json
-    - assets/food_changing_orders_lottie.json
-    - assets/location_lottie.json
-    - assets/language_screen_lottie.json
+    - assets/animations/
     - assets/game/assets/
     - assets/game/sfx/
     - .env
@@ -140,6 +135,14 @@ flutter:
         - asset: assets/font/english/Omnes Medium.ttf
           weight: 500
         - asset: assets/font/english/Omnes Bold.ttf
+          weight: 700
+    - family: OmnesArabic
+      fonts:
+        - asset: assets/font/arabic/arfonts-omnes-arabic-light.ttf
+          weight: 400
+        - asset: assets/font/arabic/arfonts-omnes-arabic-medium.ttf
+          weight: 500
+        - asset: assets/font/arabic/arfonts-omnes-arabic-bold.ttf
           weight: 700
     - family: Roboto
       fonts:

@@ -69,7 +69,7 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
 
                   // Lottie Animation
                   Lottie.asset(
-                    'assets/food_changing_orders_lottie.json',
+                    'assets/animations/food_changing_orders_lottie.json',
                     width: ResponsiveHelper.isDesktop(context) ? 200 : 150,
                     height: ResponsiveHelper.isDesktop(context) ? 200 : 150,
                     repeat: true,
