@@ -12,52 +12,115 @@ import 'package:godelivery_user/helper/auth_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:screen_corner_radius/screen_corner_radius.dart';
 
-class StickyTopBarWidget extends StatelessWidget {
+class StickyTopBarWidget extends StatefulWidget {
   final double scrollOffset;
 
   const StickyTopBarWidget({super.key, this.scrollOffset = 0});
 
   @override
+  State<StickyTopBarWidget> createState() => _StickyTopBarWidgetState();
+}
+
+class _StickyTopBarWidgetState extends State<StickyTopBarWidget> {
+  BorderRadius? _headerRadius;
+  EdgeInsets? _headerPadding;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeHeaderRadius();
+  }
+
+  /// Fetches device screen corner radii and calculates appropriate header radius
+  Future<void> _initializeHeaderRadius() async {
+    try {
+      final radii = await ScreenCornerRadius.get();
+
+      if (radii != null && mounted) {
+        const margin = Dimensions.paddingSizeExtraSmall; // 5px margin
+        const gap = 2.0; // Smaller gap value for more rounding
+        final innerRadiusTopLeft = radii.topLeft - gap;
+        final innerRadiusTopRight = radii.topRight - gap;
+
+        setState(() {
+          _headerRadius = BorderRadius.only(
+            topLeft: Radius.circular(innerRadiusTopLeft),
+            topRight: Radius.circular(innerRadiusTopRight),
+          );
+          _headerPadding = const EdgeInsets.only(
+            top: margin,
+            left: margin,
+            right: margin,
+          );
+        });
+      } else if (mounted) {
+        // Fallback: no top rounding, no margins
+        setState(() {
+          _headerRadius = BorderRadius.zero;
+          _headerPadding = EdgeInsets.zero;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _headerRadius = BorderRadius.zero;
+          _headerPadding = EdgeInsets.zero;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Show loading indicator while radius is being calculated
+    if (_headerRadius == null || _headerPadding == null) {
+      return const SizedBox.shrink();
+    }
+
     // Calculate border radius based on scroll offset
     // Start showing rounded corners after scrolling 50px, fully rounded at 100px
-    final borderRadiusProgress = ((scrollOffset - 50.0) / 50.0).clamp(0.0, 1.0);
+    final borderRadiusProgress = ((widget.scrollOffset - 50.0) / 50.0).clamp(0.0, 1.0);
     final borderRadius = (borderRadiusProgress * 24.0).clamp(0.0, 24.0);
 
     // Calculate opacity and blur - starts after 200px scroll, completes at 400px
-    final fadeProgress = ((scrollOffset - 200.0) / 200.0).clamp(0.0, 1.0);
+    final fadeProgress = ((widget.scrollOffset - 200.0) / 200.0).clamp(0.0, 1.0);
     final backgroundOpacity = 1.0 - (fadeProgress * 0.25); // Goes from 1.0 to 0.75
     final blurAmount = fadeProgress * 10.0; // Blur from 0 to 10
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).primaryColor.withValues(alpha: backgroundOpacity),
-                Theme.of(context).primaryColor.withValues(alpha: backgroundOpacity),
-              ],
+    return Padding(
+      padding: _headerPadding!,
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).primaryColor.withValues(alpha: backgroundOpacity),
+                  Theme.of(context).primaryColor.withValues(alpha: backgroundOpacity),
+                ],
+              ),
+              borderRadius: _headerRadius!.add(BorderRadius.only(
+                bottomLeft: Radius.circular(borderRadius),
+                bottomRight: Radius.circular(borderRadius),
+              )),
             ),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(borderRadius),
-              bottomRight: Radius.circular(borderRadius),
-            ),
-          ),
-          child: SafeArea(
-        bottom: false,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Dimensions.paddingSizeDefault,
-            vertical: Dimensions.paddingSizeSmall,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+            child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: Dimensions.paddingSizeDefault,
+                    right: Dimensions.paddingSizeDefault,
+                    top: Dimensions.paddingSizeSmall,
+                    bottom: Dimensions.paddingSizeExtraSmall,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
               // Profile Picture
               GetBuilder<ProfileController>(
                 builder: (profileController) {
@@ -78,12 +141,15 @@ class StickyTopBarWidget extends StatelessWidget {
                         );
                       }
                     },
-                    child: EmojiProfilePicture(
-                      emoji: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileEmoji : null,
-                      bgColorHex: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileBgColor : null,
-                      size: 53,
-                      borderWidth: 2.4,
-                      borderColor: Colors.white.withValues(alpha: 0.3),
+                    child: Transform.scale(
+                      scale: 1.3, // Make it 30% bigger without affecting layout
+                      child: EmojiProfilePicture(
+                        emoji: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileEmoji : null,
+                        bgColorHex: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileBgColor : null,
+                        size: 53,
+                        borderWidth: 2.4,
+                        borderColor: Colors.white.withValues(alpha: 0.3),
+                      ),
                     ),
                   );
                 },
@@ -249,10 +315,11 @@ class StickyTopBarWidget extends StatelessWidget {
                     );
                   },
                 ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
           ),
         ),
       ),

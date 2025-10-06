@@ -85,23 +85,28 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor,
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: Dimensions.paddingSizeExtraSmall,
+        right: Dimensions.paddingSizeExtraSmall,
       ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).primaryColor,
+              Theme.of(context).primaryColor,
+            ],
+          ),
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(24),
+            bottomRight: Radius.circular(24),
+          ),
+        ),
       child: Stack(
         children: [
           // Background logo
@@ -253,6 +258,7 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
             ),
           ),
         ],
+      ),
       ),
     );
   }

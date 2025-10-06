@@ -227,11 +227,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       ),
 
                       /// Header Content (Title + Search) - Scrollable
-                      SliverToBoxAdapter(
-                        child: Transform.translate(
-                          offset: const Offset(0, -1),
-                          child: const HeaderContentBelowSticky(),
-                        ),
+                      const SliverToBoxAdapter(
+                        child: HeaderContentBelowSticky(),
                       ),
 
                   SliverToBoxAdapter(

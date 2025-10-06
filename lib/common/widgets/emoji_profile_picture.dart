@@ -37,12 +37,13 @@ class EmojiProfilePicture extends StatelessWidget {
               )
             : null,
       ),
-      child: Center(
-        child: Text(
-          displayEmoji,
-          style: TextStyle(
-            fontSize: size * 0.5, // Emoji size is 50% of container
-          ),
+      alignment: Alignment.center,
+      child: Text(
+        displayEmoji,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: size * 0.5, // Emoji size is 50% of container
+          height: 1.0, // Remove extra line height
         ),
       ),
     );

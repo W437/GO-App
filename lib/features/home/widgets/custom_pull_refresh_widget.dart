@@ -169,8 +169,8 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     // Positioned overlay anchored to sticky header
     return Positioned(
       top: Dimensions.stickyHeaderHeight,
-      left: 0,
-      right: 0,
+      left: Dimensions.paddingSizeExtraSmall,
+      right: Dimensions.paddingSizeExtraSmall,
       child: IgnorePointer(
         ignoring: height == 0,
         child: Container(
