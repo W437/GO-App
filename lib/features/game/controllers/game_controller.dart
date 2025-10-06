@@ -35,9 +35,13 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
 
   // Audio players
   final AudioPlayer hitSfx = AudioPlayer();
+  final AudioPlayer dieSfx = AudioPlayer();
   final AudioPlayer pointSfx = AudioPlayer();
   final AudioPlayer swooshSfx = AudioPlayer();
   final AudioPlayer wingSfx = AudioPlayer();
+
+  // Death state
+  bool isDying = false;
 
   @override
   void onInit() {
@@ -91,6 +95,12 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     }
 
     try {
+      await dieSfx.setSource(AssetSource('game/sfx/die.wav'));
+    } catch (e) {
+      debugPrint('Could not load die sound: $e');
+    }
+
+    try {
       await pointSfx.setSource(AssetSource('game/sfx/point.wav'));
     } catch (e) {
       debugPrint('Could not load point sound: $e');
@@ -111,6 +121,32 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
 
   void _gameLoop() {
     if (gameOver || isPaused || awaitTapToContinue) return;
+
+    // Handle dying state - let bird fall to ground
+    if (isDying) {
+      gameState.bird.velocity += GameConstants.gravity;
+      gameState.bird.y += gameState.bird.velocity;
+
+      // Update bird rotation while falling
+      final targetRotation = gameState.bird.velocity * 0.02;
+      gameState.birdRotation += 0.1 * (targetRotation - gameState.birdRotation);
+
+      final birdRadius = GameConstants.getBirdCollisionRadius();
+      final baseY = GameConstants.canvasHeight - GameConstants.floorHeight * GameConstants.baseScale;
+
+      // Check if bird hit ground
+      if (gameState.bird.y + birdRadius >= baseY) {
+        gameState.bird.y = baseY - birdRadius;
+        gameState.bird.velocity = 0;
+        _playSound(dieSfx);
+        gameOver = true;
+        isDying = false;
+        animationController.stop();
+      }
+
+      update(); // Always update to render the fall
+      return;
+    }
 
     // Update game state
     GameLogic.updateFlames(gameState);
@@ -148,9 +184,7 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     final baseY = GameConstants.canvasHeight - GameConstants.floorHeight * GameConstants.baseScale;
 
     if (birdY + birdRadius > baseY) {
-      gameState.bird.y = baseY - birdRadius;
-      gameState.bird.velocity = 0;
-      _handleGameOver();
+      _handleCollision();
       return;
     }
 
@@ -197,14 +231,14 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
         }
       }
 
-      // Check collision if not invulnerable
-      if (!GameLogic.isInvulnerable(gameState)) {
+      // Check collision if not invulnerable and not already dying
+      if (!GameLogic.isInvulnerable(gameState) && !isDying) {
         // Top pipe collision
         if (GameConstants.circleRectCollision(
           birdX, birdY, birdRadius,
           pipe.x, 0, GameConstants.pipeWidth, pipe.height,
         )) {
-          _handleGameOver();
+          _handleCollision();
           return;
         }
 
@@ -217,7 +251,7 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
           birdX, birdY, birdRadius,
           pipe.x, bottomPipeY, GameConstants.pipeWidth, bottomPipeHeight,
         )) {
-          _handleGameOver();
+          _handleCollision();
           return;
         }
       }
@@ -238,7 +272,7 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
   void handleTap() {
     if (!gameStarted && !gameOver) {
       startGame();
-    } else if (gameStarted && !gameOver && !isPaused) {
+    } else if (gameStarted && !gameOver && !isPaused && !isDying) {
       jump();
     }
   }
@@ -246,8 +280,10 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
   void startGame() {
     gameStarted = true;
     gameOver = false;
+    isDying = false;
     gameState.bird.y = GameConstants.initialBirdY;
     gameState.bird.velocity = 0;
+    _playSound(swooshSfx);
     animationController.repeat();
     update();
   }
@@ -288,8 +324,18 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     gameStarted = false;
     gameOver = false;
     isPaused = false;
+    isDying = false;
     score = 0;
     gameState = GameState.initial();
+    update();
+  }
+
+  void _handleCollision() {
+    if (isDying) return; // Already dying
+
+    _playSound(hitSfx);
+    isDying = true;
+    // Don't stop animation yet - let bird fall
     update();
   }
 
@@ -313,6 +359,7 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
   void onClose() {
     animationController.dispose();
     hitSfx.dispose();
+    dieSfx.dispose();
     pointSfx.dispose();
     swooshSfx.dispose();
     wingSfx.dispose();

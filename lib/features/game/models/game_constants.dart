@@ -33,7 +33,7 @@ class GameConstants {
 
   static void updateCanvasSize(Size size) {
     canvasWidth = size.width;
-    canvasHeight = size.height * 0.9; // 90% of screen height (header is 10%)
+    canvasHeight = size.height; // Full canvas height
   }
 
   static double getBirdCollisionRadius() {

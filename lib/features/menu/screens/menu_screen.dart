@@ -1,4 +1,5 @@
 import 'package:godelivery_user/common/widgets/bouncy_bottom_sheet.dart';
+import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -52,26 +53,45 @@ class _MenuScreenState extends State<MenuScreen> {
                   color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: Dimensions.paddingSizeOverLarge,
-                    right: Dimensions.paddingSizeOverLarge,
-                    top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
-                    bottom: Dimensions.paddingSizeOverLarge,
-                  ),
-                  child: Row(children: [
+                child: Stack(
+                  children: [
+                    // Background logo
+                    Positioned(
+                      right: -40,
+                      top: -40,
+                      child: Opacity(
+                        opacity: 0.15,
+                        child: CustomAssetImageWidget(
+                          Images.logo,
+                          width: 180,
+                          height: 180,
+                          color: Colors.white,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
 
-                  EmojiProfilePicture(
-                    emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
-                    bgColorHex: isLoggedIn ? profileController.userInfoModel?.profileBgColor : null,
-                    size: 70,
-                    borderWidth: 2,
-                    borderColor: Theme.of(context).cardColor,
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeDefault),
+                    // Main content
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: Dimensions.paddingSizeOverLarge,
+                        right: Dimensions.paddingSizeOverLarge,
+                        top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
+                        bottom: Dimensions.paddingSizeOverLarge,
+                      ),
+                      child: Row(children: [
 
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      EmojiProfilePicture(
+                        emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
+                        bgColorHex: isLoggedIn ? profileController.userInfoModel?.profileBgColor : null,
+                        size: 70,
+                        borderWidth: 2,
+                        borderColor: Theme.of(context).cardColor,
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeDefault),
+
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       isLoggedIn && profileController.userInfoModel == null ? Shimmer(
                         duration: const Duration(seconds: 2),
                         enabled: true,
@@ -113,10 +133,12 @@ class _MenuScreenState extends State<MenuScreen> {
                         ),
                       ) ,
 
-                    ]),
-                  ),
+                        ]),
+                      ),
 
-                  ]),
+                      ]),
+                    ),
+                  ],
                 ),
               ),
             ),

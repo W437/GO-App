@@ -83,7 +83,9 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                       child: widget.iconPath != null
                           ? ColorFiltered(
                               colorFilter: ColorFilter.mode(
-                                widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                                widget.isSelected
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context).disabledColor.withOpacity(0.3),
                                 BlendMode.srcIn,
                               ),
                               child: Image.asset(
@@ -94,7 +96,9 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                             )
                           : Icon(
                               widget.iconData!,
-                              color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                              color: widget.isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Theme.of(context).disabledColor.withOpacity(0.3),
                               size: 32,
                             ),
                     ),

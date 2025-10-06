@@ -13,6 +13,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class AddressBottomSheet extends StatelessWidget {
   const AddressBottomSheet({super.key});
@@ -53,7 +54,7 @@ class AddressBottomSheet extends StatelessWidget {
 
                   addressController.addressList != null && addressController.addressList!.isEmpty ? Column(children: [
 
-                    Image.asset(Images.address, width: 150),
+                    Lottie.asset('assets/location_lottie.json', width: 200, height: 150),
                     const SizedBox(height: Dimensions.paddingSizeLarge),
 
                     Text(

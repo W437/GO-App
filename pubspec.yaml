@@ -126,9 +126,8 @@ flutter:
     - assets/cart_empty_lottie.json
     - assets/cooking_loader_lottie.json
     - assets/food_changing_orders_lottie.json
-    - assets/game/bg/
-    - assets/game/char/
-    - assets/game/pipe/
+    - assets/location_lottie.json
+    - assets/game/assets/
     - assets/game/sfx/
     - .env
 

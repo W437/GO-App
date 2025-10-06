@@ -4,6 +4,7 @@ import 'package:godelivery_user/features/category/controllers/category_controlle
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class CategoryFilterChipsWidget extends StatelessWidget {
   final ExploreController exploreController;
@@ -17,8 +18,34 @@ class CategoryFilterChipsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CategoryController>(
       builder: (categoryController) {
-        if (categoryController.categoryList == null ||
-            categoryController.categoryList!.isEmpty) {
+        // Show shimmer loading state
+        if (categoryController.categoryList == null) {
+          return SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: Dimensions.paddingSizeDefault,
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(
+                  left: Dimensions.paddingSizeDefault,
+                  right: Dimensions.paddingSizeDefault,
+                ),
+                child: Row(
+                  children: List.generate(6, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
+                      child: _buildCategoryShimmer(context),
+                    );
+                  }),
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (categoryController.categoryList!.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -74,6 +101,20 @@ class CategoryFilterChipsWidget extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCategoryShimmer(BuildContext context) {
+    return Shimmer(
+      color: Theme.of(context).disabledColor.withOpacity(0.3),
+      child: Container(
+        height: 32,
+        width: 80,
+        decoration: BoxDecoration(
+          color: Theme.of(context).disabledColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(100),
+        ),
+      ),
     );
   }
 

@@ -24,6 +24,7 @@ import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class AccessLocationScreen extends StatefulWidget {
   final bool fromSignUp;
@@ -177,7 +178,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
             child: Center(child: Padding(
               padding: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
               child: SizedBox(width: 700, child: Column(children: [
-                CustomAssetImageWidget(Images.deliveryLocation, height: 220),
+                Lottie.asset('assets/location_lottie.json', height: 220),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
                 Text(
                   'find_restaurants_and_foods'.tr.toUpperCase(), textAlign: TextAlign.center,

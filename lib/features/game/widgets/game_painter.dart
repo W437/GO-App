@@ -35,16 +35,20 @@ class GamePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     GameConstants.updateCanvasSize(size);
 
-    // Clear canvas
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()..color = const Color(0xFF70C5CE),
+    // Draw blue gradient background
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        const Color(0xFF87CEEB), // Sky blue
+        const Color(0xFF4A90E2), // Deeper blue
+      ],
     );
 
-    // Draw background
-    if (bgImage != null) {
-      _drawBackground(canvas, size);
-    }
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()..shader = gradient.createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
 
     // Draw pipes
     _drawPipes(canvas, size);
@@ -104,58 +108,83 @@ class GamePainter extends CustomPainter {
     final pipePaint = Paint()..color = Colors.green;
 
     for (var pipe in gameState.pipes) {
-      // Draw top pipe
-      final topRect = Rect.fromLTWH(pipe.x, 0, GameConstants.pipeWidth, pipe.height);
       if (pipeImage != null) {
+        // Calculate pipe aspect ratio
+        final pipeAspectRatio = pipeImage!.width / pipeImage!.height;
+        final pipeDisplayHeight = GameConstants.pipeWidth / pipeAspectRatio;
+
+        // Draw top pipe (flipped and repeated to fill height)
         canvas.save();
         canvas.translate(pipe.x, pipe.height);
         canvas.scale(1, -1);
-        canvas.drawImageRect(
-          pipeImage!,
-          Rect.fromLTWH(0, 0, pipeImage!.width.toDouble(), pipeImage!.height.toDouble()),
-          Rect.fromLTWH(0, 0, GameConstants.pipeWidth, pipe.height),
-          Paint(),
-        );
+
+        // Repeat pipe texture to fill the top pipe height (from bottom to top)
+        double currentY = 0;
+        while (currentY < pipe.height) {
+          final segmentHeight = min(pipeDisplayHeight, pipe.height - currentY);
+          final srcHeight = (segmentHeight / pipeDisplayHeight) * pipeImage!.height;
+
+          canvas.drawImageRect(
+            pipeImage!,
+            Rect.fromLTWH(0, 0, pipeImage!.width.toDouble(), srcHeight),
+            Rect.fromLTWH(0, currentY, GameConstants.pipeWidth, segmentHeight),
+            Paint(),
+          );
+
+          currentY += pipeDisplayHeight;
+        }
+        canvas.restore();
+
+        // Draw bottom pipe (repeated to fill height)
+        final bottomY = pipe.height + pipe.gap;
+        final floorY = size.height - GameConstants.floorHeight * GameConstants.baseScale;
+        final bottomHeight = floorY - bottomY;
+
+        canvas.save();
+        canvas.translate(pipe.x, bottomY);
+
+        // Repeat pipe texture to fill the bottom pipe height
+        double bottomCurrentY = 0;
+        while (bottomCurrentY < bottomHeight) {
+          final segmentHeight = min(pipeDisplayHeight, bottomHeight - bottomCurrentY);
+          final srcHeight = (segmentHeight / pipeDisplayHeight) * pipeImage!.height;
+
+          canvas.drawImageRect(
+            pipeImage!,
+            Rect.fromLTWH(0, 0, pipeImage!.width.toDouble(), srcHeight),
+            Rect.fromLTWH(0, bottomCurrentY, GameConstants.pipeWidth, segmentHeight),
+            Paint(),
+          );
+
+          bottomCurrentY += pipeDisplayHeight;
+        }
         canvas.restore();
       } else {
+        // Fallback to colored rectangles
+        final topRect = Rect.fromLTWH(pipe.x, 0, GameConstants.pipeWidth, pipe.height);
         canvas.drawRect(topRect, pipePaint);
-      }
 
-      // Draw bottom pipe
-      final bottomY = pipe.height + pipe.gap;
-      final bottomHeight = GameConstants.canvasHeight -
-          GameConstants.floorHeight * GameConstants.baseScale - bottomY;
-      final bottomRect = Rect.fromLTWH(pipe.x, bottomY, GameConstants.pipeWidth, bottomHeight);
-
-      if (pipeImage != null) {
-        canvas.drawImageRect(
-          pipeImage!,
-          Rect.fromLTWH(0, 0, pipeImage!.width.toDouble(), pipeImage!.height.toDouble()),
-          bottomRect,
-          Paint(),
-        );
-      } else {
+        final bottomY = pipe.height + pipe.gap;
+        final floorY = size.height - GameConstants.floorHeight * GameConstants.baseScale;
+        final bottomHeight = floorY - bottomY;
+        final bottomRect = Rect.fromLTWH(pipe.x, bottomY, GameConstants.pipeWidth, bottomHeight);
         canvas.drawRect(bottomRect, pipePaint);
       }
     }
   }
 
   void _drawBase(Canvas canvas, Size size) {
+    final baseHeight = GameConstants.floorHeight * GameConstants.baseScale;
+    final baseY = size.height - baseHeight;
+
     if (baseImage == null) {
       // Draw placeholder floor
-      final floorRect = Rect.fromLTWH(
-        0,
-        GameConstants.canvasHeight - GameConstants.floorHeight * GameConstants.baseScale,
-        size.width,
-        GameConstants.floorHeight * GameConstants.baseScale,
-      );
+      final floorRect = Rect.fromLTWH(0, baseY, size.width, baseHeight);
       canvas.drawRect(floorRect, Paint()..color = const Color(0xFFDED895));
       return;
     }
 
     final baseTileWidth = baseImage!.width * GameConstants.baseScale;
-    final baseHeight = GameConstants.floorHeight * GameConstants.baseScale;
-    final baseY = GameConstants.canvasHeight - baseHeight;
 
     for (double x = -gameState.floorOffset; x < size.width; x += baseTileWidth) {
       canvas.drawImageRect(
@@ -385,7 +414,7 @@ class GamePainter extends CustomPainter {
 
     gameState.activePowerUps.forEach((type, powerUp) {
       final x = size.width / 2 - barWidth / 2;
-      final y = 80.0 + index * (barHeight + 8);
+      final y = 110.0 + index * (barHeight + 8);
 
       // Draw background
       final bgRect = RRect.fromRectAndRadius(

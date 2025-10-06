@@ -29,21 +29,21 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
     // Try to load images
     try {
       // Background
-      bgImage = await _loadImage('assets/game/bg/background-day.jpg');
+      bgImage = await _loadImage('assets/game/assets/background-day.jpg');
     } catch (e) {
       debugPrint('Could not load background: $e');
     }
 
     try {
       // Base/floor
-      baseImage = await _loadImage('assets/game/bg/base.png');
+      baseImage = await _loadImage('assets/game/assets/base.png');
     } catch (e) {
       debugPrint('Could not load base: $e');
     }
 
     try {
       // Pipe
-      pipeImage = await _loadImage('assets/game/pipe/pipe-green.png');
+      pipeImage = await _loadImage('assets/game/assets/pipe-green.png');
     } catch (e) {
       debugPrint('Could not load pipe: $e');
     }
@@ -57,7 +57,7 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
 
     for (var name in frameNames) {
       try {
-        final frame = await _loadImage('assets/game/char/$name');
+        final frame = await _loadImage('assets/game/assets/$name');
         birdFrames.add(frame);
       } catch (e) {
         debugPrint('Could not load bird frame $name: $e');
@@ -346,12 +346,61 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: Dimensions.paddingSizeDefault),
-                                    Text(
-                                      'Score: ${controller.score}',
-                                      style: TextStyle(
-                                        fontSize: Dimensions.fontSizeExtraLarge,
-                                        color: Theme.of(context).textTheme.bodyLarge!.color,
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Column(
+                                          children: [
+                                            Text(
+                                              'Score',
+                                              style: TextStyle(
+                                                fontSize: Dimensions.fontSizeDefault,
+                                                color: Theme.of(context).disabledColor,
+                                              ),
+                                            ),
+                                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                            Text(
+                                              '${controller.score}',
+                                              style: TextStyle(
+                                                fontSize: Dimensions.fontSizeOverLarge,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context).textTheme.bodyLarge!.color,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: Dimensions.paddingSizeExtraLarge),
+                                        Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.emoji_events,
+                                                  color: Colors.amber,
+                                                  size: Dimensions.fontSizeDefault,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  'Best',
+                                                  style: TextStyle(
+                                                    fontSize: Dimensions.fontSizeDefault,
+                                                    color: Theme.of(context).disabledColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                            Text(
+                                              '${controller.highScore}',
+                                              style: TextStyle(
+                                                fontSize: Dimensions.fontSizeOverLarge,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.amber,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                     if (controller.score == controller.highScore && controller.score > 0) ...[
                                       const SizedBox(height: Dimensions.paddingSizeSmall),
@@ -388,6 +437,37 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                                    SizedBox(
+                                      width: 200,
+                                      child: OutlinedButton.icon(
+                                        onPressed: () => _showLeaderboard(context),
+                                        icon: Icon(
+                                          Icons.leaderboard,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                        label: Text(
+                                          'Leaderboard',
+                                          style: TextStyle(
+                                            color: Theme.of(context).primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: Dimensions.paddingSizeDefault,
+                                          ),
+                                          side: BorderSide(
+                                            color: Theme.of(context).primaryColor,
+                                            width: 2,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(Dimensions.radiusDefault),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -402,6 +482,154 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showLeaderboard(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(Dimensions.radiusLarge),
+          ),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).disabledColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Global Leaderboard',
+                    style: TextStyle(
+                      fontSize: Dimensions.fontSizeExtraLarge,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+
+            // Leaderboard list
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                itemCount: 20,
+                itemBuilder: (context, index) {
+                  // Dummy data
+                  final names = [
+                    'Alex Chen', 'Maria Garcia', 'James Wilson', 'Sarah Johnson',
+                    'Mohammed Ali', 'Emma Brown', 'David Lee', 'Sophia Martinez',
+                    'Michael Kim', 'Olivia Taylor', 'Daniel Anderson', 'Isabella White',
+                    'Ryan Thomas', 'Ava Jackson', 'Kevin Nguyen', 'Mia Robinson',
+                    'Christopher Wright', 'Charlotte Lopez', 'Andrew Clark', 'Amelia Hill'
+                  ];
+                  final score = 250 - (index * 10) - (index * 2);
+                  final isCurrentUser = index == 7; // Mock current user position
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+                    padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                    decoration: BoxDecoration(
+                      color: isCurrentUser
+                          ? Theme.of(context).primaryColor.withOpacity(0.1)
+                          : Theme.of(context).disabledColor.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      border: isCurrentUser
+                          ? Border.all(
+                              color: Theme.of(context).primaryColor,
+                              width: 2,
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        // Rank
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            '#${index + 1}',
+                            style: TextStyle(
+                              fontSize: Dimensions.fontSizeLarge,
+                              fontWeight: FontWeight.bold,
+                              color: index < 3 ? Colors.amber : Theme.of(context).disabledColor,
+                            ),
+                          ),
+                        ),
+
+                        // Trophy for top 3
+                        if (index < 3)
+                          Container(
+                            margin: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
+                            child: Icon(
+                              Icons.emoji_events,
+                              color: index == 0
+                                  ? const Color(0xFFFFD700) // Gold
+                                  : index == 1
+                                      ? const Color(0xFFC0C0C0) // Silver
+                                      : const Color(0xFFCD7F32), // Bronze
+                              size: 24,
+                            ),
+                          ),
+
+                        // Name
+                        Expanded(
+                          child: Text(
+                            names[index],
+                            style: TextStyle(
+                              fontSize: Dimensions.fontSizeDefault,
+                              fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                            ),
+                          ),
+                        ),
+
+                        // Score
+                        Text(
+                          '$score',
+                          style: TextStyle(
+                            fontSize: Dimensions.fontSizeLarge,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
