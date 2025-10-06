@@ -6,9 +6,9 @@ class GameLogic {
   static final Random _random = Random();
 
   static Pipe createPipe(double x, GameState state) {
-    final dynamicGap = GameConstants.minGapSetting.clamp(
+    final dynamicGap = (GameConstants.gapHeight - state.score * 2).clamp(
       GameConstants.minGapSetting,
-      GameConstants.gapHeight - state.score * 2,
+      GameConstants.gapHeight,
     );
 
     final availableHeight = GameConstants.canvasHeight -

@@ -181,6 +181,22 @@ class AppConstants {
   static const String demoResetTopic = 'go_demo_reset';
   static const String configCacheKey = 'go_config_cache';
 
+  // Explore Filter Preferences
+  static const String exploreMinRatingFilter = 'go_explore_min_rating';
+  static const String exploreMinPriceFilter = 'go_explore_min_price';
+  static const String exploreMaxPriceFilter = 'go_explore_max_price';
+  static const String exploreMaxDeliveryFeeFilter = 'go_explore_max_delivery_fee';
+  static const String exploreSortOption = 'go_explore_sort_option';
+  static const String exploreFilterOpenNow = 'go_explore_filter_open_now';
+  static const String exploreFilterFreeDelivery = 'go_explore_filter_free_delivery';
+  static const String exploreFilterTopRated = 'go_explore_filter_top_rated';
+  static const String exploreFilterFastDelivery = 'go_explore_filter_fast_delivery';
+
+  // Explore Map Position
+  static const String exploreMapLatitude = 'go_explore_map_lat';
+  static const String exploreMapLongitude = 'go_explore_map_lng';
+  static const String exploreMapZoom = 'go_explore_map_zoom';
+
 
   ///Refer & Earn work flow list..
   static final dataList = [

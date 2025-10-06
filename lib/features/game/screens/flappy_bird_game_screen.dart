@@ -81,17 +81,28 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
     return GetBuilder<GameController>(
       init: GameController(),
       builder: (controller) {
-        return PopScope(
-          canPop: true,
-          child: Scaffold(
-            backgroundColor: const Color(0xFF1a1a2e),
-            body: SafeArea(
-              child: Column(
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+          ),
+          child: PopScope(
+            canPop: true,
+            child: Scaffold(
+              backgroundColor: const Color(0xFF1a1a2e),
+              extendBodyBehindAppBar: true,
+              body: Column(
                 children: [
                   // Header
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                    height: MediaQuery.of(context).size.height * 0.1 + MediaQuery.of(context).padding.top,
+                    padding: EdgeInsets.fromLTRB(
+                      Dimensions.paddingSizeDefault,
+                      MediaQuery.of(context).padding.top,
+                      Dimensions.paddingSizeDefault,
+                      0,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       boxShadow: [

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,8 @@ import 'package:godelivery_user/features/category/controllers/category_controlle
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/util/app_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum SortOption {
   distance('Distance', Icons.location_on),
@@ -63,6 +66,9 @@ class ExploreController extends GetxController implements GetxService {
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
+  List<String> _searchHistory = [];
+  List<String> get searchHistory => _searchHistory;
+
   SortOption _currentSortOption = SortOption.distance;
   SortOption get currentSortOption => _currentSortOption;
 
@@ -78,11 +84,31 @@ class ExploreController extends GetxController implements GetxService {
   bool _filterFastDelivery = false;
   bool get filterFastDelivery => _filterFastDelivery;
 
+  // Advanced filters
+  double _minRatingFilter = 0;
+  double get minRatingFilter => _minRatingFilter;
+
+  int _minPriceFilter = 1;
+  int get minPriceFilter => _minPriceFilter;
+
+  int _maxPriceFilter = 4;
+  int get maxPriceFilter => _maxPriceFilter;
+
+  double _maxDeliveryFeeFilter = 20;
+  double get maxDeliveryFeeFilter => _maxDeliveryFeeFilter;
+
   double _sheetPosition = 0.5;
   double get sheetPosition => _sheetPosition;
 
   bool _isFullscreenMode = false;
   bool get isFullscreenMode => _isFullscreenMode;
+
+  // Map position persistence
+  Timer? _mapPositionSaveTimer;
+  LatLng? _savedMapPosition;
+  LatLng? get savedMapPosition => _savedMapPosition;
+  double? _savedMapZoom;
+  double? get savedMapZoom => _savedMapZoom;
 
   int get activeFilterCount {
     int count = 0;
@@ -91,6 +117,8 @@ class ExploreController extends GetxController implements GetxService {
     if (_filterTopRated) count++;
     if (_filterFastDelivery) count++;
     if (_selectedCategoryId != null) count++;
+    if (_minRatingFilter > 0) count++;
+    if (_maxDeliveryFeeFilter < 20) count++;
     return count;
   }
 
@@ -136,6 +164,12 @@ class ExploreController extends GetxController implements GetxService {
   void updateMapPosition(LatLng position, double zoom) {
     _currentMapCenter = position;
     _currentZoom = zoom;
+
+    // Throttle saving to prevent excessive writes
+    _mapPositionSaveTimer?.cancel();
+    _mapPositionSaveTimer = Timer(const Duration(seconds: 2), () {
+      _saveMapPosition(position, zoom);
+    });
   }
 
   void animateToRestaurant(Restaurant restaurant) {
@@ -168,8 +202,11 @@ class ExploreController extends GetxController implements GetxService {
     update();
   }
 
-  void searchRestaurants(String query) {
+  void searchRestaurants(String query, {bool saveToHistory = true}) {
     _searchQuery = query.toLowerCase();
+    if (saveToHistory && query.trim().isNotEmpty) {
+      _addToSearchHistory(query.trim());
+    }
     _applyFiltersAndSort();
   }
 
@@ -178,28 +215,126 @@ class ExploreController extends GetxController implements GetxService {
     _applyFiltersAndSort();
   }
 
+  // Search History Methods
+  void _addToSearchHistory(String query) {
+    // Remove if already exists (to move to top)
+    _searchHistory.remove(query);
+    // Add to beginning
+    _searchHistory.insert(0, query);
+    // Keep only last 10
+    if (_searchHistory.length > 10) {
+      _searchHistory = _searchHistory.sublist(0, 10);
+    }
+    _saveSearchHistory();
+    update();
+  }
+
+  void removeFromSearchHistory(String query) {
+    _searchHistory.remove(query);
+    _saveSearchHistory();
+    update();
+  }
+
+  void clearSearchHistory() {
+    _searchHistory.clear();
+    _saveSearchHistory();
+    update();
+  }
+
+  Future<void> _loadSearchHistory() async {
+    final prefs = Get.find<SharedPreferences>();
+    final history = prefs.getStringList(AppConstants.searchHistory) ?? [];
+    _searchHistory = history;
+  }
+
+  Future<void> _saveSearchHistory() async {
+    final prefs = Get.find<SharedPreferences>();
+    await prefs.setStringList(AppConstants.searchHistory, _searchHistory);
+  }
+
+  // Autocomplete Methods
+  List<String> getAutocompleteSuggestions(String query) {
+    if (query.isEmpty || _nearbyRestaurants == null) {
+      return [];
+    }
+
+    final lowerQuery = query.toLowerCase();
+    final Set<String> suggestions = {};
+
+    // Add restaurant names
+    for (final restaurant in _nearbyRestaurants!) {
+      final name = restaurant.name?.toLowerCase() ?? '';
+      if (name.contains(lowerQuery)) {
+        suggestions.add(restaurant.name!);
+      }
+    }
+
+    // Add cuisine names
+    for (final restaurant in _nearbyRestaurants!) {
+      if (restaurant.cuisineNames != null) {
+        for (final cuisine in restaurant.cuisineNames!) {
+          final cuisineName = cuisine.name?.toLowerCase() ?? '';
+          if (cuisineName.contains(lowerQuery)) {
+            suggestions.add(cuisine.name!);
+          }
+        }
+      }
+    }
+
+    // Return top 5 suggestions
+    return suggestions.take(5).toList();
+  }
+
+  // Map Position Persistence Methods
+  Future<void> _loadMapPosition() async {
+    final prefs = Get.find<SharedPreferences>();
+    final lat = prefs.getDouble(AppConstants.exploreMapLatitude);
+    final lng = prefs.getDouble(AppConstants.exploreMapLongitude);
+    final zoom = prefs.getDouble(AppConstants.exploreMapZoom);
+
+    if (lat != null && lng != null && zoom != null) {
+      _savedMapPosition = LatLng(lat, lng);
+      _savedMapZoom = zoom;
+    }
+  }
+
+  Future<void> _saveMapPosition(LatLng position, double zoom) async {
+    final prefs = Get.find<SharedPreferences>();
+    await prefs.setDouble(AppConstants.exploreMapLatitude, position.latitude);
+    await prefs.setDouble(AppConstants.exploreMapLongitude, position.longitude);
+    await prefs.setDouble(AppConstants.exploreMapZoom, zoom);
+
+    _savedMapPosition = position;
+    _savedMapZoom = zoom;
+  }
+
   void setSortOption(SortOption option) {
     _currentSortOption = option;
+    _saveFilters();
     _applyFiltersAndSort();
   }
 
   void toggleOpenNowFilter() {
     _filterOpenNow = !_filterOpenNow;
+    _saveFilters();
     _applyFiltersAndSort();
   }
 
   void toggleFreeDeliveryFilter() {
     _filterFreeDelivery = !_filterFreeDelivery;
+    _saveFilters();
     _applyFiltersAndSort();
   }
 
   void toggleTopRatedFilter() {
     _filterTopRated = !_filterTopRated;
+    _saveFilters();
     _applyFiltersAndSort();
   }
 
   void toggleFastDeliveryFilter() {
     _filterFastDelivery = !_filterFastDelivery;
+    _saveFilters();
     _applyFiltersAndSort();
   }
 
@@ -209,6 +344,25 @@ class ExploreController extends GetxController implements GetxService {
     _filterTopRated = false;
     _filterFastDelivery = false;
     _selectedCategoryId = null;
+    _minRatingFilter = 0;
+    _minPriceFilter = 1;
+    _maxPriceFilter = 4;
+    _maxDeliveryFeeFilter = 20;
+    _saveFilters();
+    _applyFiltersAndSort();
+  }
+
+  void setAdvancedFilters({
+    required double minRating,
+    required int minPrice,
+    required int maxPrice,
+    required double maxDeliveryFee,
+  }) {
+    _minRatingFilter = minRating;
+    _minPriceFilter = minPrice;
+    _maxPriceFilter = maxPrice;
+    _maxDeliveryFeeFilter = maxDeliveryFee;
+    _saveFilters();
     _applyFiltersAndSort();
   }
 
@@ -255,6 +409,20 @@ class ExploreController extends GetxController implements GetxService {
 
     if (_filterTopRated) {
       result = result.where((r) => (r.avgRating ?? 0) >= 4.5).toList();
+    }
+
+    // Apply advanced filters
+    if (_minRatingFilter > 0) {
+      result = result.where((r) => (r.avgRating ?? 0) >= _minRatingFilter).toList();
+    }
+
+    if (_maxDeliveryFeeFilter < 20) {
+      result = result.where((r) {
+        if (_maxDeliveryFeeFilter == 0) {
+          return r.freeDelivery == true;
+        }
+        return r.freeDelivery == true || (r.minimumShippingCharge ?? 999) <= _maxDeliveryFeeFilter;
+      }).toList();
     }
 
     if (_filterFastDelivery) {
@@ -341,15 +509,60 @@ class ExploreController extends GetxController implements GetxService {
     return match != null ? int.parse(match.group(0)!) : 999;
   }
 
+  // Filter Persistence Methods
+  Future<void> _loadSavedFilters() async {
+    final prefs = Get.find<SharedPreferences>();
+
+    // Load advanced filters
+    _minRatingFilter = prefs.getDouble(AppConstants.exploreMinRatingFilter) ?? 0;
+    _minPriceFilter = prefs.getInt(AppConstants.exploreMinPriceFilter) ?? 1;
+    _maxPriceFilter = prefs.getInt(AppConstants.exploreMaxPriceFilter) ?? 4;
+    _maxDeliveryFeeFilter = prefs.getDouble(AppConstants.exploreMaxDeliveryFeeFilter) ?? 20;
+
+    // Load sort option (by index)
+    final sortIndex = prefs.getInt(AppConstants.exploreSortOption) ?? 0;
+    _currentSortOption = SortOption.values[sortIndex];
+
+    // Load quick filters
+    _filterOpenNow = prefs.getBool(AppConstants.exploreFilterOpenNow) ?? false;
+    _filterFreeDelivery = prefs.getBool(AppConstants.exploreFilterFreeDelivery) ?? false;
+    _filterTopRated = prefs.getBool(AppConstants.exploreFilterTopRated) ?? false;
+    _filterFastDelivery = prefs.getBool(AppConstants.exploreFilterFastDelivery) ?? false;
+  }
+
+  Future<void> _saveFilters() async {
+    final prefs = Get.find<SharedPreferences>();
+
+    // Save advanced filters
+    await prefs.setDouble(AppConstants.exploreMinRatingFilter, _minRatingFilter);
+    await prefs.setInt(AppConstants.exploreMinPriceFilter, _minPriceFilter);
+    await prefs.setInt(AppConstants.exploreMaxPriceFilter, _maxPriceFilter);
+    await prefs.setDouble(AppConstants.exploreMaxDeliveryFeeFilter, _maxDeliveryFeeFilter);
+
+    // Save sort option (by index)
+    await prefs.setInt(AppConstants.exploreSortOption, _currentSortOption.index);
+
+    // Save quick filters
+    await prefs.setBool(AppConstants.exploreFilterOpenNow, _filterOpenNow);
+    await prefs.setBool(AppConstants.exploreFilterFreeDelivery, _filterFreeDelivery);
+    await prefs.setBool(AppConstants.exploreFilterTopRated, _filterTopRated);
+    await prefs.setBool(AppConstants.exploreFilterFastDelivery, _filterFastDelivery);
+  }
+
   @override
   void onInit() {
     super.onInit();
-    getNearbyRestaurants(reload: true);
+    _loadSavedFilters().then((_) {
+      _loadSearchHistory();
+      _loadMapPosition();
+      getNearbyRestaurants(reload: true);
+    });
   }
 
   @override
   void onClose() {
     _mapController?.dispose();
+    _mapPositionSaveTimer?.cancel();
     super.onClose();
   }
 }

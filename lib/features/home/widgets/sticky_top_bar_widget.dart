@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/screens/access_location_screen.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
@@ -95,7 +96,75 @@ class StickyTopBarWidget extends StatelessWidget {
                 child: GetBuilder<LocationController>(
                   builder: (locationController) {
                     return InkWell(
-                      onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => DraggableScrollableSheet(
+                            initialChildSize: 0.9,
+                            minChildSize: 0.5,
+                            maxChildSize: 0.95,
+                            builder: (context, scrollController) => ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(24),
+                                topRight: Radius.circular(24),
+                              ),
+                              child: Container(
+                                color: Theme.of(context).colorScheme.surface,
+                                child: Column(
+                                  children: [
+                                    // Sheet header with drag handle and close button
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: Dimensions.paddingSizeDefault,
+                                        vertical: Dimensions.paddingSizeSmall,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.surface,
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                            width: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                                            icon: const Icon(Icons.keyboard_arrow_down, size: 32),
+                                          ),
+                                          Expanded(
+                                            child: Center(
+                                              child: Text(
+                                                'set_location'.tr,
+                                                style: robotoBold.copyWith(
+                                                  fontSize: Dimensions.fontSizeLarge,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 48), // Balance the back button
+                                        ],
+                                      ),
+                                    ),
+                                    // Content
+                                    const Expanded(
+                                      child: AccessLocationScreen(
+                                        fromSignUp: false,
+                                        fromHome: true,
+                                        route: 'home',
+                                        hideAppBar: true,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,

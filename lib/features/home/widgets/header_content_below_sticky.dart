@@ -125,7 +125,7 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
             padding: const EdgeInsets.fromLTRB(
               Dimensions.paddingSizeLarge,
               Dimensions.paddingSizeDefault,
-              Dimensions.paddingSizeDefault,
+              Dimensions.paddingSizeDefault + 4.5,
               Dimensions.paddingSizeDefault,
             ),
             child: AnimatedSize(
@@ -153,13 +153,12 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
                     ),
 
                     // Circular search button (only shows when not expanded)
-                    if (!_isExpanded) ...[
-                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                    if (!_isExpanded)
                       InkWell(
                         onTap: _toggleExpansion,
                         child: Container(
-                          width: 53,
-                          height: 53,
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
@@ -172,11 +171,10 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
                           child: Icon(
                             Icons.search,
                             color: Theme.of(context).primaryColor,
-                            size: 26,
+                            size: 22,
                           ),
                         ),
                       ),
-                    ],
                   ],
                 ),
 

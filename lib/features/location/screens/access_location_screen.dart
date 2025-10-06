@@ -29,7 +29,8 @@ class AccessLocationScreen extends StatefulWidget {
   final bool fromSignUp;
   final bool fromHome;
   final String? route;
-  const AccessLocationScreen({super.key, required this.fromSignUp, required this.fromHome, required this.route});
+  final bool hideAppBar;
+  const AccessLocationScreen({super.key, required this.fromSignUp, required this.fromHome, required this.route, this.hideAppBar = false});
 
   @override
   State<AccessLocationScreen> createState() => _AccessLocationScreenState();
@@ -111,8 +112,9 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
     }
 
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'set_location'.tr, isBackButtonExist: widget.fromHome),
-      endDrawer: const MenuDrawerWidget(),endDrawerEnableOpenDragGesture: false,
+      appBar: widget.hideAppBar ? null : CustomAppBarWidget(title: 'set_location'.tr, isBackButtonExist: widget.fromHome),
+      endDrawer: widget.hideAppBar ? null : const MenuDrawerWidget(),
+      endDrawerEnableOpenDragGesture: false,
       body: SafeArea(child: GetBuilder<AddressController>(builder: (addressController) {
         return isLoggedIn ? SingleChildScrollView(
           child: FooterViewWidget(

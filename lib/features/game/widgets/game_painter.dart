@@ -257,6 +257,14 @@ class GamePainter extends CustomPainter {
     canvas.translate(100, gameState.bird.y);
     canvas.rotate(gameState.birdRotation);
 
+    // DEBUG: Draw collision circle
+    final collisionRadius = GameConstants.getBirdCollisionRadius();
+    final debugPaint = Paint()
+      ..color = Colors.red.withOpacity(0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(Offset.zero, collisionRadius, debugPaint);
+
     // Draw burger shield if active
     if (gameState.activePowerUps.containsKey(PowerUpType.burger)) {
       final burger = gameState.activePowerUps[PowerUpType.burger]!;

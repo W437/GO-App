@@ -94,12 +94,12 @@ class CategoryFilterChipsWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? Theme.of(context).primaryColor
-              : Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              : Theme.of(context).primaryColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).primaryColor
-                : Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                : Theme.of(context).primaryColor.withOpacity(0.3),
             width: 1,
           ),
         ),

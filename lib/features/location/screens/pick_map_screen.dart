@@ -1,3 +1,4 @@
+import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
@@ -59,7 +60,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
-      body: SafeArea(child: Center(child: SizedBox(
+      body: SafeArea(
+        bottom: false,
+        child: Center(child: SizedBox(
         width: Dimensions.webMaxWidth,
         child: GetBuilder<LocationController>(builder: (locationController) {
           return Stack(children: [
@@ -132,6 +135,28 @@ class _PickMapScreenState extends State<PickMapScreen> {
                     ),
                   ),
                 ],
+              ),
+            ),
+
+            // Back button under search bar
+            Positioned(
+              top: Dimensions.paddingSizeLarge + 50 + Dimensions.paddingSizeSmall,
+              left: Dimensions.paddingSizeSmall,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: CircularBackButtonWidget(
+                  showText: true,
+                  backgroundColor: Theme.of(context).cardColor,
+                ),
               ),
             ),
 

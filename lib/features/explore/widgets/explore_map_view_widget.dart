@@ -45,7 +45,15 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
   }
 
   void _initializeMap() {
-    // Get user's current location or default location
+    // Priority: 1) Saved map position, 2) User address, 3) Default location
+
+    // Check for saved map position first
+    if (widget.exploreController.savedMapPosition != null) {
+      _initialPosition = widget.exploreController.savedMapPosition;
+      return;
+    }
+
+    // Fall back to user's current address
     final addressModel = AddressHelper.getAddressFromSharedPref();
     if (addressModel != null &&
         addressModel.latitude != null &&
@@ -55,6 +63,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
         double.parse(addressModel.longitude!),
       );
     } else {
+      // Fall back to default location
       _initialPosition = LatLng(
         double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '37.7749'),
         double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '-122.4194'),
@@ -155,7 +164,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
                 : GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: _initialPosition!,
-                      zoom: 14.0,
+                      zoom: widget.exploreController.savedMapZoom ?? 14.0,
                     ),
                     markers: _markers,
                     myLocationButtonEnabled: false,
@@ -299,7 +308,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
               borderRadius: BorderRadius.circular(100),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
