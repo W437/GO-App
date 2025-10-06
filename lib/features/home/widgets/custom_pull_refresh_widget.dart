@@ -165,9 +165,9 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
 
     final height = realTimeHeight;
 
-    // Positioned overlay anchored to sticky header (100px from top)
+    // Positioned overlay anchored to sticky header (110px from top)
     return Positioned(
-      top: 100, // Height of sticky header
+      top: 110, // Height of sticky header
       left: 0,
       right: 0,
       child: IgnorePointer(

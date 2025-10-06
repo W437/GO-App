@@ -221,14 +221,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       SliverPersistentHeader(
                         pinned: true,
                         delegate: SliverDelegate(
-                          height: 100,
+                          height: 110,
                           child: StickyTopBarWidget(scrollOffset: _scrollOffset),
                         ),
                       ),
 
                       /// Header Content (Title + Search) - Scrollable
                       SliverToBoxAdapter(
-                        child: const HeaderContentBelowSticky(),
+                        child: Transform.translate(
+                          offset: const Offset(0, -1),
+                          child: const HeaderContentBelowSticky(),
+                        ),
                       ),
 
                   SliverToBoxAdapter(

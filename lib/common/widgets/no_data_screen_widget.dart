@@ -9,6 +9,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class NoDataScreen extends StatelessWidget {
   //final bool isCart;
@@ -46,13 +47,20 @@ class NoDataScreen extends StatelessWidget {
         ),
 
         Center(
-          child: CustomAssetImageWidget(
-            isEmptyAddress ? Images.emptyAddress : isEmptyCart ? Images.emptyCart : isEmptyChat ? Images.emptyChat : isEmptyOrder ? Images.emptyOrder
-                : isEmptyCoupon ? Images.emptyCoupon : isEmptyFood ? Images.emptyFood : isEmptyNotification ? Images.emptyNotification
-                : isEmptyRestaurant ? Images.emptyRestaurant : isEmptySearchFood ? Images.emptySearchFood : isEmptyTransaction ? Images.emptyTransaction
-                : isEmptyWishlist ? Images.emptyWishlist : Images.emptyFood,
-            width: isDesktop ? 130 : 80, height: isDesktop ? 130 : 80,
-          ),
+          child: isEmptyCart
+            ? Lottie.asset(
+                'assets/cart_empty_lottie.json',
+                width: isDesktop ? 200 : 150,
+                height: isDesktop ? 200 : 150,
+                repeat: true,
+              )
+            : CustomAssetImageWidget(
+                isEmptyAddress ? Images.emptyAddress : isEmptyChat ? Images.emptyChat : isEmptyOrder ? Images.emptyOrder
+                    : isEmptyCoupon ? Images.emptyCoupon : isEmptyFood ? Images.emptyFood : isEmptyNotification ? Images.emptyNotification
+                    : isEmptyRestaurant ? Images.emptyRestaurant : isEmptySearchFood ? Images.emptySearchFood : isEmptyTransaction ? Images.emptyTransaction
+                    : isEmptyWishlist ? Images.emptyWishlist : Images.emptyFood,
+                width: isDesktop ? 130 : 80, height: isDesktop ? 130 : 80,
+              ),
         ),
         SizedBox(height: fromAddress ? 10 : 10),
 

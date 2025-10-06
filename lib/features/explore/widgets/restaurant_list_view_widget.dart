@@ -61,7 +61,12 @@ class RestaurantListViewWidget extends StatelessWidget {
           },
           child: ListView.separated(
             controller: scrollController,
-            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+            padding: EdgeInsets.only(
+              left: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              top: Dimensions.paddingSizeDefault,
+              bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + Dimensions.paddingSizeDefault,
+            ),
             itemCount: controller.filteredRestaurants!.length,
             separatorBuilder: (context, index) =>
                 const SizedBox(height: Dimensions.paddingSizeDefault),

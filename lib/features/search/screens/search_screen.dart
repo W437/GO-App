@@ -74,7 +74,7 @@ class SearchScreenState extends State<SearchScreen> {
       _showSuggestion = false;
       setState(() {});
     } else {
-      Future.delayed(const Duration(milliseconds: 10), () => Get.offAllNamed(RouteHelper.getInitialRoute()));
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
 
@@ -105,7 +105,7 @@ class SearchScreenState extends State<SearchScreen> {
 
                   !isDesktop ? IconButton(
                     onPressed: ()=> _actionOnBackButton(),
-                    icon: const Icon(Icons.arrow_back_ios),
+                    icon: const Icon(Icons.keyboard_arrow_down, size: 32),
                   ) : const SizedBox(),
 
                   Expanded(child: Container(

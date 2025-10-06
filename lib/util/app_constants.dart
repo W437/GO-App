@@ -7,7 +7,7 @@ class AppConstants {
   static String get appName => Environment.appName;
   static double get appVersion => Environment.appVersion;
 
-  static const String fontFamily = 'Roboto';
+  static const String fontFamily = 'Omnes';
   static const bool payInWevView = false;
   static String get webHostedUrl => Environment.webHostedUrl;
   static const bool useReactWebsite = false;

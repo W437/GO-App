@@ -86,7 +86,7 @@ class GradientHeaderWidget extends StatelessWidget {
                         child: EmojiProfilePicture(
                           emoji: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileEmoji : null,
                           bgColorHex: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileBgColor : null,
-                          size: 44,
+                          size: 53,
                           borderWidth: 2,
                           borderColor: Colors.white.withValues(alpha: 0.3),
                         ),
