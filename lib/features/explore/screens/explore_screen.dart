@@ -28,7 +28,10 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
     super.initState();
 
     // Force controller initialization and reload restaurants for current zone
-    Get.find<ExploreController>().getNearbyRestaurants(reload: true);
+    // Schedule after build to avoid setState during build error
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<ExploreController>().getNearbyRestaurants(reload: true);
+    });
 
     _animationController = AnimationController(
       vsync: this,
