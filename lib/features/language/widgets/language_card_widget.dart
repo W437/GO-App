@@ -18,13 +18,11 @@ class LanguageCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomInkWellWidget(
       onTap: () {
-        if(fromBottomSheet){
-          localizationController.setLanguage(Locale(
-            AppConstants.languages[index].languageCode!,
-            AppConstants.languages[index].countryCode,
-          ), fromBottomSheet: fromBottomSheet);
-        }
         localizationController.setSelectLanguageIndex(index);
+        localizationController.setLanguage(Locale(
+          AppConstants.languages[index].languageCode!,
+          AppConstants.languages[index].countryCode,
+        ), fromBottomSheet: fromBottomSheet);
       },
       radius: Dimensions.radiusLarge,
       child: Container(

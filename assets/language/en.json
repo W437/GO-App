@@ -1015,6 +1015,7 @@
   "or_share": "OR SHARE",
   "choose_your_language": "Choose Your Language",
   "choose_your_language_to_proceed": "Choose your language to proceed",
+  "you_can_change_this_later": "You can change this later",
   "remove_all_from_cart": "Remove all from cart",
   "you_are_not_in_zone": "You are not in zone",
   "type_a_massage": "Type a message",
@@ -1339,5 +1340,8 @@
   "quick_delivery": "Quick Delivery",
   "sort_and_filter": "Sort & Filter",
   "Fav": "Fav",
-  "Unfav": "Unfav"
+  "Unfav": "Unfav",
+  "no_results_found": "No Results Found",
+  "try_adjusting_filters_or_search": "Try adjusting your filters or search terms",
+  "clear_all_filters": "Clear All Filters"
 }

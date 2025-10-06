@@ -109,15 +109,22 @@ class CuisineShimmer extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Container(decoration: BoxDecoration(color: Colors.grey[Get.find<ThemeController>().darkTheme ? 950 : 200], borderRadius: BorderRadius.circular(50)),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Shimmer(
-                      child: Container(
-                        height: 100, width: 100,
-                        color: Colors.grey[Get.find<ThemeController>().darkTheme ? 900 : 200],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[Get.find<ThemeController>().darkTheme ? 950 : 200],
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: Shimmer(
+                        child: Container(
+                          height: 100, width: 100,
+                          color: Colors.grey[Get.find<ThemeController>().darkTheme ? 900 : 200],
+                        ),
                       ),
-                    )
+                    ),
                   ),
                 ),
               ),

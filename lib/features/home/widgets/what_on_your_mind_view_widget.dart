@@ -139,10 +139,10 @@ class WebWhatOnYourMindViewShimmer extends StatelessWidget {
               child: Column(children: [
 
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
                   child: Shimmer(
                     child: Container(
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusLarge), color: Theme.of(context).shadowColor),
                       height: ResponsiveHelper.isMobile(context) ? 70 : 80, width: 70,
                     ),
                   ),

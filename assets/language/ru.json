@@ -1011,9 +1011,10 @@
   "phone_number_can_not_be_edited": "Phone number can’t be edited",
   "copied": "Copied",
   "or_share": "OR SHARE",
-  "choose_your_language": "Choose Your Language",
-  "choose_your_language_to_proceed": "Choose your language to proceed",
-  "remove_all_from_cart": "Remove all from cart",
+  "choose_your_language": "Выберите свой язык",
+  "choose_your_language_to_proceed": "Выберите свой язык, чтобы продолжить",
+  "you_can_change_this_later": "Вы можете изменить это позже",
+  "remove_all_from_cart": "Удалить все из корзины",
   "you_are_not_in_zone": "You are not in zone",
   "type_a_massage": "Type a massage",
   "restaurant_preference": "Restaurant Preference",
@@ -1338,5 +1339,8 @@
   "quick_delivery": "Быстрая доставка",
   "sort_and_filter": "Сортировка и фильтры",
   "Fav": "Избр",
-  "Unfav": "Удал"
+  "Unfav": "Удал",
+  "no_results_found": "Результаты не найдены",
+  "try_adjusting_filters_or_search": "Попробуйте изменить фильтры или поисковый запрос",
+  "clear_all_filters": "Очистить все фильтры"
 }

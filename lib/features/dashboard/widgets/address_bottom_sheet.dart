@@ -15,8 +15,57 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-class AddressBottomSheet extends StatelessWidget {
+class AddressBottomSheet extends StatefulWidget {
   const AddressBottomSheet({super.key});
+
+  @override
+  State<AddressBottomSheet> createState() => _AddressBottomSheetState();
+}
+
+class _AddressBottomSheetState extends State<AddressBottomSheet> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+  DateTime? _lastTapTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 1.15, end: 0.98).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 0.98, end: 1.03).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 1.03, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
+    ]).animate(_animationController);
+
+    _rotationAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.02), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 0.02, end: -0.02), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: -0.02, end: 0.015), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 0.015, end: -0.01), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: -0.01, end: 0.0), weight: 20),
+    ]).animate(_animationController);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _playAnimation() {
+    final now = DateTime.now();
+    if (_lastTapTime != null && now.difference(_lastTapTime!).inSeconds < 3) {
+      return; // Cooldown active
+    }
+    _lastTapTime = now;
+    _animationController.forward(from: 0.0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +103,21 @@ class AddressBottomSheet extends StatelessWidget {
 
                   addressController.addressList != null && addressController.addressList!.isEmpty ? Column(children: [
 
-                    Lottie.asset('assets/location_lottie.json', width: 200, height: 150),
+                    GestureDetector(
+                      onTap: _playAnimation,
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _scaleAnimation.value,
+                            child: Transform.rotate(
+                              angle: _rotationAnimation.value,
+                              child: Lottie.asset('assets/location_lottie.json', width: 200, height: 150),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     const SizedBox(height: Dimensions.paddingSizeLarge),
 
                     Text(

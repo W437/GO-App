@@ -1013,6 +1013,7 @@
   "or_share": "أو شارك",
   "choose_your_language": "اختر لغتك",
   "choose_your_language_to_proceed": "اختر لغتك للمتابعة",
+  "you_can_change_this_later": "يمكنك تغيير هذا لاحقًا",
   "remove_all_from_cart": "إزالة الكل من السلة",
   "you_are_not_in_zone": "أنت لست في المنطقة",
   "type_a_massage": "اكتب التدليك",
@@ -1338,5 +1339,8 @@
   "quick_delivery": "توصيل سريع",
   "sort_and_filter": "الترتيب والفلترة",
   "Fav": "مفضل",
-  "Unfav": "إلغاء"
+  "Unfav": "إلغاء",
+  "no_results_found": "لا توجد نتائج",
+  "try_adjusting_filters_or_search": "حاول تعديل الفلاتر أو مصطلحات البحث",
+  "clear_all_filters": "مسح جميع الفلاتر"
 }

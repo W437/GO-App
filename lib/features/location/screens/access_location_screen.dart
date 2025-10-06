@@ -37,11 +37,35 @@ class AccessLocationScreen extends StatefulWidget {
   State<AccessLocationScreen> createState() => _AccessLocationScreenState();
 }
 
-class _AccessLocationScreenState extends State<AccessLocationScreen> {
+class _AccessLocationScreenState extends State<AccessLocationScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+  DateTime? _lastTapTime;
 
   @override
   void initState() {
     super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 1.15, end: 0.98).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 0.98, end: 1.03).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 1.03, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
+    ]).animate(_animationController);
+
+    _rotationAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.02), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 0.02, end: -0.02), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: -0.02, end: 0.015), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 0.015, end: -0.01), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: -0.01, end: 0.0), weight: 20),
+    ]).animate(_animationController);
 
     // Load zone list after build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -75,6 +99,21 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
     } else if(!widget.fromHome){
       _getCurrentLocationAndRoute();
     }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _playAnimation() {
+    final now = DateTime.now();
+    if (_lastTapTime != null && now.difference(_lastTapTime!).inSeconds < 3) {
+      return; // Cooldown active
+    }
+    _lastTapTime = now;
+    _animationController.forward(from: 0.0);
   }
 
   Future<void> _getCurrentLocationAndRoute() async {
@@ -178,7 +217,21 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
             child: Center(child: Padding(
               padding: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
               child: SizedBox(width: 700, child: Column(children: [
-                Lottie.asset('assets/location_lottie.json', height: 220),
+                GestureDetector(
+                  onTap: _playAnimation,
+                  child: AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: Transform.rotate(
+                          angle: _rotationAnimation.value,
+                          child: Lottie.asset('assets/location_lottie.json', height: 220),
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
                 Text(
                   'find_restaurants_and_foods'.tr.toUpperCase(), textAlign: TextAlign.center,

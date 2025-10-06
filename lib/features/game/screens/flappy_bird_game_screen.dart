@@ -13,16 +13,47 @@ class FlappyBirdGameScreen extends StatefulWidget {
   State<FlappyBirdGameScreen> createState() => _FlappyBirdGameScreenState();
 }
 
-class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
+class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> with TickerProviderStateMixin {
   ui.Image? bgImage;
   ui.Image? baseImage;
   ui.Image? pipeImage;
   List<ui.Image> birdFrames = [];
 
+  late AnimationController _gameOverAnimationController;
+  late Animation<double> _gameOverScaleAnimation;
+  bool _hasTriggeredGameOverAnimation = false;
+
   @override
   void initState() {
     super.initState();
     _loadImages();
+
+    _gameOverAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _gameOverScaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.2).chain(CurveTween(curve: Curves.easeOut)), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 0.95).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.0).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
+    ]).animate(_gameOverAnimationController);
+  }
+
+  @override
+  void dispose() {
+    _gameOverAnimationController.dispose();
+    super.dispose();
+  }
+
+  void _checkGameOverState(GameController controller) {
+    if (controller.gameOver && !_hasTriggeredGameOverAnimation) {
+      _hasTriggeredGameOverAnimation = true;
+      _gameOverAnimationController.forward(from: 0.0);
+    } else if (!controller.gameOver && _hasTriggeredGameOverAnimation) {
+      _hasTriggeredGameOverAnimation = false;
+      _gameOverAnimationController.reset();
+    }
   }
 
   Future<void> _loadImages() async {
@@ -81,6 +112,7 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
     return GetBuilder<GameController>(
       init: GameController(),
       builder: (controller) {
+        _checkGameOverState(controller);
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
@@ -327,16 +359,18 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
                           Container(
                             color: Colors.black54,
                             child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                                margin: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).cardColor,
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
+                              child: ScaleTransition(
+                                scale: _gameOverScaleAnimation,
+                                child: Container(
+                                  padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                                  margin: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
                                     Text(
                                       'Game Over!',
                                       style: TextStyle(
@@ -473,6 +507,7 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> {
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),

@@ -127,6 +127,7 @@ flutter:
     - assets/cooking_loader_lottie.json
     - assets/food_changing_orders_lottie.json
     - assets/location_lottie.json
+    - assets/language_screen_lottie.json
     - assets/game/assets/
     - assets/game/sfx/
     - .env

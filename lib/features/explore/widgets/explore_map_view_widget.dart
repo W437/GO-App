@@ -276,73 +276,92 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
   Widget _buildTopButtons(BuildContext context, ExploreController controller) {
     return Stack(
       children: [
-        // Expand Map Button
-        Positioned(
-          top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
-          right: Dimensions.paddingSizeDefault,
-          child: FloatingActionButton(
-            heroTag: 'explore_fullscreen_toggle',
-            mini: true,
-            backgroundColor: Theme.of(context).cardColor,
-            onPressed: widget.onFullscreenToggle,
-            child: Icon(
-              controller.isFullscreenMode ? Icons.fullscreen_exit : Icons.fullscreen,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-
         // Search/Filter Indicator (hide in fullscreen mode)
         if (!controller.isFullscreenMode)
           Positioned(
             top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
             left: Dimensions.paddingSizeDefault,
-            right: Dimensions.paddingSizeDefault + 50,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Dimensions.paddingSizeDefault,
-              vertical: Dimensions.paddingSizeSmall,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(100),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+            right: Dimensions.paddingSizeDefault,
             child: Row(
               children: [
-                Icon(
-                  Icons.explore,
-                  color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
+                // Search/Filter Badge
                 Expanded(
-                  child: Text(
-                    controller.selectedCategoryId == null
-                        ? 'exploring_all_restaurants'.tr
-                        : 'filtered_view'.tr,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium!.color,
-                      fontWeight: FontWeight.w500,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Dimensions.paddingSizeDefault,
+                      vertical: Dimensions.paddingSizeSmall,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.explore,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        Expanded(
+                          child: Text(
+                            controller.selectedCategoryId == null
+                                ? 'exploring_all_restaurants'.tr
+                                : 'filtered_view'.tr,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyMedium!.color,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${controller.filteredRestaurants?.length ?? 0}',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Text(
-                  '${controller.filteredRestaurants?.length ?? 0}',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                // Fullscreen Button
+                InkWell(
+                  onTap: widget.onFullscreenToggle,
+                  borderRadius: BorderRadius.circular(100),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Dimensions.paddingSizeDefault,
+                      vertical: Dimensions.paddingSizeSmall,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      controller.isFullscreenMode ? Icons.fullscreen_exit : Icons.fullscreen,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
       ],
     );
   }

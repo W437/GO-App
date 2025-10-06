@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/explore/widgets/category_filter_chips_widget.dart';
 import 'package:godelivery_user/features/explore/widgets/restaurant_list_view_widget.dart';
-import 'package:godelivery_user/features/explore/widgets/search_bar_widget.dart';
 import 'package:godelivery_user/features/explore/widgets/sort_filter_bar.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -267,18 +266,6 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                 ),
                     ),
                   ],
-                ),
-              ),
-
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Dimensions.paddingSizeDefault,
-                ),
-                child: SearchBarWidget(
-                  exploreController: widget.exploreController,
                 ),
               ),
 

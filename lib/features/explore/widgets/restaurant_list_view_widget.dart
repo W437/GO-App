@@ -51,14 +51,25 @@ class RestaurantListViewWidget extends StatelessWidget {
           final bool hasActiveFilters = controller.activeFilterCount > 0 ||
                                         controller.searchQuery.isNotEmpty;
 
-          return EmptyStateWidget(
-            type: hasActiveFilters
-                ? EmptyStateType.noResults
-                : EmptyStateType.noRestaurantsNearby,
-            onClearFilters: hasActiveFilters ? () {
-              controller.clearAllFilters();
-              controller.clearSearch();
-            } : null,
+          return ListView(
+            controller: scrollController,
+            padding: EdgeInsets.only(
+              left: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              top: Dimensions.paddingSizeDefault,
+              bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + Dimensions.paddingSizeDefault,
+            ),
+            children: [
+              EmptyStateWidget(
+                type: hasActiveFilters
+                    ? EmptyStateType.noResults
+                    : EmptyStateType.noRestaurantsNearby,
+                onClearFilters: hasActiveFilters ? () {
+                  controller.clearAllFilters();
+                  controller.clearSearch();
+                } : null,
+              ),
+            ],
           );
         }
 
