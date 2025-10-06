@@ -467,7 +467,7 @@ class RouteHelper {
           : Get.parameters['page'] == 'shipping-policy' ? HtmlType.shippingPolicy
           : Get.parameters['page'] == 'cancellation-policy' ? HtmlType.cancellation
           : Get.parameters['page'] == 'refund-policy' ? HtmlType.refund : HtmlType.aboutUs,
-    )),
+    ), transition: Transition.noTransition, transitionDuration: Duration.zero),
     GetPage(name: categories, page: () => getRoute(const CategoryScreen())),
     GetPage(name: categoryProduct, page: () {
       List<int> decode = base64Decode(Get.parameters['name']!.replaceAll(' ', '+'));
