@@ -10,10 +10,12 @@ import 'package:godelivery_user/util/styles.dart';
 
 class DraggableRestaurantSheet extends StatefulWidget {
   final ExploreController exploreController;
+  final Function(double)? onPositionChanged;
 
   const DraggableRestaurantSheet({
     super.key,
     required this.exploreController,
+    this.onPositionChanged,
   });
 
   @override
@@ -41,6 +43,8 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
     if (_draggableController.isAttached) {
       final size = _draggableController.size;
       widget.exploreController.updateSheetPosition(size);
+      // Notify parent about position change
+      widget.onPositionChanged?.call(size);
     }
   }
 
@@ -48,11 +52,11 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       controller: _draggableController,
-      initialChildSize: 0.5, // 50% of screen
-      minChildSize: 0.15,    // 15% minimum
-      maxChildSize: 0.9,     // 90% maximum
+      initialChildSize: 0.5, // 50% of screen (default)
+      minChildSize: 0.5,    // 50% minimum (can't go lower)
+      maxChildSize: 0.95,    // 95% maximum (expanded - almost full screen)
       snap: true,
-      snapSizes: const [0.15, 0.5, 0.9], // Snap points
+      snapSizes: const [0.5, 0.95], // Only 2 snap points
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
@@ -82,52 +86,97 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                   final size = renderBox.size;
                   final pixelsDragged = -details.delta.dy;
                   final percentageDragged = pixelsDragged / size.height;
-                  final newSize = (_draggableController.size + percentageDragged).clamp(0.15, 0.9);
+
+                  // Get current size
+                  final currentSize = _draggableController.size;
+                  var newSize = currentSize + percentageDragged;
+
+                  // Add elastic resistance at ALL boundaries
+                  const resistance = 0.25; // Resistance factor (lower = more resistance)
+                  const maxOverscroll = 0.05; // Maximum 5% overscroll
+
+                  // At default position (0.5)
+                  if (currentSize <= 0.5 && newSize < 0.5) {
+                    // Trying to drag down from default - apply resistance
+                    final overflow = 0.5 - newSize;
+                    newSize = 0.5 - (overflow * resistance);
+                    newSize = newSize.clamp(0.5 - maxOverscroll, 0.5); // Max 5% below
+                  }
+                  // At expanded position (0.95)
+                  else if (currentSize >= 0.95 && newSize > 0.95) {
+                    // Trying to drag up from expanded - apply resistance
+                    final overflow = newSize - 0.95;
+                    newSize = 0.95 + (overflow * resistance);
+                    newSize = newSize.clamp(0.95, 0.99); // Max to 99%
+                  }
+                  // Between positions - normal movement
+                  else {
+                    // No resistance in the middle zone
+                    newSize = newSize.clamp(0.5 - maxOverscroll, 0.95 + maxOverscroll);
+                  }
 
                   _draggableController.jumpTo(newSize);
+                  // Update map position in real-time
+                  widget.onPositionChanged?.call(newSize);
                 },
                 onVerticalDragEnd: (details) {
                   if (!_draggableController.isAttached) return;
 
-                  // Snap to nearest position
                   final velocity = details.primaryVelocity ?? 0;
                   final currentSize = _draggableController.size;
 
+                  // Check if we're in an overscroll position
+                  if (currentSize < 0.5) {
+                    // Below default - always bounce back to default
+                    _draggableController.animateTo(
+                      0.5,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.elasticOut,
+                    );
+                    return;
+                  } else if (currentSize > 0.95) {
+                    // Above expanded - always bounce back to expanded
+                    _draggableController.animateTo(
+                      0.95,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.elasticOut,
+                    );
+                    return;
+                  }
+
+                  // Normal zone (between 0.5 and 0.95)
                   if (velocity.abs() > 500) {
-                    // Fast swipe - expand or collapse based on direction
-                    if (velocity < 0) {
+                    // Fast swipe
+                    if (velocity < 0 && currentSize < 0.90) {
                       // Swiped up - expand
                       _draggableController.animateTo(
-                        currentSize < 0.5 ? 0.5 : 0.9,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
+                        0.95,
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOutCubic,
+                      );
+                    } else if (velocity > 0 && currentSize > 0.55) {
+                      // Swiped down - return to default
+                      _draggableController.animateTo(
+                        0.5,
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOutCubic,
                       );
                     } else {
-                      // Swiped down - collapse
+                      // Stay at current position
+                      final nearestSnap = currentSize < 0.725 ? 0.5 : 0.95;
                       _draggableController.animateTo(
-                        currentSize > 0.5 ? 0.5 : 0.15,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
+                        nearestSnap,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutBack,
                       );
                     }
                   } else {
                     // Slow drag - snap to nearest
-                    final snapSizes = [0.15, 0.5, 0.9];
-                    double nearestSnap = snapSizes[0];
-                    double minDiff = (currentSize - snapSizes[0]).abs();
-
-                    for (final snap in snapSizes) {
-                      final diff = (currentSize - snap).abs();
-                      if (diff < minDiff) {
-                        minDiff = diff;
-                        nearestSnap = snap;
-                      }
-                    }
-
+                    final nearestSnap = currentSize < 0.725 ? 0.5 : 0.95;
                     _draggableController.animateTo(
                       nearestSnap,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutBack,
                     );
                   }
                 },
@@ -177,37 +226,32 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                         },
                       ),
                     ),
-                    // Expand/Collapse Button
-                    IconButton(
-                      onPressed: () {
-                        if (!_draggableController.isAttached) return;
+                    // Expand/Collapse Button with background
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          if (!_draggableController.isAttached) return;
 
-                        final currentSize = _draggableController.size;
-                        if (currentSize < 0.5) {
+                          final currentSize = _draggableController.size;
+                          // Toggle between default (0.5) and expanded (0.95)
+                          final targetSize = currentSize < 0.725 ? 0.95 : 0.5;
                           _draggableController.animateTo(
-                            0.5,
-                            duration: const Duration(milliseconds: 300),
+                            targetSize,
+                            duration: const Duration(milliseconds: 350),
                             curve: Curves.easeOutCubic,
                           );
-                        } else if (currentSize < 0.9) {
-                          _draggableController.animateTo(
-                            0.9,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOutCubic,
-                          );
-                        } else {
-                          _draggableController.animateTo(
-                            0.5,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOutCubic,
-                          );
-                        }
-                      },
-                      icon: Icon(
-                        _draggableController.isAttached && _draggableController.size < 0.9
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        size: 28,
+                        },
+                        icon: Icon(
+                          _draggableController.isAttached && _draggableController.size < 0.725
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          size: 28,
+                          color: Theme.of(context).textTheme.bodyMedium!.color,
+                        ),
                       ),
                     ),
                   ],
@@ -243,8 +287,8 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
 
               const Divider(height: 1),
 
-              // Restaurant List (Expanded)
-              Expanded(
+              // Restaurant List (Flexible to prevent overflow)
+              Flexible(
                 child: RestaurantListViewWidget(
                   exploreController: widget.exploreController,
                   scrollController: scrollController, // Pass the scroll controller

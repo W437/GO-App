@@ -200,7 +200,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(100),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.15),
@@ -212,7 +212,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(100),
                       onTap: () => Navigator.pop(context),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -240,50 +240,6 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-
-              // Search/Filter Indicator at Top Right
-              Positioned(
-                top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
-                right: Dimensions.paddingSizeDefault,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Dimensions.paddingSizeDefault,
-                    vertical: Dimensions.paddingSizeSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(100),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Total: ',
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium!.color,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        '${controller.filteredRestaurants?.length ?? 0}',
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
@@ -432,28 +388,41 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
 
                             return Padding(
                               padding: const EdgeInsets.only(right: 8),
-                              child: FilterChip(
-                                label: Text(
-                                  isAll ? 'All' : category!.name ?? '',
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium!.color,
-                                    fontWeight: FontWeight.w500,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: BackdropFilter(
+                                  filter: isSelected
+                                      ? ui.ImageFilter.blur(sigmaX: 0, sigmaY: 0)
+                                      : ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                  child: Opacity(
+                                    opacity: isSelected ? 1.0 : 0.4,
+                                    child: FilterChip(
+                                      label: Text(
+                                        isAll ? 'All' : category!.name ?? '',
+                                        style: TextStyle(
+                                          color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium!.color,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        controller.filterByCategory(isAll ? null : category?.id);
+                                      },
+                                      backgroundColor: isSelected
+                                          ? Theme.of(context).primaryColor
+                                          : Theme.of(context).cardColor.withValues(alpha: 0.3),
+                                      selectedColor: Theme.of(context).primaryColor,
+                                      side: BorderSide(
+                                        color: isSelected
+                                            ? Theme.of(context).primaryColor
+                                            : Colors.transparent,
+                                        width: isSelected ? 1 : 0,
+                                      ),
+                                      elevation: 0,
+                                      shadowColor: Colors.transparent,
+                                    ),
                                   ),
                                 ),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  controller.filterByCategory(isAll ? null : category?.id);
-                                },
-                                backgroundColor: Theme.of(context).cardColor,
-                                selectedColor: Theme.of(context).primaryColor,
-                                side: BorderSide(
-                                  color: isSelected
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.grey.shade300,
-                                  width: 1,
-                                ),
-                                elevation: isSelected ? 4 : 0,
-                                shadowColor: Colors.black26,
                               ),
                             );
                           },

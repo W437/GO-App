@@ -9,6 +9,7 @@ import 'package:godelivery_user/helper/custom_validator.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
@@ -56,7 +57,38 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
 
-                  SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : MediaQuery.of(context).size.height * 0.15),
+                  SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : MediaQuery.of(context).size.height * 0.10),
+
+                  // Icon and Header
+                  Icon(
+                    Icons.search,
+                    size: 80,
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                  Text(
+                    'track_your_order'.tr,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeOverLarge,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+                    child: Text(
+                      'guest_track_order_description'.tr,
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),

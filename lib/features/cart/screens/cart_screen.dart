@@ -424,7 +424,13 @@ class _CartScreenState extends State<CartScreen> {
               isDesktop ? const SizedBox.shrink() : CheckoutButtonWidget(cartController: cartController, availableList: cartController.availableList, isRestaurantOpen: isRestaurantOpen, fromDineIn: widget.fromDineIn),
 
             ],
-          ) : SingleChildScrollView(child: FooterViewWidget(child: NoDataScreen(isEmptyCart: true, title: 'you_have_not_add_to_cart_yet'.tr)));
+          ) : Center(
+            child: SingleChildScrollView(
+              child: FooterViewWidget(
+                child: NoDataScreen(isEmptyCart: true, title: 'you_have_not_add_to_cart_yet'.tr),
+              ),
+            ),
+          );
         },
         );
       }),

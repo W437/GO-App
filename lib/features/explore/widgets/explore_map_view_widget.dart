@@ -241,7 +241,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
 
             // Expand Map Button
             Positioned(
-              top: Dimensions.paddingSizeDefault,
+              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
               right: Dimensions.paddingSizeDefault,
               child: FloatingActionButton(
                 mini: true,
@@ -266,7 +266,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
 
             // Search/Filter Indicator
             Positioned(
-              top: Dimensions.paddingSizeDefault,
+              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
               left: Dimensions.paddingSizeDefault,
               right: Dimensions.paddingSizeDefault + 50,
               child: Container(
