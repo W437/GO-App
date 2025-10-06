@@ -16,6 +16,7 @@ import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class GuestTrackOrderInputViewWidget extends StatefulWidget {
   const GuestTrackOrderInputViewWidget({super.key});
@@ -66,11 +67,12 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
 
                   SizedBox(height: ResponsiveHelper.isDesktop(context) ? 100 : MediaQuery.of(context).size.height * 0.10),
 
-                  // Icon and Header
-                  Icon(
-                    Icons.search,
-                    size: 80,
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                  // Lottie Animation
+                  Lottie.asset(
+                    'assets/food_changing_orders_lottie.json',
+                    width: ResponsiveHelper.isDesktop(context) ? 200 : 150,
+                    height: ResponsiveHelper.isDesktop(context) ? 200 : 150,
+                    repeat: true,
                   ),
                   const SizedBox(height: Dimensions.paddingSizeDefault),
 

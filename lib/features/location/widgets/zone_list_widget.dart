@@ -9,6 +9,7 @@ import 'package:godelivery_user/features/profile/controllers/profile_controller.
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class ZoneListWidget extends StatelessWidget {
   final bool isBottomSheet;
@@ -18,26 +19,6 @@ class ZoneListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<LocationController>(builder: (locationController) {
-      if (locationController.loadingZoneList) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      if (locationController.zoneList.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.location_off, size: 50, color: Theme.of(context).disabledColor),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-              Text(
-                'no_zones_available'.tr,
-                style: robotoMedium.copyWith(color: Theme.of(context).disabledColor),
-              ),
-            ],
-          ),
-        );
-      }
-
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -74,20 +55,143 @@ class ZoneListWidget extends StatelessWidget {
           ],
 
           Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              physics: isBottomSheet ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.all(isBottomSheet ? Dimensions.paddingSizeDefault : 0),
-              itemCount: locationController.zoneList.length,
-              itemBuilder: (context, index) {
-                ZoneListModel zone = locationController.zoneList[index];
-                return _buildZoneCard(context, zone, locationController);
-              },
-            ),
+            child: locationController.loadingZoneList
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    physics: isBottomSheet ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      isBottomSheet ? Dimensions.paddingSizeDefault : 0,
+                      isBottomSheet ? Dimensions.paddingSizeDefault : 0,
+                      isBottomSheet ? Dimensions.paddingSizeDefault : 0,
+                      isBottomSheet ? Dimensions.paddingSizeLarge : 0,
+                    ),
+                    itemCount: 5, // Show 5 shimmer items
+                    itemBuilder: (context, index) {
+                      return _buildZoneShimmer(context);
+                    },
+                  )
+                : locationController.zoneList.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.location_off, size: 50, color: Theme.of(context).disabledColor),
+                              const SizedBox(height: Dimensions.paddingSizeSmall),
+                              Text(
+                                'no_zones_available'.tr,
+                                style: robotoMedium.copyWith(color: Theme.of(context).disabledColor),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: isBottomSheet ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(
+                          isBottomSheet ? Dimensions.paddingSizeDefault : 0,
+                          isBottomSheet ? Dimensions.paddingSizeDefault : 0,
+                          isBottomSheet ? Dimensions.paddingSizeDefault : 0,
+                          isBottomSheet ? Dimensions.paddingSizeLarge : 0,
+                        ),
+                        itemCount: locationController.zoneList.length,
+                        itemBuilder: (context, index) {
+                          ZoneListModel zone = locationController.zoneList[index];
+                          return _buildZoneCard(context, zone, locationController);
+                        },
+                      ),
           ),
         ],
       );
     });
+  }
+
+  Widget _buildZoneShimmer(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        border: Border.all(
+          color: Theme.of(context).disabledColor.withOpacity(0.3),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Shimmer(
+                  color: Theme.of(context).disabledColor.withOpacity(0.3),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).disabledColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Shimmer(
+                        color: Theme.of(context).disabledColor.withOpacity(0.3),
+                        child: Container(
+                          height: 16,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).disabledColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Shimmer(
+                  color: Theme.of(context).disabledColor.withOpacity(0.3),
+                  child: Container(
+                    width: 60,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).disabledColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+            Shimmer(
+              color: Theme.of(context).disabledColor.withOpacity(0.3),
+              child: Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).disabledColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildZoneCard(BuildContext context, ZoneListModel zone, LocationController locationController) {

@@ -47,15 +47,15 @@ class NoDataScreen extends StatelessWidget {
         ),
 
         Center(
-          child: isEmptyCart
+          child: isEmptyCart || isEmptyOrder
             ? Lottie.asset(
-                'assets/cart_empty_lottie.json',
+                isEmptyCart ? 'assets/cart_empty_lottie.json' : 'assets/food_changing_orders_lottie.json',
                 width: isDesktop ? 200 : 150,
                 height: isDesktop ? 200 : 150,
                 repeat: true,
               )
             : CustomAssetImageWidget(
-                isEmptyAddress ? Images.emptyAddress : isEmptyChat ? Images.emptyChat : isEmptyOrder ? Images.emptyOrder
+                isEmptyAddress ? Images.emptyAddress : isEmptyChat ? Images.emptyChat
                     : isEmptyCoupon ? Images.emptyCoupon : isEmptyFood ? Images.emptyFood : isEmptyNotification ? Images.emptyNotification
                     : isEmptyRestaurant ? Images.emptyRestaurant : isEmptySearchFood ? Images.emptySearchFood : isEmptyTransaction ? Images.emptyTransaction
                     : isEmptyWishlist ? Images.emptyWishlist : Images.emptyFood,

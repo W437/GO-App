@@ -164,9 +164,9 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     }
 
     // Add new pipes
-    final dynamicSpacing = (GameConstants.minSpacingSetting).clamp(
+    final dynamicSpacing = (GameConstants.pipeSpacing - gameState.score * 2).clamp(
       GameConstants.minSpacingSetting,
-      GameConstants.pipeSpacing - gameState.score * 2,
+      GameConstants.pipeSpacing,
     );
 
     if (gameState.pipes.isNotEmpty &&

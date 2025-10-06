@@ -11,6 +11,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class SignInScreen extends StatefulWidget {
   final bool exitFromApp;
@@ -99,11 +100,13 @@ class SignInScreenState extends State<SignInScreen> {
                   ),
                 ) : const SizedBox(),
 
-                CustomImageWidget(
-                  image: Get.find<SplashController>().configModel?.logoFullUrl ?? '',
-                  height: 50, width: 200, fit: BoxFit.contain,
+                Lottie.asset(
+                  'assets/cooking_loader_lottie.json',
+                  height: 150,
+                  width: 150,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(height: Dimensions.paddingSizeOverLarge),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
 
                 SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
 
