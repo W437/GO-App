@@ -1071,7 +1071,7 @@
   "high_to_low": "High to Low",
   "select_price_sort": "Select Price Sort",
   "select_letter_sort": "Select Letter Sort",
-  "you_have_not_add_to_cart_yet": "Your cart is empty. Start adding delicious items to get started!",
+  "you_have_not_add_to_cart_yet": "Your cart is empty.\nStart adding delicious items to get started!",
   "no_coupon_available": "No coupon available",
   "no_transaction_yet": "No transaction yet!",
   "no_notification": "No notification",

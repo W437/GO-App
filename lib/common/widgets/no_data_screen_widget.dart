@@ -42,7 +42,7 @@ class NoDataScreen extends StatelessWidget {
       child: Column(mainAxisAlignment: fromAddress ? MainAxisAlignment.start : MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
 
         fromAddress ? SizedBox(height : height * 0.25) : SizedBox(
-          height: isEmptyTransaction || isEmptyCoupon ? height * 0.15  : isDesktop ? height * 0.2 : height * 0.3,
+          height: isEmptyCart ? height * 0.15 : isEmptyTransaction || isEmptyCoupon ? height * 0.15  : isDesktop ? height * 0.2 : height * 0.3,
         ),
 
         Center(

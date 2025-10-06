@@ -19,6 +19,7 @@ import 'package:godelivery_user/features/dashboard/widgets/circular_reveal_clipp
 import 'package:godelivery_user/features/dashboard/widgets/running_order_view_widget.dart';
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
 import 'package:godelivery_user/features/explore/screens/explore_screen.dart';
+import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
@@ -302,6 +303,23 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   }
 
   void _setPage(int pageIndex, [Offset? tapPosition]) {
+    // If clicking explore tab while already on explore and in fullscreen mode, exit fullscreen
+    if (pageIndex == 0 && _pageIndex == 0) {
+      final exploreController = Get.find<ExploreController>();
+      if (exploreController.isFullscreenMode) {
+        exploreController.exitFullscreenMode();
+      }
+      return;
+    }
+
+    // Exit fullscreen mode when navigating away from explore screen
+    if (_pageIndex == 0 && pageIndex != 0) {
+      final exploreController = Get.find<ExploreController>();
+      if (exploreController.isFullscreenMode) {
+        exploreController.exitFullscreenMode();
+      }
+    }
+
     if (pageIndex == _pageIndex) return;
 
     setState(() {

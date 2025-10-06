@@ -81,6 +81,9 @@ class ExploreController extends GetxController implements GetxService {
   double _sheetPosition = 0.5;
   double get sheetPosition => _sheetPosition;
 
+  bool _isFullscreenMode = false;
+  bool get isFullscreenMode => _isFullscreenMode;
+
   int get activeFilterCount {
     int count = 0;
     if (_filterOpenNow) count++;
@@ -152,6 +155,16 @@ class ExploreController extends GetxController implements GetxService {
   // New methods for enhanced features
   void updateSheetPosition(double position) {
     _sheetPosition = position;
+    update();
+  }
+
+  void toggleFullscreenMode() {
+    _isFullscreenMode = !_isFullscreenMode;
+    update();
+  }
+
+  void exitFullscreenMode() {
+    _isFullscreenMode = false;
     update();
   }
 

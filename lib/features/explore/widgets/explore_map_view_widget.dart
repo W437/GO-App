@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/explore/widgets/fullscreen_map_view.dart';
 import 'package:godelivery_user/features/explore/widgets/restaurant_bottom_sheet_widget.dart';
@@ -16,10 +17,16 @@ import 'package:godelivery_user/util/dimensions.dart';
 
 class ExploreMapViewWidget extends StatefulWidget {
   final ExploreController exploreController;
+  final VoidCallback? onFullscreenToggle;
+  final Animation<Offset>? topButtonsAnimation;
+  final Animation<double>? topButtonsFadeAnimation;
 
   const ExploreMapViewWidget({
     super.key,
     required this.exploreController,
+    this.onFullscreenToggle,
+    this.topButtonsAnimation,
+    this.topButtonsFadeAnimation,
   });
 
   @override
@@ -239,84 +246,93 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
               ),
             ),
 
-            // Expand Map Button
-            Positioned(
-              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
-              right: Dimensions.paddingSizeDefault,
-              child: FloatingActionButton(
-                mini: true,
-                backgroundColor: Theme.of(context).cardColor,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FullscreenMapView(
-                        controller: widget.exploreController,
-                        initialPosition: _initialPosition!,
-                      ),
-                    ),
-                  );
-                },
-                child: Icon(
-                  Icons.fullscreen,
-                  color: Theme.of(context).primaryColor,
+            // Top buttons with animation
+            if (widget.topButtonsAnimation != null && widget.topButtonsFadeAnimation != null)
+              FadeTransition(
+                opacity: widget.topButtonsFadeAnimation!,
+                child: SlideTransition(
+                  position: widget.topButtonsAnimation!,
+                  child: _buildTopButtons(context, controller),
                 ),
-              ),
-            ),
-
-            // Search/Filter Indicator
-            Positioned(
-              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
-              left: Dimensions.paddingSizeDefault,
-              right: Dimensions.paddingSizeDefault + 50,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Dimensions.paddingSizeDefault,
-                  vertical: Dimensions.paddingSizeSmall,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(100),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.explore,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-                    Expanded(
-                      child: Text(
-                        controller.selectedCategoryId == null
-                            ? 'exploring_all_restaurants'.tr
-                            : 'filtered_view'.tr,
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium!.color,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '${controller.filteredRestaurants?.length ?? 0}',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+              )
+            else
+              _buildTopButtons(context, controller),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTopButtons(BuildContext context, ExploreController controller) {
+    return Stack(
+      children: [
+        // Expand Map Button
+        Positioned(
+          top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
+          right: Dimensions.paddingSizeDefault,
+          child: FloatingActionButton(
+            mini: true,
+            backgroundColor: Theme.of(context).cardColor,
+            onPressed: widget.onFullscreenToggle,
+            child: Icon(
+              controller.isFullscreenMode ? Icons.fullscreen_exit : Icons.fullscreen,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ),
+
+        // Search/Filter Indicator (hide in fullscreen mode)
+        if (!controller.isFullscreenMode)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
+            left: Dimensions.paddingSizeDefault,
+            right: Dimensions.paddingSizeDefault + 50,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Dimensions.paddingSizeDefault,
+              vertical: Dimensions.paddingSizeSmall,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(100),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.explore,
+                  color: Theme.of(context).primaryColor,
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Expanded(
+                  child: Text(
+                    controller.selectedCategoryId == null
+                        ? 'exploring_all_restaurants'.tr
+                        : 'filtered_view'.tr,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyMedium!.color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${controller.filteredRestaurants?.length ?? 0}',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
