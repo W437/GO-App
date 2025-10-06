@@ -1,19 +1,17 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
-import 'package:godelivery_user/features/explore/widgets/fullscreen_map_view.dart';
 import 'package:godelivery_user/features/explore/widgets/restaurant_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/marker_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
 
 class ExploreMapViewWidget extends StatefulWidget {
   final ExploreController exploreController;
@@ -37,6 +35,7 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   LatLng? _initialPosition;
+  int _lastRestaurantCount = -1;
 
   @override
   void initState() {
@@ -74,66 +73,79 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
   Future<void> _createMarkers() async {
     _markers.clear();
 
-    // Add user location marker
-    if (_initialPosition != null) {
-      _markers.add(
-        Marker(
-          markerId: const MarkerId('user_location'),
-          position: _initialPosition!,
-          icon: await _getMarkerIcon('assets/image/location/my_location_marker.png', 80),
-          zIndex: 1,
-        ),
+    try {
+      // Create marker icons using MarkerHelper for efficiency
+      final restaurantMarkerIcon = await MarkerHelper.convertAssetToBitmapDescriptor(
+        width: 50,
+        imagePath: Images.nearbyRestaurantMarker,
       );
-    }
+      final myLocationMarkerIcon = await MarkerHelper.convertAssetToBitmapDescriptor(
+        width: 50,
+        imagePath: Images.myLocationMarker,
+      );
 
-    // Add restaurant markers
-    if (widget.exploreController.filteredRestaurants != null) {
-      for (int i = 0; i < widget.exploreController.filteredRestaurants!.length; i++) {
-        final restaurant = widget.exploreController.filteredRestaurants![i];
-        if (restaurant.latitude != null && restaurant.longitude != null) {
-          _markers.add(
-            Marker(
-              markerId: MarkerId('restaurant_${restaurant.id}'),
-              position: LatLng(
-                double.parse(restaurant.latitude!),
-                double.parse(restaurant.longitude!),
+      // Add user location marker
+      if (_initialPosition != null) {
+        _markers.add(
+          Marker(
+            markerId: const MarkerId('user_location'),
+            position: _initialPosition!,
+            icon: myLocationMarkerIcon,
+            zIndex: 1,
+          ),
+        );
+      }
+
+      // Add restaurant markers
+      if (widget.exploreController.filteredRestaurants != null) {
+        for (int i = 0; i < widget.exploreController.filteredRestaurants!.length; i++) {
+          final restaurant = widget.exploreController.filteredRestaurants![i];
+          if (restaurant.latitude != null && restaurant.longitude != null) {
+            _markers.add(
+              Marker(
+                markerId: MarkerId('restaurant_${restaurant.id}'),
+                position: LatLng(
+                  double.parse(restaurant.latitude!),
+                  double.parse(restaurant.longitude!),
+                ),
+                icon: restaurantMarkerIcon,
+                onTap: () => _onMarkerTapped(restaurant, i),
+                zIndex: 2,
               ),
-              icon: await _getMarkerIcon('assets/image/location/restaurant_marker.png', 100),
-              onTap: () => _onMarkerTapped(restaurant, i),
-              zIndex: 2,
-            ),
-          );
+            );
+          }
         }
       }
-    }
 
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  Future<BitmapDescriptor> _getMarkerIcon(String assetPath, int size) async {
-    try {
-      final ByteData data = await rootBundle.load(assetPath);
-      final ui.Codec codec = await ui.instantiateImageCodec(
-        data.buffer.asUint8List(),
-        targetWidth: size,
-      );
-      final ui.FrameInfo frameInfo = await codec.getNextFrame();
-      final ByteData? byteData = await frameInfo.image.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
-      final Uint8List resizedData = byteData!.buffer.asUint8List();
-      return BitmapDescriptor.fromBytes(resizedData);
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
-      // Fallback to default marker
-      return BitmapDescriptor.defaultMarker;
+      debugPrint('Error creating markers: $e');
     }
   }
 
   void _onMarkerTapped(Restaurant restaurant, int index) {
     widget.exploreController.selectRestaurant(index);
 
+    // If not in fullscreen mode, trigger fullscreen first, then show card
+    if (!widget.exploreController.isFullscreenMode) {
+      // Trigger fullscreen mode
+      widget.onFullscreenToggle?.call();
+
+      // Wait for fullscreen animation to complete before showing card
+      Future.delayed(const Duration(milliseconds: 550), () {
+        if (mounted) {
+          _showRestaurantBottomSheet(restaurant);
+        }
+      });
+    } else {
+      // Already in fullscreen, show card immediately
+      _showRestaurantBottomSheet(restaurant);
+    }
+  }
+
+  void _showRestaurantBottomSheet(Restaurant restaurant) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -153,8 +165,12 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
     return GetBuilder<ExploreController>(
       builder: (controller) {
         // Update markers when filtered restaurants change
-        if (controller.filteredRestaurants != null) {
-          _createMarkers();
+        final currentCount = controller.filteredRestaurants?.length ?? 0;
+        if (currentCount != _lastRestaurantCount && currentCount > 0) {
+          _lastRestaurantCount = currentCount;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _createMarkers();
+          });
         }
 
         return Stack(
@@ -172,6 +188,10 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
                     onMapCreated: (GoogleMapController mapController) {
                       _mapController = mapController;
                       controller.setMapController(mapController);
+                      // Create markers once map is created
+                      if (controller.filteredRestaurants != null) {
+                        _createMarkers();
+                      }
                     },
                     onCameraMove: (CameraPosition position) {
                       controller.updateMapPosition(
@@ -305,26 +325,35 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.explore,
+                          Icons.location_on,
                           color: Theme.of(context).primaryColor,
+                          size: 20,
                         ),
                         const SizedBox(width: Dimensions.paddingSizeSmall),
                         Expanded(
-                          child: Text(
-                            controller.selectedCategoryId == null
-                                ? 'exploring_all_restaurants'.tr
-                                : 'filtered_view'.tr,
-                            style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyMedium!.color,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '${controller.filteredRestaurants?.length ?? 0}',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                AddressHelper.getAddressFromSharedPref()?.address ?? 'current_location'.tr,
+                                style: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyMedium!.color,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: Dimensions.fontSizeSmall,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${controller.filteredRestaurants?.length ?? 0} ${'restaurants'.tr}',
+                                style: TextStyle(
+                                  color: Theme.of(context).disabledColor,
+                                  fontSize: Dimensions.fontSizeExtraSmall,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

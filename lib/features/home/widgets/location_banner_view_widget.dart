@@ -69,7 +69,7 @@ class LocationBannerViewWidget extends StatelessWidget {
                 height: ResponsiveHelper.isMobile(context) ? 35 : 40,
                 fontSize: Dimensions.fontSizeSmall,
                 radius: Dimensions.radiusDefault,
-                onPressed: ()=> Get.toNamed(RouteHelper.getMapViewRoute()),
+                onPressed: ()=> Get.toNamed(RouteHelper.getExploreScreen()),
               ),
 
               Positioned(

@@ -21,10 +21,15 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
   late Animation<Offset> _topButtonsAnimation;
   late Animation<Offset> _backButtonAnimation;
   late Animation<double> _topButtonsFadeAnimation;
+  late Animation<double> _backButtonFadeAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    // Force controller initialization and reload restaurants for current zone
+    Get.find<ExploreController>().getNearbyRestaurants(reload: true);
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 350),
@@ -61,6 +66,13 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
     ).animate(CurvedAnimation(
       parent: _fullscreenAnimationController,
       curve: Curves.easeOutCubic,
+    ));
+    _backButtonFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fullscreenAnimationController,
+      curve: Curves.easeIn,
     ));
     _topButtonsFadeAnimation = Tween<double>(
       begin: 1.0,
@@ -145,28 +157,31 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
                 ),
               ),
 
-              // Back button (only visible in fullscreen mode) with slide down animation
+              // Back button (only visible in fullscreen mode) with slide down and fade animation
               if (exploreController.isFullscreenMode)
                 Positioned(
                   top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
                   left: Dimensions.paddingSizeDefault,
-                  child: SlideTransition(
-                    position: _backButtonAnimation,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: CircularBackButtonWidget(
-                        showText: true,
-                        backgroundColor: Theme.of(context).cardColor,
-                        onPressed: () => _toggleFullscreen(exploreController),
+                  child: FadeTransition(
+                    opacity: _backButtonFadeAnimation,
+                    child: SlideTransition(
+                      position: _backButtonAnimation,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: CircularBackButtonWidget(
+                          showText: true,
+                          backgroundColor: Theme.of(context).cardColor,
+                          onPressed: () => _toggleFullscreen(exploreController),
+                        ),
                       ),
                     ),
                   ),

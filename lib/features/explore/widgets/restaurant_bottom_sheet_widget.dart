@@ -27,9 +27,14 @@ class RestaurantBottomSheetWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final distance = _calculateDistance();
     final isOpen = restaurant.open == 1 && restaurant.active == true;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
-      margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+      margin: EdgeInsets.only(
+        left: Dimensions.paddingSizeExtraSmall,
+        right: Dimensions.paddingSizeExtraSmall,
+        bottom: bottomPadding + Dimensions.paddingSizeSmall,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),

@@ -55,9 +55,12 @@ class CategoryController extends GetxController implements GetxService {
   int get offset => _offset;
 
   Future<void> getCategoryList(bool reload, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
-    // Force reload from server (bypass cache) - TEMP FIX for server switch
-    _categoryList = null;
+    // Only show shimmer on first load, not on reload
+    if(_categoryList == null) {
+      update();
+    }
     List<CategoryModel>? categoryList = await categoryServiceInterface.getCategoryList(source: DataSourceEnum.client);
+    print('🔍 Category API returned: ${categoryList?.length} categories');
     _prepareCategoryList(categoryList);
   }
 
@@ -65,6 +68,9 @@ class CategoryController extends GetxController implements GetxService {
     if(categoryList != null) {
       _categoryList = [];
       _categoryList!.addAll(categoryList);
+      print('✅ Categories set: ${_categoryList!.length} categories');
+    } else {
+      print('❌ Categories API returned null!');
     }
     update();
   }
