@@ -136,25 +136,48 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
       // Wait for fullscreen animation to complete before showing card
       Future.delayed(const Duration(milliseconds: 550), () {
         if (mounted) {
-          _showRestaurantBottomSheet(restaurant);
+          _showRestaurantBottomSheet(index);
         }
       });
     } else {
       // Already in fullscreen, show card immediately
-      _showRestaurantBottomSheet(restaurant);
+      _showRestaurantBottomSheet(index);
     }
   }
 
-  void _showRestaurantBottomSheet(Restaurant restaurant) {
+  void _showRestaurantBottomSheet(int initialIndex) {
+    final restaurants = widget.exploreController.filteredRestaurants;
+    if (restaurants == null || restaurants.isEmpty) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => RestaurantBottomSheetWidget(
-        restaurant: restaurant,
+        restaurants: restaurants,
+        initialIndex: initialIndex,
         onClose: () {
           widget.exploreController.clearSelectedRestaurant();
           Navigator.pop(context);
+        },
+        onRestaurantChanged: (index) {
+          // Update controller selection when user swipes
+          widget.exploreController.selectRestaurant(index);
+
+          // Animate map to the new restaurant
+          final restaurant = restaurants[index];
+          if (_mapController != null &&
+              restaurant.latitude != null &&
+              restaurant.longitude != null) {
+            _mapController!.animateCamera(
+              CameraUpdate.newLatLng(
+                LatLng(
+                  double.parse(restaurant.latitude!),
+                  double.parse(restaurant.longitude!),
+                ),
+              ),
+            );
+          }
         },
       ),
     );
