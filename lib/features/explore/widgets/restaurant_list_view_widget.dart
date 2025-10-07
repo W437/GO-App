@@ -146,7 +146,7 @@ class RestaurantListViewWidget extends StatelessWidget {
               },
             ),
             children: [
-              SlidableAction(
+              CustomSlidableAction(
                 onPressed: (context) {
                   HapticFeedback.mediumImpact();
                   if (isFavorite) {
@@ -155,14 +155,17 @@ class RestaurantListViewWidget extends StatelessWidget {
                     favouriteController.addToFavouriteList(null, restaurant.id, true);
                   }
                 },
-                backgroundColor: isFavorite ? Colors.red.withOpacity(0.9) : Theme.of(context).primaryColor.withOpacity(0.9),
-                foregroundColor: Colors.white,
-                icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                backgroundColor: Colors.grey.shade300,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(Dimensions.radiusDefault),
                   bottomRight: Radius.circular(Dimensions.radiusDefault),
                 ),
                 padding: EdgeInsets.zero,
+                child: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Theme.of(context).primaryColor : Colors.grey.shade600,
+                  size: 24,
+                ),
               ),
             ],
           ),

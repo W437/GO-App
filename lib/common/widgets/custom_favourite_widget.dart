@@ -59,7 +59,13 @@ class _CustomFavouriteWidgetState extends State<CustomFavouriteWidget> with Sing
       },
       child: ScaleTransition(
         scale: Tween(begin: 0.7, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut)),
-        child: CustomAssetImageWidget(widget.isWished ? Images.favouriteIcon : Images.unFavouriteIcon, height: widget.size, width: widget.size),
+        child: Icon(
+          widget.isWished ? Icons.favorite : Icons.favorite_border,
+          size: widget.size,
+          color: widget.isWished
+              ? Theme.of(context).primaryColor // Orange when favorited
+              : Colors.grey.shade400, // Muted gray when not favorited
+        ),
       ),
     );
   }
