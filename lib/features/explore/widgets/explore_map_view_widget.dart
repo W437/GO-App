@@ -296,101 +296,83 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
   Widget _buildTopButtons(BuildContext context, ExploreController controller) {
     return Stack(
       children: [
-        // Search/Filter Indicator (hide in fullscreen mode)
-        if (!controller.isFullscreenMode)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
-            left: Dimensions.paddingSizeDefault,
-            right: Dimensions.paddingSizeDefault,
-            child: Row(
-              children: [
-                // Search/Filter Badge
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Dimensions.paddingSizeDefault,
-                      vertical: Dimensions.paddingSizeSmall,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
+        // Search/Filter Indicator (always visible, animates with topButtonsAnimation)
+        Positioned(
+          top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
+          left: Dimensions.paddingSizeDefault,
+          right: Dimensions.paddingSizeDefault,
+          child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimensions.paddingSizeDefault,
+                vertical: Dimensions.paddingSizeSmall,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(100),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: Theme.of(context).primaryColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.location_on,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
+                        Text(
+                          AddressHelper.getAddressFromSharedPref()?.address ?? 'current_location'.tr,
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyMedium!.color,
+                            fontWeight: FontWeight.w600,
+                            fontSize: Dimensions.fontSizeSmall,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: Dimensions.paddingSizeSmall),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                AddressHelper.getAddressFromSharedPref()?.address ?? 'current_location'.tr,
-                                style: TextStyle(
-                                  color: Theme.of(context).textTheme.bodyMedium!.color,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: Dimensions.fontSizeSmall,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${controller.filteredRestaurants?.length ?? 0} ${'restaurants'.tr}',
-                                style: TextStyle(
-                                  color: Theme.of(context).disabledColor,
-                                  fontSize: Dimensions.fontSizeExtraSmall,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 2),
+                        Text(
+                          '${controller.filteredRestaurants?.length ?? 0} ${'restaurants'.tr}',
+                          style: TextStyle(
+                            color: Theme.of(context).disabledColor,
+                            fontSize: Dimensions.fontSizeExtraSmall,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                // Fullscreen Button
-                InkWell(
-                  onTap: widget.onFullscreenToggle,
-                  borderRadius: BorderRadius.circular(100),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Dimensions.paddingSizeDefault,
-                      vertical: Dimensions.paddingSizeSmall,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      controller.isFullscreenMode ? Icons.fullscreen_exit : Icons.fullscreen,
-                      color: Theme.of(context).primaryColor,
+                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                  // Fullscreen Button inside badge
+                  InkWell(
+                    onTap: widget.onFullscreenToggle,
+                    borderRadius: BorderRadius.circular(100),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).disabledColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        controller.isFullscreenMode ? Icons.fullscreen_exit : Icons.fullscreen,
+                        color: Theme.of(context).primaryColor,
+                        size: 20,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+        ),
       ],
     );
   }

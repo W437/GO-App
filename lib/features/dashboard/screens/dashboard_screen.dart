@@ -44,6 +44,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   int _pageIndex = 0;
   int _previousPageIndex = 0;
   late List<Widget> _screens;
+  late final List<GlobalKey> _screenKeys;
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   bool _canExit = GetPlatform.isWeb ? true : false;
   late bool _isLogin;
@@ -51,6 +52,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   late AnimationController _animationController;
   late Animation<double> _animation;
   Offset? _tapPosition;
+  bool _isAnimating = false;
 
   @override
   void initState() {
@@ -82,12 +84,29 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
 
     _pageController = PageController(initialPage: widget.pageIndex);
 
+    _screenKeys = List.generate(5, (_) => GlobalKey());
+
     _screens = [
-      const ExploreScreen(),
-      const CartScreen(fromNav: true),
-      const HomeScreen(),
-      const OrderScreen(),
-      const MenuScreen()
+      KeyedSubtree(
+        key: _screenKeys[0],
+        child: const ExploreScreen(key: PageStorageKey('explore')),
+      ),
+      KeyedSubtree(
+        key: _screenKeys[1],
+        child: const CartScreen(fromNav: true, key: PageStorageKey('cart')),
+      ),
+      KeyedSubtree(
+        key: _screenKeys[2],
+        child: const HomeScreen(key: PageStorageKey('home')),
+      ),
+      KeyedSubtree(
+        key: _screenKeys[3],
+        child: const OrderScreen(key: PageStorageKey('orders')),
+      ),
+      KeyedSubtree(
+        key: _screenKeys[4],
+        child: const MenuScreen(key: PageStorageKey('menu')),
+      ),
     ];
 
     Future.delayed(const Duration(seconds: 1), () {
@@ -242,26 +261,52 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
             List<OrderModel> runningOrder = orderController.runningOrderList != null ? orderController.runningOrderList! : [];
 
             List<OrderModel> reversOrder =  List.from(runningOrder.reversed);
+            final isSwitching = _isAnimating && _previousPageIndex != _pageIndex;
+            final displayIndex = isSwitching ? _previousPageIndex : _pageIndex;
+
             return ExpandableBottomSheet(
-              background: AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return Stack(
-                    children: [
-                      // Previous screen
-                      if (_previousPageIndex != _pageIndex)
-                        _screens[_previousPageIndex],
-                      // New screen with circular reveal
-                      ClipPath(
-                        clipper: CircularRevealClipper(
-                          fraction: _animation.value,
-                          centerOffset: _tapPosition,
+              background: Stack(
+                children: [
+                  // Bottom: base IndexedStack keeps current page visible without clipping
+                  IndexedStack(
+                    index: displayIndex,
+                    sizing: StackFit.expand,
+                    children: List.generate(_screens.length, (index) {
+                      final isDisplayedChild = displayIndex == index;
+                      final isOverlayChild = isSwitching && index == _pageIndex;
+
+                      final child = isOverlayChild ? const SizedBox() : _screens[index];
+
+                      return TickerMode(
+                        enabled: isDisplayedChild,
+                        child: child,
+                      );
+                    }),
+                  ),
+
+                  // Overlay: reveal new page inside expanding circle, leave previous page untouched underneath
+                  if (isSwitching)
+                    IgnorePointer(
+                      child: AnimatedBuilder(
+                        animation: _animation,
+                        child: SizedBox.expand(
+                          child: TickerMode(
+                            enabled: true,
+                            child: _screens[_pageIndex],
+                          ),
                         ),
-                        child: _screens[_pageIndex],
+                        builder: (context, child) {
+                          return ClipPath(
+                            clipper: CircularRevealClipper(
+                              fraction: _animation.value,
+                              centerOffset: _tapPosition,
+                            ),
+                            child: child,
+                          );
+                        },
                       ),
-                    ],
-                  );
-                },
+                    ),
+                ],
               ),
               persistentContentHeight: 100,
 
@@ -324,11 +369,19 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
 
     setState(() {
       _previousPageIndex = _pageIndex;
-      _pageIndex = pageIndex;
+      _pageIndex = pageIndex; // Update immediately for button feedback
       _tapPosition = tapPosition;
+      _isAnimating = true;
     });
 
-    _animationController.forward(from: 0.0);
+    // Start animation
+    _animationController.forward(from: 0.0).then((_) {
+      if (mounted) {
+        setState(() {
+          _isAnimating = false;
+        });
+      }
+    });
   }
 
   @override
