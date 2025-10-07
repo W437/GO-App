@@ -287,25 +287,45 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                   // Overlay: reveal new page inside expanding circle, leave previous page untouched underneath
                   if (isSwitching)
                     IgnorePointer(
-                      child: AnimatedBuilder(
-                        animation: _animation,
-                        child: SizedBox.expand(
-                          child: TickerMode(
-                            enabled: true,
-                            child: _screens[_pageIndex],
-                          ),
-                        ),
-                        builder: (context, child) {
-                          return ClipPath(
-                            clipper: CircularRevealClipper(
-                              fraction: _animation.value,
-                              centerOffset: _tapPosition,
+                        child: AnimatedBuilder(
+                          animation: _animation,
+                          child: SizedBox.expand(
+                            child: TickerMode(
+                              enabled: true,
+                              child: _screens[_pageIndex],
                             ),
-                            child: child,
+                          ),
+                          builder: (context, child) {
+                          final scale = _calculateOverlayScale(_animation.value);
+                          return LayoutBuilder(
+                            builder: (context, constraints) {
+                              final size = constraints.biggest;
+                              final rawTap = _tapPosition ?? Offset(size.width / 2, size.height / 2);
+                              final safeTap = Offset(
+                                rawTap.dx.clamp(0.0, size.width),
+                                rawTap.dy.clamp(0.0, size.height),
+                              );
+                              final alignment = Alignment(
+                                size.width > 0 ? (safeTap.dx / size.width) * 2 - 1 : 0,
+                                size.height > 0 ? (safeTap.dy / size.height) * 2 - 1 : 0,
+                              );
+
+                              return ClipPath(
+                                clipper: CircularRevealClipper(
+                                  fraction: _animation.value,
+                                  centerOffset: safeTap,
+                                ),
+                                child: Transform.scale(
+                                  scale: scale,
+                                  alignment: alignment,
+                                  child: child,
+                                ),
+                              );
+                            },
                           );
-                        },
+                          },
+                        ),
                       ),
-                    ),
                 ],
               ),
               persistentContentHeight: 100,
@@ -345,6 +365,24 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
         ),
       ),
     );
+  }
+
+  double _calculateOverlayScale(double progress) {
+    const double scaleEndProgress = 0.8;
+    const double minScale = 0.88;
+    const double peakScale = 1.015;
+
+    final clamped = progress.clamp(0.0, 1.0);
+
+    if (clamped <= scaleEndProgress) {
+      final normalized = clamped / scaleEndProgress;
+      final eased = Curves.easeOutCubic.transform(normalized);
+      return lerpDouble(minScale, peakScale, eased)!;
+    }
+
+    final settleProgress = (clamped - scaleEndProgress) / (1 - scaleEndProgress);
+    final easedSettle = Curves.easeOut.transform(settleProgress);
+    return lerpDouble(peakScale, 1.0, easedSettle)!;
   }
 
   void _setPage(int pageIndex, [Offset? tapPosition]) {
