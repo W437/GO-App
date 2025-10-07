@@ -26,6 +26,14 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> with Ticker
   @override
   void initState() {
     super.initState();
+
+    // Set loading state before loading images
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = Get.find<GameController>();
+      controller.isLoading = true;
+      controller.update();
+    });
+
     _loadImages();
 
     _gameOverAnimationController = AnimationController(
@@ -95,7 +103,11 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> with Ticker
       }
     }
 
+    // All images loaded - notify controller
     if (mounted) {
+      final controller = Get.find<GameController>();
+      controller.isLoading = false;
+      controller.update();
       setState(() {});
     }
   }
