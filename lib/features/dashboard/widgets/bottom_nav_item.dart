@@ -90,8 +90,8 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                               ),
                               child: Image.asset(
                                 widget.iconPath!,
-                                width: 32,
-                                height: 32,
+                                width: 28.8,
+                                height: 28.8,
                               ),
                             )
                           : Icon(
@@ -99,24 +99,24 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                               color: widget.isSelected
                                   ? Theme.of(context).primaryColor
                                   : Theme.of(context).disabledColor.withOpacity(0.3),
-                              size: 32,
+                              size: 28.8,
                             ),
                     ),
                   );
                 },
               ),
-              // const SizedBox(height: 2),
-              // Flexible(
-              //   child: Text(
-              //     widget.label,
-              //     style: TextStyle(
-              //       fontSize: 11,
-              //       color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
-              //     ),
-              //     maxLines: 1,
-              //     overflow: TextOverflow.ellipsis,
-              //   ),
-              // ),
+              const SizedBox(height: 2),
+              Flexible(
+                child: Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
         ),

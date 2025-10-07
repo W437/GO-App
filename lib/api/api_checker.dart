@@ -14,7 +14,8 @@ class ApiChecker {
         Get.find<FavouriteController>().removeFavourites();
         Get.offAllNamed(RouteHelper.getInitialRoute());
       });
-    } else {
+    } else if(response.statusCode != 500) {
+      // Don't show toast for 500 errors - these are server-side issues that should be silent
       showCustomSnackBar(response.statusText);
     }
   }

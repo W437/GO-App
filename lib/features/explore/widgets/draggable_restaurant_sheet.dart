@@ -10,11 +10,13 @@ import 'package:godelivery_user/util/styles.dart';
 class DraggableRestaurantSheet extends StatefulWidget {
   final ExploreController exploreController;
   final Function(double)? onPositionChanged;
+  final VoidCallback? onFullscreenToggle;
 
   const DraggableRestaurantSheet({
     super.key,
     required this.exploreController,
     this.onPositionChanged,
+    this.onFullscreenToggle,
   });
 
   @override
@@ -23,6 +25,7 @@ class DraggableRestaurantSheet extends StatefulWidget {
 
 class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
   final DraggableScrollableController _draggableController = DraggableScrollableController();
+  bool _wasInFullscreenMode = false;
 
   @override
   void initState() {
@@ -41,22 +44,54 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
     // Update map visibility based on sheet position
     if (_draggableController.isAttached) {
       final size = _draggableController.size;
-      widget.exploreController.updateSheetPosition(size);
-      // Notify parent about position change
-      widget.onPositionChanged?.call(size);
+      // Schedule update after build to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.exploreController.updateSheetPosition(size);
+          widget.onPositionChanged?.call(size);
+        }
+      });
     }
+  }
+
+  void _checkFullscreenTransition() {
+    final isInFullscreen = widget.exploreController.isFullscreenMode;
+
+    // Detect transition from fullscreen to normal mode
+    if (_wasInFullscreenMode && !isInFullscreen) {
+      // Reset sheet to default position when exiting fullscreen
+      if (_draggableController.isAttached) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _draggableController.isAttached) {
+            _draggableController.animateTo(
+              0.5,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      }
+    }
+
+    _wasInFullscreenMode = isInFullscreen;
   }
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      controller: _draggableController,
-      initialChildSize: 0.5, // 50% of screen (default)
-      minChildSize: 0.5,    // 50% minimum (can't go lower)
-      maxChildSize: 0.95,    // 95% maximum (expanded - almost full screen)
-      snap: true,
-      snapSizes: const [0.5, 0.95], // Only 2 snap points
-      builder: (BuildContext context, ScrollController scrollController) {
+    return GetBuilder<ExploreController>(
+      builder: (controller) {
+        // Check for fullscreen transitions
+        _checkFullscreenTransition();
+
+        // Allow sheet to slide down when not in fullscreen mode
+        return DraggableScrollableSheet(
+          controller: _draggableController,
+          initialChildSize: 0.5, // 50% of screen (default)
+          minChildSize: 0.5,    // Keep at 50% minimum
+          maxChildSize: 0.95,    // 95% maximum (expanded - almost full screen)
+          snap: true,
+          snapSizes: const [0.5, 0.95], // Only 2 snap points
+          builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
@@ -115,8 +150,6 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                   }
 
                   _draggableController.jumpTo(newSize);
-                  // Update map position in real-time
-                  widget.onPositionChanged?.call(newSize);
                 },
                 onVerticalDragEnd: (details) {
                   if (!_draggableController.isAttached) return;
@@ -124,9 +157,14 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                   final velocity = details.primaryVelocity ?? 0;
                   final currentSize = _draggableController.size;
 
-                  // Check if we're in an overscroll position
+                  // SIMPLE RULE: Fast downward swipe at default position = trigger fullscreen
+                  if (currentSize <= 0.52 && velocity > 700 && !widget.exploreController.isFullscreenMode) {
+                    widget.onFullscreenToggle?.call();
+                    return;
+                  }
+
+                  // Handle overscroll bounce back
                   if (currentSize < 0.5) {
-                    // Below default - always bounce back to default
                     _draggableController.animateTo(
                       0.5,
                       duration: const Duration(milliseconds: 400),
@@ -134,7 +172,6 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                     );
                     return;
                   } else if (currentSize > 0.95) {
-                    // Above expanded - always bounce back to expanded
                     _draggableController.animateTo(
                       0.95,
                       duration: const Duration(milliseconds: 400),
@@ -292,6 +329,8 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
               ),
             ],
           ),
+        );
+      },
         );
       },
     );

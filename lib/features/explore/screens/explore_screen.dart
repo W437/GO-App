@@ -157,13 +157,14 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
                 child: DraggableRestaurantSheet(
                   exploreController: exploreController,
                   onPositionChanged: _onSheetPositionChanged,
+                  onFullscreenToggle: () => _toggleFullscreen(exploreController),
                 ),
               ),
 
               // Back button (only visible in fullscreen mode) with slide down and fade animation
               if (exploreController.isFullscreenMode)
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
+                  bottom: MediaQuery.of(context).padding.bottom + Dimensions.paddingSizeDefault,
                   left: Dimensions.paddingSizeDefault,
                   child: FadeTransition(
                     opacity: _backButtonFadeAnimation,

@@ -85,7 +85,7 @@ class _NoDataScreenState extends State<NoDataScreen> with TickerProviderStateMix
   late AnimationController _emojiRainController;
   final List<_FallingEmoji> _fallingEmojis = [];
   final Random _random = Random();
-  final List<String> _foodEmojis = ['🍔', '🍕', '🍟', '🌮', '🍱', '🍜', '🍝', '🥗', '🍦', '🍰', '🥤', '🍩'];
+  final List<String> _foodEmojis = ['🍔', '🍕', '🍟', '🌮', '🍱', '🍜', '🍝', '🥗', '🍦', '🍰', '🥤', '🍩', '😂', '🤪', '😋'];
 
   DateTime? _lastTapTime;
 

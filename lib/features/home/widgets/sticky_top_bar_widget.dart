@@ -141,15 +141,12 @@ class _StickyTopBarWidgetState extends State<StickyTopBarWidget> {
                         );
                       }
                     },
-                    child: Transform.scale(
-                      scale: 1.3, // Make it 30% bigger without affecting layout
-                      child: EmojiProfilePicture(
-                        emoji: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileEmoji : null,
-                        bgColorHex: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileBgColor : null,
-                        size: 53,
-                        borderWidth: 2.4,
-                        borderColor: Colors.white.withValues(alpha: 0.3),
-                      ),
+                    child: EmojiProfilePicture(
+                      emoji: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileEmoji : null,
+                      bgColorHex: AuthHelper.isLoggedIn() ? profileController.userInfoModel?.profileBgColor : null,
+                      size: 40,
+                      borderWidth: 2,
+                      borderColor: Colors.white.withValues(alpha: 0.3),
                     ),
                   );
                 },
