@@ -1,16 +1,19 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class LocationBannerViewWidget extends StatelessWidget {
-  const LocationBannerViewWidget({super.key});
+  LocationBannerViewWidget({super.key});
+
+  final GlobalKey _buttonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +67,37 @@ class LocationBannerViewWidget extends StatelessWidget {
 
             Stack(clipBehavior: Clip.none, children: [
               CustomButtonWidget(
+                key: _buttonKey,
                 buttonText: 'see_location'.tr,
                 width: ResponsiveHelper.isMobile(context) ? 90 : 120,
                 height: ResponsiveHelper.isMobile(context) ? 35 : 40,
                 fontSize: Dimensions.fontSizeSmall,
                 radius: Dimensions.radiusDefault,
-                onPressed: ()=> Get.toNamed(RouteHelper.getMainRoute('explore')),
+                onPressed: () {
+                  Offset? tapPosition;
+                  final buttonContext = _buttonKey.currentContext;
+                  if (buttonContext != null) {
+                    final renderBox = buttonContext.findRenderObject() as RenderBox?;
+                    if (renderBox != null && renderBox.hasSize) {
+                      tapPosition = renderBox.localToGlobal(renderBox.size.center(Offset.zero));
+                    }
+                  }
+                  tapPosition ??= () {
+                    final fallbackBox = context.findRenderObject() as RenderBox?;
+                    return fallbackBox != null && fallbackBox.hasSize
+                        ? fallbackBox.localToGlobal(fallbackBox.size.center(Offset.zero))
+                        : null;
+                  }();
+
+                  if (tapPosition != null) {
+                    tapPosition = Offset(tapPosition.dx, tapPosition.dy);
+                  }
+
+                  final handled = Get.find<DashboardController>().navigateToPage(0, tapPosition: tapPosition);
+                  if (!handled) {
+                    Get.toNamed(RouteHelper.getExploreScreen());
+                  }
+                },
               ),
 
               Positioned(

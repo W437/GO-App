@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/dashboard/domain/services/dashboard_service_interface.dart';
@@ -8,9 +10,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+typedef DashboardNavigationCallback = void Function(int pageIndex, Offset? tapPosition);
+
 class DashboardController extends GetxController implements GetxService {
   final DashboardServiceInterface dashboardServiceInterface;
   DashboardController({required this.dashboardServiceInterface});
+
+  DashboardNavigationCallback? _navigationCallback;
 
   bool _showLocationSuggestion = true;
   bool get showLocationSuggestion => _showLocationSuggestion;
@@ -53,5 +59,24 @@ class DashboardController extends GetxController implements GetxService {
 
   bool getIsRestaurantRegistrationSharedPref() {
     return dashboardServiceInterface.getIsRestaurantRegistration();
+  }
+
+  void registerNavigationCallback(DashboardNavigationCallback callback) {
+    _navigationCallback = callback;
+  }
+
+  void unregisterNavigationCallback(DashboardNavigationCallback callback) {
+    if (_navigationCallback == callback) {
+      _navigationCallback = null;
+    }
+  }
+
+  bool navigateToPage(int pageIndex, {Offset? tapPosition}) {
+    final callback = _navigationCallback;
+    if (callback != null) {
+      callback(pageIndex, tapPosition);
+      return true;
+    }
+    return false;
   }
 }

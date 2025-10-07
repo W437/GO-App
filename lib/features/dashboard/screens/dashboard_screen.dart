@@ -53,6 +53,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   late Animation<double> _animation;
   Offset? _tapPosition;
   bool _isAnimating = false;
+  late final DashboardNavigationCallback _navigationCallback;
 
   @override
   void initState() {
@@ -113,6 +114,8 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       setState(() {});
     });
 
+    _navigationCallback = _onExternalPageRequest;
+    Get.find<DashboardController>().registerNavigationCallback(_navigationCallback);
   }
 
   _showRegistrationSuccessBottomSheet() {
@@ -422,7 +425,13 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
 
   @override
   void dispose() {
+    Get.find<DashboardController>().unregisterNavigationCallback(_navigationCallback);
     _animationController.dispose();
     super.dispose();
+  }
+
+  void _onExternalPageRequest(int pageIndex, Offset? tapPosition) {
+    if (!mounted) return;
+    _setPage(pageIndex, tapPosition);
   }
 }

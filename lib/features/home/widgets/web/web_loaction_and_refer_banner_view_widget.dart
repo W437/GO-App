@@ -17,7 +17,7 @@ class WebLocationAndReferBannerViewWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 13),
           child: Row(children: [
-            const Expanded(
+            Expanded(
               child: LocationBannerViewWidget(),
             ),
 
@@ -34,6 +34,3 @@ class WebLocationAndReferBannerViewWidget extends StatelessWidget {
     );
   }
 }
-
-
-
