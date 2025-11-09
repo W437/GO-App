@@ -70,13 +70,9 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
     // Load zone list after build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Get.find<LocationController>().getZoneList();
+      // Check and request location permission for all platforms
+      _checkPermission();
     });
-
-    if(ResponsiveHelper.isDesktop(Get.context!)) {
-      Future.delayed(const Duration(milliseconds: 600), () {
-        _checkPermission();
-      });
-    }
   }
 
   void _checkPermission() async {
@@ -117,7 +113,6 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
   }
 
   Future<void> _getCurrentLocationAndRoute() async {
-    Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
     AddressModel address = await Get.find<LocationController>().getCurrentLocation(true);
     ZoneResponseModel response = await Get.find<LocationController>().getZone(address.latitude, address.longitude, false);
     if(response.isSuccess) {
@@ -140,7 +135,6 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
   Widget build(BuildContext context) {
     if(!widget.fromHome && AddressHelper.getAddressFromSharedPref() != null) {
       Future.delayed(const Duration(milliseconds: 500), () {
-        Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
         Get.find<LocationController>().autoNavigate(
           AddressHelper.getAddressFromSharedPref()!, widget.fromSignUp, widget.route, widget.route != null, ResponsiveHelper.isDesktop(Get.context),
         );

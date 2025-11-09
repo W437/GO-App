@@ -267,7 +267,6 @@ class SplashController extends GetxController implements GetxService {
       Get.toNamed(RouteHelper.getPickMapRoute(page, false));
     } else {
       if(await _locationCheck()) {
-        Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
         await Get.find<LocationController>().getCurrentLocation(false).then((value) {
           if (value.latitude != null) {
             _onPickAddressButtonPressed(Get.find<LocationController>(), page);

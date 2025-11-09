@@ -57,15 +57,10 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
   void _finishOnboarding() async {
     Get.find<SplashController>().disableIntro();
 
-    // Request notification permission after onboarding
-    await NotificationHelper.requestPermission(flutterLocalNotificationsPlugin);
-
     await Get.find<AuthController>().guestLogin();
-    if (AddressHelper.getAddressFromSharedPref() != null) {
-      Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
-    } else {
-      Get.find<SplashController>().navigateToLocationScreen('splash', offNamed: true);
-    }
+
+    // Navigate directly to location screen
+    Get.offNamed(RouteHelper.getAccessLocationRoute('onboarding'));
   }
 
   @override
@@ -94,58 +89,57 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
             ],
           ),
 
-          // Overlays (indicators, next button) - only show if not on welcome page
-          if (_currentPage != 1)
-            SafeArea(
-              child: Column(
-                children: [
-                  const Spacer(),
+          // Overlays (indicators, next button) - shown for all pages
+          SafeArea(
+            child: Column(
+              children: [
+                const Spacer(),
 
-                  // Page indicators
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                    child: SmoothPageIndicator(
-                      controller: _pageController,
-                      count: 5,
-                      effect: SwapEffect(
-                        dotHeight: 8,
-                        dotWidth: 8,
-                        spacing: 8,
-                        activeDotColor: Theme.of(context).primaryColor,
-                        dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                      ),
+                // Page indicators
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+                  child: SmoothPageIndicator(
+                    controller: _pageController,
+                    count: 5,
+                    effect: SwapEffect(
+                      dotHeight: 8,
+                      dotWidth: 8,
+                      spacing: 8,
+                      activeDotColor: Theme.of(context).primaryColor,
+                      dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
                     ),
                   ),
+                ),
 
-                  // Next button
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      Dimensions.paddingSizeExtraLarge,
-                      0,
-                      Dimensions.paddingSizeExtraLarge,
-                      Dimensions.paddingSizeDefault,
-                    ),
-                    child: GetBuilder<LocalizationController>(
-                      builder: (localizationController) {
-                        return CustomButtonWidget(
-                          buttonText: _currentPage == 4 ? 'get_started'.tr : 'next'.tr,
-                          onPressed: () {
-                            // Validate language selection on first page
-                            if (_currentPage == 0) {
-                              if (localizationController.selectedLanguageIndex == -1) {
-                                showCustomSnackBar('select_a_language'.tr);
-                                return;
-                              }
+                // Next button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Dimensions.paddingSizeExtraLarge,
+                    0,
+                    Dimensions.paddingSizeExtraLarge,
+                    Dimensions.paddingSizeDefault,
+                  ),
+                  child: GetBuilder<LocalizationController>(
+                    builder: (localizationController) {
+                      return CustomButtonWidget(
+                        buttonText: _currentPage == 4 ? 'get_started'.tr : 'next'.tr,
+                        onPressed: () {
+                          // Validate language selection on first page
+                          if (_currentPage == 0) {
+                            if (localizationController.selectedLanguageIndex == -1) {
+                              showCustomSnackBar('select_a_language'.tr);
+                              return;
                             }
-                            _nextPage();
-                          },
-                        );
-                      },
-                    ),
+                          }
+                          _nextPage();
+                        },
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );
@@ -157,7 +151,12 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
       builder: (localizationController) {
         return SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+            padding: const EdgeInsets.fromLTRB(
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeLarge,
+              120, // Bottom padding for overlay buttons
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -281,78 +280,46 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
           ),
         ),
 
-        // Bottom section: White background with content
+        // Bottom section: White background with content only (no buttons/pagination)
         Expanded(
           flex: 4,
           child: Container(
             width: double.infinity,
             color: Theme.of(context).cardColor,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Top content: Title and description
-                    Column(
-                      children: [
-                        // Welcome title
-                        Text(
-                          'welcome_title'.tr,
-                          style: robotoBold.copyWith(
-                            fontSize: 36,
-                            color: Theme.of(context).primaryColor,
-                            height: 1.2,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                        // Description
-                        Text(
-                          'welcome_description'.tr,
-                          style: robotoRegular.copyWith(
-                            fontSize: Dimensions.fontSizeDefault,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-
-                    // Bottom content: Pagination and button
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Page indicators
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                          child: SmoothPageIndicator(
-                            controller: _pageController,
-                            count: 5,
-                            effect: SwapEffect(
-                              dotHeight: 8,
-                              dotWidth: 8,
-                              spacing: 8,
-                              activeDotColor: Theme.of(context).primaryColor,
-                              dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                            ),
-                          ),
-                        ),
-
-                        // Next button
-                        CustomButtonWidget(
-                          buttonText: 'next'.tr,
-                          onPressed: _nextPage,
-                        ),
-                      ],
-                    ),
-                  ],
+            padding: const EdgeInsets.fromLTRB(
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeLarge,
+              Dimensions.paddingSizeLarge,
+              120, // Bottom padding for overlay buttons
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Welcome title
+                Text(
+                  'welcome_title'.tr,
+                  style: robotoBold.copyWith(
+                    fontSize: 36,
+                    color: Theme.of(context).primaryColor,
+                    height: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                // Description
+                Text(
+                  'welcome_description'.tr,
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
