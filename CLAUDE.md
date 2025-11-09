@@ -1,0 +1,1 @@
+- DigitalOcean deployment server ip: 138.197.188.120 - use for SSH'ing in.

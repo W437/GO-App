@@ -222,24 +222,29 @@ class SplashScreenState extends State<SplashScreen> {
 
             // Skip button at the bottom
             Positioned(
-              bottom: Dimensions.paddingSizeExtraLarge,
+              bottom: 0,
               left: 0,
               right: 0,
-              child: Center(
-                child: TextButton(
-                  onPressed: () {
-                    if (!_hasTriggeredRoute) {
-                      print('🎥 [SPLASH] Skip button pressed');
-                      _videoCompleted = true;
-                      _tryStartRouting();
-                    }
-                  },
-                  child: Text(
-                    'skip'.tr,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                  child: Center(
+                    child: TextButton(
+                      onPressed: () {
+                        if (!_hasTriggeredRoute) {
+                          print('🎥 [SPLASH] Skip button pressed');
+                          _videoCompleted = true;
+                          _tryStartRouting();
+                        }
+                      },
+                      child: Text(
+                        'skip'.tr,
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ),

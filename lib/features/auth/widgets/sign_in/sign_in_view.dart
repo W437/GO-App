@@ -86,7 +86,24 @@ class _SignInViewState extends State<SignInView> {
   }
 
   Widget activeCentralizeLogin(CentralizeLoginSetup centralizeLoginSetup, AuthController authController) {
-    CentralizeLoginType centralizeLogin = CentralizeLoginHelper.getPreferredLoginMethod(centralizeLoginSetup, authController.isOtpViewEnable).type;
+    // 🔍 DEBUG: Print login configuration
+    print('═══════════════════════════════════════════════════════════');
+    print('🔍 [LOGIN DEBUG] Configuration from Backend:');
+    print('   Manual Login Status: ${centralizeLoginSetup.manualLoginStatus}');
+    print('   OTP Login Status: ${centralizeLoginSetup.otpLoginStatus}');
+    print('   Social Login Status: ${centralizeLoginSetup.socialLoginStatus}');
+    print('   Google Login Status: ${centralizeLoginSetup.googleLoginStatus}');
+    print('   Facebook Login Status: ${centralizeLoginSetup.facebookLoginStatus}');
+    print('   Apple Login Status: ${centralizeLoginSetup.appleLoginStatus}');
+    print('   isOtpViewEnable (AuthController): ${authController.isOtpViewEnable}');
+    print('-----------------------------------------------------------');
+
+    var loginMethod = CentralizeLoginHelper.getPreferredLoginMethod(centralizeLoginSetup, authController.isOtpViewEnable);
+    CentralizeLoginType centralizeLogin = loginMethod.type;
+
+    print('🎯 [LOGIN DEBUG] Selected Login Method: $centralizeLogin');
+    print('   Widget Size: ${loginMethod.size}');
+    print('═══════════════════════════════════════════════════════════');
 
     switch (centralizeLogin) {
       case CentralizeLoginType.otp:

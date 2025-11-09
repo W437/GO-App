@@ -115,6 +115,23 @@ class SplashController extends GetxController implements GetxService {
     if(response.statusCode == 200) {
       _configModel = splashServiceInterface.prepareConfigData(response);
       if(_configModel != null) {
+        // 🔍 DEBUG: Print loaded config
+        print('═══════════════════════════════════════════════════════════');
+        print('🔍 [CONFIG DEBUG] Configuration loaded successfully!');
+        print('   Business Name: ${_configModel!.businessName ?? "N/A"}');
+        if(_configModel!.centralizeLoginSetup != null) {
+          print('📱 [CONFIG DEBUG] Centralize Login Setup:');
+          print('   Manual Login: ${_configModel!.centralizeLoginSetup!.manualLoginStatus}');
+          print('   OTP Login: ${_configModel!.centralizeLoginSetup!.otpLoginStatus}');
+          print('   Social Login: ${_configModel!.centralizeLoginSetup!.socialLoginStatus}');
+          print('   Google: ${_configModel!.centralizeLoginSetup!.googleLoginStatus}');
+          print('   Facebook: ${_configModel!.centralizeLoginSetup!.facebookLoginStatus}');
+          print('   Apple: ${_configModel!.centralizeLoginSetup!.appleLoginStatus}');
+        } else {
+          print('⚠️ [CONFIG DEBUG] centralizeLoginSetup is NULL!');
+        }
+        print('═══════════════════════════════════════════════════════════');
+
         if(!GetPlatform.isWeb){
           bool isMaintenanceMode = _configModel!.maintenanceMode!;
           bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
