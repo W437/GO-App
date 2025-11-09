@@ -225,7 +225,7 @@ class Images {
   static const String dineInMap = 'assets/image/orders/dine_in_map.png';
   static const String uploadIcon = 'assets/image/ui/upload_icon.png';
 
-  static const String welcomeBg = 'assets/image/onboarding/welcome_bg.jpg';
+  static const String welcomeBg = 'assets/image/onboarding/welcome-bg-hopa.png';
   static const String onboarding_1 = 'assets/image/onboarding/onboard_1.svg';
   static const String onboarding_2 = 'assets/image/onboarding/onboard_2.svg';
   static const String onboarding_3 = 'assets/image/onboarding/onboard_3.svg';

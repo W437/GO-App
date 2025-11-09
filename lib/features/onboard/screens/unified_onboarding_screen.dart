@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -92,30 +93,11 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
             ],
           ),
 
-          // Overlays (skip button, indicators, next button) - only show if not on welcome page
+          // Overlays (indicators, next button) - only show if not on welcome page
           if (_currentPage != 1)
             SafeArea(
               child: Column(
                 children: [
-                  // Skip button
-                  if (_currentPage < 4)
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                        child: TextButton(
-                          onPressed: () => _pageController.jumpToPage(4),
-                          child: Text(
-                            'skip'.tr,
-                            style: robotoMedium.copyWith(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: Dimensions.fontSizeDefault,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
                   const Spacer(),
 
                   // Page indicators
@@ -239,8 +221,8 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                 // Lottie animation
                 Lottie.asset(
                   'assets/animations/language_screen_lottie.json',
-                  height: 200,
-                  width: 200,
+                  height: 160,
+                  width: 160,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
@@ -248,7 +230,7 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                 // Title
                 Text(
                   'choose_your_language'.tr,
-                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraSmall),
@@ -256,25 +238,34 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                 // Subtitle
                 Text(
                   'choose_your_language_to_proceed'.tr,
-                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                // Language cards
+                // Language vertical list
                 ListView.builder(
                   itemCount: localizationController.languages.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                   itemBuilder: (context, index) {
-                    return LanguageCardWidget(
-                      languageModel: localizationController.languages[index],
-                      localizationController: localizationController,
-                      index: index,
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index < localizationController.languages.length - 1 ? 12 : 0,
+                      ),
+                      child: LanguageCardWidget(
+                        languageModel: localizationController.languages[index],
+                        localizationController: localizationController,
+                        index: index,
+                      ),
                     );
                   },
                 ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
 
                 // Muted text
                 Text(
@@ -309,19 +300,42 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
           ),
         ),
 
-        // Dark gradient overlay
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.3),
-                Colors.black.withValues(alpha: 0.7),
-              ],
-            ),
+        // Gradient fade overlay with blur at bottom
+        Positioned.fill(
+          child: Stack(
+            children: [
+              // Blur layer
+              Positioned.fill(
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+              ),
+              // Gradient mask to control blur visibility (fade from top to bottom)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context).cardColor.withValues(alpha: 0.0),
+                        Theme.of(context).cardColor.withValues(alpha: 0.0),
+                        Theme.of(context).cardColor.withValues(alpha: 0.2),
+                        Theme.of(context).cardColor.withValues(alpha: 0.5),
+                        Theme.of(context).cardColor.withValues(alpha: 0.8),
+                        Theme.of(context).cardColor.withValues(alpha: 0.95),
+                      ],
+                      stops: const [0.0, 0.3, 0.5, 0.7, 0.85, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -354,7 +368,7 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                   'welcome_description'.tr,
                   style: robotoRegular.copyWith(
                     fontSize: Dimensions.fontSizeDefault,
-                    color: Colors.white,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,

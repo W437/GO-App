@@ -43,8 +43,8 @@ class _LanguageScreenState extends State<LanguageScreen> {
                       // Lottie animation
                       Lottie.asset(
                         'assets/animations/language_screen_lottie.json',
-                        height: 200,
-                        width: 200,
+                        height: 160,
+                        width: 160,
                         fit: BoxFit.contain,
                       ),
                       const SizedBox(height: Dimensions.paddingSizeLarge),
@@ -54,7 +54,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                         child: Text(
                           'choose_your_language'.tr,
-                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -65,27 +65,35 @@ class _LanguageScreenState extends State<LanguageScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                         child: Text(
                           'choose_your_language_to_proceed'.tr,
-                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                          style: robotoRegular.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Theme.of(context).hintColor,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
                       const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                      // Language list
+                      // Language vertical list
                       ListView.builder(
                         itemCount: localizationController.languages.length,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                         itemBuilder: (context, index) {
-                          return LanguageCardWidget(
-                            languageModel: localizationController.languages[index],
-                            localizationController: localizationController,
-                            index: index,
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: index < localizationController.languages.length - 1 ? 12 : 0,
+                            ),
+                            child: LanguageCardWidget(
+                              languageModel: localizationController.languages[index],
+                              localizationController: localizationController,
+                              index: index,
+                            ),
                           );
                         },
                       ),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
+                      const SizedBox(height: Dimensions.paddingSizeDefault),
 
                       // Muted text
                       Padding(

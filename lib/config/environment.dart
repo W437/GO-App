@@ -25,10 +25,10 @@ class Environment {
   static String get facebookAppId => dotenv.env['FACEBOOK_APP_ID'] ?? '452131619626499';
 
   // App Configuration
-  static String get appName => dotenv.env['APP_NAME'] ?? 'GoDelivery';
+  static String get appName => dotenv.env['APP_NAME'] ?? 'Hopa!';
   static double get appVersion => double.tryParse(dotenv.env['APP_VERSION'] ?? '8.3') ?? 8.3;
-  static String get yourScheme => dotenv.env['YOUR_SCHEME'] ?? 'GoDelivery';
-  static String get yourHost => dotenv.env['YOUR_HOST'] ?? 'godelivery.com';
+  static String get yourScheme => dotenv.env['YOUR_SCHEME'] ?? 'Hopa';
+  static String get yourHost => dotenv.env['YOUR_HOST'] ?? 'hopa.delivery';
 
   // Google Maps Configuration
   static String get googleMapsApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';

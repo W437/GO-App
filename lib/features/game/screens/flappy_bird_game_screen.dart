@@ -186,7 +186,7 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> with Ticker
 
                         // Title
                         Text(
-                          'GO! BIRD',
+                          'HOPA! BIRD',
                           style: TextStyle(
                             fontSize: Dimensions.fontSizeExtraLarge,
                             fontWeight: FontWeight.bold,
@@ -331,7 +331,7 @@ class _FlappyBirdGameScreenState extends State<FlappyBirdGameScreen> with Ticker
                                       ),
                                       child: Center(
                                         child: Text(
-                                          'GO!',
+                                          'Hopa!',
                                           style: TextStyle(
                                             fontSize: Dimensions.fontSizeOverLarge * 1.5,
                                             fontWeight: FontWeight.bold,

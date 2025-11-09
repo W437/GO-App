@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.godelivery.user"
+    namespace "com.hopa.user"
     compileSdk 36
     ndkVersion = "27.0.12077973"
 

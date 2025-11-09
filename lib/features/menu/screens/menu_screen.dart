@@ -286,7 +286,7 @@ class _MenuScreenState extends State<MenuScreen> {
                         ),
                         PortionWidget(
                           iconData: Icons.sports_esports,
-                          title: 'GO! Bird Game',
+                          title: 'Hopa! Bird Game',
                           route: RouteHelper.getFlappyBirdGameScreen(),
                         ),
                         PortionWidget(icon: Images.addressIcon, title: 'my_address'.tr, route: RouteHelper.getAddressRoute()),
