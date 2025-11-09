@@ -8,14 +8,21 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 import 'package:godelivery_user/helper/address_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/util/images.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
 
 class SplashScreen extends StatefulWidget {
   final NotificationBodyModel? notificationBody;
   final DeepLinkBody? linkBody;
-  const SplashScreen({super.key, required this.notificationBody, required this.linkBody});
+  final bool muteVideo;
+
+  const SplashScreen({
+    super.key,
+    required this.notificationBody,
+    required this.linkBody,
+    this.muteVideo = false,
+  });
 
   @override
   SplashScreenState createState() => SplashScreenState();
@@ -24,10 +31,17 @@ class SplashScreen extends StatefulWidget {
 class SplashScreenState extends State<SplashScreen> {
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey();
   StreamSubscription<List<ConnectivityResult>>? _onConnectivityChanged;
+  late final VideoPlayerController _videoController;
+  late final Future<void> _videoInitializationFuture;
+  bool _videoCompleted = false;
+  bool _hasTriggeredRoute = false;
+  bool _videoFailedToLoad = false;
 
   @override
   void initState() {
     super.initState();
+
+    _initializeVideo();
 
     bool firstTime = true;
     _onConnectivityChanged = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
@@ -41,7 +55,7 @@ class SplashScreenState extends State<SplashScreen> {
           content: Text(isConnected ? 'connected'.tr : 'no_connection'.tr, textAlign: TextAlign.center),
         ));
         if(isConnected) {
-          _route();
+          _handleConnectionRestored();
         }else {
           Get.to(const NoInternetScreen());
         }
@@ -59,8 +73,6 @@ class SplashScreenState extends State<SplashScreen> {
     if(Get.find<AuthController>().isGuestLoggedIn() || Get.find<AuthController>().isLoggedIn()) {
       Get.find<CartController>().getCartDataOnline();
     }
-    _route();
-
   }
 
   @override
@@ -68,6 +80,77 @@ class SplashScreenState extends State<SplashScreen> {
     super.dispose();
 
     _onConnectivityChanged?.cancel();
+    _videoController.removeListener(_videoListener);
+    _videoController.dispose();
+  }
+
+  void _initializeVideo() {
+    print('🎥 [SPLASH] Starting video initialization...');
+    _videoController = VideoPlayerController.asset('assets/video/notbad.mp4');
+    _videoInitializationFuture = _videoController.initialize().then((_) async {
+      print('🎥 [SPLASH] Video initialized successfully');
+      print('🎥 [SPLASH] Video duration: ${_videoController.value.duration}');
+      print('🎥 [SPLASH] Video aspect ratio: ${_videoController.value.aspectRatio}');
+      print('🎥 [SPLASH] Video size: ${_videoController.value.size}');
+
+      if (!mounted) {
+        print('🎥 [SPLASH] Widget not mounted, skipping play');
+        return;
+      }
+
+      await _videoController.setLooping(false);
+      await _videoController.setVolume(widget.muteVideo ? 0.0 : 1.0);
+      print('🎥 [SPLASH] Starting video playback...');
+      await _videoController.play();
+      print('🎥 [SPLASH] Video play() called, isPlaying: ${_videoController.value.isPlaying}');
+      print('🎥 [SPLASH] Video muted: ${widget.muteVideo}, volume: ${_videoController.value.volume}');
+
+      _videoController.addListener(_videoListener);
+      if (mounted) {
+        setState(() {});
+      }
+    }).catchError((error) {
+      print('❌ [SPLASH] Video initialization failed: $error');
+      _videoFailedToLoad = true;
+      _handleVideoCompleted();
+    });
+  }
+
+  void _videoListener() {
+    if (!_videoController.value.isInitialized || _videoFailedToLoad) {
+      return;
+    }
+    final Duration duration = _videoController.value.duration;
+    final Duration position = _videoController.value.position;
+    if (!_videoCompleted && duration > Duration.zero && position >= duration - const Duration(milliseconds: 100)) {
+      _handleVideoCompleted();
+    }
+  }
+
+  void _handleVideoCompleted() {
+    if (_videoCompleted) return;
+    print('🎥 [SPLASH] Video completed');
+    _videoCompleted = true;
+    _videoController.removeListener(_videoListener);
+    _tryStartRouting();
+  }
+
+  void _handleConnectionRestored() {
+    _tryStartRouting();
+  }
+
+  void _tryStartRouting() {
+    print('🎥 [SPLASH] _tryStartRouting called - hasTriggeredRoute: $_hasTriggeredRoute, videoCompleted: $_videoCompleted');
+    if (_hasTriggeredRoute || !_videoCompleted) return;
+
+    final hasConnection = Get.find<SplashController>().hasConnection;
+    print('🎥 [SPLASH] Connection status: $hasConnection');
+    if (!hasConnection) {
+      return;
+    }
+    _hasTriggeredRoute = true;
+    print('🎥 [SPLASH] Starting route to next screen');
+    _route();
   }
 
   void _route() {
@@ -76,27 +159,117 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('🎥 [SPLASH] Building splash screen');
     return Scaffold(
+      backgroundColor: Colors.white,
       key: _globalKey,
       body: GetBuilder<SplashController>(builder: (splashController) {
-        return Center(
-          child: splashController.hasConnection ? Column(
-            mainAxisSize: MainAxisSize.min,
+        print('🎥 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
+
+        // Show no internet screen only if explicitly no connection
+        // but keep it as an overlay, don't block video
+        if (!splashController.hasConnection) {
+          // Let video play in background, show connection screen as overlay
+          return Stack(
             children: [
-              Image.asset(Images.logo, width: 200),
-              const SizedBox(height: 80),
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-                  strokeWidth: 3,
+              _buildVideoPlayer(),
+              NoInternetScreen(
+                child: SplashScreen(
+                  notificationBody: widget.notificationBody,
+                  linkBody: widget.linkBody,
+                  muteVideo: widget.muteVideo,
                 ),
               ),
             ],
-          ) : NoInternetScreen(child: SplashScreen(notificationBody: widget.notificationBody, linkBody: widget.linkBody)),
-        );
+          );
+        }
+
+        return _buildVideoPlayer();
       }),
+    );
+  }
+
+  Widget _buildVideoPlayer() {
+    return FutureBuilder<void>(
+      future: _videoInitializationFuture,
+      builder: (context, snapshot) {
+        print('🎥 [SPLASH] FutureBuilder state: ${snapshot.connectionState}');
+
+        final bool isVideoReady = snapshot.connectionState == ConnectionState.done &&
+                                   !_videoFailedToLoad &&
+                                   !snapshot.hasError;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Thumbnail shown while video loads
+            Image.asset(
+              'assets/image/splash_thumbnail.jpg',
+              fit: BoxFit.contain,
+            ),
+
+            // Video player on top, only visible when ready
+            if (isVideoReady)
+              Container(
+                color: Colors.white,
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: _videoController.value.aspectRatio,
+                    child: VideoPlayer(_videoController),
+                  ),
+                ),
+              ),
+
+            // Skip button at the bottom
+            Positioned(
+              bottom: Dimensions.paddingSizeExtraLarge,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: TextButton(
+                  onPressed: () {
+                    if (!_hasTriggeredRoute) {
+                      print('🎥 [SPLASH] Skip button pressed');
+                      _videoCompleted = true;
+                      _tryStartRouting();
+                    }
+                  },
+                  child: Text(
+                    'skip'.tr,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FallbackLogo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            const SizedBox(height: Dimensions.paddingSizeLarge),
+            Text(
+              'Launching...',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -61,7 +61,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   custom_info_window: ^1.0.1
   flutter_widget_from_html_core: ^0.15.2
-  smooth_page_indicator: ^1.2.0+3
+  smooth_page_indicator: ^1.2.1
   video_player: ^2.9.3
   chewie: ^1.11.0
   location: ^7.0.0
@@ -126,6 +126,7 @@ flutter:
     - assets/animations/
     - assets/game/assets/
     - assets/game/sfx/
+    - assets/video/
     - .env
 
   fonts:

@@ -93,24 +93,9 @@ class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTick
           padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
           decoration: BoxDecoration(
             color: _isSelected
-              ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
-              : Theme.of(context).cardColor,
+              ? Colors.green.withValues(alpha: 0.1)
+              : Theme.of(context).disabledColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: _isSelected
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).disabledColor.withValues(alpha: 0.3),
-              width: _isSelected ? 2.5 : 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _isSelected
-                  ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                  : Colors.black.withValues(alpha: 0.03),
-                blurRadius: _isSelected ? 6 : 4,
-                offset: Offset(0, _isSelected ? 3 : 2),
-              ),
-            ],
           ),
           child: Row(
             children: [
@@ -130,9 +115,7 @@ class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTick
                   style: robotoMedium.copyWith(
                     fontSize: Dimensions.fontSizeLarge,
                     fontFamily: AppConstants.getFontFamily(widget.languageModel.languageCode ?? 'en'),
-                    color: _isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).textTheme.bodyLarge?.color,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -148,11 +131,11 @@ class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTick
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
+                    color: Colors.green,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                        color: Colors.green.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),

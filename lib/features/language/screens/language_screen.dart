@@ -28,7 +28,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
     return Scaffold(
       appBar: (widget.fromMenu || ResponsiveHelper.isDesktop(context)) ? CustomAppBarWidget(title: 'language'.tr, isBackButtonExist: true) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-      backgroundColor: Theme.of(context).cardColor,
+      backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.03),
       body: SafeArea(
         child: GetBuilder<LocalizationController>(builder: (localizationController) {
           return ResponsiveHelper.isDesktop(context) ? const WebLanguageScreen() : Column(children: [

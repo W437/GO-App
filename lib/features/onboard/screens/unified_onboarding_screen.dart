@@ -18,6 +18,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:lottie/lottie.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class UnifiedOnboardingScreen extends StatefulWidget {
   const UnifiedOnboardingScreen({super.key});
@@ -103,22 +104,15 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                   // Page indicators
                   Padding(
                     padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        5,
-                        (index) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: index == _currentPage ? 32 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: index == _currentPage
-                                ? Theme.of(context).primaryColor
-                                : Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
+                    child: SmoothPageIndicator(
+                      controller: _pageController,
+                      count: 5,
+                      effect: SwapEffect(
+                        dotHeight: 8,
+                        dotWidth: 8,
+                        spacing: 8,
+                        activeDotColor: Theme.of(context).primaryColor,
+                        dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
                       ),
                     ),
                   ),
@@ -150,57 +144,6 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                     ),
                   ),
                 ],
-              ),
-            ),
-
-          // For welcome page, show only indicators and next button at bottom with SafeArea
-          if (_currentPage == 1)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Page indicators
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          5,
-                          (index) => AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: index == _currentPage ? 32 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: index == _currentPage
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Next button
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        Dimensions.paddingSizeExtraLarge,
-                        0,
-                        Dimensions.paddingSizeExtraLarge,
-                        Dimensions.paddingSizeDefault,
-                      ),
-                      child: CustomButtonWidget(
-                        buttonText: 'next'.tr,
-                        onPressed: _nextPage,
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
         ],
@@ -286,51 +229,50 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
   // Welcome Page
   Widget _buildWelcomePage() {
-    return Stack(
+    return Column(
       children: [
-        // Background image
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(Images.welcomeBg),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-
-        // Gradient fade overlay with blur at bottom
-        Positioned.fill(
+        // Top section: Image with blur
+        Expanded(
+          flex: 6,
           child: Stack(
             children: [
-              // Blur layer
-              Positioned.fill(
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                    child: Container(
-                      color: Colors.transparent,
-                    ),
+              // Background image
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(Images.welcomeBg),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
-              // Gradient mask to control blur visibility (fade from top to bottom)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
+
+              // Smooth blur fade at bottom of image - using ShaderMask for gradual blur transition
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 350,
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Theme.of(context).cardColor.withValues(alpha: 0.0),
-                        Theme.of(context).cardColor.withValues(alpha: 0.0),
-                        Theme.of(context).cardColor.withValues(alpha: 0.2),
-                        Theme.of(context).cardColor.withValues(alpha: 0.5),
-                        Theme.of(context).cardColor.withValues(alpha: 0.8),
-                        Theme.of(context).cardColor.withValues(alpha: 0.95),
+                      colors: const [
+                        Colors.transparent,
+                        Colors.black,
                       ],
-                      stops: const [0.0, 0.3, 0.5, 0.7, 0.85, 1.0],
+                      stops: const [0.0, 0.5],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstOut,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                      child: Container(
+                        color: Colors.transparent,
+                      ),
                     ),
                   ),
                 ),
@@ -339,41 +281,78 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
           ),
         ),
 
-        // Content - centered above pagination
-        Positioned(
-          bottom: 150, // Above the pagination and button
-          left: 0,
-          right: 0,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Welcome title
-                Text(
-                  'welcome_title'.tr,
-                  style: robotoBold.copyWith(
-                    fontSize: 36,
-                    color: Theme.of(context).primaryColor,
-                    height: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+        // Bottom section: White background with content
+        Expanded(
+          flex: 4,
+          child: Container(
+            width: double.infinity,
+            color: Theme.of(context).cardColor,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Top content: Title and description
+                    Column(
+                      children: [
+                        // Welcome title
+                        Text(
+                          'welcome_title'.tr,
+                          style: robotoBold.copyWith(
+                            fontSize: 36,
+                            color: Theme.of(context).primaryColor,
+                            height: 1.2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
 
-                const SizedBox(height: Dimensions.paddingSizeDefault),
+                        const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                // Description
-                Text(
-                  'welcome_description'.tr,
-                  style: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
+                        // Description
+                        Text(
+                          'welcome_description'.tr,
+                          style: robotoRegular.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+
+                    // Bottom content: Pagination and button
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Page indicators
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+                          child: SmoothPageIndicator(
+                            controller: _pageController,
+                            count: 5,
+                            effect: SwapEffect(
+                              dotHeight: 8,
+                              dotWidth: 8,
+                              spacing: 8,
+                              activeDotColor: Theme.of(context).primaryColor,
+                              dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                        ),
+
+                        // Next button
+                        CustomButtonWidget(
+                          buttonText: 'next'.tr,
+                          onPressed: _nextPage,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -398,12 +377,25 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Illustration
-              CustomAssetImageWidget(
-                onBoardingController.onBoardingList![index].imageUrl,
+              // Illustration - Placeholder
+              Container(
                 width: MediaQuery.of(context).size.width * 0.6,
                 height: MediaQuery.of(context).size.height * 0.35,
-                fit: BoxFit.contain,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.image_outlined,
+                    size: 80,
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                  ),
+                ),
               ),
 
               const SizedBox(height: Dimensions.paddingSizeExtraLarge),

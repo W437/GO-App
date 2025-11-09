@@ -6,7 +6,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class CustomButtonWidget extends StatelessWidget {
+class CustomButtonWidget extends StatefulWidget {
   final Function? onPressed;
   final String? buttonText;
   final bool transparent;
@@ -49,38 +49,45 @@ class CustomButtonWidget extends StatelessWidget {
   });
 
   @override
+  State<CustomButtonWidget> createState() => _CustomButtonWidgetState();
+}
+
+class _CustomButtonWidgetState extends State<CustomButtonWidget> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     // For circular buttons (icon-only)
-    if (isCircular) {
-      final size = width ?? height ?? 44.0;
+    if (widget.isCircular) {
+      final size = widget.width ?? widget.height ?? 44.0;
       return Padding(
-        padding: margin ?? EdgeInsets.zero,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: onPressed == null
-              ? Theme.of(context).disabledColor.withValues(alpha: 0.6)
-              : transparent
-                ? Colors.transparent
-                : color ?? Theme.of(context).primaryColor,
-            shape: BoxShape.circle,
-            border: border,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: isLoading ? null : onPressed as void Function()?,
-              borderRadius: BorderRadius.circular(size / 2),
-              splashFactory: InkRipple.splashFactory,
-              splashColor: Colors.black.withOpacity(0.1),
-              highlightColor: Colors.black.withOpacity(0.05),
+        padding: widget.margin ?? EdgeInsets.zero,
+        child: GestureDetector(
+          onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => setState(() => _isPressed = true) : null,
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTapCancel: () => setState(() => _isPressed = false),
+          onTap: widget.isLoading ? null : widget.onPressed as void Function()?,
+          child: AnimatedOpacity(
+            opacity: _isPressed ? 0.6 : 1.0,
+            duration: const Duration(milliseconds: 100),
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: widget.onPressed == null
+                  ? Theme.of(context).disabledColor.withValues(alpha: 0.6)
+                  : widget.transparent
+                    ? Colors.transparent
+                    : widget.color ?? Theme.of(context).primaryColor,
+                shape: BoxShape.circle,
+                border: widget.border,
+              ),
               child: Center(
-                child: child ?? (icon != null
+                child: widget.child ?? (widget.icon != null
                   ? Icon(
-                      icon,
-                      color: iconColor ?? (transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
-                      size: iconSize ?? 24,
+                      widget.icon,
+                      color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                      size: widget.iconSize ?? 24,
                     )
                   : null),
               ),
@@ -91,29 +98,29 @@ class CustomButtonWidget extends StatelessWidget {
     }
 
     // For regular buttons (existing behavior)
-    return Center(child: SizedBox(width: width ?? Dimensions.webMaxWidth, child: Padding(
-      padding: margin == null ? const EdgeInsets.all(0) : margin!,
-      child: Material(
-        color: onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : transparent
-            ? Colors.transparent : color ?? Theme.of(context).primaryColor,
-        borderRadius: BorderRadius.circular(radius),
-        child: InkWell(
-          onTap: isLoading ? null : onPressed as void Function()?,
-          borderRadius: BorderRadius.circular(radius),
-          splashFactory: InkRipple.splashFactory,
-          splashColor: Colors.black.withOpacity(0.1),
-          highlightColor: Colors.black.withOpacity(0.05),
+    return Center(child: SizedBox(width: widget.width ?? Dimensions.webMaxWidth, child: Padding(
+      padding: widget.margin == null ? const EdgeInsets.all(0) : widget.margin!,
+      child: GestureDetector(
+        onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => setState(() => _isPressed = true) : null,
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        onTap: widget.isLoading ? null : widget.onPressed as void Function()?,
+        child: AnimatedOpacity(
+          opacity: _isPressed ? 0.6 : 1.0,
+          duration: const Duration(milliseconds: 100),
           child: Container(
-            decoration: border != null ? BoxDecoration(
-              borderRadius: BorderRadius.circular(radius),
-              border: border,
-            ) : null,
-            constraints: BoxConstraints(
-              minWidth: width ?? Dimensions.webMaxWidth,
-              minHeight: height ?? 56,
+            decoration: BoxDecoration(
+              color: widget.onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : widget.transparent
+                  ? Colors.transparent : widget.color ?? Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(widget.radius),
+              border: widget.border,
             ),
-            child: child ?? Center(
-              child: isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+            constraints: BoxConstraints(
+              minWidth: widget.width ?? Dimensions.webMaxWidth,
+              minHeight: widget.height ?? 56,
+            ),
+            child: widget.child ?? Center(
+              child: widget.isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                 const SizedBox(
                   height: 15, width: 15,
                   child: CircularProgressIndicator(
@@ -125,16 +132,16 @@ class CustomButtonWidget extends StatelessWidget {
 
                 Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white)),
               ]) : Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
-                icon != null ? Padding(
+                widget.icon != null ? Padding(
                   padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
-                  child: Icon(icon, color: iconColor ?? (transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
+                  child: Icon(widget.icon, color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
                 ) : const SizedBox(),
-                buttonText != null ? Text(buttonText!, textAlign: TextAlign.center,  style: isBold ? robotoBold.copyWith(
-                    color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
-                    fontSize: fontSize ?? Dimensions.fontSizeLarge,
+                widget.buttonText != null ? Text(widget.buttonText!, textAlign: TextAlign.center,  style: widget.isBold ? robotoBold.copyWith(
+                    color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
+                    fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
                   ) : robotoRegular.copyWith(
-                    color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
-                    fontSize: fontSize ?? Dimensions.fontSizeLarge,
+                    color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
+                    fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
                   )
                 ) : const SizedBox(),
               ]),

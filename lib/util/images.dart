@@ -225,11 +225,9 @@ class Images {
   static const String dineInMap = 'assets/image/orders/dine_in_map.png';
   static const String uploadIcon = 'assets/image/ui/upload_icon.png';
 
-  static const String welcomeBg = 'assets/image/onboarding/welcome-bg-hopa.png';
-  static const String onboarding_1 = 'assets/image/onboarding/onboard_1.svg';
-  static const String onboarding_2 = 'assets/image/onboarding/onboard_2.svg';
-  static const String onboarding_3 = 'assets/image/onboarding/onboard_3.svg';
-  static const String languageBg = 'assets/image/language/language_bg.svg';
+  static const String welcomeBg = 'assets/image/onboarding/onboarding_bg1.jpg';
+  static const String languageBg = 'assets/image/onboarding/onboarding_bg2.jpg';
+  // Onboarding step icons - using placeholders in UI (no images needed)
   static const String orderConfirmIcon = 'assets/image/orders/order_confirm_icon.svg';
   static const String pushNotificationIcon = 'assets/image/notifications/push_notification.svg';
   static const String orderOnTheWaYIcon = 'assets/image/orders/order_on_the_way_icon.svg';
