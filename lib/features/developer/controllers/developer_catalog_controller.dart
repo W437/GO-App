@@ -127,6 +127,17 @@ class DeveloperCatalogController extends GetxController {
       case 'lib/features/auth/screens/restaurant_registration_screen.dart':
         Get.toNamed(RouteHelper.getRestaurantRegistrationRoute());
         break;
+      case 'lib/features/auth/screens/web/deliveryman_registration_web_screen.dart':
+        Get.toNamed(RouteHelper.deliveryManRegistration);
+        break;
+
+      // Business screens
+      case 'lib/features/business/screens/subscription_payment_screen.dart':
+        Get.toNamed(RouteHelper.subscriptionPayment);
+        break;
+      case 'lib/features/business/screens/subscription_success_or_failed_screen.dart':
+        Get.toNamed(RouteHelper.subscriptionSuccess);
+        break;
 
       // Cart screen
       case 'lib/features/cart/screens/cart_screen.dart':
@@ -142,16 +153,31 @@ class DeveloperCatalogController extends GetxController {
         break;
 
       // Chat screens
+      case 'lib/features/chat/screens/chat_screen.dart':
+        Get.toNamed(RouteHelper.messages);
+        break;
       case 'lib/features/chat/screens/conversation_screen.dart':
         Get.toNamed(RouteHelper.getConversationRoute());
+        break;
+      case 'lib/features/chat/screens/preview_screen.dart':
+        Get.snackbar('Info', 'Preview screen requires specific data');
         break;
 
       // Checkout screens
       case 'lib/features/checkout/screens/checkout_screen.dart':
         Get.toNamed(RouteHelper.getCheckoutRoute('cart'));
         break;
+      case 'lib/features/checkout/screens/offline_payment_screen.dart':
+        Get.toNamed(RouteHelper.offlinePaymentScreen);
+        break;
       case 'lib/features/checkout/screens/order_successful_screen.dart':
         Get.toNamed(RouteHelper.getOrderSuccessRoute('12345', 'success', 100.0, '1234567890'));
+        break;
+      case 'lib/features/checkout/screens/payment_screen.dart':
+        Get.toNamed(RouteHelper.payment);
+        break;
+      case 'lib/features/checkout/screens/payment_webview_screen.dart':
+        Get.snackbar('Info', 'Payment webview requires order data');
         break;
 
       // Coupon screen
@@ -159,9 +185,22 @@ class DeveloperCatalogController extends GetxController {
         Get.toNamed(RouteHelper.getCouponRoute(fromCheckout: false));
         break;
 
+      // Cuisine screens
+      case 'lib/features/cuisine/screens/cuisine_screen.dart':
+        Get.toNamed(RouteHelper.cuisine);
+        break;
+      case 'lib/features/cuisine/screens/cuisine_restaurant_screen.dart':
+        Get.toNamed(RouteHelper.cuisineRestaurant);
+        break;
+
       // Dashboard screen
       case 'lib/features/dashboard/screens/dashboard_screen.dart':
         Get.toNamed(RouteHelper.getInitialRoute());
+        break;
+
+      // Dine In screen
+      case 'lib/features/dine_in/screens/dine_in_restaurant_screen.dart':
+        Get.snackbar('Info', 'Dine In requires restaurant data');
         break;
 
       // Explore screen
@@ -174,9 +213,26 @@ class DeveloperCatalogController extends GetxController {
         Get.toNamed(RouteHelper.favourite);
         break;
 
+      // Game screen
+      case 'lib/features/game/screens/flappy_bird_game_screen.dart':
+        Get.snackbar('Info', 'Game screen - Easter egg!');
+        break;
+
       // Home screens
       case 'lib/features/home/screens/home_screen.dart':
         Get.toNamed(RouteHelper.getInitialRoute()); // Opens at index 2
+        break;
+      case 'lib/features/home/screens/map_view_screen.dart':
+        Get.toNamed(RouteHelper.mapView);
+        break;
+      case 'lib/features/home/screens/theme1_home_screen.dart':
+        Get.toNamed(RouteHelper.getInitialRoute());
+        break;
+      case 'lib/features/home/screens/theme2_home_screen.dart':
+        Get.toNamed(RouteHelper.getInitialRoute());
+        break;
+      case 'lib/features/home/screens/web_home_screen.dart':
+        Get.toNamed(RouteHelper.getInitialRoute());
         break;
 
       // HTML viewer
@@ -184,8 +240,16 @@ class DeveloperCatalogController extends GetxController {
         Get.toNamed(RouteHelper.getHtmlRoute('privacy-policy'));
         break;
 
-      // Language screen
+      // Interest screen
+      case 'lib/features/interest/screens/interest_screen.dart':
+        Get.toNamed(RouteHelper.interest);
+        break;
+
+      // Language screens
       case 'lib/features/language/screens/language_screen.dart':
+        Get.toNamed(RouteHelper.getLanguageRoute('menu'));
+        break;
+      case 'lib/features/language/screens/web_language_screen.dart':
         Get.toNamed(RouteHelper.getLanguageRoute('menu'));
         break;
 
@@ -196,6 +260,9 @@ class DeveloperCatalogController extends GetxController {
       case 'lib/features/location/screens/map_screen.dart':
         // Skip map screen - requires AddressModel
         Get.snackbar('Info', 'Map screen requires address data');
+        break;
+      case 'lib/features/location/screens/pick_map_screen.dart':
+        Get.toNamed(RouteHelper.pickMap);
         break;
 
       // Loyalty screen
@@ -217,13 +284,28 @@ class DeveloperCatalogController extends GetxController {
       case 'lib/features/onboard/screens/onboarding_screen.dart':
         Get.toNamed(RouteHelper.getOnBoardingRoute());
         break;
+      case 'lib/features/onboard/screens/unified_onboarding_screen.dart':
+        Get.toNamed(RouteHelper.unifiedOnboarding);
+        break;
+      case 'lib/features/onboard/screens/welcome_screen.dart':
+        Get.toNamed(RouteHelper.welcome);
+        break;
 
       // Order screens
       case 'lib/features/order/screens/order_screen.dart':
         Get.toNamed(RouteHelper.getOrderRoute());
         break;
+      case 'lib/features/order/screens/order_details_screen.dart':
+        Get.toNamed(RouteHelper.getOrderDetailsRoute(12345));
+        break;
+      case 'lib/features/order/screens/order_tracking_screen.dart':
+        Get.toNamed(RouteHelper.getOrderTrackingRoute(12345, '1234567890'));
+        break;
       case 'lib/features/order/screens/guest_track_order_screen.dart':
         Get.toNamed(RouteHelper.getGuestTrackOrderScreen('12345', '1234567890'));
+        break;
+      case 'lib/features/order/screens/refund_request_screen.dart':
+        Get.toNamed(RouteHelper.refund);
         break;
 
       // Product screens
@@ -254,6 +336,23 @@ class DeveloperCatalogController extends GetxController {
       case 'lib/features/restaurant/screens/campaign_screen.dart':
         Get.toNamed(RouteHelper.basicCampaign);
         break;
+      case 'lib/features/restaurant/screens/restaurant_screen.dart':
+        Get.toNamed(RouteHelper.getRestaurantRoute(1));
+        break;
+      case 'lib/features/restaurant/screens/restaurant_product_search_screen.dart':
+        Get.toNamed(RouteHelper.searchRestaurantItem);
+        break;
+      case 'lib/features/restaurant/screens/web_campaign_screen.dart':
+        Get.toNamed(RouteHelper.basicCampaign);
+        break;
+
+      // Review screens
+      case 'lib/features/review/screens/rate_review_screen.dart':
+        Get.toNamed(RouteHelper.rateReview);
+        break;
+      case 'lib/features/review/screens/review_screen.dart':
+        Get.toNamed(RouteHelper.restaurantReview);
+        break;
 
       // Search screen
       case 'lib/features/search/screens/search_screen.dart':
@@ -263,6 +362,11 @@ class DeveloperCatalogController extends GetxController {
       // Splash screen
       case 'lib/features/splash/screens/splash_screen.dart':
         Get.toNamed(RouteHelper.getSplashRoute(null, null));
+        break;
+
+      // Story screen
+      case 'lib/features/story/screens/story_viewer_screen.dart':
+        Get.snackbar('Info', 'Story viewer requires story data');
         break;
 
       // Support screen
@@ -278,6 +382,12 @@ class DeveloperCatalogController extends GetxController {
       // Verification screens
       case 'lib/features/verification/screens/forget_pass_screen.dart':
         Get.toNamed(RouteHelper.forgotPassword);
+        break;
+      case 'lib/features/verification/screens/new_pass_screen.dart':
+        Get.toNamed(RouteHelper.resetPassword);
+        break;
+      case 'lib/features/verification/screens/verification_screen.dart':
+        Get.toNamed(RouteHelper.verification);
         break;
 
       // Wallet screen

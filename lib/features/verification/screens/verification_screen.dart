@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:godelivery_user/common/models/response_model.dart';
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
 import 'package:godelivery_user/features/auth/domain/centralize_login_enum.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
 import 'package:godelivery_user/features/auth/widgets/sign_in/existing_user_bottom_sheet.dart';
@@ -15,9 +14,8 @@ import 'package:godelivery_user/helper/auth_helper.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
@@ -84,9 +82,13 @@ class VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    double borderWidth = 0.7;
     return Scaffold(
-      appBar: isDesktop ? null : CustomAppBarWidget(title: _email != null ? 'email_verification'.tr : 'phone_verification'.tr),
+      appBar: isDesktop ? null : UnifiedHeaderWidget(
+        title: _email != null ? 'Email Verification' : 'Phone Verification',
+        showBackButton: true,
+        centerTitle: true,
+        showBorder: true,
+      ),
       backgroundColor: isDesktop ? Colors.transparent : null,
       body: SafeArea(child: Center(child: SingleChildScrollView(
         controller: _scrollController,
@@ -113,46 +115,105 @@ class VerificationScreenState extends State<VerificationScreen> {
                 ),
               ) : const SizedBox(),
 
-              CustomAssetImageWidget(Images.otpVerification, height: 100),
-              const SizedBox(height: Dimensions.paddingSizeOverLarge),
+              // Larger illustration with background container - placeholder
+              Container(
+                width: context.width > 700 ? 350 : context.width * 0.85,
+                height: context.width > 700 ? 280 : 220,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                      Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.mail_outline_rounded,
+                        size: context.width > 700 ? 80 : 60,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(height: 20),
+                      Icon(
+                        Icons.security_rounded,
+                        size: context.width > 700 ? 40 : 30,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 50),
 
+              // Bold heading
+              Text(
+                'Check your messages',
+                style: robotoBold.copyWith(
+                  fontSize: Dimensions.fontSizeOverLarge + 4,
+                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+
+              // Subtitle text
               Get.find<SplashController>().configModel!.demo! ? Text(
                 'for_demo_purpose'.tr, style: robotoMedium,
               ) : SizedBox(
-                width: 250,
-                child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
-                  RichText(text: TextSpan(children: [
-                    TextSpan(text: 'we_have_a_verification_code'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
-                    TextSpan(text: ' ${_email ?? _number}', style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)),
-                  ]), textAlign: TextAlign.center,),
-                ],
+                width: context.width > 700 ? 400 : context.width * 0.8,
+                child: Text(
+                  _email != null
+                    ? 'We\'ve sent a 6-digit code to your email. Please enter it below.'
+                    : 'We\'ve sent a 6-digit code to your phone. Please enter it below.',
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).disabledColor,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.width > 850 ? 50 : Dimensions.paddingSizeDefault, vertical: 35),
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: context.width > 700 ? 450 : context.width * 0.95,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 40
+                ),
                 child: PinCodeTextField(
                   length: 6,
                   appContext: context,
                   keyboardType: TextInputType.number,
-                  animationType: AnimationType.slide,
+                  animationType: AnimationType.fade,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  separatorBuilder: (context, index) => const SizedBox(width: 8),
                   pinTheme: PinTheme(
                     shape: PinCodeFieldShape.box,
-                    fieldHeight: 60,
-                    fieldWidth: 50,
-                    borderWidth: borderWidth,
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    fieldHeight: context.width > 400 ? 60 : 48,
+                    fieldWidth: context.width > 400 ? 50 : 38,
+                    borderWidth: 1.5,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
                     selectedColor: Theme.of(context).primaryColor,
-                    selectedFillColor: Colors.white,
+                    selectedFillColor: Theme.of(context).cardColor,
                     inactiveFillColor: Theme.of(context).cardColor,
-                    inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.6),
-                    activeColor: Theme.of(context).disabledColor,
+                    inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                    activeColor: Theme.of(context).primaryColor.withValues(alpha: 0.6),
                     activeFillColor: Theme.of(context).cardColor,
-                    inactiveBorderWidth: borderWidth,
-                    selectedBorderWidth: borderWidth,
-                    disabledBorderWidth: borderWidth,
-                    errorBorderWidth: borderWidth,
-                    activeBorderWidth: borderWidth
+                    inactiveBorderWidth: 1.5,
+                    selectedBorderWidth: 2,
+                    disabledBorderWidth: 1.5,
+                    errorBorderWidth: 1.5,
+                    activeBorderWidth: 1.5,
+                  ),
+                  textStyle: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeLarge,
+                    color: Theme.of(context).textTheme.bodyLarge!.color,
                   ),
                   animationDuration: const Duration(milliseconds: 300),
                   backgroundColor: Colors.transparent,
@@ -161,15 +222,16 @@ class VerificationScreenState extends State<VerificationScreen> {
                   beforeTextPaste: (text) => true,
                 ),
               ),
-              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
 
               GetBuilder<ProfileController>(
                   builder: (profileController) {
                     return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32 : Dimensions.paddingSizeSmall),
+                      padding: EdgeInsets.symmetric(horizontal: isDesktop ? 50 : context.width > 400 ? 30 : 20),
                       child: CustomButtonWidget(
-                        radius: Dimensions.radiusDefault,
-                        buttonText: 'verify'.tr,
+                        buttonText: 'Verify',
+                        height: 55,
+                        fontSize: Dimensions.fontSizeDefault + 1,
                         isLoading: verificationController.isLoading || profileController.isLoading,
                         onPressed: verificationController.verificationCode.length < 6 ? null : () {
                           if(widget.firebaseSession != null && widget.userModel == null) {
@@ -231,27 +293,48 @@ class VerificationScreenState extends State<VerificationScreen> {
                     );
                   }
               ),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
+              const SizedBox(height: Dimensions.paddingSizeLarge * 2),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: isDesktop ? 29 : Dimensions.paddingSizeDefault),
-                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text(
-                    'did_not_receive_the_code'.tr,
-                    style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
-                  ),
-                  TextButton(
-                    onPressed: _seconds < 1 ? () async {
-                      if(widget.firebaseSession != null) {
-                        await Get.find<AuthController>().firebaseVerifyPhoneNumber(_number!, widget.token, widget.loginType, fromSignUp: widget.fromSignUp, canRoute: false);
-                        _startTimer();
-                      } else {
-                        _resendOtp();
-                      }
-                    } : null,
-                    child: Text('${'resent_it'.tr}${_seconds > 0 ? ' (${_seconds}s)' : ''}', style: TextStyle(color: Theme.of(context).primaryColor),),
-                  ),
-                ]),
+                padding: EdgeInsets.symmetric(horizontal: isDesktop ? 50 : context.width > 400 ? 30 : 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Didn\'t receive a code? ',
+                      style: robotoRegular.copyWith(
+                        color: Theme.of(context).disabledColor,
+                        fontSize: Dimensions.fontSizeDefault,
+                      ),
+                    ),
+                    _seconds > 0
+                      ? Text(
+                          'Resend code in 0:${_seconds.toString().padLeft(2, '0')}',
+                          style: robotoMedium.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: Dimensions.fontSizeDefault,
+                          ),
+                        )
+                      : InkWell(
+                          onTap: () async {
+                            if(widget.firebaseSession != null) {
+                              await Get.find<AuthController>().firebaseVerifyPhoneNumber(_number!, widget.token, widget.loginType, fromSignUp: widget.fromSignUp, canRoute: false);
+                              _startTimer();
+                            } else {
+                              _resendOtp();
+                            }
+                          },
+                          child: Text(
+                            'Resend code',
+                            style: robotoMedium.copyWith(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: Dimensions.fontSizeDefault,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                  ],
+                ),
               ),
               const SizedBox(height: Dimensions.paddingSizeLarge),
 

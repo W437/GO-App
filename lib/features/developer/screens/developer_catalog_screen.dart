@@ -6,6 +6,7 @@ import 'package:godelivery_user/features/developer/widgets/catalog_item_card.dar
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 
 class DeveloperCatalogScreen extends StatefulWidget {
   const DeveloperCatalogScreen({super.key});
@@ -42,18 +43,47 @@ class _DeveloperCatalogScreenState extends State<DeveloperCatalogScreen> {
       ),
       body: Column(
         children: [
-          // Developer Mode Banner
+          // Developer Mode Banner with Test Buttons
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
             color: Colors.orange,
-            child: const Text(
-              'DEVELOPER MODE - 71 Screens Available',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'DEVELOPER MODE - 71 Screens Available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                // Toast test buttons
+                IconButton(
+                  icon: const Icon(Icons.notifications, color: Colors.white, size: 20),
+                  onPressed: () {
+                    debugPrint('Test button pressed - showing success toast');
+                    showCustomSnackBar('Test success toast!', isError: false);
+                  },
+                  tooltip: 'Test Success Toast',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.error, color: Colors.white, size: 20),
+                  onPressed: () {
+                    debugPrint('Test button pressed - showing error toast');
+                    showCustomSnackBar('Test error toast!', isError: true);
+                  },
+                  tooltip: 'Test Error Toast',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
             ),
           ),
 

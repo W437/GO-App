@@ -35,7 +35,7 @@ class CustomButtonWidget extends StatefulWidget {
     this.width,
     this.height,
     this.fontSize,
-    this.radius = 24,
+    this.radius = 100,
     this.icon,
     this.color,
     this.textColor,
