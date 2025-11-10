@@ -187,8 +187,14 @@ class AuthController extends GetxController implements GetxService {
     await authServiceInterface.updateToken();
   }
 
+  bool _developerPreviewMode = false;
+
   bool isLoggedIn() {
-    return authServiceInterface.isLoggedIn();
+    return _developerPreviewMode || authServiceInterface.isLoggedIn();
+  }
+
+  void setDeveloperPreviewMode(bool enabled) {
+    _developerPreviewMode = enabled;
   }
 
   String getGuestId() {

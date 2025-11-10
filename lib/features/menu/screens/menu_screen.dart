@@ -17,9 +17,11 @@ import 'package:godelivery_user/helper/date_converter.dart';
 import 'package:godelivery_user/helper/price_converter.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/features/developer/controllers/developer_catalog_controller.dart';
 import 'package:godelivery_user/common/widgets/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
@@ -423,6 +425,27 @@ class _MenuScreenState extends State<MenuScreen> {
                       ]),
                     )
                   ]),
+
+                  // Version display with secret gesture for developer mode
+                  GestureDetector(
+                    onTap: () {
+                      // Initialize controller if not already done
+                      if (!Get.isRegistered<DeveloperCatalogController>()) {
+                        Get.put(DeveloperCatalogController());
+                      }
+                      Get.find<DeveloperCatalogController>().handleVersionTap();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+                      child: Text(
+                        'v${AppConstants.appVersion}',
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeSmall,
+                          color: Theme.of(context).disabledColor,
+                        ),
+                      ),
+                    ),
+                  ),
 
                   InkWell(
                     onTap: () async {

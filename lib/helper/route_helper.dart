@@ -38,6 +38,7 @@ import 'package:godelivery_user/features/order/screens/refund_request_screen.dar
 import 'package:godelivery_user/features/profile/domain/models/update_user_model.dart';
 import 'package:godelivery_user/features/profile/screens/profile_screen.dart';
 import 'package:godelivery_user/features/profile/screens/update_profile_screen.dart';
+import 'package:godelivery_user/features/developer/screens/developer_catalog_screen.dart';
 import 'package:godelivery_user/features/refer%20and%20earn/screens/refer_and_earn_screen.dart';
 import 'package:godelivery_user/features/restaurant/screens/all_restaurant_screen.dart';
 import 'package:godelivery_user/features/restaurant/screens/campaign_screen.dart';
@@ -147,6 +148,7 @@ class RouteHelper {
   static const String cuisineRestaurant = '/cuisine-restaurant';
   static const String subscriptionSuccess = '/subscription-success';
   static const String subscriptionPayment = '/subscription-payment';
+  static const String developerCatalog = '/developer-catalog';
   static const String offlinePaymentScreen = '/offline-payment-screen';
   static const String guestTrackOrderScreen = '/guest-track-order-screen';
   static const String favourite = '/favourite-screen';
@@ -212,6 +214,7 @@ class RouteHelper {
   }
   static String getProfileRoute() => profile;
   static String getUpdateProfileRoute() => updateProfile;
+  static String getDeveloperCatalogRoute() => developerCatalog;
   static String getCouponRoute({required bool fromCheckout}) => '$coupon?fromCheckout=${fromCheckout ? 'true' : 'false'}';
   static String getNotificationRoute({bool fromNotification = false}) => '$notification?fromNotification=${fromNotification.toString()}';
   static String getMapRoute(AddressModel addressModel, String page, {String? restaurantName, Restaurant? restaurant, bool? isDineOrder}) {
@@ -404,6 +407,7 @@ class RouteHelper {
     }),
     GetPage(name: profile, page: () => getRoute(const ProfileScreen())),
     GetPage(name: updateProfile, page: () => getRoute(const UpdateProfileScreen())),
+    GetPage(name: developerCatalog, page: () => getRoute(const DeveloperCatalogScreen())),
     GetPage(name: coupon, page: () => getRoute(CouponScreen(fromCheckout: Get.parameters['fromCheckout'] == 'true'))),
     GetPage(name: notification, page: () => getRoute(NotificationScreen(fromNotification: Get.parameters['fromNotification'] == 'true'))),
     GetPage(name: map, page: () {
