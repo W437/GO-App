@@ -77,25 +77,6 @@ class SignInScreenState extends State<SignInScreen> {
             ) : null,
             child: Stack(
               children: [
-                // Back button at top-left (overlay)
-                if (!widget.exitFromApp)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: IconButton(
-                      onPressed: () {
-                        if(Get.find<AuthController>().isOtpViewEnable){
-                          Get.find<AuthController>().enableOtpView(enable: false);
-                        }else{
-                          Get.back(result: false);
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ),
-
                 // Content aligned to bottom
                 SingleChildScrollView(
                   child: ConstrainedBox(
@@ -136,6 +117,22 @@ class SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ),
+
+                // Back button at top-left (overlay) - rendered last so it's on top
+                if (!widget.exitFromApp)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    child: CircularBackButtonWidget(
+                      onPressed: () {
+                        if(Get.find<AuthController>().isOtpViewEnable){
+                          Get.find<AuthController>().enableOtpView(enable: false);
+                        }else{
+                          Get.back(result: false);
+                        }
+                      },
+                    ),
+                  ),
               ],
             ),
           ),

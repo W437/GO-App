@@ -115,12 +115,22 @@ class _HeaderContentBelowStickyState extends State<HeaderContentBelowSticky> wit
             top: -40,
             child: Opacity(
               opacity: 0.15,
-              child: Image.asset(
-                Images.logo,
+              child: Container(
                 width: 180,
                 height: 180,
-                color: Colors.white,
-                fit: BoxFit.contain,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: Center(
+                  child: Text(
+                    'H!',
+                    style: robotoBold.copyWith(
+                      fontSize: 90,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

@@ -68,7 +68,7 @@ class ColorPalette {
     },
   ];
 
-  static const Color defaultBgColor = Color(0xFFFF9800); // Orange
+  static const Color defaultBgColor = Colors.white; // White
   static const String defaultEmoji = '😊';
 
   // Convert Color to hex string
