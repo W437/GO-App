@@ -72,7 +72,6 @@ class OtpLoginWidget extends StatelessWidget {
           // Continue button
           CustomButtonWidget(
             buttonText: 'Continue',
-            radius: Dimensions.radiusDefault,
             isBold: true,
             isLoading: authController.isLoading,
             onPressed: onClickLoginButton,

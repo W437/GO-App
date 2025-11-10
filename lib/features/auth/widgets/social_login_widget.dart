@@ -50,7 +50,6 @@ class SocialLoginWidget extends StatelessWidget {
               height: 50,
               color: Theme.of(context).cardColor,
               textColor: Theme.of(context).textTheme.bodyLarge?.color,
-              radius: Dimensions.radiusDefault,
               border: Border.all(color: Theme.of(context).disabledColor.withOpacity(0.3), width: 1),
               isBold: false,
               onPressed: () => _googleLogin(googleSignIn),
@@ -66,7 +65,6 @@ class SocialLoginWidget extends StatelessWidget {
               height: 50,
               color: const Color(0xFF1877F2),
               textColor: Colors.white,
-              radius: Dimensions.radiusDefault,
               isBold: false,
               onPressed: () => _facebookLogin(),
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -81,7 +79,6 @@ class SocialLoginWidget extends StatelessWidget {
               height: 50,
               color: Colors.black,
               textColor: Colors.white,
-              radius: Dimensions.radiusDefault,
               isBold: false,
               onPressed: () => _appleLogin(),
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

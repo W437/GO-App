@@ -96,12 +96,18 @@ class SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
 
-                // Centered content
-                Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeLarge),
+                // Content aligned to bottom
+                SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height -
+                                 MediaQuery.of(context).padding.top -
+                                 MediaQuery.of(context).padding.bottom -
+                                 (widget.exitFromApp ? 0 : 48) - // Back button height
+                                 (Dimensions.paddingSizeLarge * 2), // Container padding
+                    ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Avatar/Logo
