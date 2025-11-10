@@ -156,15 +156,16 @@ class _SignInViewState extends State<SignInView> {
         );
 
       case CentralizeLoginType.otpAndSocial:
-        return SocialLoginWidget(onlySocialLogin: true, onOtpViewClick: (){
-          widget.isOtpViewEnable!(true);
-          if(_countryDialCode != "" && _phoneController.text != "" && _phoneController.text.contains('@')) {
-            _phoneController.text = '';
-          }
-          setState(() {
-            authController.enableOtpView(enable: true);
-          });
-        });
+        return OtpLoginWidget(
+          phoneController: _otpPhoneController,
+          phoneFocus: _otpPhoneFocus,
+          countryDialCode: _countryDialCode,
+          onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
+          socialEnable: true,
+          onClickLoginButton: () {
+            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp);
+          },
+        );
 
       case CentralizeLoginType.manualAndSocialAndOtp:
         return ManualLoginWidget(

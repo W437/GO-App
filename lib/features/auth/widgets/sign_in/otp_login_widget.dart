@@ -1,4 +1,5 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
@@ -10,6 +11,7 @@ import 'package:godelivery_user/features/auth/widgets/trams_conditions_check_box
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -29,14 +31,31 @@ class OtpLoginWidget extends StatelessWidget {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: isDesktop ? Dimensions.paddingSizeLarge : 0),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
+          // Title
+          Text(
+            'Sign in to continue',
+            style: robotoBold.copyWith(
+              fontSize: 28,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: Dimensions.paddingSizeLarge),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
 
+          // Subtitle
+          Text(
+            'Enter your phone number to get started.',
+            style: robotoRegular.copyWith(
+              fontSize: Dimensions.fontSizeDefault,
+              color: Theme.of(context).hintColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+          // Phone number field
           CustomTextFieldWidget(
-            hintText: 'xxx-xxx-xxxxx'.tr,
+            hintText: '555-123-4567',
             controller: phoneController,
             focusNode: phoneFocus,
             inputAction: TextInputAction.done,
@@ -44,54 +63,87 @@ class OtpLoginWidget extends StatelessWidget {
             isPhone: true,
             onCountryChanged: onCountryChanged,
             countryDialCode: CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code ?? Get.find<LocalizationController>().locale.countryCode,
-            labelText: 'phone'.tr,
-            required: true,
+            labelText: 'Phone number',
+            required: false,
             validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
           ),
-          const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+          const SizedBox(height: Dimensions.paddingSizeLarge),
 
-          Align(
-            alignment: Alignment.centerLeft,
-            child: InkWell(
-              onTap: () => authController.toggleRememberMeForOtp(),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    height: 24, width: 24,
-                    child: Checkbox(
-                      side: BorderSide(color: Theme.of(context).hintColor),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: authController.isActiveRememberMeForOtp,
-                      onChanged: (bool? isChecked) => authController.toggleRememberMeForOtp(),
+          // Continue button
+          CustomButtonWidget(
+            buttonText: 'Continue',
+            radius: Dimensions.radiusDefault,
+            isBold: true,
+            isLoading: authController.isLoading,
+            onPressed: onClickLoginButton,
+          ),
+          const SizedBox(height: Dimensions.paddingSizeLarge),
+
+          // "or" divider
+          if (socialEnable)
+            Row(
+              children: [
+                Expanded(child: Divider(color: Theme.of(context).disabledColor.withOpacity(0.3))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                  child: Text(
+                    'or',
+                    style: robotoRegular.copyWith(
+                      color: Theme.of(context).hintColor,
+                      fontSize: Dimensions.fontSizeDefault,
                     ),
                   ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                ),
+                Expanded(child: Divider(color: Theme.of(context).disabledColor.withOpacity(0.3))),
+              ],
+            ),
 
-                  Text('remember_me'.tr, style: robotoRegular),
+          if (socialEnable)
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          // Social login buttons
+          socialEnable ? const SocialLoginWidget(onlySocialLogin: true, showWelcomeText: false) : const SizedBox(),
+
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          // Terms and Privacy - centered text
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: robotoRegular.copyWith(
+                  fontSize: Dimensions.fontSizeSmall,
+                  color: Theme.of(context).hintColor,
+                ),
+                children: [
+                  const TextSpan(text: 'By continuing, you agree to our '),
+                  TextSpan(
+                    text: 'Terms of Service',
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).primaryColor,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => Get.toNamed(RouteHelper.getHtmlRoute('terms-and-condition')),
+                  ),
+                  const TextSpan(text: ' and '),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).primaryColor,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => Get.toNamed(RouteHelper.getHtmlRoute('privacy-policy')),
+                  ),
+                  const TextSpan(text: '.'),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: Dimensions.paddingSizeLarge),
-
-          TramsConditionsCheckBoxWidget(authController: authController, fromDialog: true),
-          const SizedBox(height: Dimensions.paddingSizeLarge),
-
-          CustomButtonWidget(
-            buttonText: 'login'.tr,
-            radius: Dimensions.radiusDefault,
-            isBold: isDesktop ? false : true,
-            isLoading: authController.isLoading,
-            onPressed: onClickLoginButton,
-            fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault,
-          ),
-          const SizedBox(height: Dimensions.paddingSizeLarge),
-
-          socialEnable ? const SocialLoginWidget(onlySocialLogin: false) : const SizedBox(),
-
-          socialEnable && isDesktop ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
           !socialEnable ? const SizedBox(height: 100) : const SizedBox(),
 

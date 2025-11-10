@@ -1,4 +1,5 @@
 import 'package:godelivery_user/common/models/response_model.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/auth/domain/centralize_login_enum.dart';
@@ -45,75 +46,49 @@ class SocialLoginWidget extends StatelessWidget {
             showWelcomeText ? Text('${'welcome_to'.tr} ${AppConstants.appName}', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)) : const SizedBox(),
             const SizedBox(height: Dimensions.paddingSizeLarge),
 
-            Get.find<SplashController>().configModel!.socialLogin![0].status! ? Container(
+            Get.find<SplashController>().configModel!.socialLogin![0].status! ? CustomButtonWidget(
               height: 50,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusDefault)),
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5, offset: const Offset(2, 2))],
-              ),
-              child: CustomInkWellWidget(
-                onTap: ()=> _googleLogin(googleSignIn),
-                radius: Dimensions.radiusDefault,
-                child: Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.google, height: 20, width: 20),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                    Text('continue_with_google'.tr, style: robotoMedium.copyWith()),
-                  ]),
-                ),
-              ),
+              color: Theme.of(context).cardColor,
+              textColor: Theme.of(context).textTheme.bodyLarge?.color,
+              radius: Dimensions.radiusDefault,
+              border: Border.all(color: Theme.of(context).disabledColor.withOpacity(0.3), width: 1),
+              isBold: false,
+              onPressed: () => _googleLogin(googleSignIn),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Image.asset(Images.google, height: 20, width: 20),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Text('Sign in with Google', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+              ]),
             ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeLarge : 0),
+            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeSmall : 0),
 
-            Get.find<SplashController>().configModel!.socialLogin![1].status! ? Container(
+            Get.find<SplashController>().configModel!.socialLogin![1].status! ? CustomButtonWidget(
               height: 50,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusDefault)),
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5, offset: const Offset(2, 2))],
-              ),
-              child: CustomInkWellWidget(
-                onTap: ()=> _facebookLogin(),
-                radius: Dimensions.radiusDefault,
-                child: Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.facebookIcon, height: 20, width: 20),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                    Text('continue_with_facebook'.tr, style: robotoMedium.copyWith()),
-                  ]),
-                ),
-              ),
+              color: const Color(0xFF1877F2),
+              textColor: Colors.white,
+              radius: Dimensions.radiusDefault,
+              isBold: false,
+              onPressed: () => _facebookLogin(),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Image.asset(Images.facebookIcon, height: 20, width: 20),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Text('Sign in with Facebook', style: robotoMedium.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
+              ]),
             ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![1].status! ? Dimensions.paddingSizeLarge : 0),
+            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![1].status! ? Dimensions.paddingSizeSmall : 0),
 
-            canAppleLogin ? Container(
+            canAppleLogin ? CustomButtonWidget(
               height: 50,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusDefault)),
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5, offset: const Offset(2, 2))],
-              ),
-              child: CustomInkWellWidget(
-                onTap: ()=> _appleLogin(),
-                radius: Dimensions.radiusDefault,
-                child: Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.appleLogo, height: 20, width: 20),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                    Text('continue_with_apple'.tr, style: robotoMedium.copyWith()),
-                  ]),
-                ),
-              ),
+              color: Colors.black,
+              textColor: Colors.white,
+              radius: Dimensions.radiusDefault,
+              isBold: false,
+              onPressed: () => _appleLogin(),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Image.asset(Images.appleLogo, height: 20, width: 20),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Text('Sign in with Apple', style: robotoMedium.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
+              ]),
             ) : const SizedBox(),
             SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeSmall : onOtpViewClick != null ? 0 : Dimensions.paddingSizeLarge),
 
