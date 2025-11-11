@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/draggable_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/screens/access_location_screen.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
@@ -41,69 +42,13 @@ class NewHomeHeaderWidget extends StatelessWidget {
                   builder: (locationController) {
                     return InkWell(
                       onTap: () {
-                        showModalBottomSheet(
+                        showDraggableBottomSheet(
                           context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => DraggableScrollableSheet(
-                            initialChildSize: 0.9,
-                            minChildSize: 0.5,
-                            maxChildSize: 0.95,
-                            builder: (context, scrollController) => ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(24),
-                                topRight: Radius.circular(24),
-                              ),
-                              child: Container(
-                                color: Theme.of(context).colorScheme.surface,
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: Dimensions.paddingSizeDefault,
-                                        vertical: Dimensions.paddingSizeSmall,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.surface,
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                                            width: 1,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          IconButton(
-                                            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-                                            icon: const Icon(Icons.keyboard_arrow_down, size: 32),
-                                          ),
-                                          Expanded(
-                                            child: Center(
-                                              child: Text(
-                                                'set_location'.tr,
-                                                style: robotoBold.copyWith(
-                                                  fontSize: Dimensions.fontSizeLarge,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 48),
-                                        ],
-                                      ),
-                                    ),
-                                    const Expanded(
-                                      child: AccessLocationScreen(
-                                        fromSignUp: false,
-                                        fromHome: true,
-                                        route: 'home',
-                                        hideAppBar: true,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          child: const AccessLocationScreen(
+                            fromSignUp: false,
+                            fromHome: true,
+                            route: 'home',
+                            hideAppBar: true,
                           ),
                         );
                       },

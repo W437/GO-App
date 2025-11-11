@@ -24,7 +24,6 @@ import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 
 class AccessLocationScreen extends StatefulWidget {
   final bool fromSignUp;
@@ -37,35 +36,11 @@ class AccessLocationScreen extends StatefulWidget {
   State<AccessLocationScreen> createState() => _AccessLocationScreenState();
 }
 
-class _AccessLocationScreenState extends State<AccessLocationScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _rotationAnimation;
-  DateTime? _lastTapTime;
+class _AccessLocationScreenState extends State<AccessLocationScreen> {
 
   @override
   void initState() {
     super.initState();
-
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: 1.15, end: 0.98).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: 0.98, end: 1.03).chain(CurveTween(curve: Curves.easeOut)), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: 1.03, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
-    ]).animate(_animationController);
-
-    _rotationAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.02), weight: 20),
-      TweenSequenceItem(tween: Tween(begin: 0.02, end: -0.02), weight: 20),
-      TweenSequenceItem(tween: Tween(begin: -0.02, end: 0.015), weight: 20),
-      TweenSequenceItem(tween: Tween(begin: 0.015, end: -0.01), weight: 20),
-      TweenSequenceItem(tween: Tween(begin: -0.01, end: 0.0), weight: 20),
-    ]).animate(_animationController);
 
     // Load zone list after build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,21 +70,6 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
     } else if(!widget.fromHome){
       _getCurrentLocationAndRoute();
     }
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _playAnimation() {
-    final now = DateTime.now();
-    if (_lastTapTime != null && now.difference(_lastTapTime!).inSeconds < 3) {
-      return; // Cooldown active
-    }
-    _lastTapTime = now;
-    _animationController.forward(from: 0.0);
   }
 
   Future<void> _getCurrentLocationAndRoute() async {
@@ -146,6 +106,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: widget.hideAppBar ? null : CustomAppBarWidget(title: 'set_location'.tr, isBackButtonExist: widget.fromHome),
       endDrawer: widget.hideAppBar ? null : const MenuDrawerWidget(),
       endDrawerEnableOpenDragGesture: false,
@@ -206,65 +167,41 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> with Single
 
             ]),
           ),
-        ) : Center(child: SingleChildScrollView(
+        ) : SingleChildScrollView(
           child: FooterViewWidget(
-            child: Center(child: Padding(
-              padding: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
-              child: SizedBox(width: 700, child: Column(children: [
-                GestureDetector(
-                  onTap: _playAnimation,
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _scaleAnimation.value,
-                        child: Transform.rotate(
-                          angle: _rotationAnimation.value,
-                          child: Lottie.asset('assets/animations/location_lottie.json', height: 220),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-                Text(
-                  'find_restaurants_and_foods'.tr.toUpperCase(), textAlign: TextAlign.center,
-                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                  child: Text(
-                    'by_allowing_location_access'.tr, textAlign: TextAlign.center,
-                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-                BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
-
-                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Dimensions.paddingSizeLarge,
+                0,
+                Dimensions.paddingSizeLarge,
+                Dimensions.paddingSizeLarge
+              ),
+              child: Column(children: [
 
                 // Zone List for non-logged-in users
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'select_delivery_zone'.tr,
-                        style: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeLarge,
-                          color: Theme.of(context).textTheme.bodyLarge!.color,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'select_delivery_zone'.tr,
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                        color: Theme.of(context).textTheme.bodyLarge!.color,
                       ),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-                      const ZoneListWidget(),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    const ZoneListWidget(),
+                  ],
                 ),
-              ])),
-            )),
+
+                const SizedBox(height: Dimensions.paddingSizeLarge),
+
+                BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
+
+              ]),
+            ),
           ),
-        ));
+        );
       })),
       bottomNavigationBar: !ResponsiveHelper.isDesktop(context) && isLoggedIn ? GetBuilder<AddressController>(
         builder: (addressController) {
