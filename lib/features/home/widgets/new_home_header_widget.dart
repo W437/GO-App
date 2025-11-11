@@ -44,6 +44,8 @@ class NewHomeHeaderWidget extends StatelessWidget {
                       onTap: () {
                         showDraggableBottomSheet(
                           context: context,
+                          wrapContent: true,
+                          maxChildSize: 0.7,
                           child: const AccessLocationScreen(
                             fromSignUp: false,
                             fromHome: true,

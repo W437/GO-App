@@ -42,10 +42,8 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
   void initState() {
     super.initState();
 
-    // Load zone list after build is complete
+    // Check and request location permission for all platforms
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<LocationController>().getZoneList();
-      // Check and request location permission for all platforms
       _checkPermission();
     });
   }
@@ -110,7 +108,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
       appBar: widget.hideAppBar ? null : CustomAppBarWidget(title: 'set_location'.tr, isBackButtonExist: widget.fromHome),
       endDrawer: widget.hideAppBar ? null : const MenuDrawerWidget(),
       endDrawerEnableOpenDragGesture: false,
-      body: SafeArea(child: GetBuilder<AddressController>(builder: (addressController) {
+      body: GetBuilder<AddressController>(builder: (addressController) {
         return isLoggedIn ? SingleChildScrollView(
           child: FooterViewWidget(
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -167,42 +165,75 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
 
             ]),
           ),
-        ) : SingleChildScrollView(
-          child: FooterViewWidget(
-            child: Padding(
+        ) : widget.hideAppBar
+          ? Padding(
               padding: const EdgeInsets.fromLTRB(
                 Dimensions.paddingSizeLarge,
                 0,
                 Dimensions.paddingSizeLarge,
                 Dimensions.paddingSizeLarge
               ),
-              child: Column(children: [
-
-                // Zone List for non-logged-in users
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'select_delivery_zone'.tr,
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeLarge,
-                        color: Theme.of(context).textTheme.bodyLarge!.color,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Zone List for non-logged-in users
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'select_delivery_zone'.tr,
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeLarge,
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
                       ),
+                      const SizedBox(height: Dimensions.paddingSizeSmall),
+                      const ZoneListWidget(),
+                    ],
+                  ),
+
+                  const SizedBox(height: Dimensions.paddingSizeLarge),
+
+                  BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              child: FooterViewWidget(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Dimensions.paddingSizeLarge,
+                    0,
+                    Dimensions.paddingSizeLarge,
+                    Dimensions.paddingSizeLarge
+                  ),
+                  child: Column(children: [
+
+                    // Zone List for non-logged-in users
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'select_delivery_zone'.tr,
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeLarge,
+                            color: Theme.of(context).textTheme.bodyLarge!.color,
+                          ),
+                        ),
+                        const SizedBox(height: Dimensions.paddingSizeSmall),
+                        const ZoneListWidget(),
+                      ],
                     ),
-                    const SizedBox(height: Dimensions.paddingSizeSmall),
-                    const ZoneListWidget(),
-                  ],
+
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+
+                    BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
+
+                  ]),
                 ),
-
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
-
-              ]),
-            ),
-          ),
-        );
-      })),
+              ),
+            );
+      }),
       bottomNavigationBar: !ResponsiveHelper.isDesktop(context) && isLoggedIn ? GetBuilder<AddressController>(
         builder: (addressController) {
           return SizedBox(height: context.height * 0.24, child: BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route));

@@ -77,6 +77,7 @@ class HomeScreen extends StatefulWidget {
     Get.find<AdvertisementController>().getAdvertisementList();
     Get.find<DineInController>().getDineInRestaurantList(1, reload);
     Get.find<StoryController>().getStories(reload: reload);
+    Get.find<LocationController>().getZoneList();
     if(Get.find<SplashController>().configModel!.popularRestaurant == 1) {
       Get.find<RestaurantController>().getPopularRestaurantList(reload, 'all', false);
     }

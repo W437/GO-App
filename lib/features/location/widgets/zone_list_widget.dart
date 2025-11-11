@@ -217,16 +217,61 @@ class ZoneListWidget extends StatelessWidget {
     bool isFirst = index == 0;
     bool isLast = index == totalCount - 1;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.vertical(
-          top: isFirst ? const Radius.circular(Dimensions.radiusDefault) : Radius.zero,
-          bottom: isLast ? const Radius.circular(Dimensions.radiusDefault) : Radius.zero,
-        ),
-        onTap: isActive ? () async {
-          locationController.selectZone(zone);
-          if (isBottomSheet) {
+    return _ZoneListItemStateful(
+      zone: zone,
+      locationController: locationController,
+      isActive: isActive,
+      isFirst: isFirst,
+      isLast: isLast,
+      isBottomSheet: isBottomSheet,
+    );
+  }
+}
+
+class _ZoneListItemStateful extends StatefulWidget {
+  final ZoneListModel zone;
+  final LocationController locationController;
+  final bool isActive;
+  final bool isFirst;
+  final bool isLast;
+  final bool isBottomSheet;
+
+  const _ZoneListItemStateful({
+    required this.zone,
+    required this.locationController,
+    required this.isActive,
+    required this.isFirst,
+    required this.isLast,
+    required this.isBottomSheet,
+  });
+
+  @override
+  State<_ZoneListItemStateful> createState() => _ZoneListItemStatefulState();
+}
+
+class _ZoneListItemStatefulState extends State<_ZoneListItemStateful> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pressedColor = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.04);
+
+    return GestureDetector(
+      onTapDown: widget.isActive ? (_) {
+        setState(() => _isPressed = true);
+      } : null,
+      onTapUp: widget.isActive ? (_) async {
+        // Small delay to show pressed state
+        await Future.delayed(const Duration(milliseconds: 80));
+
+        if (mounted) {
+          setState(() => _isPressed = false);
+
+          widget.locationController.selectZone(widget.zone);
+          if (widget.isBottomSheet) {
             Get.back();
           }
 
@@ -234,12 +279,12 @@ class ZoneListWidget extends StatelessWidget {
           Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
 
           // Create an address from the zone's center point
-          if (zone.formattedCoordinates != null && zone.formattedCoordinates!.isNotEmpty) {
+          if (widget.zone.formattedCoordinates != null && widget.zone.formattedCoordinates!.isNotEmpty) {
             double totalLat = 0;
             double totalLng = 0;
-            int count = zone.formattedCoordinates!.length;
+            int count = widget.zone.formattedCoordinates!.length;
 
-            for (var coord in zone.formattedCoordinates!) {
+            for (var coord in widget.zone.formattedCoordinates!) {
               totalLat += coord.lat!;
               totalLng += coord.lng!;
             }
@@ -250,7 +295,7 @@ class ZoneListWidget extends StatelessWidget {
             AddressModel address = AddressModel(
               latitude: centerLat.toString(),
               longitude: centerLng.toString(),
-              address: zone.displayName ?? zone.name ?? 'Selected Zone',
+              address: widget.zone.displayName ?? widget.zone.name ?? 'Selected Zone',
               addressType: 'others',
             );
 
@@ -258,36 +303,42 @@ class ZoneListWidget extends StatelessWidget {
               var response = await Get.find<AuthController>().guestLogin();
               if (response.isSuccess) {
                 Get.find<ProfileController>().setForceFullyUserEmpty();
-                locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
+                widget.locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
               }
             } else {
-              locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
+              widget.locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
             }
           }
-        } : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeDefault),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  zone.displayName ?? zone.name ?? 'Unknown Zone',
-                  style: robotoMedium.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: isActive
-                        ? Theme.of(context).textTheme.bodyLarge!.color
-                        : Theme.of(context).disabledColor,
-                  ),
+        }
+      } : null,
+      onTapCancel: () {
+        if (mounted) {
+          setState(() => _isPressed = false);
+        }
+      },
+      child: Container(
+        color: _isPressed ? pressedColor : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeDefault),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.zone.displayName ?? widget.zone.name ?? 'Unknown Zone',
+                style: robotoMedium.copyWith(
+                  fontSize: Dimensions.fontSizeDefault,
+                  color: widget.isActive
+                      ? Theme.of(context).textTheme.bodyLarge!.color
+                      : Theme.of(context).disabledColor,
                 ),
               ),
-              if (isActive)
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: Theme.of(context).hintColor,
-                ),
-            ],
-          ),
+            ),
+            if (widget.isActive)
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Theme.of(context).hintColor,
+              ),
+          ],
         ),
       ),
     );
