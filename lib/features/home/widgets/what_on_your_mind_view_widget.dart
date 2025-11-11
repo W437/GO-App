@@ -63,21 +63,24 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
                         height: ResponsiveHelper.isMobile(context) ? 70 : 90,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Theme.of(context).primaryColor,
-                              Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                            ],
-                          ),
+                          color: Get.isDarkMode
+                            ? Theme.of(context).cardColor
+                            : Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.2),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Container(
                           margin: const EdgeInsets.all(2),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(Dimensions.radiusLarge - 2),
                             child: CustomImageWidget(
-                              image: '${categoryController.categoryList![index].imageFullUrl}',
+                              image: categoryController.categoryList![index].imageFullUrl ?? '',
                               height: ResponsiveHelper.isMobile(context) ? 66 : 86,
                               width: ResponsiveHelper.isMobile(context) ? 66 : 86,
                               fit: BoxFit.cover,

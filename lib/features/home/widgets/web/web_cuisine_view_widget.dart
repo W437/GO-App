@@ -52,7 +52,7 @@ class WebCuisineViewWidget extends StatelessWidget {
                                     hoverColor: Colors.transparent,
                                     onTap: () =>  Get.toNamed(RouteHelper.getCuisineRestaurantRoute(cuisineController.cuisineModel!.cuisines![index].id, cuisineController.cuisineModel!.cuisines![index].name)),
                                     child: CuisineCardWidget(
-                                      image: '${cuisineController.cuisineModel!.cuisines![index].imageFullUrl}',
+                                      image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
                                       name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
                                     ),
                                   ),

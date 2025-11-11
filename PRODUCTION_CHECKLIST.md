@@ -2,11 +2,27 @@
 
 ## ⚠️ CRITICAL - Security & Signing
 
-### 1. **CHANGE SHA-1 CERTIFICATE FOR GOOGLE MAPS API** ⚠️
-   - [ ] Generate production keystore (if not already created)
-   - [ ] Extract SHA-1 from production keystore: `keytool -list -v -keystore ~/key.jks -alias key`
-   - [ ] Update Google Maps API Console with production SHA-1
-   - [ ] Keep debug SHA-1 as well for development builds
+### 1. **REPLACE UNRESTRICTED GOOGLE MAPS API KEY** ⚠️
+   - [ ] **Currently using unrestricted API key for development** (Application restrictions: None)
+   - [ ] **MUST create separate restricted keys before release:**
+
+   **Android Production Key:**
+   - [ ] Create new Android-restricted API key in Google Cloud Console
+   - [ ] Restriction type: Android apps
+   - [ ] Package name: `com.hopa.user`
+   - [ ] Generate production keystore: `keytool -genkey -v -keystore ~/key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias key`
+   - [ ] Extract production SHA-1: `keytool -list -v -keystore ~/key.jks -alias key`
+   - [ ] Add production SHA-1 to Android API key restrictions
+   - [ ] Enable: Maps SDK for Android
+   - [ ] Update key in `android/app/src/main/AndroidManifest.xml`
+
+   **iOS Production Key:**
+   - [ ] Create new iOS-restricted API key in Google Cloud Console
+   - [ ] Restriction type: iOS apps
+   - [ ] Bundle ID: `com.hopa.user`
+   - [ ] Enable: Maps SDK for iOS
+   - [ ] Update key in `ios/Runner/AppDelegate.swift`
+
    - [ ] Current debug SHA-1: `99:A5:F3:C3:07:76:33:B2:7E:88:4B:ED:D4:24:33:F1:94:AD:F1:61`
    - [ ] Reference: `/android/SHA1_CERTIFICATE_INFO.md`
 

@@ -27,7 +27,7 @@ class MapCustomInfoWindowWidget extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(50),
             child: CustomImageWidget(
-              image: restaurant != null ? '${restaurant?.logoFullUrl}' : '${userInfoModel?.imageFullUrl}',
+              image: restaurant != null ? (restaurant?.logoFullUrl ?? '') : (userInfoModel?.imageFullUrl ?? ''),
               fit: BoxFit.fill, height: 30, width: 30,
             ),
           ),

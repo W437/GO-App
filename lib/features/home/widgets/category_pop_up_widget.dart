@@ -59,7 +59,7 @@ class CategoryPopUpWidget extends StatelessWidget {
                                     boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, blurRadius: 5, spreadRadius: 1)],
                                   ),
                                   child: CustomImageWidget(
-                                    image: '${categoryController.categoryList![index].imageFullUrl}',
+                                    image: categoryController.categoryList![index].imageFullUrl ?? '',
                                     height: 50, width: 50, fit: BoxFit.cover,
                                   ),
                                 ),

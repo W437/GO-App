@@ -45,7 +45,7 @@ class ItemCampaignWidget1 extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                       child: CustomImageWidget(
-                        image: '${campaignController.itemCampaignList![index].imageFullUrl}',
+                        image: campaignController.itemCampaignList![index].imageFullUrl ?? '',
                         height: 150, width: 150, fit: BoxFit.cover,
                         isFood: true,
                       ),

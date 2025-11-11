@@ -82,7 +82,7 @@ class AllCuisinesBottomSheet extends StatelessWidget {
                               ));
                             },
                             child: CuisineCardWidget(
-                              image: '${cuisineController.cuisineModel!.cuisines![index].imageFullUrl}',
+                              image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
                               name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
                               fromCuisinesPage: true,
                             ),

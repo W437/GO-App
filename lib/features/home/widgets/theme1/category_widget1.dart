@@ -54,7 +54,7 @@ class CategoryWidget1 extends StatelessWidget {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                   child: CustomImageWidget(
-                                    image: '${categoryController.categoryList![index].imageFullUrl}',
+                                    image: categoryController.categoryList![index].imageFullUrl ?? '',
                                     height: 65, width: 75, fit: BoxFit.cover,
                                   ),
                                 ),

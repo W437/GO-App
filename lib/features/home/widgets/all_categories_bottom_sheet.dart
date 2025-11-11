@@ -105,7 +105,7 @@ class AllCategoriesBottomSheet extends StatelessWidget {
                                       height: 50,
                                       width: 50,
                                       fit: BoxFit.cover,
-                                      image: '${categoryController.categoryList![index].imageFullUrl}',
+                                      image: categoryController.categoryList![index].imageFullUrl ?? '',
                                     ),
                                   ),
                                   const SizedBox(height: Dimensions.paddingSizeExtraSmall),

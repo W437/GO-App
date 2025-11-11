@@ -74,7 +74,7 @@ class BestReviewedItemWidget1 extends StatelessWidget {
                           ClipRRect(
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusSmall)),
                             child: CustomImageWidget(
-                              image: '${productList[index].imageFullUrl}',
+                              image: productList[index].imageFullUrl ?? '',
                               height: 125, width: 170, fit: BoxFit.cover,
                               isFood: true,
                             ),

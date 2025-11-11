@@ -46,7 +46,7 @@ class CuisinesWidget1 extends StatelessWidget {
                       borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                       child: CustomImageWidget(
                         fit: BoxFit.cover,
-                        image: '${cuisineController.cuisineModel!.cuisines![index].imageFullUrl}',
+                        image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
                       ),
                     ),
                   ),

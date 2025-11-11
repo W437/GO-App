@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/widgets/sign_in/sign_in_view.dart';
@@ -65,78 +65,73 @@ class SignInScreenState extends State<SignInScreen> {
       },
       child: Scaffold(
         backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
-        body: SafeArea(child: Align(
-          alignment: Alignment.center,
-          child: Container(
-            width: context.width > 700 ? 500 : context.width,
-            padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.all(Dimensions.paddingSizeLarge),
-            margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
-            decoration: context.width > 700 ? BoxDecoration(
-              color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-              boxShadow: ResponsiveHelper.isDesktop(context) ? null : [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, blurRadius: 5, spreadRadius: 1)],
-            ) : null,
-            child: Stack(
-              children: [
-                // Content aligned to bottom
-                SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height -
-                                 MediaQuery.of(context).padding.top -
-                                 MediaQuery.of(context).padding.bottom -
-                                 (widget.exitFromApp ? 0 : 48) - // Back button height
-                                 (Dimensions.paddingSizeLarge * 2), // Container padding
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Avatar/Logo
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'H!',
-                              style: robotoBold.copyWith(
-                                fontSize: 36,
-                                color: Colors.white,
-                              ),
+        appBar: widget.exitFromApp ? null : UnifiedHeaderWidget(
+          title: '',
+          showBackButton: true,
+          onBackPressed: () {
+            if(Get.find<AuthController>().isOtpViewEnable){
+              Get.find<AuthController>().enableOtpView(enable: false);
+            }else{
+              Get.back(result: false);
+            }
+          },
+        ),
+        body: SafeArea(
+          top: widget.exitFromApp,
+          child: Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: context.width > 700 ? 500 : context.width,
+              padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.all(Dimensions.paddingSizeLarge),
+              margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
+              decoration: context.width > 700 ? BoxDecoration(
+                color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                boxShadow: ResponsiveHelper.isDesktop(context) ? null : [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, blurRadius: 5, spreadRadius: 1)],
+              ) : null,
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height -
+                               MediaQuery.of(context).padding.top -
+                               MediaQuery.of(context).padding.bottom -
+                               (widget.exitFromApp ? 0 : 56) - // AppBar height (UnifiedHeaderWidget preferredSize)
+                               (Dimensions.paddingSizeLarge * 2), // Container padding
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Avatar/Logo
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'H!',
+                            style: robotoBold.copyWith(
+                              fontSize: 36,
+                              color: Colors.white,
                             ),
                           ),
                         ),
+                      ),
 
-                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                      const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                        SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
-                      ],
-                    ),
+                      SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
+
+                      const SizedBox(height: 60),
+                    ],
                   ),
                 ),
-
-                // Back button at top-left (overlay) - rendered last so it's on top
-                if (!widget.exitFromApp)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: CircularBackButtonWidget(
-                      onPressed: () {
-                        if(Get.find<AuthController>().isOtpViewEnable){
-                          Get.find<AuthController>().enableOtpView(enable: false);
-                        }else{
-                          Get.back(result: false);
-                        }
-                      },
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
-        )),
+        ),
       ),
     );
   }

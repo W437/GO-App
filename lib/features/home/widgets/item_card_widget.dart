@@ -72,7 +72,7 @@ class ItemCardWidget extends StatelessWidget {
                     borderRadius: isCampaignItem ? const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)) :
                     BorderRadius.circular(Dimensions.radiusDefault),
                     child: CustomImageWidget(
-                      image: !isCampaignItem ? '${product.imageFullUrl}' : '${product.imageFullUrl}',
+                      image: product.imageFullUrl ?? '',
                       fit: BoxFit.cover, width: double.infinity, height: double.infinity,
                       isFood: true,
                     ),

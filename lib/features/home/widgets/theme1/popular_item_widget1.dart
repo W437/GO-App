@@ -74,7 +74,7 @@ class PopularItemWidget1 extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                 child: CustomImageWidget(
-                                  image: '${productList[index].imageFullUrl}',
+                                  image: productList[index].imageFullUrl ?? '',
                                   height: 80, width: 80, fit: BoxFit.cover,
                                   isFood: true,
                                 ),
