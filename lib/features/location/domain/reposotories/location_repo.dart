@@ -28,6 +28,12 @@ class LocationRepo implements LocationRepoInterface {
 
   @override
   Future<String> getAddressFromGeocode(LatLng latLng) async {
+    // Guard against invalid coordinates (0,0)
+    if (latLng.latitude == 0.0 && latLng.longitude == 0.0) {
+      print('⚠️ [GEOCODE] Skipping geocode for invalid coordinates: lat=0.0, lng=0.0');
+      return 'Unknown Location';
+    }
+
     Response response = await apiClient.getData('${AppConstants.geocodeUri}?lat=${latLng.latitude}&lng=${latLng.longitude}');
     String address = 'Unknown Location Found';
     if(response.statusCode == 200 && response.body['status'] == 'OK') {

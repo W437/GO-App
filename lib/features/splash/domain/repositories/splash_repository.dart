@@ -35,19 +35,21 @@ class SplashRepository implements SplashRepositoryInterface {
 
   Future<Response> getConfigDataFromApi() async {
     try {
+      debugPrint('🌐 [CONFIG] Starting API call to ${AppConstants.configUri}');
       Response response = await apiClient.getData(AppConstants.configUri).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 8),
         onTimeout: () {
-          debugPrint('Config API call timed out after 10 seconds');
+          debugPrint('⏱️ [CONFIG] API call timed out after 8 seconds');
           return Response(statusCode: 1, statusText: ApiClient.noInternetMessage);
         },
       );
+      debugPrint('🌐 [CONFIG] API response received - status: ${response.statusCode}');
       if (response.statusCode == 200) {
         sharedPreferences.setString(AppConstants.configCacheKey, jsonEncode(response.body));
       }
       return response;
     } catch (e) {
-      debugPrint('Error fetching config: $e');
+      debugPrint('❌ [CONFIG] Error fetching config: $e');
       return Response(statusCode: 1, statusText: ApiClient.noInternetMessage);
     }
   }

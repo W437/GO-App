@@ -11,17 +11,22 @@ import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 
 void route({required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
+  print('🚀 [ROUTE] route() called - starting navigation logic');
   double? minimumVersion = _getMinimumVersion();
   bool needsUpdate = AppConstants.appVersion < minimumVersion;
 
   bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
   if (needsUpdate || isInMaintenance) {
+    print('🚀 [ROUTE] Navigating to update/maintenance screen');
     Get.offNamed(RouteHelper.getUpdateRoute(needsUpdate));
   } else if(!GetPlatform.isWeb){
+    print('🚀 [ROUTE] Calling _handleNavigation for mobile');
     _handleNavigation(notificationBody, linkBody);
   } else if (GetPlatform.isWeb && Get.currentRoute.contains(RouteHelper.update) && !isInMaintenance) {
+    print('🚀 [ROUTE] Navigating to initial route for web');
     Get.offNamed(RouteHelper.getInitialRoute());
   }
+  print('🚀 [ROUTE] route() completed');
 }
 
 double _getMinimumVersion() {
@@ -35,18 +40,25 @@ double _getMinimumVersion() {
 }
 
 void _handleNavigation(NotificationBodyModel? notificationBody, DeepLinkBody? linkBody) async {
+  print('🚀 [NAVIGATION] _handleNavigation started');
   if (notificationBody != null && linkBody == null) {
+    print('🚀 [NAVIGATION] Route: notification');
     _forNotificationRouteProcess(notificationBody);
   } else if (Get.find<AuthController>().isLoggedIn()) {
+    print('🚀 [NAVIGATION] Route: logged in user');
     _forLoggedInUserRouteProcess();
   } else if (Get.find<SplashController>().showIntro()!) {
+    print('🚀 [NAVIGATION] Route: first time user (onboarding)');
     _newlyRegisteredRouteProcess();
   } else if (Get.find<AuthController>().isGuestLoggedIn()) {
+    print('🚀 [NAVIGATION] Route: guest user (already logged in)');
     _forGuestUserRouteProcess();
   } else {
+    print('🚀 [NAVIGATION] Route: new guest user (logging in)');
     await Get.find<AuthController>().guestLogin();
     _forGuestUserRouteProcess();
   }
+  print('🚀 [NAVIGATION] _handleNavigation completed');
 }
 
 void _forNotificationRouteProcess(NotificationBodyModel? notificationBody) {

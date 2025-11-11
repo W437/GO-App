@@ -78,8 +78,8 @@ class LocationController extends GetxController implements GetxService {
     Position myPosition = await locationServiceInterface.getPosition(
       defaultLatLng,
       LatLng(
-        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '37.7749'),
-        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '-122.4194'),
+        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '32.997473'),
+        double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '35.144028'),
       ),
     );
     fromAddress ? _position = myPosition : _pickPosition = myPosition;
@@ -100,6 +100,12 @@ class LocationController extends GetxController implements GetxService {
   }
 
   Future<ZoneResponseModel> getZone(String? lat, String? long, bool markerLoad, {bool updateInAddress = false, bool showSnackBar = false}) async {
+    // Guard against invalid coordinates (0,0 or null)
+    if (lat == null || long == null || (lat == '0.0' && long == '0.0') || (double.tryParse(lat) == 0.0 && double.tryParse(long) == 0.0)) {
+      print('⚠️ [LOCATION] Skipping zone check for invalid coordinates: lat=$lat, lng=$long');
+      return ZoneResponseModel(false, 'Invalid coordinates', [], []);
+    }
+
     if(markerLoad) {
       _loading = true;
     }else {

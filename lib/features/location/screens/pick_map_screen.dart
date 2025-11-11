@@ -1,9 +1,9 @@
 import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/draggable_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
-import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/location/widgets/location_search_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
@@ -45,14 +45,18 @@ class _PickMapScreenState extends State<PickMapScreen> {
     super.initState();
 
     Get.find<LocationController>().makeLoadingOff();
-    Get.find<LocationController>().getZoneList();
+
+    // Call after build to avoid setState during build error
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<LocationController>().getZoneList();
+    });
 
     if(widget.fromAddAddress) {
       Get.find<LocationController>().setPickData();
     }
     _initialPosition = LatLng(
-      double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '37.7749'),
-      double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '-122.4194'),
+      double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '32.997473'),
+      double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '35.144028'),
     );
   }
 
@@ -104,41 +108,10 @@ class _PickMapScreenState extends State<PickMapScreen> {
             ) : const CircularProgressIndicator()),
 
             Positioned(
-              top: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: LocationSearchDialog(mapController: _mapController, pickedLocation: locationController.pickAddress!),
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                  Container(
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(25), // Pill shape (full circle for square)
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(25), // Pill shape
-                        onTap: () => _showZoneSelectionActionSheet(context),
-                        child: const Icon(
-                          Icons.list_alt,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              top: Dimensions.paddingSizeLarge,
+              left: Dimensions.paddingSizeSmall,
+              right: Dimensions.paddingSizeSmall,
+              child: LocationSearchDialog(mapController: _mapController, pickedLocation: locationController.pickAddress!),
             ),
 
             // Back button under search bar
@@ -192,12 +165,28 @@ class _PickMapScreenState extends State<PickMapScreen> {
                     Dimensions.paddingSizeExtraLarge,
                     Dimensions.paddingSizeDefault,
                   ),
-                  child: CustomButtonWidget(
-                    buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
-                        : 'service_not_available_in_this_area'.tr,
-                    isLoading: locationController.isLoading,
-                    onPressed: (locationController.buttonDisabled || locationController.loading) ? null
-                        : () => _onPickAddressButtonPressed(locationController),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Zone selection button
+                      CustomButtonWidget(
+                        buttonText: 'select_zone'.tr,
+                        icon: Icons.list_alt,
+                        color: Theme.of(context).cardColor,
+                        textColor: Theme.of(context).textTheme.bodyLarge!.color,
+                        iconColor: Colors.black,
+                        onPressed: () => _showZoneSelectionActionSheet(context),
+                      ),
+                      const SizedBox(height: Dimensions.paddingSizeSmall),
+                      // Main action button
+                      CustomButtonWidget(
+                        buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
+                            : 'service_not_available_in_this_area'.tr,
+                        isLoading: locationController.isLoading,
+                        onPressed: (locationController.buttonDisabled || locationController.loading) ? null
+                            : () => _onPickAddressButtonPressed(locationController),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -247,228 +236,34 @@ class _PickMapScreenState extends State<PickMapScreen> {
   }
 
   void _showZoneSelectionActionSheet(BuildContext context) {
-    ZoneListModel? selectedZone;
-
-    showModalBottomSheet(
+    showDraggableBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Container(
-          height: MediaQuery.of(context).size.height * 0.8,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(Dimensions.radiusExtraLarge),
-              topRight: Radius.circular(Dimensions.radiusExtraLarge),
+      wrapContent: true,
+      maxChildSize: 0.7,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          Dimensions.paddingSizeDefault,
+          0,
+          Dimensions.paddingSizeDefault,
+          Dimensions.paddingSizeLarge,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'select_delivery_zone'.tr,
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeLarge,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeDefault),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).disabledColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'select_zone'.tr,
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeLarge,
-                        color: Theme.of(context).textTheme.bodyLarge!.color,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Get.back(),
-                      icon: Icon(Icons.close, color: Theme.of(context).disabledColor),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Divider(height: 1),
-
-              // Zone list
-              Expanded(
-                child: GetBuilder<LocationController>(builder: (locationController) {
-                  if (locationController.loadingZoneList) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (locationController.zoneList.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.location_off, size: 50, color: Theme.of(context).disabledColor),
-                          const SizedBox(height: Dimensions.paddingSizeSmall),
-                          Text(
-                            'no_zones_available'.tr,
-                            style: robotoMedium.copyWith(color: Theme.of(context).disabledColor),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                    itemCount: locationController.zoneList.length,
-                    itemBuilder: (context, index) {
-                      ZoneListModel zone = locationController.zoneList[index];
-                      bool isSelected = selectedZone?.id == zone.id;
-                      bool isActive = zone.status == 1;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(context).primaryColor.withOpacity(0.1)
-                              : Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          border: Border.all(
-                            color: isSelected
-                                ? Theme.of(context).primaryColor
-                                : isActive
-                                    ? Theme.of(context).primaryColor.withOpacity(0.3)
-                                    : Theme.of(context).disabledColor.withOpacity(0.3),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                            onTap: isActive ? () {
-                              setState(() {
-                                selectedZone = zone;
-                              });
-                            } : null,
-                            child: Padding(
-                              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: isActive
-                                          ? Theme.of(context).primaryColor.withOpacity(0.1)
-                                          : Theme.of(context).disabledColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.location_on,
-                                      color: isActive
-                                          ? Theme.of(context).primaryColor
-                                          : Theme.of(context).disabledColor,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          zone.displayName ?? zone.name ?? 'Unknown Zone',
-                                          style: robotoBold.copyWith(
-                                            fontSize: Dimensions.fontSizeDefault,
-                                            color: isActive
-                                                ? Theme.of(context).textTheme.bodyLarge!.color
-                                                : Theme.of(context).disabledColor,
-                                          ),
-                                        ),
-                                        if (isActive) ...[
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            zone.shippingInfo,
-                                            style: robotoRegular.copyWith(
-                                              fontSize: Dimensions.fontSizeSmall,
-                                              color: Theme.of(context).textTheme.bodyMedium!.color,
-                                            ),
-                                          ),
-                                        ] else ...[
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            'service_unavailable'.tr,
-                                            style: robotoRegular.copyWith(
-                                              fontSize: Dimensions.fontSizeSmall,
-                                              color: Theme.of(context).colorScheme.error,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    Icon(
-                                      Icons.check_circle,
-                                      color: Theme.of(context).primaryColor,
-                                      size: 24,
-                                    )
-                                  else if (isActive)
-                                    Icon(
-                                      Icons.radio_button_unchecked,
-                                      color: Theme.of(context).primaryColor.withOpacity(0.5),
-                                      size: 24,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
-              ),
-
-              // Fixed confirm button at bottom
-              Container(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  border: Border(
-                    top: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: SafeArea(
-                  child: CustomButtonWidget(
-                    buttonText: 'confirm'.tr,
-                    isLoading: false,
-                    onPressed: selectedZone != null ? () {
-                      Get.find<LocationController>().selectZone(selectedZone!);
-                      Get.back();
-                      // Auto-trigger the location confirmation after a brief delay
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        _onPickAddressButtonPressed(Get.find<LocationController>());
-                      });
-                    } : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+            const Flexible(
+              child: ZoneListWidget(isBottomSheet: false),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+          ],
         ),
       ),
     );

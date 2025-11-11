@@ -36,6 +36,7 @@ class SplashScreenState extends State<SplashScreen> {
   bool _videoCompleted = false;
   bool _hasTriggeredRoute = false;
   bool _videoFailedToLoad = false;
+  bool _skipPressed = false;
 
   @override
   void initState() {
@@ -162,6 +163,21 @@ class SplashScreenState extends State<SplashScreen> {
     }
 
     print('🎥 [SPLASH] Starting route to next screen');
+
+    // Add safety timeout - if routing takes more than 15 seconds, show no internet screen
+    Future.delayed(const Duration(seconds: 15), () {
+      if (Get.currentRoute == '/splash') {
+        print('🎥 [SPLASH] Routing timed out after 15 seconds - showing no internet screen');
+        Get.off(() => NoInternetScreen(
+          child: SplashScreen(
+            notificationBody: widget.notificationBody,
+            linkBody: widget.linkBody,
+            muteVideo: widget.muteVideo,
+          ),
+        ));
+      }
+    });
+
     _route();
   }
 
@@ -171,17 +187,19 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('🎥 [SPLASH] Building splash screen');
+    print('🎥 [SPLASH] Building splash screen - skipPressed: $_skipPressed');
     return Scaffold(
       backgroundColor: Colors.white,
       key: _globalKey,
-      body: GetBuilder<SplashController>(builder: (splashController) {
-        print('🎥 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
+      body: _skipPressed
+        ? const Center(child: CircularProgressIndicator())  // Show loading when skipped
+        : GetBuilder<SplashController>(builder: (splashController) {
+            print('🎥 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
 
-        // Always show video player - no overlay during video playback
-        // No internet check will happen after video completes in _tryStartRouting()
-        return _buildVideoPlayer();
-      }),
+            // Always show video player - no overlay during video playback
+            // No internet check will happen after video completes in _tryStartRouting()
+            return _buildVideoPlayer();
+          }),
     );
   }
 
@@ -228,9 +246,16 @@ class SplashScreenState extends State<SplashScreen> {
                     child: TextButton(
                       onPressed: () {
                         if (!_hasTriggeredRoute) {
-                          print('🎥 [SPLASH] Skip button pressed');
-                          _videoCompleted = true;
-                          _tryStartRouting();
+                          print('🎥 [SPLASH] Skip button pressed - hiding splash immediately');
+                          setState(() {
+                            _skipPressed = true;
+                            _hasTriggeredRoute = true;
+                            _videoCompleted = true;
+                          });
+                          // Stop video
+                          _videoController.pause();
+                          // Navigate
+                          _route();
                         }
                       },
                       child: Text(
