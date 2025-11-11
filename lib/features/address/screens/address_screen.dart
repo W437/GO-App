@@ -7,7 +7,7 @@ import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
@@ -48,7 +48,11 @@ class _AddressScreenState extends State<AddressScreen> {
     return GetBuilder<AddressController>(builder: (addressController) {
       return Scaffold (
 
-        appBar: CustomAppBarWidget(title: 'my_address'.tr),
+        appBar: UnifiedHeaderWidget(
+          title: 'my_address'.tr,
+          showBackButton: true,
+          showBorder: true,
+        ),
 
         endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
 

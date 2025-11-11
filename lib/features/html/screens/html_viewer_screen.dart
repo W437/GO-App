@@ -23,15 +23,37 @@ class HtmlViewerScreen extends StatefulWidget {
 
 class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
   final ScrollController scrollController = ScrollController();
-  bool _isAboutUsLoading = true;
-  static const String _aboutUsUrl = 'https://go-delivery.net';
+  bool _isWebViewLoading = true;
+  static const String _aboutUsUrl = 'https://hopa.delivery/about';
+  static const String _privacyPolicyUrl = 'https://hopa.delivery/privacy-policy';
+  static const String _termsOfServiceUrl = 'https://hopa.delivery/terms-of-service';
 
   @override
   void initState() {
     super.initState();
 
-    if(widget.htmlType != HtmlType.aboutUs) {
+    // Only load HTML content for types that don't use web view
+    if(!_shouldUseWebView()) {
       Get.find<HtmlController>().getHtmlText(widget.htmlType);
+    }
+  }
+
+  bool _shouldUseWebView() {
+    return widget.htmlType == HtmlType.aboutUs ||
+           widget.htmlType == HtmlType.privacyPolicy ||
+           widget.htmlType == HtmlType.termsAndCondition;
+  }
+
+  String _getWebViewUrl() {
+    switch (widget.htmlType) {
+      case HtmlType.aboutUs:
+        return _aboutUsUrl;
+      case HtmlType.privacyPolicy:
+        return _privacyPolicyUrl;
+      case HtmlType.termsAndCondition:
+        return _termsOfServiceUrl;
+      default:
+        return '';
     }
   }
 
@@ -43,17 +65,17 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isAboutUs = widget.htmlType == HtmlType.aboutUs;
+    final bool useWebView = _shouldUseWebView();
     return Scaffold(
-      extendBodyBehindAppBar: isAboutUs,
-      appBar: isAboutUs ? null : CustomAppBarWidget(title: widget.htmlType == HtmlType.termsAndCondition ? 'terms_conditions'.tr
+      extendBodyBehindAppBar: useWebView,
+      appBar: useWebView ? null : CustomAppBarWidget(title: widget.htmlType == HtmlType.termsAndCondition ? 'terms_conditions'.tr
           : widget.htmlType == HtmlType.aboutUs ? 'about_us'.tr : widget.htmlType == HtmlType.privacyPolicy
           ? 'privacy_policy'.tr :  widget.htmlType == HtmlType.shippingPolicy ? 'shipping_policy'.tr
           : widget.htmlType == HtmlType.refund ? 'refund_policy'.tr :  widget.htmlType == HtmlType.cancellation
           ? 'cancellation_policy'.tr  : 'no_data_found'.tr),
-      endDrawer: isAboutUs ? null : const MenuDrawerWidget(),
+      endDrawer: useWebView ? null : const MenuDrawerWidget(),
       endDrawerEnableOpenDragGesture: false,
-      body: isAboutUs ? Stack(
+      body: useWebView ? Stack(
         children: [
           Positioned.fill(
             child: Padding(
@@ -65,26 +87,26 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
                 child: Container(
                   color: Theme.of(context).cardColor,
                   child: InAppWebView(
-                    initialUrlRequest: URLRequest(url: WebUri(_aboutUsUrl)),
+                    initialUrlRequest: URLRequest(url: WebUri(_getWebViewUrl())),
                     initialSettings: InAppWebViewSettings(useHybridComposition: true),
                     onLoadStart: (_, __) {
                       if(mounted) {
                         setState(() {
-                          _isAboutUsLoading = true;
+                          _isWebViewLoading = true;
                         });
                       }
                     },
                     onLoadStop: (_, __) async {
                       if(mounted) {
                         setState(() {
-                          _isAboutUsLoading = false;
+                          _isWebViewLoading = false;
                         });
                       }
                     },
                     onProgressChanged: (_, progress) {
                       if(progress == 100 && mounted) {
                         setState(() {
-                          _isAboutUsLoading = false;
+                          _isWebViewLoading = false;
                         });
                       }
                     },
@@ -93,7 +115,7 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
               ),
             ),
           ),
-          if(_isAboutUsLoading)
+          if(_isWebViewLoading)
             Center(
               child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)),
             ),

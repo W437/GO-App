@@ -1,12 +1,8 @@
-/// Not logged in screen widget for guest user handling
-/// Shows login prompt and authentication options for restricted content
-
 import 'package:godelivery_user/features/auth/widgets/auth_dialog_widget.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/helper/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
@@ -24,50 +20,95 @@ class NotLoggedInScreen extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: FooterViewWidget(
-          child: Padding(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-
-              Image.asset(
-                Images.guest,
-                width: MediaQuery.of(context).size.height*0.25,
-                height: MediaQuery.of(context).size.height*0.25,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity,
               ),
-              SizedBox(height: MediaQuery.of(context).size.height*0.01),
+              child: Padding(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-              Text(
-                'sorry'.tr,
-                style: robotoBold.copyWith(fontSize: MediaQuery.of(context).size.height*0.023, color: Theme.of(context).primaryColor),
-                textAlign: TextAlign.center,
+                    // Icon with circular background
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                      ),
+                      child: Icon(
+                        Icons.lock_outline_rounded,
+                        size: 60,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                    // Title
+                    Text(
+                      'welcome_back'.tr,
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeOverLarge,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                    // Description
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                      child: Text(
+                        'sign_in_to_access_features'.tr,
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                      ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                    // Login Button
+                    SizedBox(
+                      width: ResponsiveHelper.isDesktop(context) ? 280 : double.infinity,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeDefault,
+                        ),
+                        child: CustomButtonWidget(
+                          buttonText: 'login_to_continue'.tr,
+                          onPressed: () async {
+                            if (!ResponsiveHelper.isDesktop(context)) {
+                              await Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute));
+                            } else {
+                              Get.dialog(const Center(
+                                child: AuthDialogWidget(
+                                  exitFromApp: false,
+                                  backFromThis: true,
+                                ),
+                              )).then((value) => callBack(true));
+                            }
+                            if (Get.find<OrderController>().showBottomSheet) {
+                              Get.find<OrderController>().showRunningOrders();
+                            }
+                            callBack(true);
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  ],
+                ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height*0.01),
-
-              Text(
-                'you_are_not_logged_in'.tr,
-                style: robotoRegular.copyWith(fontSize: MediaQuery.of(context).size.height*0.0175, color: Theme.of(context).disabledColor),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height*0.04),
-
-              SizedBox(
-                width: 200,
-                child: CustomButtonWidget(buttonText: 'login_to_continue'.tr, /*height: 40,*/ onPressed: () async {
-
-                  if(!ResponsiveHelper.isDesktop(context)) {
-                    await Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute));
-                  }else{
-                    Get.dialog(const Center(child: AuthDialogWidget(exitFromApp: false, backFromThis: true))).then((value) => callBack(true));
-                    // Get.dialog(const SignInScreen(exitFromApp: false, backFromThis: true)).then((value) => callBack(true));
-                  }
-                  if(Get.find<OrderController>().showBottomSheet) {
-                    Get.find<OrderController>().showRunningOrders();
-                  }
-                  callBack(true);
-
-                }),
-              ),
-
-            ]),
+            ),
           ),
         ),
       ),

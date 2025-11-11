@@ -4,7 +4,7 @@ import 'package:godelivery_user/features/coupon/controllers/coupon_controller.da
 import 'package:godelivery_user/features/coupon/widgets/coupon_card_widget.dart';
 import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
@@ -64,7 +64,11 @@ class _CouponScreenState extends State<CouponScreen> {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
 
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'coupon'.tr),
+      appBar: UnifiedHeaderWidget(
+        title: 'coupon'.tr,
+        showBackButton: true,
+        showBorder: true,
+      ),
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: _isLoggedIn ? GetBuilder<CouponController>(builder: (couponController) {
         return (couponController.customerCouponModel?.available != null && _availableToolTipControllerList != null) ? couponController.customerCouponModel!.available!.isNotEmpty ? RefreshIndicator(

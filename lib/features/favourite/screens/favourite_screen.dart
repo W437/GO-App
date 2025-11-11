@@ -4,11 +4,9 @@ import 'package:godelivery_user/features/favourite/controllers/favourite_control
 import 'package:godelivery_user/features/favourite/widgets/fav_item_view_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/not_logged_in_screen.dart';
-import 'package:godelivery_user/common/widgets/gradient_screen_header_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,9 +36,12 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
 
   @override
   Widget build(BuildContext context) {
-    bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'favourite'.tr),
+      appBar: UnifiedHeaderWidget(
+        title: 'favourite'.tr,
+        showBackButton: true,
+        showBorder: true,
+      ),
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: Get.find<AuthController>().isLoggedIn() ? SafeArea(child: Column(children: [
 

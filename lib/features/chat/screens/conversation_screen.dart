@@ -15,7 +15,7 @@ import 'package:godelivery_user/common/enums/user_type.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
@@ -96,7 +96,11 @@ class _ConversationScreenState extends State<ConversationScreen>  with TickerPro
       }
 
       return Scaffold(
-        appBar: CustomAppBarWidget(title: 'conversation_list'.tr),
+        appBar: UnifiedHeaderWidget(
+          title: 'conversation_list'.tr,
+          showBackButton: true,
+          showBorder: true,
+        ),
         endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
         floatingActionButton: !ResponsiveHelper.isDesktop(context) ? (chatController.conversationModel != null && chatController.showFloatingButton) ? FloatingActionButton(heroTag: 'chat_conversation_new', 
           backgroundColor: Theme.of(context).primaryColor,
