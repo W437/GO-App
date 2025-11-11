@@ -143,12 +143,24 @@ class SplashScreenState extends State<SplashScreen> {
     print('🎥 [SPLASH] _tryStartRouting called - hasTriggeredRoute: $_hasTriggeredRoute, videoCompleted: $_videoCompleted');
     if (_hasTriggeredRoute || !_videoCompleted) return;
 
+    _hasTriggeredRoute = true;
+
     final hasConnection = Get.find<SplashController>().hasConnection;
     print('🎥 [SPLASH] Connection status: $hasConnection');
+
     if (!hasConnection) {
+      print('🎥 [SPLASH] No connection - navigating to no internet screen');
+      // Navigate to dedicated no internet screen
+      Get.off(() => NoInternetScreen(
+        child: SplashScreen(
+          notificationBody: widget.notificationBody,
+          linkBody: widget.linkBody,
+          muteVideo: widget.muteVideo,
+        ),
+      ));
       return;
     }
-    _hasTriggeredRoute = true;
+
     print('🎥 [SPLASH] Starting route to next screen');
     _route();
   }
@@ -166,24 +178,8 @@ class SplashScreenState extends State<SplashScreen> {
       body: GetBuilder<SplashController>(builder: (splashController) {
         print('🎥 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
 
-        // Show no internet screen only if explicitly no connection
-        // but keep it as an overlay, don't block video
-        if (!splashController.hasConnection) {
-          // Let video play in background, show connection screen as overlay
-          return Stack(
-            children: [
-              _buildVideoPlayer(),
-              NoInternetScreen(
-                child: SplashScreen(
-                  notificationBody: widget.notificationBody,
-                  linkBody: widget.linkBody,
-                  muteVideo: widget.muteVideo,
-                ),
-              ),
-            ],
-          );
-        }
-
+        // Always show video player - no overlay during video playback
+        // No internet check will happen after video completes in _tryStartRouting()
         return _buildVideoPlayer();
       }),
     );

@@ -102,8 +102,16 @@ class SplashController extends GetxController implements GetxService {
     Response response;
     if(source == DataSourceEnum.local) {
       response = await splashServiceInterface.getConfigData(source: DataSourceEnum.local);
-      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
-      getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client);
+      // If local cache exists, handle it and fetch fresh data in background
+      if(response.statusCode == 200) {
+        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
+        // Refresh in background without blocking
+        getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client);
+      } else {
+        // No cache - must wait for API response
+        response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
+        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
+      }
     } else {
       response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
       _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);

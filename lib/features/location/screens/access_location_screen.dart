@@ -42,6 +42,9 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
   void initState() {
     super.initState();
 
+    // Load zone list immediately
+    Get.find<LocationController>().getZoneList();
+
     // Check and request location permission for all platforms
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkPermission();

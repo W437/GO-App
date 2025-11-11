@@ -25,7 +25,8 @@ class SplashRepository implements SplashRepositoryInterface {
       if (cachedData != null) {
         return Response(statusCode: 200, body: jsonDecode(cachedData));
       } else {
-        return await getConfigDataFromApi();
+        // No cache - return empty response and let client call handle API
+        return Response(statusCode: 404, statusText: 'No cached data');
       }
     } else {
       return await getConfigDataFromApi();
@@ -33,11 +34,22 @@ class SplashRepository implements SplashRepositoryInterface {
   }
 
   Future<Response> getConfigDataFromApi() async {
-    Response response = await apiClient.getData(AppConstants.configUri);
-    if (response.statusCode == 200) {
-      sharedPreferences.setString(AppConstants.configCacheKey, jsonEncode(response.body));
+    try {
+      Response response = await apiClient.getData(AppConstants.configUri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          debugPrint('Config API call timed out after 10 seconds');
+          return Response(statusCode: 1, statusText: ApiClient.noInternetMessage);
+        },
+      );
+      if (response.statusCode == 200) {
+        sharedPreferences.setString(AppConstants.configCacheKey, jsonEncode(response.body));
+      }
+      return response;
+    } catch (e) {
+      debugPrint('Error fetching config: $e');
+      return Response(statusCode: 1, statusText: ApiClient.noInternetMessage);
     }
-    return response;
   }
 
   @override
