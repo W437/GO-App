@@ -166,36 +166,38 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
             ]),
           ),
         ) : widget.hideAppBar
-          ? Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Dimensions.paddingSizeLarge,
-                0,
-                Dimensions.paddingSizeLarge,
-                Dimensions.paddingSizeLarge
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Zone List for non-logged-in users
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'select_delivery_zone'.tr,
-                        style: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeLarge,
-                          color: Theme.of(context).textTheme.bodyLarge!.color,
+          ? SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  Dimensions.paddingSizeLarge,
+                  0,
+                  Dimensions.paddingSizeLarge,
+                  Dimensions.paddingSizeLarge
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Zone List for non-logged-in users
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'select_delivery_zone'.tr,
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeLarge,
+                            color: Theme.of(context).textTheme.bodyLarge!.color,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-                      const ZoneListWidget(),
-                    ],
-                  ),
+                        const SizedBox(height: Dimensions.paddingSizeSmall),
+                        const ZoneListWidget(),
+                      ],
+                    ),
 
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                  BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
-                ],
+                    BottomButton(addressController: addressController, fromSignUp: widget.fromSignUp, route: widget.route),
+                  ],
+                ),
               ),
             )
           : SingleChildScrollView(

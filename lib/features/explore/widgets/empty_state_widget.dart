@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -70,7 +71,7 @@ class EmptyStateWidget extends StatelessWidget {
         break;
       case EmptyStateType.noRestaurantsNearby:
         icon = Icons.location_off;
-        color = Colors.orange;
+        color = Theme.of(context).primaryColor;
         break;
       case EmptyStateType.networkError:
         icon = Icons.wifi_off;
@@ -171,29 +172,17 @@ class EmptyStateWidget extends StatelessWidget {
 
     if (type == EmptyStateType.noRestaurantsNearby) {
       buttons.add(
-        OutlinedButton.icon(
+        CustomButtonWidget(
+          buttonText: 'change_location'.tr,
+          icon: Icons.edit_location,
+          transparent: true,
+          border: Border.all(width: 2, color: Theme.of(context).primaryColor),
+          textColor: Theme.of(context).primaryColor,
+          iconColor: Theme.of(context).primaryColor,
           onPressed: () {
             // Navigate to location picker
             Get.toNamed('/pick-location');
           },
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: Theme.of(context).primaryColor),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Dimensions.paddingSizeLarge,
-              vertical: Dimensions.paddingSizeDefault,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-            ),
-          ),
-          icon: Icon(Icons.edit_location, color: Theme.of(context).primaryColor),
-          label: Text(
-            'change_location'.tr,
-            style: robotoMedium.copyWith(
-              color: Theme.of(context).primaryColor,
-              fontSize: Dimensions.fontSizeDefault,
-            ),
-          ),
         ),
       );
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/explore/widgets/category_filter_chips_widget.dart';
 import 'package:godelivery_user/features/explore/widgets/restaurant_list_view_widget.dart';
@@ -263,16 +264,16 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                       ),
                     ),
                     // Expand/Collapse Button with background
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: AnimatedBuilder(
-                        animation: _draggableController,
-                        builder: (context, child) {
-                          final isExpanded = _draggableController.isAttached && _draggableController.size >= 0.725;
-                          return IconButton(
+                    AnimatedBuilder(
+                      animation: _draggableController,
+                      builder: (context, child) {
+                        final isExpanded = _draggableController.isAttached && _draggableController.size >= 0.725;
+                        return AnimatedRotation(
+                          turns: isExpanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: RoundedIconButtonWidget(
+                            icon: Icons.keyboard_arrow_up,
                             onPressed: () {
                               if (!_draggableController.isAttached) return;
 
@@ -285,19 +286,14 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                                 curve: Curves.easeOutCubic,
                               );
                             },
-                            icon: AnimatedRotation(
-                              turns: isExpanded ? 0.5 : 0,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              child: Icon(
-                                Icons.keyboard_arrow_up,
-                                size: 28,
-                                color: Theme.of(context).textTheme.bodyMedium!.color,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                            size: 44,
+                            iconSize: 28,
+                            backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                            pressedColor: Theme.of(context).disabledColor.withValues(alpha: 0.25),
+                            iconColor: Theme.of(context).textTheme.bodyMedium!.color,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

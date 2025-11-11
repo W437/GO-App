@@ -25,12 +25,12 @@ class BottomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: SizedBox(width: 700, child: Padding(
-      padding: context.width > 700 ? const EdgeInsets.all(0) :  const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+    return Padding(
+      padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
       child: Column(children: [
 
         CustomButtonWidget(
-          radius: Dimensions.radiusDefault,
+          width: double.infinity,
           buttonText: 'user_current_location'.tr,
           onPressed: () async {
             _checkPermission(() async {
@@ -59,15 +59,14 @@ class BottomButton extends StatelessWidget {
         ),
         const SizedBox(height: Dimensions.paddingSizeSmall),
 
-        TextButton(
-          style: TextButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              side: BorderSide(width: 2, color: Theme.of(context).primaryColor),
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-            ),
-            minimumSize: const Size(Dimensions.webMaxWidth, 50),
-            padding: EdgeInsets.zero,
-          ),
+        CustomButtonWidget(
+          width: double.infinity,
+          buttonText: 'set_from_map'.tr,
+          transparent: true,
+          border: Border.all(width: 2, color: Theme.of(context).primaryColor),
+          textColor: Theme.of(context).primaryColor,
+          iconColor: Theme.of(context).primaryColor,
+          icon: Icons.map,
           onPressed: () {
             if(ResponsiveHelper.isDesktop(Get.context)) {
               showGeneralDialog(context: context, pageBuilder: (_,__,___) {
@@ -76,7 +75,6 @@ class BottomButton extends StatelessWidget {
                   child: PickMapDialog(
                     fromSignUp: fromSignUp, canRoute: route != null, fromAddAddress: false, route: route
                       ?? (fromSignUp ? RouteHelper.signUp : RouteHelper.accessLocation),
-                    // canTakeCurrentLocation: false /*(!AuthHelper.isLoggedIn() || route == '/?from-splash=false')*/,
                   ),
                 );
               });
@@ -86,20 +84,10 @@ class BottomButton extends StatelessWidget {
               ));
             }
           },
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Padding(
-              padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
-              child: Icon(Icons.map, color: Theme.of(context).primaryColor),
-            ),
-            Text('set_from_map'.tr, textAlign: TextAlign.center, style: robotoBold.copyWith(
-              color: Theme.of(context).primaryColor,
-              fontSize: Dimensions.fontSizeLarge,
-            )),
-          ]),
         ),
 
       ]),
-    )));
+    );
   }
 
   void _checkPermission(Function onTap) async {
