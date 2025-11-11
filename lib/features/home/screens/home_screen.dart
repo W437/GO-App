@@ -34,6 +34,7 @@ import 'package:godelivery_user/features/home/widgets/sticky_header_delegate.dar
 import 'package:godelivery_user/features/home/widgets/header_content_widget.dart';
 import 'package:godelivery_user/features/home/widgets/sticky_top_bar_widget.dart';
 import 'package:godelivery_user/features/home/widgets/header_content_below_sticky.dart';
+import 'package:godelivery_user/features/home/widgets/new_home_header_widget.dart';
 import 'package:godelivery_user/features/home/widgets/custom_pull_refresh_widget.dart';
 import 'package:godelivery_user/features/home/widgets/max_stretch_scroll_controller.dart';
 import 'package:godelivery_user/features/home/widgets/today_trends_view_widget.dart';
@@ -210,26 +211,36 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 scrollController: _scrollController,
               ) : (Get.find<SplashController>().configModel!.theme == 2) ? Theme1HomeScreen(
                 scrollController: _scrollController,
-              ) : Stack(
-                children: [
-                  CustomScrollView(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                    slivers: [
+              ) : CustomScrollView(
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                slivers: [
 
-                      /// Sticky Top Bar (Profile, Location, Notification)
-                      SliverPersistentHeader(
-                        pinned: true,
-                        delegate: SliverDelegate(
-                          height: Dimensions.stickyHeaderHeight,
-                          child: StickyTopBarWidget(scrollOffset: _scrollOffset),
-                        ),
-                      ),
+                  /// NEW Simple Header (Location, Cart, Notification) - Pinned to top
+                  /// To use old header, comment this section and uncomment the two sections below
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: SliverDelegate(
+                      height: 90,
+                      child: const NewHomeHeaderWidget(),
+                    ),
+                  ),
 
-                      /// Header Content (Title + Search) - Scrollable
-                      const SliverToBoxAdapter(
-                        child: HeaderContentBelowSticky(),
-                      ),
+                  /// OLD HEADER - PART 1: Sticky Top Bar (Profile, Location, Notification)
+                  /// Uncomment to use old header
+                  // SliverPersistentHeader(
+                  //   pinned: true,
+                  //   delegate: SliverDelegate(
+                  //     height: Dimensions.stickyHeaderHeight,
+                  //     child: StickyTopBarWidget(scrollOffset: _scrollOffset),
+                  //   ),
+                  // ),
+
+                  /// OLD HEADER - PART 2: Header Content (Title + Search) - Scrollable
+                  /// Uncomment to use old header
+                  // const SliverToBoxAdapter(
+                  //   child: HeaderContentBelowSticky(),
+                  // ),
 
                   SliverToBoxAdapter(
                     child: Center(child: SizedBox(
@@ -290,31 +301,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     ),
                   ))),
 
-                    ],
-                  ),
-
-                  /// Pull to Refresh Overlay - Anchored to sticky header
-                  SliverPullRefreshIndicator(
-                    scrollController: _scrollController,
-                    onRefresh: () async {
-                      await Get.find<HomeController>().getBannerList(true);
-                      await Get.find<CategoryController>().getCategoryList(true);
-                      await Get.find<CuisineController>().getCuisineList();
-                      Get.find<AdvertisementController>().getAdvertisementList();
-                      await Get.find<RestaurantController>().getPopularRestaurantList(true, 'all', false);
-                      await Get.find<CampaignController>().getItemCampaignList(true);
-                      await Get.find<ProductController>().getPopularProductList(true, 'all', false);
-                      await Get.find<RestaurantController>().getLatestRestaurantList(true, 'all', false);
-                      await Get.find<ReviewController>().getReviewedProductList(true, 'all', false);
-                      await Get.find<RestaurantController>().getRestaurantList(1, true);
-                      if(Get.find<AuthController>().isLoggedIn()) {
-                        await Get.find<ProfileController>().getUserInfo();
-                        await Get.find<NotificationController>().getNotificationList(true);
-                        await Get.find<RestaurantController>().getRecentlyViewedRestaurantList(true, 'all', false);
-                        await Get.find<RestaurantController>().getOrderAgainRestaurantList(true);
-                      }
-                    },
-                  ),
                 ],
               ),
             ),

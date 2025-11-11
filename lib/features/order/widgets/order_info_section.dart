@@ -1276,3 +1276,4 @@ void openDialog(BuildContext context, String imageUrl) {
     );
   },
 );
+}
