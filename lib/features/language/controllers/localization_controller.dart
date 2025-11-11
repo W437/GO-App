@@ -32,7 +32,10 @@ class LocalizationController extends GetxController implements GetxService {
   int _selectedLanguageIndex = 0;
   int get selectedLanguageIndex => _selectedLanguageIndex;
 
-  void setLanguage(Locale locale, {bool fromBottomSheet = false}) {
+  void setLanguage(Locale locale, {bool fromBottomSheet = false, bool forceReload = false}) {
+    // Check if language actually changed
+    bool languageChanged = _locale.languageCode != locale.languageCode;
+
     Get.updateLocale(locale);
     _locale = locale;
     _isLtr = languageServiceInterface.setLTR(_locale);
@@ -41,7 +44,8 @@ class LocalizationController extends GetxController implements GetxService {
     if(!fromBottomSheet) {
       saveLanguage(_locale);
     }
-    if(AddressHelper.getAddressFromSharedPref() != null && !fromBottomSheet) {
+    // Only reload data if language actually changed or force reload is requested
+    if(AddressHelper.getAddressFromSharedPref() != null && !fromBottomSheet && (languageChanged || forceReload)) {
       HomeScreen.loadData(true);
     }
 

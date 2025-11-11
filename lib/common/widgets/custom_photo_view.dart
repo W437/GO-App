@@ -15,11 +15,18 @@ class CustomPhotoView extends StatelessWidget {
 
       ClipRRect(
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-        child: PhotoView(
-          tightMode: true,
-          imageProvider: NetworkImage(imageUrl),
-          heroAttributes: PhotoViewHeroAttributes(tag: imageUrl),
-        ),
+        child: imageUrl.isNotEmpty
+          ? PhotoView(
+              tightMode: true,
+              imageProvider: NetworkImage(imageUrl),
+              heroAttributes: PhotoViewHeroAttributes(tag: imageUrl),
+            )
+          : Container(
+              color: Colors.black,
+              child: const Center(
+                child: Icon(Icons.broken_image, color: Colors.white, size: 48),
+              ),
+            ),
       ),
 
       Positioned(top: 0, right: 0, child: IconButton(

@@ -42,11 +42,19 @@ class _ImageViewerScreenWidgetState extends State<ImageViewerScreenWidget> {
             Expanded(child:  PhotoViewGallery.builder(
               scrollPhysics: const BouncingScrollPhysics(),
               backgroundDecoration: BoxDecoration(color: ResponsiveHelper.isDesktop(context) ? Theme.of(context).canvasColor : Theme.of(context).cardColor),
-              itemCount: imageList.length,
+              itemCount: imageList.where((img) => img?.isNotEmpty == true).length,
               pageController: _pageController,
               builder: (BuildContext context, int index) {
+                // Filter out null and empty URLs
+                final validImages = imageList.where((img) => img?.isNotEmpty == true).toList();
+                final imageUrl = validImages.isNotEmpty && index < validImages.length
+                    ? validImages[index]!
+                    : '';
+
                 return PhotoViewGalleryPageOptions(
-                  imageProvider: NetworkImage('${imageList[index]}'),
+                  imageProvider: imageUrl.isNotEmpty
+                      ? NetworkImage(imageUrl)
+                      : const AssetImage('assets/image/placeholder.png') as ImageProvider,
                   initialScale: PhotoViewComputedScale.contained,
                   heroAttributes: PhotoViewHeroAttributes(tag: index.toString()),
                 );

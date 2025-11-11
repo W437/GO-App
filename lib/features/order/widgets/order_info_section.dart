@@ -653,12 +653,18 @@ class OrderInfoSection extends StatelessWidget {
                   SizedBox(height: (order.refund != null && order.refund!.imageFullUrl != null) ? Dimensions.paddingSizeSmall : 0),
 
                   (order.refund != null && order.refund!.imageFullUrl != null && order.refund!.imageFullUrl!.isNotEmpty) ? InkWell(
-                    onTap: () => showDialog(context: context, builder: (context) {
-                      return ImageDialogWidget(imageUrl: order.refund!.imageFullUrl!.isNotEmpty ? order.refund!.imageFullUrl![0] : '');
-                    }),
+                    onTap: () {
+                      // Only open dialog if image URL is valid
+                      if (order.refund!.imageFullUrl!.isNotEmpty && order.refund!.imageFullUrl![0].isNotEmpty) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => ImageDialogWidget(imageUrl: order.refund!.imageFullUrl![0])
+                        );
+                      }
+                    },
                     child: CustomImageWidget(
                       height: 40, width: 40, fit: BoxFit.cover,
-                      image: order.refund != null ? order.refund!.imageFullUrl!.isNotEmpty ? order.refund!.imageFullUrl![0] : '' : '',
+                      image: order.refund!.imageFullUrl!.isNotEmpty ? order.refund!.imageFullUrl![0] : '',
                     ),
                   ) : const SizedBox(),
                 ]) : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1240,21 +1246,25 @@ Widget offlineView(BuildContext context, OrderController orderController, Expans
   );
 }
 
-void openDialog(BuildContext context, String imageUrl) => showDialog(
-  context: context,
-  builder: (BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusLarge)),
-      child: Stack(children: [
+void openDialog(BuildContext context, String imageUrl) {
+  // Validate image URL before opening dialog
+  if (imageUrl.isEmpty) return;
 
-        ClipRRect(
-          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-          child: PhotoView(
-            tightMode: true,
-            imageProvider: NetworkImage(imageUrl),
-            heroAttributes: PhotoViewHeroAttributes(tag: imageUrl),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusLarge)),
+        child: Stack(children: [
+
+          ClipRRect(
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+            child: PhotoView(
+              tightMode: true,
+              imageProvider: NetworkImage(imageUrl),
+              heroAttributes: PhotoViewHeroAttributes(tag: imageUrl),
+            ),
           ),
-        ),
 
         Positioned(top: 0, right: 0, child: IconButton(
           splashRadius: 5,

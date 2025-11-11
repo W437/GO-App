@@ -38,8 +38,14 @@ class _StoryContentWidgetState extends State<StoryContentWidget> {
 
   Future<void> _initializeVideo() async {
     try {
+      // Validate video URL before initializing
+      if (widget.media.mediaPath?.isEmpty ?? true) {
+        print('Error: Video path is empty or null');
+        return;
+      }
+
       _videoController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.media.mediaPath ?? ''),
+        Uri.parse(widget.media.mediaPath!),
       );
 
       await _videoController!.initialize();
@@ -101,8 +107,28 @@ class _StoryContentWidgetState extends State<StoryContentWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.media.isImage) {
+      // Validate image URL before loading
+      if (widget.media.mediaPath?.isEmpty ?? true) {
+        return Container(
+          color: Colors.black,
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.broken_image, color: Colors.white, size: 48),
+                SizedBox(height: Dimensions.paddingSizeSmall),
+                Text(
+                  'Image failed to load',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       return CachedNetworkImage(
-        imageUrl: widget.media.mediaPath ?? '',
+        imageUrl: widget.media.mediaPath!,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,

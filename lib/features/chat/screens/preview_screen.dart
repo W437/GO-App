@@ -116,14 +116,23 @@ class _PreviewScreenState extends State<PreviewScreen> {
               },
               itemCount: widget.images.length,
                 itemBuilder: (context, index) {
+              final imageUrl = widget.images[index];
+
               return Get.find<ChatController>().isVideoExtension(widget.images[_currentPage]) && _chewController != null && _chewController!.videoPlayerController.value.isInitialized ? Flexible(
                 child: Center(child: Chewie(controller: _chewController!)),
-              ) : PhotoView(
-                backgroundDecoration: BoxDecoration(color: isDesktop ? Colors.transparent : Colors.black),
-                tightMode: true,
-                imageProvider: NetworkImage(widget.images[index]),
-                heroAttributes: PhotoViewHeroAttributes(tag: widget.images[index]),
-              );
+              ) : imageUrl.isNotEmpty
+                  ? PhotoView(
+                      backgroundDecoration: BoxDecoration(color: isDesktop ? Colors.transparent : Colors.black),
+                      tightMode: true,
+                      imageProvider: NetworkImage(imageUrl),
+                      heroAttributes: PhotoViewHeroAttributes(tag: imageUrl),
+                    )
+                  : Container(
+                      color: Colors.black,
+                      child: const Center(
+                        child: Icon(Icons.broken_image, color: Colors.white, size: 48),
+                      ),
+                    );
             }),
 
             Positioned(top: 10, right: 0, child: IconButton(

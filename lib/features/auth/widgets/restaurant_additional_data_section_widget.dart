@@ -147,13 +147,18 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
                       height: 70,
                       margin: const EdgeInsets.only(bottom: 10),
                       child: Center(
-                        child: isImage && !GetPlatform.isWeb ? ClipRRect(
+                        child: isImage ? ClipRRect(
                           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          child: GetPlatform.isWeb ? Image.network(
-                            file.files.single.path!, width: 100, height: 100, fit: BoxFit.cover,
-                          ) : Image.file(
-                            File(file.files.single.path!), width: 500, height: 70, fit: BoxFit.cover,
-                          ),
+                          child: !GetPlatform.isWeb && file.files.single.path != null && file.files.single.path!.isNotEmpty
+                            ? Image.file(
+                                File(file.files.single.path!), width: 500, height: 70, fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 100,
+                                height: 70,
+                                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                child: Icon(Icons.image, color: Theme.of(context).disabledColor),
+                              ),
                         ) : DottedBorder(
                           color: Theme.of(context).disabledColor,
                           strokeWidth: 1,
@@ -281,13 +286,18 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
                         height: 70,
                         margin: const EdgeInsets.only(bottom: 10, right: 10),
                         child: Center(
-                          child: isImage && !GetPlatform.isWeb ? ClipRRect(
+                          child: isImage ? ClipRRect(
                             borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                            child: GetPlatform.isWeb ? Image.network(
-                              file.files.single.path!, width: 100, height: 100, fit: BoxFit.cover,
-                            ) : Image.file(
-                              File(file.files.single.path!), width: 500, height: 70, fit: BoxFit.cover,
-                            ),
+                            child: !GetPlatform.isWeb && file.files.single.path != null && file.files.single.path!.isNotEmpty
+                              ? Image.file(
+                                  File(file.files.single.path!), width: 500, height: 70, fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  width: 100,
+                                  height: 70,
+                                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                  child: Icon(Icons.image, color: Theme.of(context).disabledColor),
+                                ),
                           ) : DottedBorder(
                             color: Theme.of(context).disabledColor,
                             strokeWidth: 1,

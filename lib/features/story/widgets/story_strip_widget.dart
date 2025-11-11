@@ -87,20 +87,25 @@ class StoryStripWidget extends StatelessWidget {
                             ),
                           ),
                           child: ClipOval(
-                            child: CachedNetworkImage(
-                              imageUrl: restaurant.logoFullUrl ?? '',
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
+                            child: (restaurant.logoFullUrl?.isNotEmpty == true)
+                              ? CachedNetworkImage(
+                                  imageUrl: restaurant.logoFullUrl!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => Container(
+                                    color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                    child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
+                                  ),
+                                )
+                              : Container(
+                                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                  child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
                                 ),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
-                              ),
-                            ),
                           ),
                         ),
                       ),

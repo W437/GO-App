@@ -495,8 +495,12 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   _manageLanguageFunctionality() {
-    Get.find<LocalizationController>().saveCacheLanguage(null);
-    Get.find<LocalizationController>().searchSelectedLanguage();
+    final localizationController = Get.find<LocalizationController>();
+    localizationController.saveCacheLanguage(null);
+    localizationController.searchSelectedLanguage();
+
+    // Store current language before opening sheet
+    final currentLocale = localizationController.locale;
 
     showModalBottomSheet(
       isScrollControlled: true, useRootNavigator: true, context: Get.context!,
@@ -510,6 +514,12 @@ class _MenuScreenState extends State<MenuScreen> {
           child: const LanguageBottomSheetWidget(),
         );
       },
-    ).then((value) => Get.find<LocalizationController>().setLanguage(Get.find<LocalizationController>().getCacheLocaleFromSharedPref()));
+    ).then((value) {
+      // Only call setLanguage if language actually changed
+      final cachedLocale = localizationController.getCacheLocaleFromSharedPref();
+      if (currentLocale.languageCode != cachedLocale.languageCode) {
+        localizationController.setLanguage(cachedLocale);
+      }
+    });
   }
 }

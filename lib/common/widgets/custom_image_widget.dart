@@ -30,6 +30,25 @@ class _CustomImageWidgetState extends State<CustomImageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Validate image URL before loading
+    final String placeholderImage = widget.placeholder.isNotEmpty
+        ? widget.placeholder
+        : widget.isRestaurant
+            ? Images.restaurantPlaceholder
+            : widget.isFood
+                ? Images.foodPlaceholder
+                : Images.placeholderPng;
+
+    if (widget.image.isEmpty) {
+      return CustomAssetImageWidget(
+        placeholderImage,
+        height: widget.height,
+        width: widget.width,
+        fit: widget.fit,
+        color: widget.imageColor
+      );
+    }
+
     return MouseRegion(
       onEnter: (_) {
         setState(() {
@@ -47,11 +66,24 @@ class _CustomImageWidgetState extends State<CustomImageWidget> {
         curve: Curves.easeInOut,
         child: CachedNetworkImage(
           color: widget.color,
-          imageUrl: kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=${widget.image}' : widget.image, height: widget.height, width: widget.width, fit: widget.fit,
-          placeholder: (context, url) => CustomAssetImageWidget(widget.placeholder.isNotEmpty ? widget.placeholder : widget.isRestaurant ? Images.restaurantPlaceholder : widget.isFood ? Images.foodPlaceholder : Images.placeholderPng,
-              height: widget.height, width: widget.width, fit: widget.fit, color: widget.imageColor),
-          errorWidget: (context, url, error) => CustomAssetImageWidget(widget.placeholder.isNotEmpty ? widget.placeholder : widget.isRestaurant ? Images.restaurantPlaceholder : widget.isFood ? Images.foodPlaceholder : Images.placeholderPng,
-              height: widget.height, width: widget.width, fit: widget.fit, color: widget.imageColor),
+          imageUrl: kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=${widget.image}' : widget.image,
+          height: widget.height,
+          width: widget.width,
+          fit: widget.fit,
+          placeholder: (context, url) => CustomAssetImageWidget(
+            placeholderImage,
+            height: widget.height,
+            width: widget.width,
+            fit: widget.fit,
+            color: widget.imageColor
+          ),
+          errorWidget: (context, url, error) => CustomAssetImageWidget(
+            placeholderImage,
+            height: widget.height,
+            width: widget.width,
+            fit: widget.fit,
+            color: widget.imageColor
+          ),
         ),
       ),
     );
