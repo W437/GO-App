@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
+import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
@@ -78,6 +79,8 @@ void _forNotificationRouteProcess(NotificationBodyModel? notificationBody) {
 Future<void> _forLoggedInUserRouteProcess() async {
   Get.find<AuthController>().updateToken();
   await Get.find<FavouriteController>().getFavouriteList();
+  // Pre-load zones for instant display when user clicks location
+  Get.find<LocationController>().getZoneList();
   if (AddressHelper.getAddressFromSharedPref() != null) {
     Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true ));
   } else {

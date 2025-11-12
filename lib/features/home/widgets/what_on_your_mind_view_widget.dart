@@ -28,15 +28,7 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
             bottom: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeOverLarge,
           ),
           child: Padding(padding: const EdgeInsets.only(left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeDefault),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('what_on_your_mind'.tr, style: ResponsiveHelper.isDesktop(context) ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600) : robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
-              ArrowIconButtonWidget(onTap: () {
-                showBouncyBottomSheet(
-                  context: context,
-                  builder: (context) => const AllCategoriesBottomSheet(),
-                );
-              }),
-            ]),
+            child: Text('what_on_your_mind'.tr, style: ResponsiveHelper.isDesktop(context) ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600) : robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
           ),
         ),
 

@@ -33,41 +33,42 @@ class CuisineViewWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text('cuisine'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
-                  ArrowIconButtonWidget(onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => const AllCuisinesBottomSheet(),
-                    );
-                  }),
-                ]),
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: Dimensions.paddingSizeLarge,
+                  right: Dimensions.paddingSizeLarge,
+                  top: Dimensions.paddingSizeLarge,
+                  bottom: Dimensions.paddingSizeDefault,
+                ),
+                child: Text('cuisine'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600)),
               ),
 
-              cuisineController.cuisineModel != null ? GridView.builder(
-                padding: const EdgeInsets.only(left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeLarge),
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: cuisineController.cuisineModel!.cuisines!.length > 7  ? 8 : cuisineController.cuisineModel!.cuisines!.length,
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: ResponsiveHelper.isMobile(context) ? 4 : ResponsiveHelper.isDesktop(context) ? 7 : 6,
-                  mainAxisSpacing: Dimensions.paddingSizeLarge,  crossAxisSpacing: Dimensions.paddingSizeLarge,
-                ),
-                itemBuilder: (context, index) {
-                  return CustomInkWellWidget(
-                    onTap: () =>  Get.toNamed(RouteHelper.getCuisineRestaurantRoute(cuisineController.cuisineModel!.cuisines![index].id, cuisineController.cuisineModel!.cuisines![index].name)),
-                    radius: Dimensions.radiusDefault,
-                    child: CuisineCardWidget(
-                      image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
-                      name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
-                    ),
-                  );
-
-                },
-              )  : const CuisineShimmer(),
+              SizedBox(
+                height: ResponsiveHelper.isMobile(context) ? 120 : 170,
+                child: cuisineController.cuisineModel != null ? ListView.builder(
+                  physics: ResponsiveHelper.isMobile(context) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeLarge),
+                  itemCount: cuisineController.cuisineModel!.cuisines!.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: Dimensions.paddingSizeLarge),
+                      child: CustomInkWellWidget(
+                        onTap: () => Get.toNamed(RouteHelper.getCuisineRestaurantRoute(cuisineController.cuisineModel!.cuisines![index].id, cuisineController.cuisineModel!.cuisines![index].name)),
+                        radius: Dimensions.radiusDefault,
+                        child: SizedBox(
+                          width: ResponsiveHelper.isMobile(context) ? 100 : 120,
+                          child: CuisineCardWidget(
+                            image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
+                            name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ) : const CuisineShimmer(),
+              ),
 
               const SizedBox(height: Dimensions.paddingSizeLarge),
             ],
@@ -85,66 +86,68 @@ class CuisineShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeDefault),
-      physics: const NeverScrollableScrollPhysics(),
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(left: Dimensions.paddingSizeLarge),
       itemCount: 6,
       shrinkWrap: true,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, mainAxisSpacing: Dimensions.paddingSizeDefault, crossAxisSpacing: Dimensions.paddingSizeDefault,
-      ),
       itemBuilder: (context, index) {
-        return ClipRRect(
-          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.paddingSizeSmall), bottomRight: Radius.circular(Dimensions.paddingSizeSmall)),
-          child: Stack(
-            children: [
-              Positioned(bottom: -55,left: 0,right: 0,
-                child: Transform.rotate(
-                  angle: 40,
-                  child: Container(
-                    height: 120, width: 120,
-                    color: Theme.of(context).cardColor,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[Get.find<ThemeController>().darkTheme ? 950 : 200],
-                      borderRadius: BorderRadius.circular(50),
+        return Padding(
+          padding: const EdgeInsets.only(right: Dimensions.paddingSizeLarge),
+          child: SizedBox(
+            width: ResponsiveHelper.isMobile(context) ? 100 : 120,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.paddingSizeSmall), bottomRight: Radius.circular(Dimensions.paddingSizeSmall)),
+              child: Stack(
+                children: [
+                  Positioned(bottom: -55, left: 0, right: 0,
+                    child: Transform.rotate(
+                      angle: 40,
+                      child: Container(
+                        height: 120, width: 120,
+                        color: Theme.of(context).cardColor,
+                      ),
                     ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(50),
-                      child: Shimmer(
-                        child: Container(
-                          height: 100, width: 100,
-                          color: Colors.grey[Get.find<ThemeController>().darkTheme ? 900 : 200],
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[Get.find<ThemeController>().darkTheme ? 950 : 200],
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: Shimmer(
+                            child: Container(
+                              height: 100, width: 100,
+                              color: Colors.grey[Get.find<ThemeController>().darkTheme ? 900 : 200],
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
 
-              Positioned(
-                bottom: 0, left: 0, right: 0,
-                child: Container(
-                  alignment: Alignment.center,
-                  height: 30, width: 120,
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 100],
-                    borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.paddingSizeSmall), bottomRight: Radius.circular(Dimensions.paddingSizeSmall)),
+                  Positioned(
+                    bottom: 0, left: 0, right: 0,
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: 30, width: 120,
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 100],
+                        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.paddingSizeSmall), bottomRight: Radius.circular(Dimensions.paddingSizeSmall)),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         );
-
       },
     );
   }

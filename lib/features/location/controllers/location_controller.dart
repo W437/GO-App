@@ -292,8 +292,11 @@ class LocationController extends GetxController implements GetxService {
   }
 
   Future<void> getZoneList() async {
-    _loadingZoneList = true;
-    update();
+    // Only show loading if zones aren't already loaded
+    if (_zoneList.isEmpty) {
+      _loadingZoneList = true;
+      update();
+    }
     try {
       _zoneList = await locationServiceInterface.getZoneList();
       print('Zone list loaded: ${_zoneList.length} zones');

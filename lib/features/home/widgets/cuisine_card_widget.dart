@@ -58,49 +58,46 @@ class CuisineCardWidget extends StatelessWidget {
           )
         ],
       ),
-    ) : Stack(children: [
-
-        Positioned(
-          bottom: 25, left: 0, right: 0,
-          child: CustomPaint(
-            size: const Size(150, 50),
-            painter: MyPainter(),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: ClipOval(
-              child: CustomImageWidget(
-                image: image,
-                fit: BoxFit.cover, height: fromSearchPage || fromCuisinesPage ? 100 : 70, width: fromSearchPage || fromCuisinesPage ? 100 : 70,
+    ) : Column(
+      children: [
+        Container(
+          width: fromSearchPage || fromCuisinesPage ? 120 : 84,
+          height: fromSearchPage || fromCuisinesPage ? 120 : 84,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.2),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
               ),
+            ],
+          ),
+          child: ClipOval(
+            child: CustomImageWidget(
+              image: image,
+              fit: BoxFit.cover,
+              height: fromSearchPage || fromCuisinesPage ? 120 : 84,
+              width: fromSearchPage || fromCuisinesPage ? 120 : 84,
             ),
           ),
         ),
-
-        Positioned(
-          bottom: 0, left: 0, right: 0,
-          child: Container(
-            alignment: Alignment.center,
-            height: 25, width: 120,
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              boxShadow: [BoxShadow(color: Colors.grey[Get.find<ThemeController>().darkTheme ? 700 : 300]!, spreadRadius: 0.5, blurRadius: 0.5)],
-              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.radiusDefault), bottomRight: Radius.circular(Dimensions.radiusDefault)),
+        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+        SizedBox(
+          width: fromSearchPage || fromCuisinesPage ? 120 : 84,
+          child: Text(
+            name,
+            style: robotoMedium.copyWith(
+              fontSize: Dimensions.fontSizeSmall,
+              fontWeight: FontWeight.w500,
             ),
-            child: Text( name, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
-              maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
-            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
         ),
-
       ],
     );
   }
