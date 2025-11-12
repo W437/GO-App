@@ -6,6 +6,7 @@ import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/validate_check.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/domain/centralize_login_enum.dart';
@@ -57,12 +58,12 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
-      appBar: ResponsiveHelper.isDesktop(context) ? null : AppBar(leading: IconButton(
-        onPressed: () => Get.back(),
-        icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).textTheme.bodyLarge!.color),
-      ), elevation: 0, backgroundColor: Theme.of(context).cardColor),
-      body: SafeArea(child: Align(
-        alignment: ResponsiveHelper.isDesktop(context) ? Alignment.center : Alignment.topCenter,
+      appBar: ResponsiveHelper.isDesktop(context) ? null : UnifiedHeaderWidget(
+        title: 'profile_setup'.tr,
+        showBackButton: true,
+      ),
+      body: SafeArea(child: Center(child: Align(
+        alignment: Alignment.center,
         child: Container(
           width: context.width > 700 ? 500 : context.width,
           padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
@@ -94,7 +95,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
                 CustomTextFieldWidget(
-                  hintText: 'ex_jhon'.tr,
+                  hintText: 'enter_your_name'.tr,
                   labelText: 'user_name'.tr,
                   showLabelText: true,
                   required: true,
@@ -126,16 +127,16 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                       : Get.find<LocalizationController>().locale.countryCode,
                   validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
                 ) : CustomTextFieldWidget(
-                  hintText: 'enter_email'.tr,
+                  hintText: 'enter_email_address'.tr,
                   labelText: 'email'.tr,
                   showLabelText: true,
-                  required: true,
+                  required: false,
                   controller: _emailController,
                   focusNode: _emailFocus,
                   nextFocus: _referCodeFocus,
                   inputType: TextInputType.emailAddress,
                   prefixIcon: CupertinoIcons.mail_solid,
-                  validator: (value) => ValidateCheck.validateEmail(value),
+                  validator: (value) => value != null && value.isNotEmpty ? ValidateCheck.validateEmail(value) : null,
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
@@ -156,11 +157,6 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
 
                 GetBuilder<AuthController>(builder: (authController) {
                   return CustomButtonWidget(
-                    height: ResponsiveHelper.isDesktop(context) ? 50 : null,
-                    width:  ResponsiveHelper.isDesktop(context) ? 250 : null,
-                    radius: ResponsiveHelper.isDesktop(context) ? Dimensions.radiusSmall : Dimensions.radiusDefault,
-                    isBold: !ResponsiveHelper.isDesktop(context),
-                    fontSize: ResponsiveHelper.isDesktop(context) ? Dimensions.fontSizeSmall : null,
                     buttonText: 'done'.tr,
                     isLoading: authController.isLoading,
                     onPressed: () async {
@@ -211,7 +207,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
           ),
 
         ),
-      )),
+      ))),
     );
   }
 }

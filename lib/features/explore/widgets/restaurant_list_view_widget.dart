@@ -377,11 +377,14 @@ class RestaurantListViewWidget extends StatelessWidget {
                         color: isOpen ? Colors.green : Colors.red,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        restaurant.deliveryTime ?? '30-40 min',
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeExtraSmall,
-                          color: Theme.of(context).disabledColor,
+                      Flexible(
+                        child: Text(
+                          restaurant.deliveryTime ?? '30-40 min',
+                          style: robotoRegular.copyWith(
+                            fontSize: Dimensions.fontSizeExtraSmall,
+                            color: Theme.of(context).disabledColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: Dimensions.paddingSizeSmall),
@@ -393,15 +396,18 @@ class RestaurantListViewWidget extends StatelessWidget {
                         color: Theme.of(context).primaryColor,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '${distance.toStringAsFixed(1)} ${'km'.tr}',
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeExtraSmall,
-                          color: Theme.of(context).disabledColor,
+                      Flexible(
+                        child: Text(
+                          '${distance.toStringAsFixed(1)} ${'km'.tr}',
+                          style: robotoRegular.copyWith(
+                            fontSize: Dimensions.fontSizeExtraSmall,
+                            color: Theme.of(context).disabledColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
 
-                      const Spacer(),
+                      const SizedBox(width: 4),
 
                       // Delivery Fee or Free Badge
                       if (restaurant.freeDelivery == true)
