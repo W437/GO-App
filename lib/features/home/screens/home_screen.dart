@@ -248,11 +248,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       width: Dimensions.webMaxWidth,
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
+                        const StoryStripWidget(),
+
                         const BannerViewWidget(),
 
                         const BadWeatherWidget(),
-
-                        const StoryStripWidget(),
 
                         const WhatOnYourMindViewWidget(),
 

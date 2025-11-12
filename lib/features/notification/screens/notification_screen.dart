@@ -1,4 +1,5 @@
 import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
 import 'package:godelivery_user/features/notification/widgets/add_fund_bottom_sheet.dart';
@@ -13,7 +14,6 @@ import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
@@ -66,13 +66,63 @@ class _NotificationScreenState extends State<NotificationScreen> {
         }
       },
       child: Scaffold(
-        appBar: CustomAppBarWidget(title: 'notification'.tr, onBackPressed: () {
-          if(widget.fromNotification) {
-            Get.offAllNamed(RouteHelper.getInitialRoute());
-          }else {
-            Get.back();
-          }
-        }),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Dimensions.paddingSizeDefault,
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
+                child: Row(
+                  children: [
+                    // Back Button
+                    RoundedIconButtonWidget(
+                      icon: Icons.arrow_back,
+                      onPressed: () {
+                        if(widget.fromNotification) {
+                          Get.offAllNamed(RouteHelper.getInitialRoute());
+                        }else {
+                          Get.back();
+                        }
+                      },
+                      size: 36,
+                      iconSize: 20,
+                      backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                      pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
+                      iconColor: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                    const SizedBox(width: Dimensions.paddingSizeDefault),
+                    // Title
+                    Expanded(
+                      child: Text(
+                        'notification'.tr,
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeLarge,
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(width: 52), // Balance the back button width
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
         body: Get.find<AuthController>().isLoggedIn() ? GetBuilder<NotificationController>(builder: (notificationController) {
           if(notificationController.notificationList != null) {

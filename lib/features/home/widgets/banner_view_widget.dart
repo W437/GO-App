@@ -24,96 +24,126 @@ class BannerViewWidget extends StatelessWidget {
     return GetBuilder<HomeController>(builder: (homeController) {
       return (homeController.bannerImageList != null && homeController.bannerImageList!.isEmpty) ? const SizedBox() : Container(
         width: MediaQuery.of(context).size.width,
-        height: GetPlatform.isDesktop ? 500 : 205,
+        height: GetPlatform.isDesktop ? 500 : 185,
         padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
         child: homeController.bannerImageList != null ? Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CarouselSlider.builder(
-              options: CarouselOptions(
-                aspectRatio: 2.5,
-                enlargeFactor: 0.3,
-                autoPlay: true,
-                enlargeCenterPage: true,
-                disableCenter: true,
-                autoPlayInterval: const Duration(seconds: 7),
-                onPageChanged: (index, reason) {
-                  homeController.setCurrentIndex(index, true);
-                },
-              ),
-              itemCount: homeController.bannerImageList!.isEmpty ? 1 : homeController.bannerImageList!.length,
-              itemBuilder: (context, index, _) {
-                return InkWell(
-                  onTap: () {
-                    if(homeController.bannerDataList![index] is Product) {
-                      Product? product = homeController.bannerDataList![index];
-                      ResponsiveHelper.isMobile(context) ? showModalBottomSheet(
-                        context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-                        builder: (con) => ProductBottomSheetWidget(product: product),
-                      ) : showDialog(context: context, builder: (con) => Dialog(
-                          child: ProductBottomSheetWidget(product: product)),
-                      );
-                    }else if(homeController.bannerDataList![index] is Restaurant) {
-                      Restaurant restaurant = homeController.bannerDataList![index];
-                      Get.toNamed(
-                        RouteHelper.getRestaurantRoute(restaurant.id),
-                        arguments: RestaurantScreen(restaurant: restaurant),
-                      );
-                    }else if(homeController.bannerDataList![index] is BasicCampaignModel) {
-                      BasicCampaignModel campaign = homeController.bannerDataList![index];
-                      Get.toNamed(RouteHelper.getBasicCampaignRoute(campaign));
-                    }
+            Expanded(
+              child: CarouselSlider.builder(
+                options: CarouselOptions(
+                  viewportFraction: 1.0,
+                  enlargeFactor: 0.0,
+                  autoPlay: true,
+                  enlargeCenterPage: false,
+                  disableCenter: false,
+                  padEnds: true,
+                  autoPlayInterval: const Duration(seconds: 7),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 1000),
+                  autoPlayCurve: Curves.easeInOutCubic,
+                  onPageChanged: (index, reason) {
+                    homeController.setCurrentIndex(index, true);
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                      boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 2, offset: const Offset(0, 1))],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                      child: GetBuilder<SplashController>(builder: (splashController) {
-                        return CustomImageWidget(
-                          image: '${homeController.bannerImageList![index]}',
-                          fit: BoxFit.cover,
-                        );
-                      },
+                ),
+                itemCount: homeController.bannerImageList!.isEmpty ? 1 : homeController.bannerImageList!.length,
+                itemBuilder: (context, index, _) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            spreadRadius: 0,
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            if(homeController.bannerDataList![index] is Product) {
+                              Product? product = homeController.bannerDataList![index];
+                              ResponsiveHelper.isMobile(context) ? showModalBottomSheet(
+                                context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+                                builder: (con) => ProductBottomSheetWidget(product: product),
+                              ) : showDialog(context: context, builder: (con) => Dialog(
+                                  child: ProductBottomSheetWidget(product: product)),
+                              );
+                            }else if(homeController.bannerDataList![index] is Restaurant) {
+                              Restaurant restaurant = homeController.bannerDataList![index];
+                              Get.toNamed(
+                                RouteHelper.getRestaurantRoute(restaurant.id),
+                                arguments: RestaurantScreen(restaurant: restaurant),
+                              );
+                            }else if(homeController.bannerDataList![index] is BasicCampaignModel) {
+                              BasicCampaignModel campaign = homeController.bannerDataList![index];
+                              Get.toNamed(RouteHelper.getBasicCampaignRoute(campaign));
+                            }
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: GetBuilder<SplashController>(builder: (splashController) {
+                              return CustomImageWidget(
+                                image: '${homeController.bannerImageList![index]}',
+                                fit: BoxFit.cover,
+                              );
+                            },
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
 
-            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: homeController.bannerImageList!.map((bnr) {
                 int index = homeController.bannerImageList!.indexOf(bnr);
-                int totalBanner = homeController.bannerImageList!.length;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: index == homeController.currentIndex ? Container(
-                    decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(Dimensions.radiusDefault)),
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                    child: Text('${(index) + 1}/$totalBanner', style: robotoRegular.copyWith(color: Colors.white, fontSize: 12)),
-                  ) : Container(
-                    height: 4.18, width: 5.57,
-                    decoration: BoxDecoration(color: Theme.of(context).primaryColor.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(Dimensions.radiusDefault)),
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  height: 8,
+                  width: index == homeController.currentIndex ? 24 : 8,
+                  decoration: BoxDecoration(
+                    color: index == homeController.currentIndex
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 );
               }).toList(),
             ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
           ],
         ) : Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-            child: Shimmer(
-              child: Container(decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Theme.of(context).shadowColor,
-              )),
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: Theme.of(context).cardColor,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Shimmer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Theme.of(context).shadowColor,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
