@@ -59,8 +59,9 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
     await Get.find<AuthController>().guestLogin();
 
-    // Navigate directly to location screen
-    Get.offNamed(RouteHelper.getAccessLocationRoute('onboarding'));
+    // Send the user straight to the interactive map selector so they can
+    // grant location permission and pick a zone immediately after onboarding.
+    Get.offNamed(RouteHelper.getPickMapRoute(RouteHelper.accessLocation, false));
   }
 
   @override
