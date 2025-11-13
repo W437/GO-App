@@ -5,7 +5,6 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
-import 'package:godelivery_user/features/location/widgets/location_search_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
@@ -71,162 +70,172 @@ class _PickMapScreenState extends State<PickMapScreen> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
-        body: SafeArea(
-          top: false,
-          bottom: false,
-          child: Center(
-            child: SizedBox(
-              width: Dimensions.webMaxWidth,
-              child: GetBuilder<LocationController>(builder: (locationController) {
-                return Stack(children: [
-
-            GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: widget.fromAddAddress ? LatLng(locationController.position.latitude, locationController.position.longitude)
-                    : _initialPosition,
-                zoom: 16,
-              ),
-              minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
-              polygons: _zonePolygons(locationController, context),
-              onMapCreated: (GoogleMapController mapController) {
-                _mapController = mapController;
-                if(!widget.fromAddAddress && widget.route != 'splash') {
-                  Get.find<LocationController>().getCurrentLocation(false, mapController: mapController).then((value) {
-                    if(widget.fromSplash) {
-                      _onPickAddressButtonPressed(locationController);
-                    }
-                  });
-                }
-              },
-              zoomControlsEnabled: false,
-              onCameraMove: (CameraPosition cameraPosition) {
-                _cameraPosition = cameraPosition;
-              },
-              onCameraMoveStarted: () {
-                locationController.disableButton();
-              },
-              onCameraIdle: () {
-                Get.find<LocationController>().updatePosition(_cameraPosition, false);
-              },
-              style: Get.isDarkMode ? Get.find<ThemeController>().darkMap : Get.find<ThemeController>().lightMap,
-            ),
-
-            // Top gradient overlay to soften the transition to the sheet controls
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 140,
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.35),
-                        Colors.black.withOpacity(0.0),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            Center(child: !locationController.loading ? Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: Image.asset(
-                Images.pickLocationMapPin,
-                height: 72,
-                width: 72,
-                fit: BoxFit.contain,
-              ),
-            ) : const CircularProgressIndicator()),
-
-            // Back button
-            Positioned(
-              top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,
-              left: Dimensions.paddingSizeSmall,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: CircularBackButtonWidget(
-                  showText: false,
-                  backgroundColor: Theme.of(context).cardColor,
-                ),
-              ),
-            ),
-
-            Positioned(
-              right: Dimensions.paddingSizeSmall,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: FloatingActionButton(
-                  heroTag: 'pick_map_screen_my_location',
-                  mini: true,
-                  backgroundColor: Theme.of(context).cardColor,
-                  onPressed: () => _checkPermission(() {
-                    Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
-                  }),
-                  child: Icon(Icons.my_location, color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    Dimensions.paddingSizeExtraLarge,
-                    0,
-                    Dimensions.paddingSizeExtraLarge,
-                    Dimensions.paddingSizeDefault,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+        body: WillPopScope(
+          onWillPop: () async => !widget.fromSplash,
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
+              child: SizedBox(
+                width: Dimensions.webMaxWidth,
+                child: GetBuilder<LocationController>(builder: (locationController) {
+                  return Stack(
                     children: [
-                      CustomButtonWidget(
-                        buttonText: 'select_zone'.tr,
-                        icon: Icons.list_alt,
-                        color: Theme.of(context).cardColor,
-                        textColor: Theme.of(context).textTheme.bodyLarge!.color,
-                        iconColor: Colors.black,
-                        onPressed: () => _showZoneSelectionActionSheet(context),
+                      GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: widget.fromAddAddress
+                              ? LatLng(locationController.position.latitude, locationController.position.longitude)
+                              : _initialPosition,
+                          zoom: 16,
+                        ),
+                        minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+                        polygons: _zonePolygons(locationController, context),
+                        onMapCreated: (GoogleMapController mapController) {
+                          _mapController = mapController;
+                          if (!widget.fromAddAddress && widget.route != 'splash') {
+                            Get.find<LocationController>()
+                                .getCurrentLocation(false, mapController: mapController)
+                                .then((value) {
+                              if (widget.fromSplash) {
+                                _onPickAddressButtonPressed(locationController);
+                              }
+                            });
+                          }
+                        },
+                        zoomControlsEnabled: false,
+                        onCameraMove: (CameraPosition cameraPosition) {
+                          _cameraPosition = cameraPosition;
+                        },
+                        onCameraMoveStarted: () {
+                          locationController.disableButton();
+                        },
+                        onCameraIdle: () {
+                          Get.find<LocationController>().updatePosition(_cameraPosition, false);
+                        },
+                        style: Get.isDarkMode
+                            ? Get.find<ThemeController>().darkMap
+                            : Get.find<ThemeController>().lightMap,
                       ),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-                      CustomButtonWidget(
-                        buttonText: locationController.inZone
-                            ? (widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr)
-                            : 'service_not_available_in_this_area'.tr,
-                        isLoading: locationController.isLoading,
-                        onPressed: (locationController.buttonDisabled || locationController.loading)
-                            ? null
-                            : () => _onPickAddressButtonPressed(locationController),
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 140,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.35),
+                                  Colors.black.withOpacity(0.0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: locationController.loading
+                            ? const CircularProgressIndicator()
+                            : Padding(
+                                padding: const EdgeInsets.only(bottom: 20.0),
+                                child: Image.asset(
+                                  Images.pickLocationMapPin,
+                                  height: 72,
+                                  width: 72,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                      ),
+                      if (!widget.fromSplash)
+                        Positioned(
+                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,
+                          left: Dimensions.paddingSizeSmall,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: CircularBackButtonWidget(
+                              showText: false,
+                              backgroundColor: Theme.of(context).cardColor,
+                            ),
+                          ),
+                        ),
+                      Positioned(
+                        right: Dimensions.paddingSizeSmall,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: FloatingActionButton(
+                            heroTag: 'pick_map_screen_my_location',
+                            mini: true,
+                            backgroundColor: Theme.of(context).cardColor,
+                            onPressed: () => _checkPermission(() {
+                              Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
+                            }),
+                            child: Icon(
+                              Icons.my_location,
+                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              Dimensions.paddingSizeExtraLarge,
+                              0,
+                              Dimensions.paddingSizeExtraLarge,
+                              Dimensions.paddingSizeDefault,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CustomButtonWidget(
+                                  buttonText: 'select_zone'.tr,
+                                  icon: Icons.list_alt,
+                                  color: Theme.of(context).cardColor,
+                                  textColor: Theme.of(context).textTheme.bodyLarge!.color,
+                                  iconColor: Colors.black,
+                                  onPressed: () => _showZoneSelectionActionSheet(context),
+                                ),
+                                const SizedBox(height: Dimensions.paddingSizeSmall),
+                                CustomButtonWidget(
+                                  buttonText: locationController.inZone
+                                      ? (widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr)
+                                      : 'service_not_available_in_this_area'.tr,
+                                  isLoading: locationController.isLoading,
+                                  onPressed: (locationController.buttonDisabled || locationController.loading)
+                                      ? null
+                                      : () => _onPickAddressButtonPressed(locationController),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
-                  ),
-                ),
+                  );
+                }),
               ),
             ),
-            ]);
-          }),
+          ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 
   void _onPickAddressButtonPressed(LocationController locationController) {

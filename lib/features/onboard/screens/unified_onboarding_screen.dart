@@ -61,7 +61,7 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
     // Send the user straight to the interactive map selector so they can
     // grant location permission and pick a zone immediately after onboarding.
-    Get.offNamed(RouteHelper.getPickMapRoute(RouteHelper.accessLocation, false));
+    Get.offNamed(RouteHelper.getPickMapRoute(RouteHelper.onBoarding, false));
   }
 
   @override

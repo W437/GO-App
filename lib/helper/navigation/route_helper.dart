@@ -370,7 +370,8 @@ class RouteHelper {
       PickMapScreen? pickMapScreen = Get.arguments;
       bool fromAddress = Get.parameters['page'] == 'add-address';
       return (fromAddress && pickMapScreen == null) ? const NotFoundWidget() : (pickMapScreen ?? PickMapScreen(
-        fromSignUp: Get.parameters['page'] == signUp, fromSplash: Get.parameters['page'] == splash,
+        fromSignUp: Get.parameters['page'] == signUp,
+        fromSplash: Get.parameters['page'] == splash || Get.parameters['page'] == onBoarding,
         fromAddAddress: fromAddress, route: Get.parameters['page'], canRoute: Get.parameters['route'] == 'true',
       ));
     }),
