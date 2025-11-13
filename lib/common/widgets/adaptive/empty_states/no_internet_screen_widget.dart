@@ -1,5 +1,5 @@
-// No internet screen widget for handling connectivity issues
-// Displays network error message with retry functionality
+/// No internet screen widget for handling connectivity issues
+/// Displays network error message with retry functionality and animations
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';

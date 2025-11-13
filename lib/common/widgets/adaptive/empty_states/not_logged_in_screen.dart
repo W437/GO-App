@@ -1,3 +1,6 @@
+/// Not logged in screen widget for prompting user authentication
+/// Displays login prompt when user tries to access protected features
+
 import 'package:godelivery_user/features/auth/widgets/auth_dialog_widget.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';

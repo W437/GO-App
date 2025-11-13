@@ -1,3 +1,6 @@
+/// Helper function to display a modal bottom sheet with transparent background
+/// Provides a simple wrapper around Flutter's showModalBottomSheet with common defaults
+
 import 'package:flutter/material.dart';
 
 Future<T?> showBouncyBottomSheet<T>({

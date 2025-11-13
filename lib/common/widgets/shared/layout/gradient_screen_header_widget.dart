@@ -1,3 +1,6 @@
+/// Gradient screen header widget for consistent page headers with rounded bottom
+/// Displays title with optional back button in a styled container
+
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';

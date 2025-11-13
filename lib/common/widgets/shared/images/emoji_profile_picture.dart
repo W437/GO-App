@@ -1,3 +1,6 @@
+/// Emoji profile picture widget for displaying emoji-based user avatars
+/// Shows emoji with customizable background color and optional border
+
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/util/color_palette.dart';
 

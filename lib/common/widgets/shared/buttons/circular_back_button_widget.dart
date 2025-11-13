@@ -1,3 +1,6 @@
+/// Circular back button widget with optional text label and press effects
+/// Provides iOS-style circular or pill-shaped back navigation button
+
 import 'package:flutter/material.dart';
 
 class CircularBackButtonWidget extends StatefulWidget {

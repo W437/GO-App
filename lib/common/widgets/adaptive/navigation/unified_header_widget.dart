@@ -1,3 +1,6 @@
+/// Unified header widget with consistent styling across app screens
+/// Provides standardized app bar with back button, title, and actions
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
