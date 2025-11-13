@@ -9,8 +9,8 @@ import 'package:godelivery_user/features/profile/controllers/profile_controller.
 import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
 import 'package:godelivery_user/features/chat/domain/models/conversation_model.dart';
 import 'package:godelivery_user/features/chat/widgets/message_bubble_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/common/enums/user_type.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';

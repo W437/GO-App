@@ -2,10 +2,10 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/review/controllers/review_controller.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
-import 'package:godelivery_user/helper/product_helper.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/business_logic/product_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

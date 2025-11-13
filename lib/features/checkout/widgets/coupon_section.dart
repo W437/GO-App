@@ -1,7 +1,7 @@
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/widgets/coupon_bottom_sheet.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

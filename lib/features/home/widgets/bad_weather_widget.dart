@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

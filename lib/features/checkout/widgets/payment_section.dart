@@ -1,9 +1,9 @@
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/widgets/payment_method_bottom_sheet2.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
-import 'package:godelivery_user/helper/extensions.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/utilities/extensions.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

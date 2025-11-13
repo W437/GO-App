@@ -9,7 +9,7 @@ import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/features/order/domain/models/pause_log_model.dart';
 import 'package:godelivery_user/features/order/domain/models/refund_model.dart';
 import 'package:godelivery_user/features/order/domain/repositories/order_repository_interface.dart';
-import 'package:godelivery_user/helper/auth_helper.dart';
+import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect.dart';
 import 'package:image_picker/image_picker.dart';

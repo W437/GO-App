@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/cart_widget.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 
 class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   final String title;

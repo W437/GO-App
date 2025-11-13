@@ -6,8 +6,8 @@ import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/domain/models/timeslote_model.dart';
 import 'package:godelivery_user/features/checkout/widgets/dine_in_date_select_bottom_sheet.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 

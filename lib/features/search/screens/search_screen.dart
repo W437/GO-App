@@ -9,8 +9,8 @@ import 'package:godelivery_user/features/search/controllers/search_controller.da
 import 'package:godelivery_user/features/search/widgets/filter_widget.dart';
 import 'package:godelivery_user/features/search/widgets/search_result_widget.dart';
 import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

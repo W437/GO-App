@@ -81,8 +81,8 @@ import 'package:godelivery_user/features/verification/screens/forget_pass_screen
 import 'package:godelivery_user/features/verification/screens/new_pass_screen.dart';
 import 'package:godelivery_user/features/verification/screens/verification_screen.dart';
 import 'package:godelivery_user/features/wallet/screens/wallet_screen.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/maintance_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/utilities/maintance_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

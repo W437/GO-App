@@ -3,7 +3,7 @@ import 'package:godelivery_user/features/restaurant/controllers/restaurant_contr
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';

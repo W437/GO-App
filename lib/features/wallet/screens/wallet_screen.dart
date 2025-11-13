@@ -5,8 +5,8 @@ import 'package:godelivery_user/features/wallet/widgets/bonus_banner_widget.dart
 import 'package:godelivery_user/features/wallet/widgets/wallet_card_widget.dart';
 import 'package:godelivery_user/features/wallet/widgets/wallet_history_widget.dart';
 import 'package:godelivery_user/features/wallet/widgets/web_bonus_banner_view_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';

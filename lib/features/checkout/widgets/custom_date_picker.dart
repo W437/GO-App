@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';

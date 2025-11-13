@@ -2,7 +2,7 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/support/widgets/quick_action_button_widget.dart';
 import 'package:godelivery_user/features/support/widgets/faq_item_widget.dart';
 import 'package:godelivery_user/features/support/widgets/contact_list_item_widget.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';

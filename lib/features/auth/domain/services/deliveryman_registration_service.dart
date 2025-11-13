@@ -5,7 +5,7 @@ import 'package:godelivery_user/features/auth/domain/models/vehicle_model.dart';
 import 'package:godelivery_user/features/auth/domain/models/zone_model.dart';
 import 'package:godelivery_user/features/auth/domain/reposotories/deliveryman_registration_repo_interface.dart';
 import 'package:godelivery_user/features/auth/domain/services/deliveryman_registration_service_interface.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';

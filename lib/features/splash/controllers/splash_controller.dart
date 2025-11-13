@@ -13,13 +13,13 @@ import 'package:godelivery_user/features/notification/domain/models/notification
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/maintance_helper.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/utilities/maintance_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/helper/splash_route_helper.dart';
+import 'package:godelivery_user/helper/navigation/splash_route_helper.dart';
 import 'package:universal_html/html.dart' as html;
 
 class SplashController extends GetxController implements GetxService {

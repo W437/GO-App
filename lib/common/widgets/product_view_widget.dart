@@ -7,7 +7,7 @@ import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/product_shimmer_widget.dart';
 import 'package:godelivery_user/common/widgets/product_widget.dart';
 import 'package:godelivery_user/features/home/widgets/theme1/restaurant_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/common/widgets/web_restaurant_widget.dart';
 import 'package:flutter/material.dart';

@@ -11,8 +11,8 @@ import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_m
 import 'package:godelivery_user/features/auth/domain/services/auth_service_interface.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/verification/screens/verification_screen.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 
 class AuthController extends GetxController implements GetxService {
   final AuthServiceInterface authServiceInterface;

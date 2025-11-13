@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

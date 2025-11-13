@@ -1,7 +1,7 @@
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

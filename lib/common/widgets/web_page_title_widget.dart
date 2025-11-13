@@ -1,7 +1,7 @@
 /// Web page title widget for desktop screen headers
 /// Displays page titles with consistent styling across desktop views
 
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';
 

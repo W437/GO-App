@@ -1,7 +1,7 @@
 import 'package:godelivery_user/features/home/widgets/filter_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/restaurant_filter_button_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';

@@ -11,8 +11,8 @@ import 'package:godelivery_user/features/order/domain/models/pause_log_model.dar
 import 'package:godelivery_user/features/order/domain/models/subscription_schedule_model.dart';
 import 'package:godelivery_user/features/order/domain/repositories/order_repository_interface.dart';
 import 'package:godelivery_user/features/order/domain/services/order_service_interface.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:image_picker/image_picker.dart';
 

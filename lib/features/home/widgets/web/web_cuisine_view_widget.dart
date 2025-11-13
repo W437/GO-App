@@ -3,7 +3,7 @@ import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.d
 import 'package:godelivery_user/features/home/widgets/cuisine_card_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

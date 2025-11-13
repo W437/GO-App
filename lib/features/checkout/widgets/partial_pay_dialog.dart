@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

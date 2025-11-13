@@ -12,7 +12,7 @@ import 'package:godelivery_user/features/auth/controllers/restaurant_registratio
 import 'package:godelivery_user/features/auth/domain/models/zone_model.dart';
 import 'package:godelivery_user/features/location/widgets/location_search_dialog.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

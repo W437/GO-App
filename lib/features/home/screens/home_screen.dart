@@ -54,10 +54,10 @@ import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/product/controllers/product_controller.dart';
 import 'package:godelivery_user/features/review/controllers/review_controller.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/auth_helper.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

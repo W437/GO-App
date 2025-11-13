@@ -2,8 +2,8 @@ import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.
 import 'package:godelivery_user/features/search/controllers/search_controller.dart' as search;
 import 'package:godelivery_user/features/search/widgets/custom_check_box_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_button_widget.dart';

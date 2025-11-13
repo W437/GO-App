@@ -7,7 +7,7 @@ import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

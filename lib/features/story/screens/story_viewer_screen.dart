@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/story/domain/models/story_collection_mo
 import 'package:godelivery_user/features/story/domain/models/story_media_model.dart';
 import 'package:godelivery_user/features/story/widgets/story_content_widget.dart';
 import 'package:godelivery_user/features/story/widgets/story_progress_bar_widget.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 

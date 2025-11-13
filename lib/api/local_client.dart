@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/data_source/cache_response.dart';
-import 'package:godelivery_user/helper/db_helper.dart';
+import 'package:godelivery_user/helper/utilities/db_helper.dart';
 
 class LocalClient {
 

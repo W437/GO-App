@@ -16,10 +16,10 @@ import 'package:godelivery_user/features/favourite/controllers/favourite_control
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/verification/screens/verification_screen.dart';
-import 'package:godelivery_user/helper/centralize_login_helper.dart';
-import 'package:godelivery_user/helper/custom_validator.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/centralize_login_helper.dart';
+import 'package:godelivery_user/helper/utilities/custom_validator.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 
 class SignInView extends StatefulWidget {
   final bool exitFromApp;

@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/cuisine/widgets/cuisine_custom_shape_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/custom_image_widget.dart';

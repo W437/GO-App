@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/restaurant/widgets/coupon_view_widget.d
 import 'package:godelivery_user/common/widgets/customizable_space_bar_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/info_view_widget.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

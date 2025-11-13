@@ -6,9 +6,9 @@ import 'package:godelivery_user/features/location/controllers/location_controlle
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/maintance_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/utilities/maintance_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 
 void route({required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {

@@ -5,7 +5,7 @@ import 'package:godelivery_user/features/profile/controllers/profile_controller.
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
 import 'package:godelivery_user/features/chat/domain/models/conversation_model.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/common/enums/user_type.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';

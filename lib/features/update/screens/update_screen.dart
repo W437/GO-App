@@ -1,6 +1,6 @@
 import 'package:godelivery_user/common/widgets/dotted_divider.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

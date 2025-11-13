@@ -7,8 +7,8 @@ import 'package:godelivery_user/features/location/domain/models/zone_response_mo
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/repositories/restaurant_repository_interface.dart';
 import 'package:godelivery_user/features/restaurant/domain/services/restaurant_service_interface.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

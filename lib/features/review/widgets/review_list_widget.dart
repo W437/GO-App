@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:godelivery_user/features/review/controllers/review_controller.dart';
 import 'package:godelivery_user/features/review/widgets/review_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 
 class ReviewListWidget extends StatelessWidget {
   final ReviewController reviewController;

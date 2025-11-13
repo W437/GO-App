@@ -2,7 +2,7 @@ import 'package:godelivery_user/features/checkout/controllers/checkout_controlle
 import 'package:godelivery_user/features/checkout/widgets/time_slot_bottom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';

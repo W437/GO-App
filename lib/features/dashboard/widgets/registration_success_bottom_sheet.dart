@@ -1,7 +1,7 @@
 import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
 import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
 import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';

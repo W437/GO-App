@@ -2,7 +2,7 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
 import 'package:godelivery_user/features/coupon/widgets/coupon_card_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/common/widgets/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';

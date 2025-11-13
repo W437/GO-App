@@ -3,7 +3,7 @@ import 'package:godelivery_user/api/api_client.dart';
 import 'package:godelivery_user/features/auth/domain/models/auth_response_model.dart';
 import 'package:godelivery_user/features/verification/domein/model/verification_data_model.dart';
 import 'package:godelivery_user/features/verification/domein/reposotories/verification_repo_interface.dart';
-import 'package:godelivery_user/helper/auth_helper.dart';
+import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:shared_preferences/shared_preferences.dart';

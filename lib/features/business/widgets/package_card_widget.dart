@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/features/business/domain/models/package_model.dart';
 import 'package:godelivery_user/features/business/widgets/curve_clipper_widget.dart';
 import 'package:godelivery_user/features/business/widgets/package_widget.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 

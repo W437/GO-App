@@ -9,8 +9,8 @@ import 'package:godelivery_user/features/auth/domain/centralize_login_enum.dart'
 import 'package:godelivery_user/features/auth/domain/models/auth_response_model.dart';
 import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_model.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

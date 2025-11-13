@@ -11,7 +11,7 @@ import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
 import 'package:godelivery_user/features/chat/domain/models/message_model.dart';
 import 'package:godelivery_user/features/chat/screens/preview_screen.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

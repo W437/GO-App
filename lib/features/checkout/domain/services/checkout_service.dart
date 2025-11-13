@@ -4,7 +4,7 @@ import 'package:godelivery_user/features/checkout/domain/models/place_order_body
 import 'package:godelivery_user/features/checkout/domain/models/timeslote_model.dart';
 import 'package:godelivery_user/features/checkout/domain/repositories/checkout_repository_interface.dart';
 import 'package:godelivery_user/features/checkout/domain/services/checkout_service_interface.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';

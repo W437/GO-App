@@ -1,5 +1,5 @@
 import 'package:godelivery_user/common/models/product_model.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 
 class ProductHelper {
 

@@ -12,7 +12,7 @@ import 'package:godelivery_user/features/restaurant/domain/models/recommended_pr
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/category/domain/models/category_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/services/restaurant_service_interface.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

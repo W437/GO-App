@@ -2,7 +2,7 @@ import 'package:godelivery_user/api/api_client.dart';
 import 'package:godelivery_user/features/wallet/domain/models/fund_bonus_model.dart';
 import 'package:godelivery_user/features/wallet/domain/models/wallet_model.dart';
 import 'package:godelivery_user/features/wallet/domain/repositories/wallet_repository_interface.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:get/get_utils/src/platform/platform.dart';

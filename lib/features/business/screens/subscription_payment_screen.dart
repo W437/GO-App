@@ -12,7 +12,7 @@ import 'package:godelivery_user/features/auth/widgets/registration_stepper_widge
 import 'package:godelivery_user/features/business/controllers/business_controller.dart';
 import 'package:godelivery_user/features/business/widgets/payment_cart_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

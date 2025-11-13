@@ -15,8 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 
 class RestaurantRegistrationController extends GetxController implements GetxService {
   final RestaurantRegistrationServiceInterface restaurantRegistrationServiceInterface;

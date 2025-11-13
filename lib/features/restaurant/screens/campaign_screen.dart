@@ -2,8 +2,8 @@ import 'package:godelivery_user/common/widgets/customizable_space_bar_widget.dar
 import 'package:godelivery_user/features/product/controllers/campaign_controller.dart';
 import 'package:godelivery_user/features/product/domain/models/basic_campaign_model.dart';
 import 'package:godelivery_user/features/restaurant/screens/web_campaign_screen.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

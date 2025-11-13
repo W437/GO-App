@@ -2,7 +2,7 @@
 /// Displays animated placeholders while product data is loading
 
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 

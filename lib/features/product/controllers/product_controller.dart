@@ -4,8 +4,8 @@ import 'package:godelivery_user/features/checkout/domain/models/place_order_body
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/product/domain/services/product_service_interface.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/common/widgets/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/product_bottom_sheet_widget.dart';

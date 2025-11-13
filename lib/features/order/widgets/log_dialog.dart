@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/features/order/domain/models/delivery_log_model.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';

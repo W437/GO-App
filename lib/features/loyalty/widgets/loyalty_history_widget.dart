@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:godelivery_user/features/loyalty/widgets/loyalty_history_card_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';

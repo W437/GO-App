@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/developer/data/catalog_data.dart';
 import 'package:godelivery_user/features/developer/models/catalog_item_model.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 

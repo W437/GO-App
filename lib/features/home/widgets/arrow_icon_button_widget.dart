@@ -1,4 +1,4 @@
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:flutter/material.dart';
 
 class ArrowIconButtonWidget extends StatelessWidget {

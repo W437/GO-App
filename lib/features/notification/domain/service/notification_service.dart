@@ -2,7 +2,7 @@ import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_model.dart';
 import 'package:godelivery_user/features/notification/domain/repository/notification_repository_interface.dart';
 import 'package:godelivery_user/features/notification/domain/service/notification_service_interface.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 
 class NotificationService implements NotificationServiceInterface {
   final NotificationRepositoryInterface notificationRepositoryInterface;

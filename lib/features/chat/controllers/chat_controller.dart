@@ -11,9 +11,9 @@ import 'package:godelivery_user/features/chat/domain/models/conversation_model.d
 import 'package:godelivery_user/features/chat/domain/models/message_model.dart';
 import 'package:godelivery_user/features/chat/domain/services/chat_service_interface.dart';
 import 'package:godelivery_user/features/chat/enums/user_type_enum.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
-import 'package:godelivery_user/helper/image_size_checker.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
+import 'package:godelivery_user/helper/utilities/image_size_checker.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

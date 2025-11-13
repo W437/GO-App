@@ -1,7 +1,7 @@
 /// Paginated list view widget for infinite scroll functionality
 /// Handles loading more items as user scrolls with loading indicators
 
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';

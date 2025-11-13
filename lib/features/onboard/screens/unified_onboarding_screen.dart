@@ -10,9 +10,9 @@ import 'package:godelivery_user/features/language/controllers/localization_contr
 import 'package:godelivery_user/features/language/widgets/language_card_widget.dart';
 import 'package:godelivery_user/features/onboard/controllers/onboard_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/notification_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/utilities/notification_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/main.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';

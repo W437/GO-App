@@ -3,7 +3,7 @@ import 'package:godelivery_user/features/home/screens/home_screen.dart';
 import 'package:godelivery_user/features/language/domain/models/language_model.dart';
 import 'package:godelivery_user/features/language/domain/service/language_service_interface.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/theme/dark_theme.dart';
 import 'package:godelivery_user/theme/light_theme.dart';
 import 'package:godelivery_user/util/app_constants.dart';

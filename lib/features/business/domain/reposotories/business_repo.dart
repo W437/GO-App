@@ -1,7 +1,7 @@
 import 'package:godelivery_user/api/api_client.dart';
 import 'package:godelivery_user/features/business/domain/models/business_plan_body.dart';
 import 'package:godelivery_user/features/business/domain/reposotories/business_repo_interface.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:universal_html/html.dart' as html;

@@ -7,9 +7,9 @@ import 'package:godelivery_user/features/location/screens/access_location_screen
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/auth_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:screen_corner_radius/screen_corner_radius.dart';

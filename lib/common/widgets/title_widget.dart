@@ -1,7 +1,7 @@
 /// Title widget for displaying section headers with consistent styling
 /// Provides formatted titles for different app sections with responsive design
 
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';

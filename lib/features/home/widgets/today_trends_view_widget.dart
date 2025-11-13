@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/product/controllers/campaign_controller.dart';
 import 'package:godelivery_user/features/home/widgets/item_card_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';

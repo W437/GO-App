@@ -10,7 +10,7 @@ import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.d
 import 'package:godelivery_user/features/home/widgets/icon_with_text_row_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

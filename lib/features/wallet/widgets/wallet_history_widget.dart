@@ -1,7 +1,7 @@
 import 'package:godelivery_user/features/wallet/domain/models/wallet_filter_body_model.dart';
 import 'package:godelivery_user/features/wallet/controllers/wallet_controller.dart';
 import 'package:godelivery_user/features/wallet/widgets/history_cart_widget.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';

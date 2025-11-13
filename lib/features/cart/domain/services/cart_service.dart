@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/checkout/domain/models/place_order_body
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/cart/domain/repositories/cart_repository_interface.dart';
 import 'package:godelivery_user/features/cart/domain/services/cart_service_interface.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:get/get_utils/get_utils.dart';
 
 class CartService implements CartServiceInterface {

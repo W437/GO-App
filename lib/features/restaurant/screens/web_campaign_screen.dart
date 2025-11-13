@@ -5,7 +5,7 @@ import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
 import 'package:godelivery_user/features/product/controllers/campaign_controller.dart';
-import 'package:godelivery_user/helper/date_converter.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';

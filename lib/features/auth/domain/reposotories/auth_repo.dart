@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/address/domain/models/address_model.dar
 import 'package:godelivery_user/features/auth/domain/models/signup_body_model.dart';
 import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_model.dart';
 import 'package:godelivery_user/features/auth/domain/reposotories/auth_repo_interface.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';

@@ -5,8 +5,8 @@ import 'package:godelivery_user/features/cart/widgets/extra_packaging_widget.dar
 import 'package:godelivery_user/features/cart/widgets/not_available_product_view_widget.dart';
 import 'package:godelivery_user/features/checkout/widgets/delivery_instruction_view.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/helper/price_converter.dart';
-import 'package:godelivery_user/helper/responsive_helper.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:flutter/material.dart';

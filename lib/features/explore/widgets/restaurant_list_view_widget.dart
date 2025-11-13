@@ -8,8 +8,8 @@ import 'package:godelivery_user/features/explore/controllers/explore_controller.
 import 'package:godelivery_user/features/explore/widgets/restaurant_card_shimmer.dart';
 import 'package:godelivery_user/features/explore/widgets/empty_state_widget.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
-import 'package:godelivery_user/helper/address_helper.dart';
-import 'package:godelivery_user/helper/route_helper.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
