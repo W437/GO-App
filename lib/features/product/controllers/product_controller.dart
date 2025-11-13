@@ -7,8 +7,8 @@ import 'package:godelivery_user/features/product/domain/services/product_service
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/images.dart';
-import 'package:godelivery_user/common/widgets/confirmation_dialog_widget.dart';
-import 'package:godelivery_user/common/widgets/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

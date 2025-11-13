@@ -27,8 +27,8 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/product_view_widget.dart';
-import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
 
 class Theme1HomeScreen extends StatelessWidget {
   final ScrollController scrollController;

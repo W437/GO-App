@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_model.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';

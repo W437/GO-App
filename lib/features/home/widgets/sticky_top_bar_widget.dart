@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
+import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/screens/access_location_screen.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';

@@ -1,7 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:godelivery_user/api/api_checker.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/home/screens/home_screen.dart';
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
@@ -27,7 +27,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_dropdown_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_dropdown_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

@@ -4,8 +4,8 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

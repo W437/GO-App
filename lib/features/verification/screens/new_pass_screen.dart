@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/validate_check.dart';
+import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/screens/sign_in_screen.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/domain/models/userinfo_model.dart';
@@ -8,10 +8,10 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

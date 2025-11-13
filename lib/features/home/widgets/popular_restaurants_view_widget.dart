@@ -1,6 +1,6 @@
-import 'package:godelivery_user/common/widgets/custom_distance_cliper_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_favourite_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/layout/custom_distance_cliper_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/icon_with_text_row_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -12,7 +12,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

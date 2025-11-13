@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/not_available_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
 import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/icon_with_text_row_widget.dart';

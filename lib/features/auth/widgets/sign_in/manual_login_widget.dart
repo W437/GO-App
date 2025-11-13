@@ -1,10 +1,10 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
-import 'package:godelivery_user/common/widgets/validate_check.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/widgets/sign_up_widget.dart';
 import 'package:godelivery_user/features/auth/widgets/social_login_widget.dart';

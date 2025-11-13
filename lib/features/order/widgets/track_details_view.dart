@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/rating_bar_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
@@ -7,8 +7,8 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/order/widgets/address_details_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';

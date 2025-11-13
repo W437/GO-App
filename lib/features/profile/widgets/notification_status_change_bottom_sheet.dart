@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';

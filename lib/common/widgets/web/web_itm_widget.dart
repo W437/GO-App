@@ -2,7 +2,7 @@
 /// Shows product cards with images, pricing, ratings, and availability status
 
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/rating_bar_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/helper/converters/date_converter.dart';
@@ -11,10 +11,10 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/discount_tag_widget.dart';
-import 'package:godelivery_user/common/widgets/not_available_widget.dart';
-import 'package:godelivery_user/common/widgets/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -3,7 +3,7 @@ import 'package:godelivery_user/features/order/domain/models/delivery_log_model.
 import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';

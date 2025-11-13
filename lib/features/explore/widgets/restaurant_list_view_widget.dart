@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/explore/widgets/restaurant_card_shimmer.dart';
 import 'package:godelivery_user/features/explore/widgets/empty_state_widget.dart';

@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/rating_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/rating_bar_widget.dart';
 import 'package:godelivery_user/features/review/widgets/rating_progress_widget.dart';
 import 'package:godelivery_user/features/review/widgets/total_rating_review_view_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';

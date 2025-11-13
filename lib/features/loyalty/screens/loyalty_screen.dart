@@ -7,11 +7,11 @@ import 'package:godelivery_user/features/profile/controllers/profile_controller.
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
-import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
-import 'package:godelivery_user/common/widgets/not_logged_in_screen.dart';
-import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_logged_in_screen.dart';
+import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

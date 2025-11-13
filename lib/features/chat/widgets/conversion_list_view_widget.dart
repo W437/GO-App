@@ -9,9 +9,9 @@
 // import 'package:godelivery_user/common/enums/user_type.dart';
 // import 'package:godelivery_user/util/dimensions.dart';
 // import 'package:godelivery_user/util/styles.dart';
-// import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-// import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
-// import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';
+// import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+// import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+// import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:shimmer_animation/shimmer_animation.dart';
@@ -270,10 +270,10 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/common/enums/user_type.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

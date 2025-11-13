@@ -10,7 +10,7 @@ import 'package:godelivery_user/features/address/domain/models/address_model.dar
 import 'package:godelivery_user/features/location/domain/services/location_service_interface.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

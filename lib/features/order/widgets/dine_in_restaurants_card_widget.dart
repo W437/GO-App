@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/custom_favourite_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
 import 'package:godelivery_user/features/home/widgets/icon_with_text_row_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -7,7 +7,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

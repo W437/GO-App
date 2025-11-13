@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:godelivery_user/common/widgets/demo_reset_dialog_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/demo_reset_dialog_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
 import 'package:godelivery_user/features/dashboard/screens/dashboard_screen.dart';

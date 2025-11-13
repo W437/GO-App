@@ -1,8 +1,8 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
 import 'package:godelivery_user/features/profile/widgets/color_palette_selector.dart';
 import 'package:godelivery_user/util/color_palette.dart';
 import 'package:godelivery_user/util/dimensions.dart';

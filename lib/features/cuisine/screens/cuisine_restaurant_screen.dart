@@ -1,11 +1,11 @@
 import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
-import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
-import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';
-import 'package:godelivery_user/common/widgets/product_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

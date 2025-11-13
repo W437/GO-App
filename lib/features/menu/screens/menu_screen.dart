@@ -1,5 +1,5 @@
-import 'package:godelivery_user/common/widgets/bouncy_bottom_sheet.dart';
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/bouncy_bottom_sheet.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
@@ -22,8 +22,8 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/developer/controllers/developer_catalog_controller.dart';
-import 'package:godelivery_user/common/widgets/confirmation_dialog_widget.dart';
-import 'package:godelivery_user/common/widgets/emoji_profile_picture.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';

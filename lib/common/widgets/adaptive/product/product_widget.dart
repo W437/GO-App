@@ -1,11 +1,11 @@
 /// Product widget for displaying food items and restaurants in lists
 /// Shows product information with rating, pricing, add to cart functionality
 
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_favourite_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/not_available_widget.dart';
-import 'package:godelivery_user/common/widgets/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/overflow_container_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
@@ -21,10 +21,10 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/discount_tag_widget.dart';
-import 'package:godelivery_user/common/widgets/discount_tag_without_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/discount_tag_without_image_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

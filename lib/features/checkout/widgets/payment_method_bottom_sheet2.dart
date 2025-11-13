@@ -1,5 +1,5 @@
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/widgets/offline_payment_button.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
@@ -10,8 +10,8 @@ import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';

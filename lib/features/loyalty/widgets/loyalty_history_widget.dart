@@ -3,7 +3,7 @@ import 'package:godelivery_user/features/loyalty/widgets/loyalty_history_card_wi
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';

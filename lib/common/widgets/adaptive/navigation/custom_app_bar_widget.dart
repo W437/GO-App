@@ -1,14 +1,14 @@
 /// Custom app bar widget with responsive design for mobile and web
 /// Provides navigation, search, cart, and veg filter functionality
 
-import 'package:godelivery_user/common/widgets/circular_back_button_widget.dart';
-import 'package:godelivery_user/common/widgets/web_menu_bar.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_menu_bar.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/cart_widget.dart';
-import 'package:godelivery_user/common/widgets/veg_filter_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/cart/cart_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/veg_filter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

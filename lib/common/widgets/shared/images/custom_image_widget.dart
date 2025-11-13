@@ -3,7 +3,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:flutter/material.dart';

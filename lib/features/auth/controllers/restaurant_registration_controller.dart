@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/business/controllers/business_controller.dart';
 import 'package:godelivery_user/features/business/domain/models/package_model.dart';
 import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';

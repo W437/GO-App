@@ -4,10 +4,10 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
-import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 class RefundRequestScreen extends StatefulWidget {

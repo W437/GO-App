@@ -24,8 +24,8 @@ import 'package:godelivery_user/features/loyalty/controllers/loyalty_controller.
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/common/widgets/cart_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_dialog_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/cart/cart_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/custom_dialog_widget.dart';
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

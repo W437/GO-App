@@ -1,7 +1,7 @@
 /// Menu drawer widget for mobile navigation sidebar
 /// Provides navigation menu with user profile, settings, and app links
 
-import 'package:godelivery_user/common/widgets/hover_widgets/on_hover_widget.dart';
+import 'package:godelivery_user/common/widgets/web/hover/on_hover_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
@@ -12,7 +12,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/confirmation_dialog_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

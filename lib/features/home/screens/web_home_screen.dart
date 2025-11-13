@@ -19,7 +19,7 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

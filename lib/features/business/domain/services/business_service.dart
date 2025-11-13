@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/business/domain/reposotories/business_r
 import 'package:godelivery_user/features/business/widgets/business_payment_method_bottom_sheet_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'business_service_interface.dart';

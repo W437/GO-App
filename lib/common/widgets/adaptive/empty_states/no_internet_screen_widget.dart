@@ -2,7 +2,7 @@
 // Displays network error message with retry functionality
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';

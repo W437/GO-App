@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_thumbnail_video/index.dart';
 import 'package:get_thumbnail_video/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
 import 'package:godelivery_user/features/chat/domain/models/message_model.dart';
 import 'package:godelivery_user/features/chat/screens/preview_screen.dart';

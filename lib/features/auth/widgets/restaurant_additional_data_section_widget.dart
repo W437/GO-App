@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:godelivery_user/common/widgets/validate_check.dart';
+import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/controllers/restaurant_registration_controller.dart';
 import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/utilities/extensions.dart';
@@ -8,7 +8,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

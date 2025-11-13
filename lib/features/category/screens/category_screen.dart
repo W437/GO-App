@@ -1,15 +1,15 @@
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
-import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
-import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
-import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

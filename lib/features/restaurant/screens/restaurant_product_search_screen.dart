@@ -5,10 +5,10 @@ import 'package:godelivery_user/features/search/controllers/search_controller.da
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
-import 'package:godelivery_user/common/widgets/paginated_list_view_widget.dart';
-import 'package:godelivery_user/common/widgets/product_view_widget.dart';
-import 'package:godelivery_user/common/widgets/veg_filter_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_view_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/veg_filter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

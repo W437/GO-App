@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/home/widgets/all_cuisines_bottom_sheet.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/cuisine_card_widget.dart';

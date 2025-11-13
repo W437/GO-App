@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
-import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/images.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/features/language/widgets/language_card_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';

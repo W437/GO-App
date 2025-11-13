@@ -16,7 +16,7 @@ import 'package:godelivery_user/theme/dark_theme.dart';
 import 'package:godelivery_user/theme/light_theme.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/messages.dart';
-import 'package:godelivery_user/common/widgets/cookies_view_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/cookies_view_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';

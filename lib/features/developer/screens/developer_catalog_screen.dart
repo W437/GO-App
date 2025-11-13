@@ -5,8 +5,8 @@ import 'package:godelivery_user/features/developer/controllers/developer_catalog
 import 'package:godelivery_user/features/developer/widgets/catalog_item_card.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 
 class DeveloperCatalogScreen extends StatefulWidget {
   const DeveloperCatalogScreen({super.key});

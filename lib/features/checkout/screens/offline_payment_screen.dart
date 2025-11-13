@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:godelivery_user/common/widgets/validate_check.dart';
+import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/domain/models/offline_method_model.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
@@ -10,12 +10,12 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_text_field_widget.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
-import 'package:godelivery_user/common/widgets/web_page_title_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

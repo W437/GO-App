@@ -1,8 +1,8 @@
 import 'package:godelivery_user/api/api_checker.dart';
 import 'package:godelivery_user/common/models/online_cart_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
-import 'package:godelivery_user/common/widgets/cart_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/cart/cart_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/cart/domain/services/cart_service_interface.dart';

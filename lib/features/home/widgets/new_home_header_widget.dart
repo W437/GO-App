@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/draggable_bottom_sheet_widget.dart';
-import 'package:godelivery_user/common/widgets/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/screens/access_location_screen.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';

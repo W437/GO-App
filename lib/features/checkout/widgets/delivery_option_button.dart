@@ -1,5 +1,5 @@
 import 'package:just_the_tooltip/just_the_tooltip.dart';
-import 'package:godelivery_user/common/widgets/custom_tool_tip.dart';
+import 'package:godelivery_user/common/widgets/shared/text/custom_tool_tip.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';

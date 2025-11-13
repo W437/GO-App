@@ -3,10 +3,10 @@
 
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/no_data_screen_widget.dart';
-import 'package:godelivery_user/common/widgets/web_product_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_product_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/common/widgets/web_restaurant_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_restaurant_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

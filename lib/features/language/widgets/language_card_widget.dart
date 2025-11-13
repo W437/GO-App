@@ -26,10 +26,26 @@ class LanguageCardWidget extends StatefulWidget {
   State<LanguageCardWidget> createState() => _LanguageCardWidgetState();
 }
 
-class _LanguageCardWidgetState extends State<LanguageCardWidget> {
+class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
   }
 
   bool get _isSelected => widget.localizationController.selectedLanguageIndex == widget.index;

@@ -1,5 +1,5 @@
 import 'package:flutter/rendering.dart';
-import 'package:godelivery_user/common/widgets/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
 import 'package:godelivery_user/features/story/widgets/story_strip_widget.dart';
@@ -44,7 +44,7 @@ import 'package:godelivery_user/features/order/controllers/order_controller.dart
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
-import 'package:godelivery_user/common/widgets/customizable_space_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/layout/customizable_space_bar_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
@@ -61,8 +61,8 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/footer_view_widget.dart';
-import 'package:godelivery_user/common/widgets/web_menu_bar.dart';
+import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
+import 'package:godelivery_user/common/widgets/web/web_menu_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

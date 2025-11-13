@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/cuisine_card_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';

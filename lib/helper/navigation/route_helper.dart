@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:godelivery_user/common/widgets/image_viewer_screen_widget.dart';
-import 'package:godelivery_user/common/widgets/not_found_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/image_viewer_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_found_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
 import 'package:godelivery_user/features/business/screens/subscription_payment_screen.dart';

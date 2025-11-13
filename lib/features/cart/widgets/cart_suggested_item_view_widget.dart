@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/product_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';

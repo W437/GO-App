@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:godelivery_user/common/widgets/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
 /// Reusable draggable bottom sheet with handle and close button
