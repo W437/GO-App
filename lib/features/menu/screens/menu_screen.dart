@@ -2,6 +2,7 @@ import 'package:godelivery_user/common/widgets/mobile/bouncy_bottom_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/developer/screens/input_test_screen.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/language/widgets/language_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/menu/widgets/ios_menu_item_widget.dart';
@@ -288,6 +289,12 @@ class _MenuScreenState extends State<MenuScreen> {
                           iconBackgroundColor: const Color(0xFF34C759),
                           title: 'Hopa! Bird Game',
                           onTap: () => Get.toNamed(RouteHelper.getFlappyBirdGameScreen()),
+                        ),
+                        IosMenuItemWidget(
+                          icon: Icons.input,
+                          iconBackgroundColor: const Color(0xFFFF2D55),
+                          title: 'Modern Input Test',
+                          onTap: () => Get.to(() => const InputTestScreen()),
                         ),
                         IosMenuItemWidget(
                           icon: Icons.location_on_outlined,

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/developer/data/catalog_data.dart';
 import 'package:godelivery_user/features/developer/models/catalog_item_model.dart';
+import 'package:godelivery_user/features/developer/screens/input_test_screen.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
@@ -393,6 +394,11 @@ class DeveloperCatalogController extends GetxController {
       // Wallet screen
       case 'lib/features/wallet/screens/wallet_screen.dart':
         Get.toNamed(RouteHelper.getWalletRoute());
+        break;
+
+      // Developer screens
+      case 'lib/features/developer/screens/input_test_screen.dart':
+        Get.to(() => const InputTestScreen());
         break;
 
       default:

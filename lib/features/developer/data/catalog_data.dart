@@ -546,6 +546,14 @@ class CatalogData {
         module: 'Wallet',
         requiresAuth: true,
       ),
+
+      // Developer Module (1 screen)
+      CatalogItemModel(
+        itemName: 'Modern Input Field Test',
+        filePath: 'lib/features/developer/screens/input_test_screen.dart',
+        category: ItemCategory.screen,
+        module: 'Developer',
+      ),
     ];
   }
 
