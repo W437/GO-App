@@ -255,7 +255,15 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               locationController.loading ? const Center(child: CircularProgressIndicator()) : const SizedBox(),
               
               Center(
-                child: !locationController.loading ? Image.asset(Images.pickMarker, height: 50, width: 50) : const CircularProgressIndicator(),
+                child: !locationController.loading ? Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Image.asset(
+                    Images.pickLocationMapPin,
+                    height: 70,
+                    width: 70,
+                    fit: BoxFit.contain,
+                  ),
+                ) : const CircularProgressIndicator(),
               ),
               
               Positioned(

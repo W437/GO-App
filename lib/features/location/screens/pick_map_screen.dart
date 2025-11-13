@@ -16,6 +16,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/web/web_menu_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -65,14 +66,19 @@ class _PickMapScreenState extends State<PickMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
-      body: SafeArea(
-        bottom: false,
-        child: Center(child: SizedBox(
-        width: Dimensions.webMaxWidth,
-        child: GetBuilder<LocationController>(builder: (locationController) {
-          return Stack(children: [
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Center(
+            child: SizedBox(
+              width: Dimensions.webMaxWidth,
+              child: GetBuilder<LocationController>(builder: (locationController) {
+                return Stack(children: [
 
             GoogleMap(
               initialCameraPosition: CameraPosition(
@@ -105,36 +111,55 @@ class _PickMapScreenState extends State<PickMapScreen> {
               style: Get.isDarkMode ? Get.find<ThemeController>().darkMap : Get.find<ThemeController>().lightMap,
             ),
 
-            Center(child: !locationController.loading ? Icon(
-              Icons.location_on,
-              size: 50,
-              color: Theme.of(context).primaryColor,
-            ) : const CircularProgressIndicator()),
-
+            // Top gradient overlay to soften the transition to the sheet controls
             Positioned(
-              top: Dimensions.paddingSizeLarge,
-              left: Dimensions.paddingSizeSmall,
-              right: Dimensions.paddingSizeSmall,
-              child: LocationSearchDialog(mapController: _mapController, pickedLocation: locationController.pickAddress!),
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 140,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.35),
+                        Colors.black.withOpacity(0.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
 
-            // Back button under search bar
+            Center(child: !locationController.loading ? Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Image.asset(
+                Images.pickLocationMapPin,
+                height: 72,
+                width: 72,
+                fit: BoxFit.contain,
+              ),
+            ) : const CircularProgressIndicator()),
+
+            // Back button
             Positioned(
-              top: Dimensions.paddingSizeLarge + 50 + Dimensions.paddingSizeSmall,
+              top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,
               left: Dimensions.paddingSizeSmall,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
+                      color: Colors.black.withOpacity(0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: CircularBackButtonWidget(
-                  showText: true,
+                  showText: false,
                   backgroundColor: Theme.of(context).cardColor,
                 ),
               ),
@@ -172,7 +197,6 @@ class _PickMapScreenState extends State<PickMapScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Zone selection button
                       CustomButtonWidget(
                         buttonText: 'select_zone'.tr,
                         icon: Icons.list_alt,
@@ -182,12 +206,13 @@ class _PickMapScreenState extends State<PickMapScreen> {
                         onPressed: () => _showZoneSelectionActionSheet(context),
                       ),
                       const SizedBox(height: Dimensions.paddingSizeSmall),
-                      // Main action button
                       CustomButtonWidget(
-                        buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
+                        buttonText: locationController.inZone
+                            ? (widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr)
                             : 'service_not_available_in_this_area'.tr,
                         isLoading: locationController.isLoading,
-                        onPressed: (locationController.buttonDisabled || locationController.loading) ? null
+                        onPressed: (locationController.buttonDisabled || locationController.loading)
+                            ? null
                             : () => _onPickAddressButtonPressed(locationController),
                       ),
                     ],
@@ -195,11 +220,13 @@ class _PickMapScreenState extends State<PickMapScreen> {
                 ),
               ),
             ),
-
-          ]);
-        }),
-      ))),
-    );
+            ]);
+          }),
+        ),
+      ),
+    ),
+  ),
+);
   }
 
   void _onPickAddressButtonPressed(LocationController locationController) {
@@ -240,34 +267,38 @@ class _PickMapScreenState extends State<PickMapScreen> {
   }
 
   void _showZoneSelectionActionSheet(BuildContext context) {
+    final double bottomInset = MediaQuery.of(context).viewPadding.bottom;
     showDraggableBottomSheet(
       context: context,
       wrapContent: true,
       maxChildSize: 0.7,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Dimensions.paddingSizeDefault,
-          0,
-          Dimensions.paddingSizeDefault,
-          Dimensions.paddingSizeLarge,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'select_delivery_zone'.tr,
-              style: robotoBold.copyWith(
-                fontSize: Dimensions.fontSizeLarge,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            Dimensions.paddingSizeDefault,
+            Dimensions.paddingSizeSmall,
+            Dimensions.paddingSizeDefault,
+            Dimensions.paddingSizeLarge + bottomInset,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'select_delivery_zone'.tr,
+                style: robotoBold.copyWith(
+                  fontSize: Dimensions.fontSizeLarge,
+                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                ),
               ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
-            const Flexible(
-              child: ZoneListWidget(isBottomSheet: false),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
-          ],
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              const Flexible(
+                child: ZoneListWidget(isBottomSheet: false),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeLarge),
+            ],
+          ),
         ),
       ),
     );
@@ -281,8 +312,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
     final theme = Theme.of(context);
     return ZonePolygonHelper.buildPolygons(
       zones: controller.zoneList,
-      strokeColor: theme.primaryColor.withOpacity(0.45),
-      fillColor: theme.primaryColor.withOpacity(0.08),
+      baseColor: theme.colorScheme.primary,
+      strokeOpacity: 0.7,
+      fillOpacity: 0.1,
     );
   }
 }

@@ -135,7 +135,12 @@ class _PickMapDialogState extends State<PickMapDialog> {
 
                         Center(child: !locationController.loading ? Padding(
                           padding: const EdgeInsets.only(bottom: 30.0),
-                          child: Image.asset(Images.newPickMarker, height: 50, width: 50),
+                          child: Image.asset(
+                            Images.pickLocationMapPin,
+                            height: 70,
+                            width: 70,
+                            fit: BoxFit.contain,
+                          ),
                         ) : const CircularProgressIndicator()),
 
                         Positioned(
@@ -240,13 +245,18 @@ class _PickMapDialogState extends State<PickMapDialog> {
               },
             ),
 
-            Center(child: !locationController.loading ? Image.asset(Images.pickMarker, height: 50, width: 50)
+            Center(child: !locationController.loading ? Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Image.asset(
+                Images.pickLocationMapPin,
+                height: 70,
+                width: 70,
+                fit: BoxFit.contain,
+              ),
+            )
                 : const CircularProgressIndicator()),
 
-            Positioned(
-              top: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-              child: SearchLocationWidget(mapController: _mapController, pickedAddress: locationController.pickAddress, isEnabled: null),
-            ),
+            // Removed search to match simplified overlay
 
             Positioned(
               bottom: 80, right: Dimensions.paddingSizeLarge,
@@ -286,8 +296,9 @@ class _PickMapDialogState extends State<PickMapDialog> {
     final theme = Theme.of(context);
     return ZonePolygonHelper.buildPolygons(
       zones: controller.zoneList,
-      strokeColor: theme.primaryColor.withOpacity(0.45),
-      fillColor: theme.primaryColor.withOpacity(0.08),
+      baseColor: theme.colorScheme.primary,
+      strokeOpacity: 0.7,
+      fillOpacity: 0.1,
     );
   }
 

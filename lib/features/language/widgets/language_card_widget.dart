@@ -26,28 +26,7 @@ class LanguageCardWidget extends StatefulWidget {
   State<LanguageCardWidget> createState() => _LanguageCardWidgetState();
 }
 
-class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    super.dispose();
-  }
-
+class _LanguageCardWidgetState extends State<LanguageCardWidget> {
   bool get _isSelected => widget.localizationController.selectedLanguageIndex == widget.index;
 
   void _handleTap() {
@@ -65,28 +44,11 @@ class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTick
     );
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    _scaleController.forward();
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    _scaleController.reverse();
-  }
-
-  void _handleTapCancel() {
-    _scaleController.reverse();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: GestureDetector(
-        onTap: _handleTap,
-        onTapDown: _handleTapDown,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
-        child: AnimatedContainer(
+    return GestureDetector(
+      onTap: _handleTap,
+      child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -150,7 +112,6 @@ class _LanguageCardWidgetState extends State<LanguageCardWidget> with SingleTick
             ],
           ),
         ),
-      ),
     );
   }
 }

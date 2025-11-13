@@ -41,6 +41,7 @@ class Images {
   static const String forgot = 'assets/image/auth/forgot.png';
   static const String pickMarker = 'assets/image/location/pick_marker.png';
   static const String newPickMarker = 'assets/image/location/new_picker_marker.png';
+  static const String pickLocationMapPin = 'assets/image/location/pick_location_map_pin.png';
   static const String house = 'assets/image/location/house.png';
   static const String tracking = 'assets/image/orders/tracking.png';
   static const String myLocationMarker = 'assets/image/location/my_location_marker.png';
