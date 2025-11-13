@@ -151,6 +151,33 @@ class _InputTestScreenState extends State<InputTestScreen> {
               ),
               const SizedBox(height: Dimensions.paddingSizeLarge),
 
+              _buildSectionTitle('Side by Side Fields'),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
+
+              // Two fields in a row
+              Row(
+                children: [
+                  Expanded(
+                    child: ModernInputFieldWidget(
+                      labelText: 'First Name',
+                      hintText: 'Enter first name',
+                      controller: TextEditingController(),
+                      prefixIcon: Icons.person,
+                    ),
+                  ),
+                  const SizedBox(width: Dimensions.paddingSizeDefault),
+                  Expanded(
+                    child: ModernInputFieldWidget(
+                      labelText: 'Last Name',
+                      hintText: 'Enter last name',
+                      controller: TextEditingController(),
+                      prefixIcon: Icons.person_outline,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Dimensions.paddingSizeLarge),
+
               _buildSectionTitle('Dropdown Inputs'),
               const SizedBox(height: Dimensions.paddingSizeSmall),
 
