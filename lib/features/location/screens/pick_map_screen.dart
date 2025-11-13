@@ -4,6 +4,7 @@ import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_wid
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
 import 'package:godelivery_user/features/location/widgets/location_search_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
@@ -26,9 +27,11 @@ class PickMapScreen extends StatefulWidget {
   final bool canRoute;
   final String? route;
   final GoogleMapController? googleMapController;
+  final bool showZonePolygons;
   const PickMapScreen({
     super.key, required this.fromSignUp, required this.fromAddAddress, required this.canRoute,
     required this.route, this.googleMapController, required this.fromSplash,
+    this.showZonePolygons = true,
   });
 
   @override
@@ -78,6 +81,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
                 zoom: 16,
               ),
               minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+              polygons: _zonePolygons(locationController, context),
               onMapCreated: (GoogleMapController mapController) {
                 _mapController = mapController;
                 if(!widget.fromAddAddress && widget.route != 'splash') {
@@ -266,6 +270,19 @@ class _PickMapScreenState extends State<PickMapScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Set<Polygon> _zonePolygons(LocationController controller, BuildContext context) {
+    if (!widget.showZonePolygons || controller.zoneList.isEmpty) {
+      return <Polygon>{};
+    }
+
+    final theme = Theme.of(context);
+    return ZonePolygonHelper.buildPolygons(
+      zones: controller.zoneList,
+      strokeColor: theme.primaryColor.withOpacity(0.45),
+      fillColor: theme.primaryColor.withOpacity(0.08),
     );
   }
 }

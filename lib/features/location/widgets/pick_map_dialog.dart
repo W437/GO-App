@@ -3,6 +3,7 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
 import 'package:godelivery_user/features/location/widgets/serach_location_widget.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -22,9 +23,11 @@ class PickMapDialog extends StatefulWidget {
   final String? route;
   final GoogleMapController? googleMapController;
   final Function(AddressModel address)? onPicked;
+  final bool showZonePolygons;
   const PickMapDialog({super.key,
     required this.fromSignUp, required this.fromAddAddress, required this.canRoute,
     required this.route, this.googleMapController, this.onPicked,
+    this.showZonePolygons = true,
   });
 
   @override
@@ -46,6 +49,11 @@ class _PickMapDialogState extends State<PickMapDialog> {
       Get.find<LocationController>().setPickData();
     }
     Get.find<LocationController>().makeLoadingOff();
+    if(widget.showZonePolygons) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.find<LocationController>().getZoneList();
+      });
+    }
     _initialPosition = LatLng(
       double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '0'),
       double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '0'),
@@ -104,6 +112,7 @@ class _PickMapDialogState extends State<PickMapDialog> {
                               zoom: _currentZoom,
                             ),
                             minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+                            polygons: _zonePolygons(locationController, context),
                             myLocationButtonEnabled: false,
                             zoomControlsEnabled: false,
                             myLocationEnabled: false,
@@ -210,6 +219,7 @@ class _PickMapDialogState extends State<PickMapDialog> {
                 zoom: 16,
               ),
               minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+              polygons: _zonePolygons(locationController, context),
               myLocationButtonEnabled: false,
               onMapCreated: (GoogleMapController mapController) {
                 _mapController = mapController;
@@ -265,6 +275,19 @@ class _PickMapDialogState extends State<PickMapDialog> {
 
         }),
       ),
+    );
+  }
+
+  Set<Polygon> _zonePolygons(LocationController controller, BuildContext context) {
+    if (!widget.showZonePolygons || controller.zoneList.isEmpty) {
+      return <Polygon>{};
+    }
+
+    final theme = Theme.of(context);
+    return ZonePolygonHelper.buildPolygons(
+      zones: controller.zoneList,
+      strokeColor: theme.primaryColor.withOpacity(0.45),
+      fillColor: theme.primaryColor.withOpacity(0.08),
     );
   }
 
