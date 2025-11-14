@@ -6,7 +6,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,28 +51,25 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                         Text('what_is_wrong_with_this_order'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
                         const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                              border: Border.all(color: Theme.of(context).disabledColor)),
-                          child: DropdownButton<String>(
-                            value: orderController.refundReasons![orderController.selectedReasonIndex],
-                            items: orderController.refundReasons!.map((String? items) {
-                              return DropdownMenuItem(value: items, child: Text(items!.tr));
-                            }).toList(),
-                            onChanged: (value){
-                              orderController.selectReason(orderController.refundReasons!.indexOf(value));
-                              if(_noteController.text.isNotEmpty){
-                                _noteController.text = '';
-                              }
-                              if(orderController.refundImage != null){
-                                orderController.pickRefundImage(true);
-                              }
-                            },
-                            isExpanded: true,
-                            underline: const SizedBox(),
-                          ),
+                        ModernInputFieldWidget<String>(
+                          inputFieldType: ModernInputType.dropdown,
+                          hintText: 'select_reason'.tr,
+                          selectedValue: orderController.refundReasons![orderController.selectedReasonIndex],
+                          dropdownItems: orderController.refundReasons!.map((String? items) {
+                            return DropdownItem<String>(
+                              value: items!,
+                              label: items.tr,
+                            );
+                          }).toList(),
+                          onDropdownChanged: (value){
+                            orderController.selectReason(orderController.refundReasons!.indexOf(value));
+                            if(_noteController.text.isNotEmpty){
+                              _noteController.text = '';
+                            }
+                            if(orderController.refundImage != null){
+                              orderController.pickRefundImage(true);
+                            }
+                          },
                         ),
                         const SizedBox(height: Dimensions.paddingSizeLarge),
 
@@ -82,7 +79,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
 
                           Container(
                             decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), border: Border.all(color: Theme.of(context).disabledColor)),
-                            child: CustomTextFieldWidget(
+                            child: ModernInputFieldWidget(
                               controller: _noteController,
                               hintText: 'ex_please_provide_any_note'.tr,
                               maxLines: 3,

@@ -5,7 +5,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -76,9 +76,8 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                 Text('add_fund_form_secured_digital_payment_gateways'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                CustomTextFieldWidget(
+                ModernInputFieldWidget(
                   hintText: 'enter_amount'.tr,
-                  showLabelText: false,
                   isAmount: true,
                   inputType: TextInputType.number,
                   focusNode: focusNode,

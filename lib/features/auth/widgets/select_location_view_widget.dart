@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/widgets/zone_selection_widget.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -96,15 +96,13 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
 
               SizedBox(height: widget.fromView ? Dimensions.paddingSizeOverLarge : 0),
 
-              widget.fromView && !isDesktop ? CustomTextFieldWidget(
-                titleText: 'write_restaurant_address'.tr,
+              widget.fromView && !isDesktop ? ModernInputFieldWidget(
                 controller: widget.addressController,
                 focusNode: widget.addressFocus,
                 inputAction: TextInputAction.done,
                 inputType: TextInputType.text,
                 capitalization: TextCapitalization.sentences,
                 maxLines: 3,
-                showTitle: isDesktop,
                 required: true,
                 labelText: 'restaurant_address'.tr,
                 validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_address_field_is_required".tr),

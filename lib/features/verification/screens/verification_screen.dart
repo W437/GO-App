@@ -189,7 +189,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                 child: PinCodeTextField(
                   length: 6,
                   appContext: context,
-                  keyboardType: TextInputType.number,
+                  inputType: TextInputType.number,
                   animationType: AnimationType.fade,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   separatorBuilder: (context, index) => const SizedBox(width: 8),

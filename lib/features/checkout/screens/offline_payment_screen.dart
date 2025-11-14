@@ -13,7 +13,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
 import 'package:flutter/material.dart';
@@ -171,8 +171,7 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
                           itemBuilder: (context, i) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                              child: CustomTextFieldWidget(
-                                titleText: methodInformation![i].customerPlaceholder!,
+                              child: ModernInputFieldWidget(
                                 labelText: methodInformation[i].customerPlaceholder!,
                                 controller: checkoutController.informationControllerList[i],
                                 focusNode: checkoutController.informationFocusList[i],
@@ -184,8 +183,7 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
                           },
                         ),
 
-                        CustomTextFieldWidget(
-                          titleText: 'write_your_note'.tr,
+                        ModernInputFieldWidget(
                           labelText: 'note'.tr,
                           controller: _customerNoteController,
                           focusNode: _customerNoteNode,

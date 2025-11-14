@@ -18,7 +18,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
@@ -127,7 +127,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                             child: Center(child: SizedBox(width: Dimensions.webMaxWidth, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                               const SizedBox(height: 70),
 
-                              CustomTextFieldWidget(
+                              ModernInputFieldWidget(
                                 titleText: 'enter_name'.tr,
                                 controller: _nameController,
                                 capitalization: TextCapitalization.words,
@@ -143,14 +143,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
                               !_isPhoneLoading ? Stack(
                                 children: [
-                                  CustomTextFieldWidget(
+                                  ModernInputFieldWidget(
                                     titleText: 'write_phone_number'.tr,
                                     controller: _phoneController,
                                     focusNode: _phoneFocus,
                                     inputType: TextInputType.phone,
                                     prefixIcon: CupertinoIcons.lock_fill,
-                                    isEnabled: !profileController.userInfoModel!.isPhoneVerified! || profileController.userInfoModel!.phone == null,
-                                    fromUpdateProfile: true,
+                                    enabled: !profileController.userInfoModel!.isPhoneVerified! || profileController.userInfoModel!.phone == null,
                                     labelText: 'phone'.tr,
                                     required: true,
                                     isPhone: true,
@@ -175,7 +174,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                               ) : Center(child: CircularProgressIndicator()),
                               const SizedBox(height: Dimensions.paddingSizeExtraOverLarge),
 
-                              CustomTextFieldWidget(
+                              ModernInputFieldWidget(
                                 titleText: 'enter_email'.tr,
                                 controller: _emailController,
                                 focusNode: _emailFocus,
@@ -371,7 +370,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         Row(children: [
 
                           Expanded(
-                            child: CustomTextFieldWidget(
+                            child: ModernInputFieldWidget(
                               titleText: 'enter_name'.tr,
                               controller: _nameController,
                               capitalization: TextCapitalization.words,
@@ -391,7 +390,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         Row(children: [
 
                           Expanded(
-                            child: CustomTextFieldWidget(
+                            child: ModernInputFieldWidget(
                               titleText: 'enter_email'.tr,
                               controller: _emailController,
                               focusNode: _emailFocus,
@@ -416,13 +415,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                           Expanded(
                             child: Stack(
                               children: [
-                                !_isPhoneLoading ? CustomTextFieldWidget(
+                                !_isPhoneLoading ? ModernInputFieldWidget(
                                   titleText: 'phone'.tr,
                                   controller: _phoneController,
                                   focusNode: _phoneFocus,
                                   inputType: TextInputType.phone,
-                                  isEnabled: !profileController.userInfoModel!.isPhoneVerified! || profileController.userInfoModel!.phone == null,
-                                  fromUpdateProfile: true,
+                                  enabled: !profileController.userInfoModel!.isPhoneVerified! || profileController.userInfoModel!.phone == null,
                                   labelText: 'phone'.tr,
                                   required: true,
                                   isPhone: true,

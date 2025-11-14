@@ -2,7 +2,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
@@ -389,7 +389,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         ),
         SizedBox(height: _otherSelect ? Dimensions.paddingSizeOverLarge : 0),
         
-        _otherSelect ? CustomTextFieldWidget(
+        _otherSelect ? ModernInputFieldWidget(
           hintText: 'ex_02'.tr,
           labelText: 'level_name'.tr,
           inputType: TextInputType.text,
@@ -397,11 +397,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           focusNode: _levelNode,
           nextFocus: _addressNode,
           capitalization: TextCapitalization.words,
-          showBorder: true,
         ) : const SizedBox(),
         const SizedBox(height: Dimensions.paddingSizeOverLarge),
         
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           hintText: 'delivery_address'.tr,
           labelText: 'delivery_address'.tr,
           required: true,
@@ -410,7 +409,6 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           nextFocus: _nameNode,
           controller: _addressController,
           onChanged: (text) => locationController.setPlaceMark(text),
-          showBorder: true,
         ),
         SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeOverLarge),
         
@@ -428,7 +426,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       padding: EdgeInsets.all(isDesktop ? Dimensions.paddingSizeOverLarge : 0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           hintText: 'ex_doe'.tr,
           labelText: 'name'.tr,
           required: true,
@@ -437,11 +435,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           focusNode: _nameNode,
           nextFocus: _numberNode,
           capitalization: TextCapitalization.words,
-          showBorder: true,
         ),
         const SizedBox(height: Dimensions.paddingSizeOverLarge),
         
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           hintText: 'xxx-xxx-xxxxx',
           labelText: 'phone'.tr,
           required: true,
@@ -457,7 +454,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         ),
         const SizedBox(height: Dimensions.paddingSizeOverLarge),
         
-        widget.forGuest ? CustomTextFieldWidget(
+        widget.forGuest ? ModernInputFieldWidget(
           hintText: 'enter_email'.tr,
           labelText: 'email'.tr,
           controller: _emailController,
@@ -467,7 +464,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         ) : const SizedBox(),
         SizedBox(height: widget.forGuest ? Dimensions.paddingSizeOverLarge : 0),
         
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           hintText: "ex_02".tr,
           labelText: 'street_number'.tr,
           inputType: TextInputType.streetAddress,
@@ -479,7 +476,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         
         Row(children: [
           Expanded(
-            child: CustomTextFieldWidget(
+            child: ModernInputFieldWidget(
               hintText: 'ex_1005/2'.tr,
               labelText: 'house'.tr,
               inputType: TextInputType.text,
@@ -489,9 +486,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             ),
           ),
           const SizedBox(width: Dimensions.paddingSizeLarge),
-          
+
           Expanded(
-            child: CustomTextFieldWidget(
+            child: ModernInputFieldWidget(
               hintText: 'ex_02'.tr,
               labelText: 'floor'.tr,
               inputType: TextInputType.text,

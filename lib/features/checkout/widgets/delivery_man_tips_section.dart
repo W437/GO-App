@@ -9,7 +9,7 @@ import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
@@ -125,8 +125,7 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
 
             widget.checkoutController.selectedTips == AppConstants.tips.length-1 ? Row(children: [
               Expanded(
-                child: CustomTextFieldWidget(
-                  titleText: 'enter_amount'.tr,
+                child: ModernInputFieldWidget(
                   controller: widget.checkoutController.tipController,
                   inputAction: TextInputAction.done,
                   inputType: TextInputType.number,

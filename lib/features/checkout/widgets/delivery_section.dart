@@ -12,7 +12,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/forms/custom_dropdown_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -159,7 +159,7 @@ class DeliverySection extends StatelessWidget {
 
           SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraLarge : Dimensions.paddingSizeLarge),
 
-          !ResponsiveHelper.isDesktop(context) ? CustomTextFieldWidget(
+          !ResponsiveHelper.isDesktop(context) ? ModernInputFieldWidget(
             hintText: 'write_street_number'.tr,
             labelText: 'street_number'.tr,
             inputType: TextInputType.streetAddress,
@@ -172,40 +172,37 @@ class DeliverySection extends StatelessWidget {
           Row(
             children: [
               ResponsiveHelper.isDesktop(context) ? Expanded(
-                child: CustomTextFieldWidget(
+                child: ModernInputFieldWidget(
                   hintText: 'write_street_number'.tr,
                   labelText: 'street_number'.tr,
                   inputType: TextInputType.streetAddress,
                   focusNode: checkoutController.streetNode,
                   nextFocus: checkoutController.houseNode,
                   controller: checkoutController.streetNumberController,
-                  showTitle: false,
                 ),
               ) : const SizedBox(),
               SizedBox(width: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeSmall : 0),
 
               Expanded(
-                child: CustomTextFieldWidget(
+                child: ModernInputFieldWidget(
                   hintText: 'write_house_number'.tr,
                   labelText: 'house'.tr,
                   inputType: TextInputType.text,
                   focusNode: checkoutController.houseNode,
                   nextFocus: checkoutController.floorNode,
                   controller: checkoutController.houseController,
-                  showTitle: false,
                 ),
               ),
               const SizedBox(width: Dimensions.paddingSizeSmall),
 
               Expanded(
-                child: CustomTextFieldWidget(
+                child: ModernInputFieldWidget(
                   hintText: 'write_floor_number'.tr,
                   labelText: 'floor'.tr,
                   inputType: TextInputType.text,
                   focusNode: checkoutController.floorNode,
                   inputAction: TextInputAction.done,
                   controller: checkoutController.floorController,
-                  showTitle: false,
                 ),
               ),
             ],

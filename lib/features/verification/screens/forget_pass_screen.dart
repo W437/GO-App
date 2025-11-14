@@ -16,7 +16,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -111,7 +111,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
 
                   Form(
                     key: _formKeyLogin,
-                    child: isPhone ? CustomTextFieldWidget(
+                    child: isPhone ? ModernInputFieldWidget(
                       titleText: 'xxx-xxx-xxxxx'.tr,
                       controller: _numberController,
                       focusNode: _numberFocusNode,
@@ -125,10 +125,9 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                       onSubmit: (text) => GetPlatform.isWeb ? _onPressedForgetPass(_countryDialCode!) : null,
                       labelText: 'phone'.tr,
                       validator: (value) => ValidateCheck.validateEmptyText(value, null),
-                    ) : CustomTextFieldWidget(
+                    ) : ModernInputFieldWidget(
                       titleText: 'enter_email'.tr,
                       labelText: 'email'.tr,
-                      showLabelText: true,
                       required: true,
                       controller: _emailController,
                       focusNode: _emailFocusNode,

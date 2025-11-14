@@ -11,7 +11,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -81,7 +81,7 @@ class _NewPassScreenState extends State<NewPassScreen> {
 
                     Column(children: [
 
-                      CustomTextFieldWidget(
+                      ModernInputFieldWidget(
                         hintText: '8+characters'.tr,
                         controller: _newPasswordController,
                         focusNode: _newPasswordFocus,
@@ -89,13 +89,12 @@ class _NewPassScreenState extends State<NewPassScreen> {
                         inputType: TextInputType.visiblePassword,
                         prefixIcon: Icons.lock,
                         isPassword: true,
-                        divider: false,
                         labelText: 'new_password'.tr,
                         validator: (value) => ValidateCheck.validateEmptyText(value, 'please_enter_new_password'.tr),
                       ),
                       const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                      CustomTextFieldWidget(
+                      ModernInputFieldWidget(
                         hintText: 're_enter_your_password'.tr,
                         controller: _confirmPasswordController,
                         focusNode: _confirmPasswordFocus,

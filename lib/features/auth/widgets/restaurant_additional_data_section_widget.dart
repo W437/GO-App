@@ -8,7 +8,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,14 +49,13 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
           bool showFile = restaurantRegiController.dataList![index].fieldType == 'file';
           return Padding(
             padding: EdgeInsets.only(bottom: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
-            child: showTextField ? CustomTextFieldWidget(
+            child: showTextField ? ModernInputFieldWidget(
               hintText: restaurantRegiController.dataList![index].placeholderData ?? '',
               controller: restaurantRegiController.additionalList![index],
               inputType: restaurantRegiController.dataList![index].fieldType == 'number' ? TextInputType.number
                   : restaurantRegiController.dataList![index].fieldType == 'phone' ? TextInputType.phone
                   : restaurantRegiController.dataList![index].fieldType == 'email' ? TextInputType.emailAddress
                   : TextInputType.text,
-              isRequired: restaurantRegiController.dataList![index].isRequired == 1,
               capitalization: TextCapitalization.words,
               required: restaurantRegiController.dataList![index].isRequired == 1,
               labelText: restaurantRegiController.dataList![index].placeholderData,

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/unified_header_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
@@ -94,10 +94,9 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                 Text('just_one_step_away'.tr, style: robotoMedium.copyWith(color: Theme.of(context).disabledColor), textAlign: TextAlign.center),
                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                CustomTextFieldWidget(
+                ModernInputFieldWidget(
                   hintText: 'enter_your_name'.tr,
                   labelText: 'user_name'.tr,
-                  showLabelText: true,
                   required: true,
                   controller: _nameController,
                   focusNode: _nameFocus,
@@ -105,15 +104,13 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   inputType: TextInputType.name,
                   capitalization: TextCapitalization.words,
                   prefixIcon: CupertinoIcons.person_alt_circle_fill,
-                  levelTextSize: Dimensions.fontSizeDefault,
                   validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_your_name".tr),
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                _isSocial ? CustomTextFieldWidget(
+                _isSocial ? ModernInputFieldWidget(
                   hintText: 'xxx-xxx-xxxxx'.tr,
                   labelText: 'phone'.tr,
-                  showLabelText: true,
                   required: true,
                   controller: _phoneController,
                   focusNode: _phoneFocus,
@@ -126,10 +123,9 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
                       : Get.find<LocalizationController>().locale.countryCode,
                   validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
-                ) : CustomTextFieldWidget(
+                ) : ModernInputFieldWidget(
                   hintText: 'enter_email_address'.tr,
                   labelText: 'email'.tr,
-                  showLabelText: true,
                   required: false,
                   controller: _emailController,
                   focusNode: _emailFocus,
@@ -140,18 +136,15 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                (Get.find<SplashController>().configModel!.refEarningStatus == 1 ) ? CustomTextFieldWidget(
+                (Get.find<SplashController>().configModel!.refEarningStatus == 1 ) ? ModernInputFieldWidget(
                   hintText: 'refer_code'.tr,
                   labelText: 'refer_code'.tr,
-                  showLabelText: true,
                   controller: _referCodeController,
                   focusNode: _referCodeFocus,
                   inputAction: TextInputAction.done,
                   inputType: TextInputType.text,
                   capitalization: TextCapitalization.words,
                   prefixImage : Images.referCode,
-                  divider: false,
-                  prefixSize: 14,
                 ) : const SizedBox(),
                 const SizedBox(height: Dimensions.paddingSizeExtraOverLarge),
 

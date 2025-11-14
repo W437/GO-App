@@ -8,7 +8,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -47,14 +47,13 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
           bool showFile = deliverymanController.dataList![index].fieldType == 'file';
           return Padding(
             padding: EdgeInsets.only(bottom: isDesktop ? Dimensions.paddingSizeOverLarge : Dimensions.paddingSizeSmall),
-            child: showTextField ? CustomTextFieldWidget(
+            child: showTextField ? ModernInputFieldWidget(
               hintText: deliverymanController.dataList![index].placeholderData ?? '',
               controller: deliverymanController.additionalList![index],
               inputType: deliverymanController.dataList![index].fieldType == 'number' ? TextInputType.number
                   : deliverymanController.dataList![index].fieldType == 'phone' ? TextInputType.phone
                   : deliverymanController.dataList![index].fieldType == 'email' ? TextInputType.emailAddress
                   : TextInputType.text,
-              isRequired: deliverymanController.dataList![index].isRequired == 1,
               capitalization: TextCapitalization.words,
               labelText: deliverymanController.dataList![index].placeholderData ?? '',
               required: deliverymanController.dataList![index].isRequired == 1,

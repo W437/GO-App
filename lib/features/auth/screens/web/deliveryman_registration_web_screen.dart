@@ -3,7 +3,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/common/widgets/web/web_screen_title_widget.dart';
@@ -120,7 +120,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
                               child: Column(children: [
 
                                 Row(children: [
-                                  Expanded(child: CustomTextFieldWidget(
+                                  Expanded(child: ModernInputFieldWidget(
                                     hintText: 'write_first_name'.tr,
                                     controller: widget.fNameController,
                                     capitalization: TextCapitalization.words,
@@ -134,7 +134,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
                                   )),
                                   const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
 
-                                  Expanded(child: CustomTextFieldWidget(
+                                  Expanded(child: ModernInputFieldWidget(
                                     hintText: 'write_last_name'.tr,
                                     controller: widget.lNameController,
                                     capitalization: TextCapitalization.words,
@@ -151,7 +151,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
 
                                 Row(children: [
                                   Expanded(
-                                    child: CustomTextFieldWidget(
+                                    child: ModernInputFieldWidget(
                                       hintText: 'phone'.tr,
                                       controller: widget.phoneController,
                                       focusNode: widget.phoneNode,
@@ -170,7 +170,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
                                   ),
                                   const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
 
-                                  Expanded(child:CustomTextFieldWidget(
+                                  Expanded(child:ModernInputFieldWidget(
                                     hintText: 'write_email'.tr,
                                     controller: widget.emailController,
                                     focusNode: widget.emailNode,
@@ -186,7 +186,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
 
                                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                   Expanded(child: Column(children: [
-                                    CustomTextFieldWidget(
+                                    ModernInputFieldWidget(
                                       hintText: '8+characters'.tr,
                                       controller: widget.passwordController,
                                       focusNode: widget.passwordNode,
@@ -215,7 +215,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
                                   ])),
                                   const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
 
-                                  Expanded(child: CustomTextFieldWidget(
+                                  Expanded(child: ModernInputFieldWidget(
                                     hintText: '8+characters'.tr,
                                     controller: widget.confirmPasswordController,
                                     focusNode: widget.confirmPasswordNode,
@@ -479,7 +479,7 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
                             const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
 
                             Expanded(
-                              child: CustomTextFieldWidget(
+                              child: ModernInputFieldWidget(
                                 hintText: widget.deliverymanController.identityTypeIndex == 0 ? 'Ex: XXXXX-XXXXXXX-X'
                                     : widget.deliverymanController.identityTypeIndex == 1 ? 'L-XXX-XXX-XXX-XXX.' : 'XXX-XXXXX',
                                 controller: widget.identityNumberController,

@@ -9,7 +9,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -56,9 +56,7 @@ class DeliveryInfoFields extends StatelessWidget {
               padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
               child: Column(children: [
                 const SizedBox(height: Dimensions.paddingSizeSmall),
-                CustomTextFieldWidget(
-                  showTitle: false,
-                  // titleText: 'contact_person_name'.tr,
+                ModernInputFieldWidget(
                   hintText: 'enter_your_name'.tr,
                   inputType: TextInputType.name,
                   controller: guestNameTextEditingController,
@@ -68,9 +66,7 @@ class DeliveryInfoFields extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                CustomTextFieldWidget(
-                  // showTitle: true,
-                  // titleText: 'contact_person_number'.tr,
+                ModernInputFieldWidget(
                   labelText: 'contact_person_number'.tr,
                   hintText: 'xxx-xxx-xxxxx'.tr,
                   controller: guestNumberTextEditingController,
@@ -85,8 +81,7 @@ class DeliveryInfoFields extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                CustomTextFieldWidget(
-                  // showTitle: true,
+                ModernInputFieldWidget(
                   labelText: 'email'.tr,
                   hintText: 'enter_email'.tr,
                   controller: guestEmailController,

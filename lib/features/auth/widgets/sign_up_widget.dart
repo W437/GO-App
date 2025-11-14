@@ -22,7 +22,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -98,10 +98,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
 
                   Row(children: [
                     Expanded(
-                      child: CustomTextFieldWidget(
+                      child: ModernInputFieldWidget(
                         hintText: 'ex_jhon'.tr,
                         labelText: 'user_name'.tr,
-                        showLabelText: true,
                         required: true,
                         controller: _nameController,
                         focusNode: _nameFocus,
@@ -117,18 +116,15 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     (Get.find<SplashController>().configModel!.refEarningStatus == 1 && isDesktop) ? Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(bottom: _isReferFieldGap ? Dimensions.paddingSizeLarge + 1 : 0),
-                        child: CustomTextFieldWidget(
+                        child: ModernInputFieldWidget(
                           hintText: 'refer_code'.tr,
                           labelText: 'refer_code'.tr,
-                          showLabelText: true,
                           controller: _referCodeController,
                           focusNode: _referCodeFocus,
                           nextFocus: isDesktop ? _emailFocus : _phoneFocus,
                           inputType: TextInputType.text,
                           capitalization: TextCapitalization.words,
                           prefixImage : Images.referCode,
-                          divider: false,
-                          prefixSize: 14,
                         ),
                       ),
                     ) : const SizedBox(),
@@ -137,10 +133,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
 
                   Row(children: [
                     isDesktop ? Expanded(
-                      child: CustomTextFieldWidget(
+                      child: ModernInputFieldWidget(
                         hintText: 'enter_email'.tr,
                         labelText: 'email'.tr,
-                        showLabelText: true,
                         required: true,
                         controller: _emailController,
                         focusNode: _emailFocus,
@@ -153,10 +148,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     SizedBox(width: isDesktop ? Dimensions.paddingSizeSmall : 0),
 
                     Expanded(
-                      child: CustomTextFieldWidget(
+                      child: ModernInputFieldWidget(
                         hintText: 'xxx-xxx-xxxxx'.tr,
                         labelText: 'phone'.tr,
-                        showLabelText: true,
                         required: true,
                         controller: _phoneController,
                         focusNode: _phoneFocus,
@@ -175,10 +169,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
                   ]),
                 SizedBox(height: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
 
-                  !isDesktop ? CustomTextFieldWidget(
+                  !isDesktop ? ModernInputFieldWidget(
                     labelText: 'email'.tr,
                     hintText: 'enter_email'.tr,
-                    showLabelText: true,
                     required: true,
                     controller: _emailController,
                     focusNode: _emailFocus,
@@ -186,17 +179,15 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     inputType: TextInputType.emailAddress,
                     prefixIcon: CupertinoIcons.mail_solid,
                     validator: (value) => ValidateCheck.validateEmail(value),
-                    divider: false,
                   ) : const SizedBox(),
                   SizedBox(height: !isDesktop ? Dimensions.paddingSizeLarge : 0),
 
                   Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Expanded(
                       child: Column(children: [
-                        CustomTextFieldWidget(
+                        ModernInputFieldWidget(
                           hintText: '8+characters'.tr,
                           labelText: 'password'.tr,
-                          showLabelText: true,
                           required: true,
                           controller: _passwordController,
                           focusNode: _passwordFocus,
@@ -210,10 +201,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     ),
                     SizedBox(width: isDesktop ? Dimensions.paddingSizeSmall : 0),
 
-                    isDesktop ? Expanded(child: CustomTextFieldWidget(
+                    isDesktop ? Expanded(child: ModernInputFieldWidget(
                       hintText: 're_enter_your_password'.tr,
                       labelText: 'confirm_password'.tr,
-                      showLabelText: true,
                       required: true,
                       controller: _confirmPasswordController,
                       focusNode: _confirmPasswordFocus,
@@ -229,10 +219,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
                   ]),
                 SizedBox(height: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
 
-                  !isDesktop ? CustomTextFieldWidget(
+                  !isDesktop ? ModernInputFieldWidget(
                     hintText: 're_enter_your_password'.tr,
                     labelText: 'confirm_password'.tr,
-                    showLabelText: true,
                     required: true,
                     controller: _confirmPasswordController,
                     focusNode: _confirmPasswordFocus,
@@ -247,18 +236,15 @@ class SignUpWidgetState extends State<SignUpWidget> {
                   SizedBox(height: !isDesktop ? Dimensions.paddingSizeLarge : 0),
 
 
-                  (Get.find<SplashController>().configModel!.refEarningStatus == 1 && !isDesktop) ? CustomTextFieldWidget(
+                  (Get.find<SplashController>().configModel!.refEarningStatus == 1 && !isDesktop) ? ModernInputFieldWidget(
                     hintText: 'refer_code'.tr,
                     labelText: 'refer_code'.tr,
-                    showLabelText: true,
                     controller: _referCodeController,
                     focusNode: _referCodeFocus,
                     inputAction: TextInputAction.done,
                     inputType: TextInputType.text,
                     capitalization: TextCapitalization.words,
                     prefixImage : Images.referCode,
-                    divider: false,
-                    prefixSize: 14,
                   ) : const SizedBox(),
                   SizedBox(height: (Get.find<SplashController>().configModel!.refEarningStatus == 1 && !isDesktop) ? Dimensions.paddingSizeLarge : 0),
 

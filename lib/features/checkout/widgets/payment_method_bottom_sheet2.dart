@@ -1,5 +1,5 @@
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/widgets/offline_payment_button.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
@@ -285,9 +285,8 @@ class _PaymentMethodBottomSheet2State extends State<PaymentMethodBottomSheet2> {
             Text('specify_the_amount_of_change_the_deliveryman_needs_to_bring_when_delivering_the_order'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
             const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-            CustomTextFieldWidget(
+            ModernInputFieldWidget(
               hintText: 'amount'.tr,
-              showLabelText: false,
               inputType: TextInputType.number,
               isAmount: true,
               inputAction: TextInputAction.done,

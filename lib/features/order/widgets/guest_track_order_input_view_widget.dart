@@ -12,7 +12,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -101,7 +101,7 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
 
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
-                    child: CustomTextFieldWidget(
+                    child: ModernInputFieldWidget(
                     titleText: 'order_id'.tr,
                     hintText: '',
                     controller: _orderIdController,
@@ -119,7 +119,7 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
 
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
-                    child: CustomTextFieldWidget(
+                    child: ModernInputFieldWidget(
                     titleText: 'enter_phone_number'.tr,
                     hintText: '',
                     controller: _phoneNumberController,

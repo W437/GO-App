@@ -26,7 +26,7 @@ import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_ba
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/forms/custom_dropdown_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -256,8 +256,7 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                               child: Column(children: [
                                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                                CustomTextFieldWidget(
-                                  titleText: 'write_first_name'.tr,
+                                ModernInputFieldWidget(
                                   controller: _fNameController,
                                   capitalization: TextCapitalization.words,
                                   inputType: TextInputType.name,
@@ -270,8 +269,7 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                                 ),
                                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                CustomTextFieldWidget(
-                                  titleText: 'write_last_name'.tr,
+                                ModernInputFieldWidget(
                                   controller: _lNameController,
                                   capitalization: TextCapitalization.words,
                                   inputType: TextInputType.name,
@@ -284,8 +282,7 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                                 ),
                                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                CustomTextFieldWidget(
-                                  titleText: ResponsiveHelper.isDesktop(context) ? 'phone'.tr : 'write_phone_number'.tr,
+                                ModernInputFieldWidget(
                                   controller: _phoneController,
                                   focusNode: _phoneNode,
                                   nextFocus: _emailNode,
@@ -302,8 +299,7 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                                 ),
                                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                CustomTextFieldWidget(
-                                  titleText: 'write_email'.tr,
+                                ModernInputFieldWidget(
                                   controller: _emailController,
                                   focusNode: _emailNode,
                                   nextFocus: _passwordNode,
@@ -315,8 +311,7 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                                 ),
                                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                CustomTextFieldWidget(
-                                  titleText: '8+characters'.tr,
+                                ModernInputFieldWidget(
                                   controller: _passwordController,
                                   focusNode: _passwordNode,
                                   nextFocus: _confirmPasswordNode,
@@ -343,8 +338,7 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                                 deliverymanController.showPassView ? const PassViewWidget() : const SizedBox(),
                                 const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                CustomTextFieldWidget(
-                                  titleText: '8+characters'.tr,
+                                ModernInputFieldWidget(
                                   hintText: '',
                                   controller: _confirmPasswordController,
                                   focusNode: _confirmPasswordNode,
@@ -516,16 +510,14 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                               ),
                               const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                              CustomTextFieldWidget(
-                                titleText: deliverymanController.identityTypeIndex == 0 ? 'Ex: XXXXX-XXXXXXX-X'
-                                    : deliverymanController.identityTypeIndex == 1 ? 'L-XXX-XXX-XXX-XXX.' : 'XXX-XXXXX',
+                              ModernInputFieldWidget(
+                                hintText: deliverymanController.identityTypeIndex == 1 ? 'L-XXX-XXX-XXX-XXX.' : 'XXX-XXXXX',
                                 controller: _identityNumberController,
                                 focusNode: _identityNumberNode,
                                 inputAction: TextInputAction.done,
                                 labelText: 'identity_number'.tr,
                                 required: true,
-                                isEnabled: deliverymanController.identityTypeIndex != 0,
-                                fromDeliveryRegistration: true,
+                                enabled: deliverymanController.identityTypeIndex != 0,
                                 validator: (value) => ValidateCheck.validateEmptyText(value, "identity_number_field_is_required".tr),
                               ),
                               const SizedBox(height: Dimensions.paddingSizeOverLarge),

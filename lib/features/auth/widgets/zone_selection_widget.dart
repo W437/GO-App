@@ -1,6 +1,6 @@
 import 'package:godelivery_user/features/auth/controllers/restaurant_registration_controller.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_dropdown_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -13,53 +13,22 @@ class ZoneSelectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return restaurantRegController.zoneIds != null ? Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-            color: Theme.of(context).cardColor,
-            border: Border.all(color: Theme.of(context).disabledColor, width: 0.3)
-          ),
-          child: CustomDropdown<int>(
-            onChange: (int? value, int index) {
-              restaurantRegController.setZoneIndex(value);
-              callBack();
-            },
-            dropdownButtonStyle: DropdownButtonStyle(
-              height: 50,
-              padding: const EdgeInsets.symmetric(
-                vertical: Dimensions.paddingSizeExtraSmall,
-                horizontal: Dimensions.paddingSizeExtraSmall,
-              ),
-              primaryColor: Theme.of(context).textTheme.bodyLarge!.color,
-            ),
-            iconColor: Theme.of(context).textTheme.bodyMedium!.color,
-            dropdownStyle: DropdownStyle(
-              elevation: 10,
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-              padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-            ),
-            items: zoneList,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(restaurantRegController.zoneList![restaurantRegController.selectedZoneIndex!].name!.tr),
-            ),
-          ),
-        ),
-
-        Positioned(
-          left: 10, top: -15,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-            ),
-            padding: const EdgeInsets.all(5),
-            child: Text('select_zone'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
-          ),
-        ),
-      ],
+    return restaurantRegController.zoneIds != null ? ModernInputFieldWidget<int>(
+      inputFieldType: ModernInputType.dropdown,
+      labelText: 'select_zone'.tr,
+      hintText: 'select_zone'.tr,
+      required: true,
+      selectedValue: restaurantRegController.selectedZoneIndex,
+      dropdownItems: restaurantRegController.zoneList!.asMap().entries.map((entry) {
+        return DropdownItem<int>(
+          value: entry.key,
+          label: entry.value.name!.tr,
+        );
+      }).toList(),
+      onDropdownChanged: (value) {
+        restaurantRegController.setZoneIndex(value);
+        callBack();
+      },
     ) : Center(child: Text('service_not_available_in_this_area'.tr));
   }
 }

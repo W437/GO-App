@@ -1,4 +1,4 @@
-import 'package:godelivery_user/common/widgets/shared/text/my_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/features/product/domain/models/review_body_model.dart';
 import 'package:godelivery_user/features/review/controllers/review_controller.dart';
@@ -78,7 +78,7 @@ class _DeliveryManReviewWidgetState extends State<DeliveryManReviewWidget> {
               ),
               const SizedBox(height: Dimensions.paddingSizeLarge),
 
-              MyTextFieldWidget(
+              ModernInputFieldWidget(
                 maxLines: 5,
                 capitalization: TextCapitalization.sentences,
                 controller: _controller,

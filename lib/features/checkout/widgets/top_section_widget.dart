@@ -19,7 +19,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
@@ -258,10 +258,9 @@ class TopSectionWidget extends StatelessWidget {
               Text('additional_note'.tr, style: robotoMedium),
               const SizedBox(height: Dimensions.paddingSizeSmall),
 
-              CustomTextFieldWidget(
+              ModernInputFieldWidget(
                 controller: checkoutController.noteController,
                 hintText: 'share_any_specific_delivery_details_here'.tr,
-                showLabelText: false,
                 maxLines: 3,
                 inputType: TextInputType.multiline,
                 inputAction: TextInputAction.done,

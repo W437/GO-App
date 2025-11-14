@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/widgets/sign_up_widget.dart';
@@ -45,7 +45,7 @@ class ManualLoginWidget extends StatelessWidget {
         ),
         const SizedBox(height: Dimensions.paddingSizeDefault),
 
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           onCountryChanged: (countryCode) => authController.countryDialCode = countryCode.dialCode!,
           countryDialCode: authController.isNumberLogin ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code : null,
           labelText: 'email_or_phone'.tr,
@@ -82,7 +82,7 @@ class ManualLoginWidget extends StatelessWidget {
 
         const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           hintText: '8_character'.tr,
           controller: passwordController,
           focusNode: passwordFocus,
@@ -203,7 +203,7 @@ class ManualLoginWidget extends StatelessWidget {
             ),
             const SizedBox(height: Dimensions.paddingSizeDefault),
 
-            CustomTextFieldWidget(
+            ModernInputFieldWidget(
               onCountryChanged: (countryCode) => authController.countryDialCode = countryCode.dialCode!,
               countryDialCode: authController.isNumberLogin ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code : null,
               labelText: 'email_or_phone'.tr,
@@ -243,7 +243,7 @@ class ManualLoginWidget extends StatelessWidget {
             ),
             const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-            CustomTextFieldWidget(
+            ModernInputFieldWidget(
               hintText: '8_character'.tr,
               controller: passwordController,
               focusNode: passwordFocus,

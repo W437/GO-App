@@ -10,7 +10,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -85,7 +85,7 @@ class _WalletBottomSheetState extends State<LoyaltyBottomSheetWidget> {
                 key: _amountFormKey,
                 child: SizedBox(
                   width: ResponsiveHelper.isDesktop(context) ? 260 : null,
-                  child: CustomTextFieldWidget(
+                  child: ModernInputFieldWidget(
                     hintText: 'enter_point'.tr,
                     labelText: 'point'.tr,
                     controller: _amountController,
@@ -94,6 +94,7 @@ class _WalletBottomSheetState extends State<LoyaltyBottomSheetWidget> {
                     textAlign: TextAlign.start,
                     required: true,
                     validator: (value) => ValidateCheck.loyaltyCheck(value, minimumExchangePoint, Get.find<ProfileController>().userInfoModel!.loyaltyPoint),
+                    isNumber: true,
                   ),
                 ),
               ),

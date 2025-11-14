@@ -2,7 +2,7 @@
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +27,7 @@ class ContactInfoWidget extends StatelessWidget {
         Text('contact_info'.tr, style: robotoMedium),
         SizedBox(height: Dimensions.paddingSizeSmall),
 
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           controller: guestNameTextEditingController,
           hintText: 'name'.tr,
           labelText: 'name'.tr,
@@ -36,7 +36,7 @@ class ContactInfoWidget extends StatelessWidget {
         ),
         SizedBox(height: Dimensions.paddingSizeLarge),
 
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           controller: guestNumberTextEditingController,
           hintText: 'enter_phone_number'.tr,
           labelText: 'phone'.tr,
@@ -46,7 +46,7 @@ class ContactInfoWidget extends StatelessWidget {
         ),
         SizedBox(height: Dimensions.paddingSizeLarge),
 
-        CustomTextFieldWidget(
+        ModernInputFieldWidget(
           controller: guestEmailController,
           hintText: 'enter_email_address'.tr,
           labelText: 'email'.tr,

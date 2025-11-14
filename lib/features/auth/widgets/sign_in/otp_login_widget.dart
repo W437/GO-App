@@ -3,7 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/widgets/social_login_widget.dart';
@@ -54,7 +54,7 @@ class OtpLoginWidget extends StatelessWidget {
           const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
           // Phone number field
-          CustomTextFieldWidget(
+          ModernInputFieldWidget(
             hintText: '555-123-4567',
             controller: phoneController,
             focusNode: phoneFocus,

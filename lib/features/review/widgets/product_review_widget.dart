@@ -7,7 +7,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/text/my_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -114,10 +114,10 @@ class _ProductReviewWidgetState extends State<ProductReviewWidget> {
                   style: robotoMedium.copyWith(color: Theme.of(context).disabledColor), overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
-                MyTextFieldWidget(
+                ModernInputFieldWidget(
                   maxLines: 3,
                   capitalization: TextCapitalization.sentences,
-                  isEnabled: !reviewController.submitList[index],
+                  enabled: !reviewController.submitList[index],
                   hintText: 'write_your_review_here'.tr,
                   fillColor: Theme.of(context).disabledColor.withValues(alpha: 0.05),
                   onChanged: (text) => reviewController.setReview(index, text),

@@ -34,7 +34,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/forms/custom_text_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
@@ -242,8 +242,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                       child: Divider(height: 0),
                                     ),
 
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_restaurant_name'.tr,
+                                    ModernInputFieldWidget(
                                       controller: _nameController[_tabController!.index],
                                       focusNode: _nameFocus[_tabController!.index],
                                       nextFocus: _tabController!.index != _languageList!.length-1 ? _addressFocus[_tabController!.index] : _addressFocus[0],
@@ -493,7 +492,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                                    CustomTextFieldWidget(
+                                    ModernInputFieldWidget(
                                       hintText: 'taxpayer_identification_number_tin'.tr,
                                       labelText: 'tin'.tr,
                                       controller: _tinNumberController,
@@ -735,28 +734,24 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_first_name'.tr,
+                                    ModernInputFieldWidget(
                                       controller: _fNameController,
                                       focusNode: _fNameFocus,
                                       nextFocus: _lNameFocus,
                                       inputType: TextInputType.name,
                                       capitalization: TextCapitalization.words,
                                       prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                                      iconSize: 25,
                                       required: true,
                                       labelText: 'first_name'.tr,
                                       validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
                                     ),
                                     const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_last_name'.tr,
+                                    ModernInputFieldWidget(
                                       controller: _lNameController,
                                       focusNode: _lNameFocus,
                                       nextFocus: _phoneFocus,
                                       prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                                      iconSize: 25,
                                       inputType: TextInputType.name,
                                       capitalization: TextCapitalization.words,
                                       required: true,
@@ -765,14 +760,12 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                     ),
                                     const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                    CustomTextFieldWidget(
-                                      titleText: ResponsiveHelper.isDesktop(context) ? 'phone'.tr : 'enter_phone_number'.tr,
+                                    ModernInputFieldWidget(
                                       controller: _phoneController,
                                       focusNode: _phoneFocus,
                                       nextFocus: _emailFocus,
                                       inputType: TextInputType.phone,
                                       isPhone: true,
-                                      showTitle: ResponsiveHelper.isDesktop(context),
                                       onCountryChanged: (CountryCode countryCode) {
                                         _countryDialCode = countryCode.dialCode;
                                       },
@@ -784,14 +777,12 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                     ),
                                     const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_email'.tr,
+                                    ModernInputFieldWidget(
                                       controller: _emailController,
                                       focusNode: _emailFocus,
                                       nextFocus: _passwordFocus,
                                       inputType: TextInputType.emailAddress,
                                       prefixIcon: Icons.email,
-                                      iconSize: 25,
                                       required: true,
                                       labelText: 'email'.tr,
                                       validator: (value) => ValidateCheck.validateEmail(value),
@@ -800,14 +791,12 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
                                     GetBuilder<DeliverymanRegistrationController>(builder: (deliverymanRegiController) {
                                       return Column(children: [
-                                        CustomTextFieldWidget(
-                                          titleText: '8+characters'.tr,
+                                        ModernInputFieldWidget(
                                           controller: _passwordController,
                                           focusNode: _passwordFocus,
                                           nextFocus: _confirmPasswordFocus,
                                           inputType: TextInputType.visiblePassword,
                                           prefixIcon: Icons.lock,
-                                          iconSize: 25,
                                           isPassword: true,
                                           onChanged: (value){
                                             if(value != null && value.isNotEmpty){
@@ -832,14 +821,12 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
                                     const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                                    CustomTextFieldWidget(
-                                      titleText: '8+characters'.tr,
+                                    ModernInputFieldWidget(
                                       controller: _confirmPasswordController,
                                       focusNode: _confirmPasswordFocus,
                                       inputType: TextInputType.visiblePassword,
                                       inputAction: TextInputAction.done,
                                       prefixIcon: Icons.lock,
-                                      iconSize: 25,
                                       isPassword: true,
                                       required: true,
                                       labelText: 'confirm_password'.tr,
@@ -1001,7 +988,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                     Expanded(
                       child: Column( children: [
                         const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-                        CustomTextFieldWidget(
+                        ModernInputFieldWidget(
                           hintText: 'write_restaurant_name'.tr,
                           controller: _nameController[_tabController!.index],
                           focusNode: _nameFocus[_tabController!.index],
@@ -1015,7 +1002,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                         ),
                         const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                        CustomTextFieldWidget(
+                        ModernInputFieldWidget(
                           hintText: 'write_restaurant_address'.tr,
                           controller: _addressController[0],
                           focusNode: _addressFocus[0],
@@ -1249,7 +1236,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
 
-                        CustomTextFieldWidget(
+                        ModernInputFieldWidget(
                           hintText: 'taxpayer_identification_number_tin'.tr,
                           labelText: 'tin'.tr,
                           controller: _tinNumberController,
@@ -1491,7 +1478,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                   const SizedBox(height: Dimensions.paddingSizeLarge),
 
                   Row(children: [
-                    Expanded(child: CustomTextFieldWidget(
+                    Expanded(child: ModernInputFieldWidget(
                       hintText: 'write_first_name'.tr,
                       controller: _fNameController,
                       focusNode: _fNameFocus,
@@ -1499,21 +1486,19 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                       inputType: TextInputType.name,
                       capitalization: TextCapitalization.words,
                       prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                      iconSize: 25,
                       required: true,
                       labelText: 'first_name'.tr,
                       validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
                     )),
                     const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
 
-                    Expanded(child: CustomTextFieldWidget(
+                    Expanded(child: ModernInputFieldWidget(
                       hintText: 'write_last_name'.tr,
                       controller: _lNameController,
                       focusNode: _lNameFocus,
                       nextFocus: _phoneFocus,
                       inputType: TextInputType.name,
                       prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                      iconSize: 25,
                       capitalization: TextCapitalization.words,
                       required: true,
                       labelText: 'last_name'.tr,
@@ -1522,7 +1507,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                     const SizedBox(width: Dimensions.paddingSizeLarge),
 
                     Expanded(
-                      child: CustomTextFieldWidget(
+                      child: ModernInputFieldWidget(
                         hintText: ResponsiveHelper.isDesktop(context) ? 'phone'.tr : 'enter_phone_number'.tr,
                         controller: _phoneController,
                         focusNode: _phoneFocus,
@@ -1563,14 +1548,13 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
                   Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Expanded(
-                      child: CustomTextFieldWidget(
+                      child: ModernInputFieldWidget(
                         hintText: 'write_email'.tr,
                         controller: _emailController,
                         focusNode: _emailFocus,
                         nextFocus: _passwordFocus,
                         inputType: TextInputType.emailAddress,
                         prefixIcon: Icons.email,
-                        iconSize: 25,
                         required: true,
                         labelText: 'email'.tr,
                         validator: (value) => ValidateCheck.validateEmail(value),
@@ -1581,14 +1565,13 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                     Expanded(
                       child: GetBuilder<DeliverymanRegistrationController>(builder: (deliverymanRegiController) {
                         return Column(children: [
-                          CustomTextFieldWidget(
+                          ModernInputFieldWidget(
                             hintText: '8+characters'.tr,
                             controller: _passwordController,
                             focusNode: _passwordFocus,
                             nextFocus: _confirmPasswordFocus,
                             inputType: TextInputType.visiblePassword,
                             prefixIcon: Icons.lock,
-                            iconSize: 25,
                             isPassword: true,
                             onChanged: (value){
                               if(value != null && value.isNotEmpty){
@@ -1613,14 +1596,12 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                     ),
                     const SizedBox(width: Dimensions.paddingSizeLarge),
 
-                    Expanded(child: CustomTextFieldWidget(
-                      titleText: '8+characters'.tr,
+                    Expanded(child: ModernInputFieldWidget(
                       controller: _confirmPasswordController,
                       focusNode: _confirmPasswordFocus,
                       inputType: TextInputType.visiblePassword,
                       inputAction: TextInputAction.done,
                       prefixIcon: Icons.lock,
-                      iconSize: 25,
                       isPassword: true,
                       required: true,
                       labelText: 'confirm_password'.tr,
