@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
 /// Reusable draggable bottom sheet with handle and close button
@@ -30,45 +29,25 @@ class _DraggableBottomSheetWidgetState extends State<DraggableBottomSheetWidget>
       minChildSize: widget.minChildSize,
       maxChildSize: widget.maxChildSize,
       builder: (context, scrollController) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(Dimensions.radiusExtraLarge),
+            topRight: Radius.circular(Dimensions.radiusExtraLarge),
           ),
         ),
         child: Column(
           children: [
-            // Top section with handle and close button
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Dimensions.paddingSizeDefault,
-                vertical: Dimensions.paddingSizeDefault,
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Drag handle centered
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).hintColor.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  // Close button on the right
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: RoundedIconButtonWidget(
-                      icon: Icons.close,
-                      onPressed: () => Navigator.of(context).pop(),
-                      backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
-                      pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
-                      iconColor: Theme.of(context).textTheme.bodyLarge!.color,
-                    ),
-                  ),
-                ],
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).hintColor.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
 
@@ -83,7 +62,7 @@ class _DraggableBottomSheetWidgetState extends State<DraggableBottomSheetWidget>
   }
 }
 
-/// Helper function to show the draggable bottom sheet
+/// Helper function to show the draggable bottom sheet with smooth bounce animation
 void showDraggableBottomSheet({
   required BuildContext context,
   required Widget child,
@@ -98,9 +77,11 @@ void showDraggableBottomSheet({
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _WrapContentBottomSheet(
-        maxChildSize: maxChildSize,
-        child: child,
+      builder: (context) => _BounceWrapper(
+        child: _WrapContentBottomSheet(
+          maxChildSize: maxChildSize,
+          child: child,
+        ),
       ),
     );
   } else {
@@ -108,12 +89,62 @@ void showDraggableBottomSheet({
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableBottomSheetWidget(
-        initialChildSize: initialChildSize ?? 0.9,
-        minChildSize: minChildSize,
-        maxChildSize: maxChildSize,
-        child: child,
+      builder: (context) => _BounceWrapper(
+        child: DraggableBottomSheetWidget(
+          initialChildSize: initialChildSize ?? 0.9,
+          minChildSize: minChildSize,
+          maxChildSize: maxChildSize,
+          child: child,
+        ),
       ),
+    );
+  }
+}
+
+/// Wrapper widget that adds bounce animation to bottom sheet
+class _BounceWrapper extends StatefulWidget {
+  final Widget child;
+
+  const _BounceWrapper({required this.child});
+
+  @override
+  State<_BounceWrapper> createState() => _BounceWrapperState();
+}
+
+class _BounceWrapperState extends State<_BounceWrapper> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, 1),
+        end: Offset.zero,
+      ).animate(_animation),
+      child: widget.child,
     );
   }
 }
@@ -138,45 +169,29 @@ class _WrapContentBottomSheetState extends State<_WrapContentBottomSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * widget.maxChildSize,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(Dimensions.radiusExtraLarge),
+          topRight: Radius.circular(Dimensions.radiusExtraLarge),
         ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Top section with handle and close button
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Drag handle centered
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                // Close button on the right
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: RoundedIconButtonWidget(
-                    icon: Icons.close,
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              ],
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall),
+              decoration: BoxDecoration(
+                color: Theme.of(context).hintColor.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
+
           // Content
           Flexible(
             child: widget.child,

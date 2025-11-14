@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
                         const TodayTrendsViewWidget(),
 
-                        LocationBannerViewWidget(),
+                        // LocationBannerViewWidget(),
 
                         const HighlightWidgetView(),
 

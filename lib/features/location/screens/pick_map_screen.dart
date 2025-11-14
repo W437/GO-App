@@ -7,6 +7,7 @@ import 'package:godelivery_user/features/location/controllers/location_controlle
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
+import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -128,9 +129,11 @@ class _PickMapScreenState extends State<PickMapScreen> {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                                 colors: [
-                                  Colors.black.withOpacity(0.35),
+                                  Colors.black.withOpacity(0.95),
+                                  Colors.black.withOpacity(0.4),
                                   Colors.black.withOpacity(0.0),
                                 ],
+                                stops: const [0.0, 0.6, 1.0],
                               ),
                             ),
                           ),
@@ -276,39 +279,48 @@ class _PickMapScreenState extends State<PickMapScreen> {
   }
 
   void _showZoneSelectionActionSheet(BuildContext context) {
-    final double bottomInset = MediaQuery.of(context).viewPadding.bottom;
-    showDraggableBottomSheet(
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 350),
+      vsync: Navigator.of(context),
+    );
+
+    final curvedAnimation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOutBack,
+    );
+
+    controller.forward();
+
+    showModalBottomSheet(
       context: context,
-      wrapContent: true,
-      maxChildSize: 0.7,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            Dimensions.paddingSizeDefault,
-            Dimensions.paddingSizeSmall,
-            Dimensions.paddingSizeDefault,
-            Dimensions.paddingSizeLarge + bottomInset,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'select_delivery_zone'.tr,
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeLarge,
-                  color: Theme.of(context).textTheme.bodyLarge!.color,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      transitionAnimationController: controller,
+      builder: (context) => LocationSelectionSheet(
+        onUseCurrentLocation: () {
+          _checkPermission(() {
+            Get.back();
+            Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
+          });
+        },
+        onLocationSelected: (address) {
+          Get.back();
+          if (_mapController != null) {
+            _mapController!.moveCamera(CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: LatLng(
+                  double.parse(address.latitude ?? '0'),
+                  double.parse(address.longitude ?? '0'),
                 ),
+                zoom: 16,
               ),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-              const Flexible(
-                child: ZoneListWidget(isBottomSheet: false),
-              ),
-              const SizedBox(height: Dimensions.paddingSizeLarge),
-            ],
-          ),
-        ),
+            ));
+          }
+        },
+        onAddNewLocation: () {
+          Get.back();
+          // Keep the current map screen - user can pick location on map
+        },
       ),
     );
   }

@@ -94,30 +94,15 @@ class ZoneListWidget extends StatelessWidget {
                           isBottomSheet ? Dimensions.paddingSizeDefault : 0,
                           isBottomSheet ? Dimensions.paddingSizeLarge : 0,
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                            border: Border.all(
-                              color: Theme.of(context).dividerColor.withOpacity(0.2),
-                            ),
-                          ),
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            physics: isBottomSheet ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
-                            padding: EdgeInsets.zero,
-                            itemCount: locationController.zoneList.length,
-                            separatorBuilder: (context, index) => Divider(
-                              height: 1,
-                              thickness: 1,
-                              indent: 44,
-                              color: Theme.of(context).dividerColor.withOpacity(0.2),
-                            ),
-                            itemBuilder: (context, index) {
-                              ZoneListModel zone = locationController.zoneList[index];
-                              return _buildZoneListItem(context, zone, locationController, index, locationController.zoneList.length);
-                            },
-                          ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: isBottomSheet ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: locationController.zoneList.length,
+                          itemBuilder: (context, index) {
+                            ZoneListModel zone = locationController.zoneList[index];
+                            return _buildZoneListItem(context, zone, locationController, index, locationController.zoneList.length);
+                          },
                         ),
                       ),
           ),
@@ -316,29 +301,76 @@ class _ZoneListItemStatefulState extends State<_ZoneListItemStateful> {
           setState(() => _isPressed = false);
         }
       },
-      child: Container(
-        color: _isPressed ? pressedColor : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeDefault),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                widget.zone.displayName ?? widget.zone.name ?? 'Unknown Zone',
-                style: robotoMedium.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
+      child: AnimatedOpacity(
+        opacity: _isPressed ? 0.6 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraSmall),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Dimensions.paddingSizeDefault,
+            vertical: Dimensions.paddingSizeDefault,
+          ),
+          decoration: BoxDecoration(
+            color: widget.isActive
+                ? Theme.of(context).cardColor
+                : Theme.of(context).disabledColor.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
                   color: widget.isActive
-                      ? Theme.of(context).textTheme.bodyLarge!.color
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                      : Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.location_city_rounded,
+                  color: widget.isActive
+                      ? Theme.of(context).primaryColor
                       : Theme.of(context).disabledColor,
+                  size: 20,
                 ),
               ),
-            ),
-            if (widget.isActive)
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Theme.of(context).hintColor,
+              const SizedBox(width: Dimensions.paddingSizeDefault),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.zone.displayName ?? widget.zone.name ?? 'Unknown Zone',
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: widget.isActive
+                            ? Theme.of(context).textTheme.bodyLarge!.color
+                            : Theme.of(context).disabledColor,
+                      ),
+                    ),
+                    if (!widget.isActive)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          'not_available'.tr,
+                          style: robotoRegular.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Theme.of(context).disabledColor,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-          ],
+              if (widget.isActive)
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Theme.of(context).hintColor,
+                ),
+            ],
+          ),
         ),
       ),
     );
