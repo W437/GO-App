@@ -172,11 +172,11 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
                               child: ModernInputFieldWidget(
-                                labelText: methodInformation[i].customerPlaceholder!,
+                                labelText: methodInformation?[i].customerPlaceholder ?? '',
                                 controller: checkoutController.informationControllerList[i],
                                 focusNode: checkoutController.informationFocusList[i],
                                 nextFocus: i != checkoutController.informationControllerList.length-1 ? checkoutController.informationFocusList[i+1] : _customerNoteNode,
-                                required: methodInformation[i].isRequired!,
+                                required: methodInformation?[i].isRequired ?? false,
                                 validator: (value) => ValidateCheck.validateEmptyText(value, null),
                               ),
                             );

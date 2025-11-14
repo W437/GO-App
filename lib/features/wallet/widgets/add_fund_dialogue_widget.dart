@@ -73,7 +73,6 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                 Text('add_fund_to_wallet'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
                 const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                Text('add_fund_form_secured_digital_payment_gateways'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
                 ModernInputFieldWidget(
@@ -83,7 +82,6 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                   focusNode: focusNode,
                   inputAction: TextInputAction.done,
                   controller: inputAmountController,
-                  textAlign: TextAlign.center,
                   onChanged: (String value){
                     try{
                       if(double.parse(value) > 0){

@@ -119,7 +119,6 @@ class _ProductReviewWidgetState extends State<ProductReviewWidget> {
                   capitalization: TextCapitalization.sentences,
                   enabled: !reviewController.submitList[index],
                   hintText: 'write_your_review_here'.tr,
-                  fillColor: Theme.of(context).disabledColor.withValues(alpha: 0.05),
                   onChanged: (text) => reviewController.setReview(index, text),
                 ),
                 const SizedBox(height: 20),

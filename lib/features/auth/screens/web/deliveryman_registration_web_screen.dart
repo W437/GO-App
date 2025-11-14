@@ -3,7 +3,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart' hide DropdownItem;
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/common/widgets/web/web_screen_title_widget.dart';

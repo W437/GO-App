@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart' hide DropdownItem;
 import 'package:godelivery_user/common/widgets/shared/text/validate_check.dart';
 import 'package:godelivery_user/features/auth/widgets/zone_selection_widget.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -43,26 +43,10 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
   Set<Polygon> _polygone = {};
   GoogleMapController? _mapController;
 
-  List<DropdownItem<int>> _generateDropDownZoneList(List<ZoneModel>? zoneList, List<int>? zoneIds) {
-    List<DropdownItem<int>> dropDownZoneList = [];
-    if(zoneList != null && zoneIds != null) {
-      for(int index=0; index<zoneList.length; index++) {
-        dropDownZoneList.add(DropdownItem<int>(value: index, child: SizedBox(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text('${zoneList[index].name}'.tr),
-          ),
-        )));
-      }
-    }
-    return dropDownZoneList;
-  }
-
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     return GetBuilder<RestaurantRegistrationController>(builder: (restaurantRegController) {
-      List<DropdownItem<int>> zoneList = _generateDropDownZoneList(restaurantRegController.zoneList, restaurantRegController.zoneIds);
 
       return Container(
         decoration: widget.fromView && !isDesktop ? BoxDecoration(
@@ -76,7 +60,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
           child: SizedBox(width: Dimensions.webMaxWidth, child: SingleChildScrollView (
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-              widget.fromView ? ZoneSelectionWidget(restaurantRegController: restaurantRegController, zoneList: zoneList, callBack: (){
+              widget.fromView ? ZoneSelectionWidget(restaurantRegController: restaurantRegController, callBack: (){
                 _setPolygon(restaurantRegController.zoneList![restaurantRegController.selectedZoneIndex!]);
               }) : const SizedBox(),
               widget.fromView ? const SizedBox(height: Dimensions.paddingSizeExtraLarge) : const SizedBox(),

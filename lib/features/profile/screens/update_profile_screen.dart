@@ -128,7 +128,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                               const SizedBox(height: 70),
 
                               ModernInputFieldWidget(
-                                titleText: 'enter_name'.tr,
                                 controller: _nameController,
                                 capitalization: TextCapitalization.words,
                                 inputType: TextInputType.name,
@@ -144,7 +143,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                               !_isPhoneLoading ? Stack(
                                 children: [
                                   ModernInputFieldWidget(
-                                    titleText: 'write_phone_number'.tr,
                                     controller: _phoneController,
                                     focusNode: _phoneFocus,
                                     inputType: TextInputType.phone,
@@ -175,7 +173,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                               const SizedBox(height: Dimensions.paddingSizeExtraOverLarge),
 
                               ModernInputFieldWidget(
-                                titleText: 'enter_email'.tr,
                                 controller: _emailController,
                                 focusNode: _emailFocus,
                                 inputType: TextInputType.emailAddress,
@@ -371,7 +368,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
                           Expanded(
                             child: ModernInputFieldWidget(
-                              titleText: 'enter_name'.tr,
                               controller: _nameController,
                               capitalization: TextCapitalization.words,
                               inputType: TextInputType.name,
@@ -391,7 +387,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
                           Expanded(
                             child: ModernInputFieldWidget(
-                              titleText: 'enter_email'.tr,
                               controller: _emailController,
                               focusNode: _emailFocus,
                               inputType: TextInputType.emailAddress,
@@ -416,7 +411,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                             child: Stack(
                               children: [
                                 !_isPhoneLoading ? ModernInputFieldWidget(
-                                  titleText: 'phone'.tr,
                                   controller: _phoneController,
                                   focusNode: _phoneFocus,
                                   inputType: TextInputType.phone,

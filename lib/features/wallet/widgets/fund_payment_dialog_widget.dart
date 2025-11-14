@@ -27,7 +27,8 @@ class FundPaymentDialogWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
               child: Text(
-                isSubscription ? 'do_you_want_to_cancel_this_payment'.tr : 'do_you_want_to_cancel_this_add_fund'.tr, textAlign: TextAlign.center,
+                isSubscription ? 'do_you_want_to_cancel_this_payment'.tr : 'do_you_want_to_cancel_this_add_fund'.tr,
+                textAlign: TextAlign.center,
                 style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Colors.red),
               ),
             ),

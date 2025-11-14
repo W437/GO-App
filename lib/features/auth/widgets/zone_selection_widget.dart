@@ -7,9 +7,8 @@ import 'package:godelivery_user/util/styles.dart';
 
 class ZoneSelectionWidget extends StatelessWidget {
   final RestaurantRegistrationController restaurantRegController;
-  final List<DropdownItem<int>> zoneList;
   final Function() callBack;
-  const ZoneSelectionWidget({super.key, required this.restaurantRegController, required this.zoneList, required this.callBack});
+  const ZoneSelectionWidget({super.key, required this.restaurantRegController, required this.callBack});
 
   @override
   Widget build(BuildContext context) {

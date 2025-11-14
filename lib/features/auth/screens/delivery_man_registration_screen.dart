@@ -26,7 +26,7 @@ import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_ba
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/forms/custom_dropdown_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/forms/modern_input_field_widget.dart' hide DropdownItem;
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';

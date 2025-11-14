@@ -112,7 +112,6 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                   Form(
                     key: _formKeyLogin,
                     child: isPhone ? ModernInputFieldWidget(
-                      titleText: 'xxx-xxx-xxxxx'.tr,
                       controller: _numberController,
                       focusNode: _numberFocusNode,
                       inputType: TextInputType.phone,
@@ -126,7 +125,6 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                       labelText: 'phone'.tr,
                       validator: (value) => ValidateCheck.validateEmptyText(value, null),
                     ) : ModernInputFieldWidget(
-                      titleText: 'enter_email'.tr,
                       labelText: 'email'.tr,
                       required: true,
                       controller: _emailController,

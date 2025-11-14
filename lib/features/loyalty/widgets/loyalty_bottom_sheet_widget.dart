@@ -70,14 +70,12 @@ class _WalletBottomSheetState extends State<LoyaltyBottomSheetWidget> {
               Text(
                 '(${'from'.tr} ${widget.amount} ${'points'.tr})',
                 style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-                maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
               ),
               const SizedBox(height: Dimensions.paddingSizeSmall),
 
               Text(
                 'amount_can_be_convert_into_wallet_money'.tr,
                 style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-                maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
               ),
               SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraLarge :  Dimensions.paddingSizeLarge),
 
@@ -91,7 +89,6 @@ class _WalletBottomSheetState extends State<LoyaltyBottomSheetWidget> {
                     controller: _amountController,
                     inputType: TextInputType.phone,
                     maxLines: 1,
-                    textAlign: TextAlign.start,
                     required: true,
                     validator: (value) => ValidateCheck.loyaltyCheck(value, minimumExchangePoint, Get.find<ProfileController>().userInfoModel!.loyaltyPoint),
                     isNumber: true,

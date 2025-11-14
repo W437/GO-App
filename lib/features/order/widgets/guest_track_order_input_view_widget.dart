@@ -102,14 +102,12 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
                     child: ModernInputFieldWidget(
-                    titleText: 'order_id'.tr,
                     hintText: '',
                     controller: _orderIdController,
                     focusNode: _orderFocus,
                     nextFocus: _phoneFocus,
                     inputType: TextInputType.number,
                     isNumber: true,
-                    showTitle: ResponsiveHelper.isDesktop(context),
                     labelText: 'order_id'.tr,
                     required: true,
                     validator: (value) => ValidateCheck.validateEmptyText(value, null),
@@ -120,14 +118,12 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: ResponsiveHelper.isDesktop(context) ? 500 : double.infinity),
                     child: ModernInputFieldWidget(
-                    titleText: 'enter_phone_number'.tr,
                     hintText: '',
                     controller: _phoneNumberController,
                     focusNode: _phoneFocus,
                     inputType: TextInputType.phone,
                     inputAction: TextInputAction.done,
                     isPhone: true,
-                    showTitle: ResponsiveHelper.isDesktop(context),
                     onCountryChanged: (CountryCode countryCode) {
                       _countryDialCode = countryCode.dialCode;
                     },
