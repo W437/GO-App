@@ -330,21 +330,27 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
   // Onboarding Step Page
   Widget _buildOnboardingPage(int index) {
-    return GetBuilder<OnBoardingController>(
-      builder: (onBoardingController) {
-        if (onBoardingController.onBoardingList == null) {
-          return Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-            ),
-          );
-        }
+    return GetBuilder<LocalizationController>(
+      builder: (localizationController) {
+        return GetBuilder<OnBoardingController>(
+          builder: (onBoardingController) {
+            // Refresh onboarding list when language changes
+            if (onBoardingController.onBoardingList == null) {
+              return Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                ),
+              );
+            }
 
-        return Padding(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            // Regenerate list with new translations
+            onBoardingController.getOnBoardingList();
+
+            return Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
               // Illustration - Placeholder
               Container(
                 width: MediaQuery.of(context).size.width * 0.6,
@@ -393,8 +399,10 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                   textAlign: TextAlign.center,
                 ),
               ),
-            ],
-          ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

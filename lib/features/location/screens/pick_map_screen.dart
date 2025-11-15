@@ -8,7 +8,9 @@ import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dar
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
 import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
+import 'package:godelivery_user/features/location/widgets/location_permission_overlay.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
@@ -43,12 +45,18 @@ class _PickMapScreenState extends State<PickMapScreen> {
   GoogleMapController? _mapController;
   CameraPosition? _cameraPosition;
   late LatLng _initialPosition;
+  bool _showLocationPermissionOverlay = false;
 
   @override
   void initState() {
     super.initState();
 
     Get.find<LocationController>().makeLoadingOff();
+
+    // Show location permission overlay if coming from onboarding
+    if (widget.route == RouteHelper.onBoarding) {
+      _showLocationPermissionOverlay = true;
+    }
 
     // Call after build to avoid setState during build error
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,7 +101,8 @@ class _PickMapScreenState extends State<PickMapScreen> {
                         polygons: _zonePolygons(locationController, context),
                         onMapCreated: (GoogleMapController mapController) {
                           _mapController = mapController;
-                          if (!widget.fromAddAddress && widget.route != 'splash') {
+                          // Don't auto-request location if showing permission overlay
+                          if (!widget.fromAddAddress && widget.route != 'splash' && !_showLocationPermissionOverlay) {
                             Get.find<LocationController>()
                                 .getCurrentLocation(false, mapController: mapController)
                                 .then((value) {
@@ -230,6 +239,14 @@ class _PickMapScreenState extends State<PickMapScreen> {
                           ),
                         ),
                       ),
+                      // Location permission overlay
+                      if (_showLocationPermissionOverlay)
+                        Positioned.fill(
+                          child: LocationPermissionOverlay(
+                            onEnableLocation: _handleEnableLocation,
+                            showSkip: false,
+                          ),
+                        ),
                     ],
                   );
                 }),
@@ -239,6 +256,29 @@ class _PickMapScreenState extends State<PickMapScreen> {
         ),
       ),
     );
+  }
+
+  void _handleEnableLocation() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      showCustomSnackBar('you_have_to_allow'.tr);
+    } else if (permission == LocationPermission.deniedForever) {
+      Get.dialog(const PermissionDialog());
+    } else {
+      // Permission granted - hide overlay and get current location
+      setState(() {
+        _showLocationPermissionOverlay = false;
+      });
+
+      // Get current location and move map
+      if (_mapController != null) {
+        Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
+      }
+    }
   }
 
   void _onPickAddressButtonPressed(LocationController locationController) {

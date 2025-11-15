@@ -34,134 +34,137 @@ class NewHomeHeaderWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: Dimensions.paddingSizeExtraLarge,
-            vertical: Dimensions.paddingSizeDefault,
+            vertical: Dimensions.paddingSizeExtraLarge,
           ),
-          child: Row(
-            children: [
-              // Location Picker on the left
-              Expanded(
-                child: GetBuilder<LocationController>(
-                  builder: (locationController) {
-                    return InkWell(
-                      onTap: () => _showLocationSheet(context),
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.location_on_rounded,
-                            color: Theme.of(context).primaryColor,
-                            size: 20,
-                          ),
-                          const SizedBox(width: Dimensions.paddingSizeSmall),
-                          SizedBox(
-                            width: 150,
-                            child: _MarqueeText(
-                              text: AddressHelper.getAddressFromSharedPref()!.address!,
-                              style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeDefault,
-                                color: Theme.of(context).textTheme.bodyLarge!.color,
+          child: SizedBox(
+            height: 56, // Fixed height for consistent header
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Location Picker on the left
+                Expanded(
+                  child: GetBuilder<LocationController>(
+                    builder: (locationController) {
+                      return InkWell(
+                        onTap: () => _showLocationSheet(context),
+                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.location_on_rounded,
+                              color: Theme.of(context).primaryColor,
+                              size: 24,
+                            ),
+                            const SizedBox(width: Dimensions.paddingSizeSmall),
+                            Expanded(
+                              child: _MarqueeText(
+                                text: AddressHelper.getAddressFromSharedPref()?.address ?? 'select_location'.tr,
+                                style: robotoBold.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault,
+                                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: Dimensions.paddingSizeDefault),
+
+                // Notification Button
+                GetBuilder<NotificationController>(
+                  builder: (notificationController) {
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        RoundedIconButtonWidget(
+                          icon: Icons.notifications_outlined,
+                          onPressed: () => Get.toNamed(RouteHelper.getNotificationRoute()),
+                          size: 48,
+                          iconSize: 24,
+                          backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                          pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
+                          iconColor: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                        if (notificationController.hasNotification)
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              height: 12,
+                              width: 12,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  width: 2,
+                                  color: Theme.of(context).cardColor,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: Theme.of(context).textTheme.bodyLarge!.color,
-                            size: 18,
-                          ),
-                        ],
-                      ),
+                      ],
                     );
                   },
                 ),
-              ),
 
-              const SizedBox(width: Dimensions.paddingSizeDefault),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
 
-              // Notification Button
-              GetBuilder<NotificationController>(
-                builder: (notificationController) {
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      RoundedIconButtonWidget(
-                        icon: Icons.notifications_outlined,
-                        onPressed: () => Get.toNamed(RouteHelper.getNotificationRoute()),
-                        size: 36,
-                        iconSize: 20,
-                        backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
-                        pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
-                        iconColor: Theme.of(context).textTheme.bodyLarge!.color,
-                      ),
-                      if (notificationController.hasNotification)
-                        Positioned(
-                          top: -4,
-                          right: -4,
-                          child: Container(
-                            height: 10,
-                            width: 10,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                width: 1.5,
-                                color: Theme.of(context).cardColor,
+                // Cart Button
+                GetBuilder<CartController>(
+                  builder: (cartController) {
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        RoundedIconButtonWidget(
+                          icon: Icons.shopping_bag_outlined,
+                          onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+                          size: 48,
+                          iconSize: 24,
+                          backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                          pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
+                          iconColor: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                        if (cartController.cartList.isNotEmpty)
+                          Positioned(
+                            top: -2,
+                            right: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 20,
+                                minHeight: 20,
+                              ),
+                              child: Text(
+                                '${cartController.cartList.length}',
+                                style: robotoMedium.copyWith(
+                                  fontSize: 11,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-
-              const SizedBox(width: Dimensions.paddingSizeSmall),
-
-              // Cart Button
-              GetBuilder<CartController>(
-                builder: (cartController) {
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      RoundedIconButtonWidget(
-                        icon: Icons.shopping_bag_outlined,
-                        onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
-                        size: 36,
-                        iconSize: 20,
-                        backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
-                        pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
-                        iconColor: Theme.of(context).textTheme.bodyLarge!.color,
-                      ),
-                      if (cartController.cartList.isNotEmpty)
-                        Positioned(
-                          top: -6,
-                          right: -6,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 18,
-                              minHeight: 18,
-                            ),
-                            child: Text(
-                              '${cartController.cartList.length}',
-                              style: robotoMedium.copyWith(
-                                fontSize: 10,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -271,7 +274,7 @@ class _BounceWrapperWidgetState extends State<_BounceWrapperWidget> with SingleT
   }
 }
 
-/// Marquee text widget that auto-scrolls when text is too long
+/// Improved marquee text widget that only applies effects when needed
 class _MarqueeText extends StatefulWidget {
   final String text;
   final TextStyle style;
@@ -285,89 +288,124 @@ class _MarqueeText extends StatefulWidget {
   State<_MarqueeText> createState() => _MarqueeTextState();
 }
 
-class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderStateMixin {
+class _MarqueeTextState extends State<_MarqueeText> {
   late ScrollController _scrollController;
-  late AnimationController _animationController;
   bool _needsScrolling = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkIfNeedsScrolling();
     });
   }
 
-  void _checkIfNeedsScrolling() {
-    if (_scrollController.hasClients && _scrollController.position.maxScrollExtent > 0) {
+  @override
+  void didUpdateWidget(_MarqueeText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) {
       setState(() {
-        _needsScrolling = true;
+        _needsScrolling = false;
       });
-      _startScrolling();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkIfNeedsScrolling();
+      });
+    }
+  }
+
+  void _checkIfNeedsScrolling() {
+    if (!mounted) return;
+
+    if (_scrollController.hasClients &&
+        _scrollController.position.maxScrollExtent > 0) {
+      if (!_needsScrolling) {
+        setState(() {
+          _needsScrolling = true;
+        });
+        _startScrolling();
+      }
+    } else {
+      setState(() {
+        _needsScrolling = false;
+      });
     }
   }
 
   void _startScrolling() async {
-    await Future.delayed(const Duration(seconds: 1));
-    if (!mounted) return;
+    if (!mounted || !_needsScrolling) return;
+
+    await Future.delayed(const Duration(milliseconds: 1500));
 
     while (mounted && _needsScrolling) {
+      if (!_scrollController.hasClients) break;
+
       await _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(seconds: 4),
+        duration: Duration(milliseconds: (widget.text.length * 60).clamp(3000, 8000)),
         curve: Curves.linear,
       );
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!mounted) return;
+
+      await Future.delayed(const Duration(milliseconds: 1000));
+      if (!mounted) break;
+
       await _scrollController.animateTo(
         0,
-        duration: const Duration(seconds: 4),
+        duration: Duration(milliseconds: (widget.text.length * 60).clamp(3000, 8000)),
         curve: Curves.linear,
       );
-      await Future.delayed(const Duration(milliseconds: 500));
+
+      await Future.delayed(const Duration(milliseconds: 1000));
     }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback: (Rect bounds) {
-        return LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.transparent,
-            Colors.black,
-            Colors.black,
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.05, 0.95, 1.0],
-        ).createShader(bounds);
-      },
-      blendMode: BlendMode.dstIn,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        controller: _scrollController,
-        physics: const NeverScrollableScrollPhysics(),
-        child: Text(
-          widget.text,
-          style: widget.style,
-          maxLines: 1,
+    // Only apply ShaderMask when text needs scrolling
+    if (_needsScrolling) {
+      return ClipRect(
+        child: ShaderMask(
+          shaderCallback: (Rect bounds) {
+            return LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: const [
+                Colors.transparent,
+                Colors.black,
+                Colors.black,
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.05, 0.95, 1.0],
+            ).createShader(bounds);
+          },
+          blendMode: BlendMode.dstIn,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: _scrollController,
+            physics: const NeverScrollableScrollPhysics(),
+            child: Text(
+              widget.text,
+              style: widget.style,
+              maxLines: 1,
+            ),
+          ),
         ),
-      ),
+      );
+    }
+
+    // For short text, display normally without shader effects
+    return Text(
+      widget.text,
+      style: widget.style,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

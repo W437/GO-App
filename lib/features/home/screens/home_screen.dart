@@ -36,6 +36,7 @@ import 'package:godelivery_user/features/home/widgets/header_content_widget.dart
 import 'package:godelivery_user/features/home/widgets/sticky_top_bar_widget.dart';
 import 'package:godelivery_user/features/home/widgets/header_content_below_sticky.dart';
 import 'package:godelivery_user/features/home/widgets/new_home_header_widget.dart';
+import 'package:godelivery_user/features/home/widgets/location_bar_widget.dart';
 import 'package:godelivery_user/features/home/widgets/custom_pull_refresh_widget.dart';
 import 'package:godelivery_user/features/home/widgets/max_stretch_scroll_controller.dart';
 import 'package:godelivery_user/features/home/widgets/today_trends_view_widget.dart';
@@ -218,15 +219,20 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 slivers: [
 
-                  /// NEW Simple Header (Location, Cart, Notification) - Pinned to top
-                  /// To use old header, comment this section and uncomment the two sections below
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: SliverDelegate(
-                      height: 90,
-                      child: const NewHomeHeaderWidget(),
-                    ),
+                  /// Location Bar - Now in content instead of sticky header
+                  SliverToBoxAdapter(
+                    child: const LocationBarWidget(),
                   ),
+
+                  /// OLD: Sticky Header (Location, Cart, Notification) - Commented out
+                  /// Now using LocationBarWidget in content above instead
+                  // SliverPersistentHeader(
+                  //   pinned: true,
+                  //   delegate: SliverDelegate(
+                  //     height: 110,
+                  //     child: const NewHomeHeaderWidget(),
+                  //   ),
+                  // ),
 
                   /// OLD HEADER - PART 1: Sticky Top Bar (Profile, Location, Notification)
                   /// Uncomment to use old header
