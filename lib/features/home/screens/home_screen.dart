@@ -18,6 +18,7 @@ import 'package:godelivery_user/features/home/widgets/bad_weather_widget.dart';
 import 'package:godelivery_user/features/home/widgets/banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/best_review_item_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/cuisine_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/categories_cuisines_tabbed_widget.dart';
 import 'package:godelivery_user/features/home/widgets/enjoy_off_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/location_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/new_on_go_view_widget.dart';
@@ -254,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
                         const BadWeatherWidget(),
 
-                        const WhatOnYourMindViewWidget(),
+                        const CategoriesCuisinesTabbedWidget(),
 
                         const TodayTrendsViewWidget(),
 
@@ -267,8 +268,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         _configModel!.mostReviewedFoods == 1 ?  const BestReviewItemViewWidget(isPopular: false) : const SizedBox(),
 
                         _configModel.dineInOrderOption! ? DineInWidget() : const SizedBox(),
-
-                        const CuisineViewWidget(),
 
                         _configModel.popularRestaurant == 1 ? const PopularRestaurantsViewWidget() : const SizedBox(),
 

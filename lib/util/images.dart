@@ -17,6 +17,7 @@ class Images {
   static const String deliveryManMarker = 'assets/image/delivery/delivery_man_marker.png';
   static const String nearbyRestaurantMarkerSvg = 'assets/image/location/nearby_restaurants.svg';
   static const String nearbyRestaurantMarker = 'assets/image/location/nearby_restaurants.png';
+  static const String mapPin = 'assets/image/location/map_pin.png';
   static const String user = 'assets/image/auth/user.png';
   static const String aboutUs = 'assets/image/policies/about_us.png';
   static const String coupon = 'assets/image/coupons/coupon.png';

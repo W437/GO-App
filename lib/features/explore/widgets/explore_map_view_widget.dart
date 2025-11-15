@@ -77,11 +77,11 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
       // Create marker icons using MarkerHelper for efficiency
       final restaurantMarkerIcon = await MarkerHelper.convertAssetToBitmapDescriptor(
         width: 50,
-        imagePath: Images.nearbyRestaurantMarker,
+        imagePath: Images.mapPin,
       );
       final myLocationMarkerIcon = await MarkerHelper.convertAssetToBitmapDescriptor(
         width: 50,
-        imagePath: Images.myLocationMarker,
+        imagePath: Images.pickLocationMapPin,
       );
 
       // Add user location marker
