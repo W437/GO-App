@@ -70,6 +70,7 @@ class AllCuisinesBottomSheet extends StatelessWidget {
                           crossAxisCount: ResponsiveHelper.isMobile(context) ? 4 : 6,
                           mainAxisSpacing: Dimensions.paddingSizeLarge,
                           crossAxisSpacing: Dimensions.paddingSizeLarge,
+                          childAspectRatio: ResponsiveHelper.isMobile(context) ? 0.65 : 0.85,
                         ),
                         itemCount: cuisineController.cuisineModel!.cuisines!.length,
                         itemBuilder: (context, index) {

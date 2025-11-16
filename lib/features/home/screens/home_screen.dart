@@ -121,6 +121,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   @override
   bool get wantKeepAlive => true;
 
+  double _headerExpandedHeight(BuildContext context) => 130;
+
+  double _headerCollapsedHeight(BuildContext context) => 70;
+
   @override
   void initState() {
     super.initState();
@@ -219,9 +223,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 slivers: [
 
-                  /// Location Bar - Now in content instead of sticky header
-                  SliverToBoxAdapter(
-                    child: const LocationBarWidget(),
+                  /// Sticky compact header with collapsing search bar
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: HomeLocationHeaderDelegate(
+                      expandedHeight: _headerExpandedHeight(context),
+                      collapsedHeight: _headerCollapsedHeight(context),
+                      topPadding: MediaQuery.of(context).padding.top,
+                    ),
                   ),
 
                   /// OLD: Sticky Header (Location, Cart, Notification) - Commented out
@@ -350,5 +359,49 @@ class SliverDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(SliverDelegate oldDelegate) {
     return oldDelegate.maxExtent != height || oldDelegate.minExtent != height || child != oldDelegate.child;
+  }
+}
+
+class HomeLocationHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double expandedHeight;
+  final double collapsedHeight;
+  final double topPadding;
+
+  HomeLocationHeaderDelegate({
+    required this.expandedHeight,
+    required this.collapsedHeight,
+    required this.topPadding,
+  });
+
+  @override
+  double get maxExtent => expandedHeight + topPadding;
+
+  @override
+  double get minExtent => collapsedHeight + topPadding;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final collapseRange = (maxExtent - minExtent).clamp(1.0, double.infinity);
+    final clampedOffset = shrinkOffset.clamp(0.0, collapseRange);
+    final progress = (collapseRange == 0
+            ? 0.0
+            : (clampedOffset / collapseRange).clamp(0.0, 1.0))
+        .toDouble();
+
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      padding: EdgeInsets.only(top: topPadding),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: LocationBarWidget(collapseFactor: progress),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(HomeLocationHeaderDelegate oldDelegate) {
+    return expandedHeight != oldDelegate.expandedHeight ||
+        collapsedHeight != oldDelegate.collapsedHeight ||
+        topPadding != oldDelegate.topPadding;
   }
 }

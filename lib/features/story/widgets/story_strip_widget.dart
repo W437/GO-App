@@ -23,8 +23,8 @@ class StoryStripWidget extends StatelessWidget {
 
         return Container(
           height: 110,
-          padding: const EdgeInsets.symmetric(
-            vertical: Dimensions.paddingSizeSmall,
+          padding: const EdgeInsets.only(
+            bottom: Dimensions.paddingSizeSmall,
           ),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -183,8 +183,8 @@ class StoryStripWidget extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context) {
     return Container(
       height: 115,
-      padding: const EdgeInsets.symmetric(
-        vertical: Dimensions.paddingSizeSmall,
+      padding: const EdgeInsets.only(
+        bottom: Dimensions.paddingSizeSmall,
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,

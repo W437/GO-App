@@ -53,7 +53,11 @@ class _CuisineScreenState extends State<CuisineScreen> {
                           crossAxisCount: ResponsiveHelper.isMobile(context) ? 4 : ResponsiveHelper.isDesktop(context) ? 8 : 6,
                           mainAxisSpacing: Dimensions.paddingSizeDefault,
                           crossAxisSpacing: ResponsiveHelper.isDesktop(context) ? 35 : Dimensions.paddingSizeDefault,
-                          childAspectRatio: 1,
+                          childAspectRatio: ResponsiveHelper.isDesktop(context)
+                              ? 0.95
+                              : ResponsiveHelper.isTab(context)
+                                  ? 0.8
+                                  : 0.65,
                         ),
                         shrinkWrap: true,
                         itemCount: cuisineController.cuisineModel!.cuisines!.length,

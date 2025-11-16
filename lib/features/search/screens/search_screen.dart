@@ -309,7 +309,11 @@ class SearchScreenState extends State<SearchScreen> {
                               crossAxisCount: isDesktop ? 8 : ResponsiveHelper.isTab(context) ? 6 : 4,
                               mainAxisSpacing: 15,
                               crossAxisSpacing: isDesktop ? 35 : 15,
-                              childAspectRatio: isDesktop ? 1 : 1,
+                              childAspectRatio: isDesktop
+                                  ? 0.95
+                                  : ResponsiveHelper.isTab(context)
+                                      ? 0.8
+                                      : 0.65,
                             ),
                             shrinkWrap: true,
                             itemCount: cuisineController.cuisineModel!.cuisines!.length,

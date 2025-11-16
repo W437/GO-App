@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/shared/text/auto_scroll_text.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -58,7 +59,7 @@ class NewHomeHeaderWidget extends StatelessWidget {
                             ),
                             const SizedBox(width: Dimensions.paddingSizeSmall),
                             Expanded(
-                              child: _MarqueeText(
+                              child: AutoScrollText(
                                 text: AddressHelper.getAddressFromSharedPref()?.address ?? 'select_location'.tr,
                                 style: robotoBold.copyWith(
                                   fontSize: Dimensions.fontSizeDefault,
@@ -270,142 +271,6 @@ class _BounceWrapperWidgetState extends State<_BounceWrapperWidget> with SingleT
         end: Offset.zero,
       ).animate(_animation),
       child: widget.child,
-    );
-  }
-}
-
-/// Improved marquee text widget that only applies effects when needed
-class _MarqueeText extends StatefulWidget {
-  final String text;
-  final TextStyle style;
-
-  const _MarqueeText({
-    required this.text,
-    required this.style,
-  });
-
-  @override
-  State<_MarqueeText> createState() => _MarqueeTextState();
-}
-
-class _MarqueeTextState extends State<_MarqueeText> {
-  late ScrollController _scrollController;
-  bool _needsScrolling = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkIfNeedsScrolling();
-    });
-  }
-
-  @override
-  void didUpdateWidget(_MarqueeText oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text) {
-      setState(() {
-        _needsScrolling = false;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _checkIfNeedsScrolling();
-      });
-    }
-  }
-
-  void _checkIfNeedsScrolling() {
-    if (!mounted) return;
-
-    if (_scrollController.hasClients &&
-        _scrollController.position.maxScrollExtent > 0) {
-      if (!_needsScrolling) {
-        setState(() {
-          _needsScrolling = true;
-        });
-        _startScrolling();
-      }
-    } else {
-      setState(() {
-        _needsScrolling = false;
-      });
-    }
-  }
-
-  void _startScrolling() async {
-    if (!mounted || !_needsScrolling) return;
-
-    await Future.delayed(const Duration(milliseconds: 1500));
-
-    while (mounted && _needsScrolling) {
-      if (!_scrollController.hasClients) break;
-
-      await _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: (widget.text.length * 60).clamp(3000, 8000)),
-        curve: Curves.linear,
-      );
-
-      await Future.delayed(const Duration(milliseconds: 1000));
-      if (!mounted) break;
-
-      await _scrollController.animateTo(
-        0,
-        duration: Duration(milliseconds: (widget.text.length * 60).clamp(3000, 8000)),
-        curve: Curves.linear,
-      );
-
-      await Future.delayed(const Duration(milliseconds: 1000));
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Only apply ShaderMask when text needs scrolling
-    if (_needsScrolling) {
-      return ClipRect(
-        child: ShaderMask(
-          shaderCallback: (Rect bounds) {
-            return LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: const [
-                Colors.transparent,
-                Colors.black,
-                Colors.black,
-                Colors.transparent,
-              ],
-              stops: const [0.0, 0.05, 0.95, 1.0],
-            ).createShader(bounds);
-          },
-          blendMode: BlendMode.dstIn,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: _scrollController,
-            physics: const NeverScrollableScrollPhysics(),
-            child: Text(
-              widget.text,
-              style: widget.style,
-              maxLines: 1,
-            ),
-          ),
-        ),
-      );
-    }
-
-    // For short text, display normally without shader effects
-    return Text(
-      widget.text,
-      style: widget.style,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }

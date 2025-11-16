@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:godelivery_user/features/cuisine/widgets/cuisine_custom_shape_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -58,47 +60,65 @@ class CuisineCardWidget extends StatelessWidget {
           )
         ],
       ),
-    ) : Column(
-      children: [
-        Container(
-          width: fromSearchPage || fromCuisinesPage ? 120 : 84,
-          height: fromSearchPage || fromCuisinesPage ? 120 : 84,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.2),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, 2),
+    ) : LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeTile = fromSearchPage || fromCuisinesPage;
+        final double targetSize = isLargeTile ? 120 : 84;
+        final double maxWidth = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : targetSize;
+        final double maxHeight = constraints.maxHeight.isFinite && constraints.maxHeight > 0
+            ? constraints.maxHeight
+            : double.infinity;
+        const double textBudget = Dimensions.paddingSizeExtraSmall + 24;
+        final double heightAllowance = maxHeight.isFinite ? max(0, maxHeight - textBudget) : double.infinity;
+        final double avatarSize = min(targetSize, min(maxWidth, heightAllowance));
+        final double textWidth = maxWidth > 0 ? maxWidth : avatarSize;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: avatarSize,
+              height: avatarSize,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.2),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: ClipOval(
-            child: CustomImageWidget(
-              image: image,
-              fit: BoxFit.cover,
-              height: fromSearchPage || fromCuisinesPage ? 120 : 84,
-              width: fromSearchPage || fromCuisinesPage ? 120 : 84,
+              child: ClipOval(
+                child: CustomImageWidget(
+                  image: image,
+                  fit: BoxFit.cover,
+                  height: avatarSize,
+                  width: avatarSize,
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-        SizedBox(
-          width: fromSearchPage || fromCuisinesPage ? 120 : 84,
-          child: Text(
-            name,
-            style: robotoMedium.copyWith(
-              fontSize: Dimensions.fontSizeSmall,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+            SizedBox(
+              width: textWidth,
+              child: Text(
+                name,
+                style: robotoMedium.copyWith(
+                  fontSize: Dimensions.fontSizeSmall,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
