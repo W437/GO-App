@@ -27,9 +27,12 @@ class StoryMediaModel {
     id = json['id'];
     storyId = json['story_id'];
     sequence = json['sequence'];
-    mediaType = json['media_type'];
-    mediaPath = json['media_path'];
-    thumbnailPath = json['thumbnail_path'];
+    // Backend sends 'type' but we store as 'mediaType'
+    mediaType = json['type'] ?? json['media_type'];
+    // Backend sends 'media_url' but we store as 'mediaPath'
+    mediaPath = json['media_url'] ?? json['media_path'];
+    // Backend sends 'thumbnail_url' but we store as 'thumbnailPath'
+    thumbnailPath = json['thumbnail_url'] ?? json['thumbnail_path'];
     durationSeconds = json['duration_seconds'] ?? 5;
     caption = json['caption'];
     ctaLabel = json['cta_label'];

@@ -32,7 +32,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   int _currentMediaIndex = 0;
   bool _isPaused = false;
   Timer? _progressTimer;
-  GlobalKey<State<StoryContentWidget>> _contentKey = GlobalKey();
+  GlobalKey<StoryContentWidgetState> _contentKey = GlobalKey();
 
   @override
   void initState() {
@@ -43,6 +43,13 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     _animationController = AnimationController(vsync: this);
     _animationController.addListener(() {
       setState(() {});
+    });
+
+    // Add status listener to handle animation completion
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_isPaused) {
+        _goToNextMedia();
+      }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -84,11 +91,8 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   void _startImageProgress(int durationSeconds) {
     _animationController.duration = Duration(seconds: durationSeconds);
-    _animationController.forward(from: 0).then((_) {
-      if (!_isPaused) {
-        _goToNextMedia();
-      }
-    });
+    _animationController.forward(from: 0);
+    // Completion is handled by the status listener in initState
   }
 
   void _pauseProgress() {
@@ -96,6 +100,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       _isPaused = true;
     });
     _animationController.stop();
+
+    // Pause video if current media is a video
+    _contentKey.currentState?.pause();
   }
 
   void _resumeProgress() {
@@ -103,6 +110,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       _isPaused = false;
     });
     _animationController.forward();
+
+    // Resume video if current media is a video
+    _contentKey.currentState?.play();
   }
 
   void _goToNextMedia() {
@@ -123,15 +133,26 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   void _goToPreviousMedia() {
-    if (_currentMediaIndex > 0) {
-      setState(() {
-        _currentMediaIndex--;
-        _contentKey = GlobalKey();
-      });
+    // If progress < 10%, go to actual previous media
+    // Otherwise, restart current media
+    final currentProgress = _animationController.value;
+
+    if (currentProgress < 0.1) {
+      // Go to previous media or restaurant
+      if (_currentMediaIndex > 0) {
+        setState(() {
+          _currentMediaIndex--;
+          _contentKey = GlobalKey();
+        });
+        _animationController.reset();
+        _loadMedia();
+      } else {
+        _goToPreviousRestaurant();
+      }
+    } else {
+      // Restart current media
       _animationController.reset();
       _loadMedia();
-    } else {
-      _goToPreviousRestaurant();
     }
   }
 
@@ -173,6 +194,29 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     }
   }
 
+  /// Format time elapsed since story was published (e.g., "5h", "23m", "2d")
+  String _formatTimeElapsed(String? publishAt) {
+    if (publishAt == null) return '';
+
+    try {
+      final publishTime = DateTime.parse(publishAt);
+      final now = DateTime.now();
+      final difference = now.difference(publishTime);
+
+      if (difference.inDays > 0) {
+        return '${difference.inDays}d';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours}h';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes}m';
+      } else {
+        return 'now';
+      }
+    } catch (e) {
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,13 +229,17 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         },
         onLongPressStart: (_) => _pauseProgress(),
         onLongPressEnd: (_) => _resumeProgress(),
+        onLongPressCancel: () => _resumeProgress(),
         onTapUp: (details) {
           final screenWidth = MediaQuery.of(context).size.width;
-          if (details.globalPosition.dx < screenWidth / 2) {
+          if (details.globalPosition.dx < screenWidth / 3) {
+            // Left third: Previous media or restart
             _goToPreviousMedia();
-          } else {
+          } else if (details.globalPosition.dx > screenWidth * 2 / 3) {
+            // Right third: Next media
             _goToNextMedia();
           }
+          // Middle third: No action (allows for accidental taps)
         },
         child: PageView.builder(
           controller: _restaurantPageController,
@@ -278,21 +326,79 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                         // Restaurant info
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.grey[300],
-                              child: const Icon(Icons.restaurant),
+                            // Restaurant logo
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              child: CircleAvatar(
+                                radius: 26,
+                                backgroundColor: Colors.grey[300],
+                                backgroundImage: (restaurant?.logoFullUrl?.isNotEmpty ?? false)
+                                    ? NetworkImage(restaurant!.logoFullUrl!)
+                                    : null,
+                                child: (restaurant?.logoFullUrl?.isEmpty ?? true)
+                                    ? const Icon(Icons.restaurant, size: 26)
+                                    : null,
+                              ),
                             ),
                             const SizedBox(width: Dimensions.paddingSizeSmall),
                             Expanded(
-                              child: Text(
-                                restaurant?.name ?? '',
-                                style: robotoMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: Dimensions.fontSizeLarge,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Restaurant name and time
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          restaurant?.name ?? '',
+                                          style: robotoMedium.copyWith(
+                                            color: Colors.white,
+                                            fontSize: Dimensions.fontSizeLarge,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (story?.publishAt != null) ...[
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          _formatTimeElapsed(story!.publishAt),
+                                          style: robotoRegular.copyWith(
+                                            color: Colors.white.withValues(alpha: 0.7),
+                                            fontSize: Dimensions.fontSizeDefault,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  // Rating
+                                  if (restaurant?.avgRating != null && restaurant!.avgRating! > 0) ...[
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${restaurant.avgRating!.toStringAsFixed(1)} (${restaurant.ratingCount ?? 0})',
+                                          style: robotoRegular.copyWith(
+                                            color: Colors.white.withValues(alpha: 0.9),
+                                            fontSize: Dimensions.fontSizeSmall,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                             IconButton(

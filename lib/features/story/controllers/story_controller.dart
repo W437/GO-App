@@ -25,28 +25,40 @@ class StoryController extends GetxController implements GetxService {
   static const Duration _viewEventThrottle = Duration(seconds: 2);
 
   Future<void> getStories({bool reload = false}) async {
-    if (_isLoading) return;
+    print('📖 [STORIES] getStories called - reload: $reload, isLoading: $_isLoading');
+
+    if (_isLoading) {
+      print('📖 [STORIES] Skipping - already loading');
+      return;
+    }
 
     _isLoading = true;
     update();
 
     try {
+      print('📖 [STORIES] Fetching from ${reload ? 'SERVER' : 'LOCAL CACHE'}');
+
       List<StoryCollectionModel>? stories =
           await storyServiceInterface.getStoryList(
         source: reload ? DataSourceEnum.client : DataSourceEnum.local,
       );
 
-      if (stories != null && stories.isEmpty && !reload) {
-        // Try fetching from server if local cache is empty
+      print('📖 [STORIES] Initial fetch result: ${stories?.length ?? 'null'} stories');
+
+      if ((stories == null || stories.isEmpty) && !reload) {
+        // Try fetching from server if local cache is empty or null
+        print('📖 [STORIES] Cache empty/null, fetching from server...');
         stories = await storyServiceInterface.getStoryList(
           source: DataSourceEnum.client,
         );
+        print('📖 [STORIES] Server fetch result: ${stories?.length ?? 'null'} stories');
       }
 
       _storyList = stories;
+      print('📖 [STORIES] ✅ Stories loaded successfully: ${_storyList?.length ?? 0} collections');
     } catch (e) {
-      print('Error fetching stories: $e');
-      print('Stack trace: ${StackTrace.current}');
+      print('📖 [STORIES] ❌ Error fetching stories: $e');
+      print('📖 [STORIES] Stack trace: ${StackTrace.current}');
       _storyList = [];
     } finally {
       _isLoading = false;

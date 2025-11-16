@@ -20,10 +20,10 @@ class StoryContentWidget extends StatefulWidget {
   });
 
   @override
-  State<StoryContentWidget> createState() => _StoryContentWidgetState();
+  State<StoryContentWidget> createState() => StoryContentWidgetState();
 }
 
-class _StoryContentWidgetState extends State<StoryContentWidget> {
+class StoryContentWidgetState extends State<StoryContentWidget> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   bool _isVideoInitialized = false;

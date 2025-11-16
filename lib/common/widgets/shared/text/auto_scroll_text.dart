@@ -145,10 +145,13 @@ class _AutoScrollTextState extends State<AutoScrollText> {
                 scrollDirection: Axis.horizontal,
                 controller: _scrollController,
                 physics: const NeverScrollableScrollPhysics(),
-                child: Text(
-                  widget.text,
-                  style: widget.style,
-                  maxLines: 1,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    widget.text,
+                    style: widget.style,
+                    maxLines: 1,
+                  ),
                 ),
               ),
             ),
