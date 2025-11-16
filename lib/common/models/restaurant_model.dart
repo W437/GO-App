@@ -170,7 +170,12 @@ class Restaurant {
     name = json['name'];
     phone = json['phone'];
     email = json['email'];
-    logoFullUrl = json['logo_full_url'] ?? '';
+    // Try multiple possible field names for logo URL
+    logoFullUrl = json['logo_full_url'] ??
+                  json['logo_url'] ??
+                  json['logo'] ??
+                  json['image'] ??
+                  json['thumbnail'] ?? '';
     latitude = json['latitude'];
     longitude = json['longitude'];
     address = json['address'];
@@ -178,7 +183,11 @@ class Restaurant {
     minimumOrder = json['minimum_order'] != null ? json['minimum_order'].toDouble() : 0;
     currency = json['currency'];
     freeDelivery = json['free_delivery'];
-    coverPhotoFullUrl = json['cover_photo_full_url'] ?? '';
+    // Try multiple possible field names for cover photo URL
+    coverPhotoFullUrl = json['cover_photo_full_url'] ??
+                        json['cover_photo_url'] ??
+                        json['cover_photo'] ??
+                        json['cover_image'] ?? '';
     delivery = json['delivery'];
     takeAway = json['take_away'];
     isDineInActive = json['is_dine_in_active'];

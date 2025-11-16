@@ -36,6 +36,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   int _currentStoryIndex = 0; // Track story within current restaurant
   int _currentMediaIndex = 0;
   bool _isPaused = false;
+  bool _isMediaLoaded = false; // Track if current media has loaded
   Timer? _progressTimer;
   GlobalKey<StoryContentWidgetState> _contentKey = GlobalKey();
 
@@ -118,11 +119,14 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       return;
     }
 
+    // Reset media loaded state
+    setState(() {
+      _isMediaLoaded = false;
+    });
+
     final media = story.media![_currentMediaIndex];
 
-    if (media.isImage) {
-      _startImageProgress(media.durationSeconds ?? 5);
-    }
+    // Don't start progress for images until they're loaded
     // Video progress is handled by the content widget's callbacks
 
     Get.find<StoryController>()
@@ -133,6 +137,23 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     _animationController.duration = Duration(seconds: durationSeconds);
     _animationController.forward(from: 0);
     // Completion is handled by the status listener in initState
+  }
+
+  void _onImageLoaded() {
+    if (!_isMediaLoaded) {
+      setState(() {
+        _isMediaLoaded = true;
+      });
+
+      // Start the timer now that the image has loaded
+      final collection = widget.collections[_currentRestaurantIndex];
+      final story = collection.stories![_currentStoryIndex];
+      final media = story.media![_currentMediaIndex];
+
+      if (media.isImage) {
+        _startImageProgress(media.durationSeconds ?? 5);
+      }
+    }
   }
 
   void _pauseProgress() {
@@ -165,6 +186,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       setState(() {
         _currentMediaIndex++;
         _contentKey = GlobalKey();
+        _isMediaLoaded = false; // Reset for new media
       });
       _animationController.reset();
       _loadMedia();
@@ -184,6 +206,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         _currentStoryIndex++;
         _currentMediaIndex = 0;
         _contentKey = GlobalKey();
+        _isMediaLoaded = false; // Reset for new media
       });
       _animationController.reset();
       _loadMedia();
@@ -236,6 +259,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         setState(() {
           _currentMediaIndex--;
           _contentKey = GlobalKey();
+          _isMediaLoaded = false; // Reset for new media
         });
         _animationController.reset();
         _loadMedia();
@@ -246,6 +270,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
           final prevStory = widget.collections[_currentRestaurantIndex].stories![_currentStoryIndex];
           _currentMediaIndex = (prevStory.media?.length ?? 1) - 1;
           _contentKey = GlobalKey();
+          _isMediaLoaded = false; // Reset for new media
         });
         _animationController.reset();
         _loadMedia();
@@ -387,6 +412,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
               _currentStoryIndex = 0; // Reset to first story of new restaurant
               _currentMediaIndex = 0;
               _contentKey = GlobalKey();
+              _isMediaLoaded = false; // Reset for new restaurant
             });
             _animationController.reset();
             _loadMedia();
@@ -425,19 +451,24 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                 // Media content
                 Positioned.fill(
                   child: StoryContentWidget(
-                    key: _contentKey,
+                    // Only use GlobalKey for the current restaurant to avoid conflicts
+                    key: restaurantIndex == _currentRestaurantIndex ? _contentKey : null,
                     media: currentMedia,
-                    onVideoReady: () {
-                      // Video will handle its own progress
-                    },
-                    onVideoComplete: () {
+                    onImageLoaded: restaurantIndex == _currentRestaurantIndex ? _onImageLoaded : null,
+                    onVideoReady: restaurantIndex == _currentRestaurantIndex ? () {
+                      // Mark media as loaded for videos
+                      setState(() {
+                        _isMediaLoaded = true;
+                      });
+                    } : null,
+                    onVideoComplete: restaurantIndex == _currentRestaurantIndex ? () {
                       if (!_isPaused) {
                         _goToNextMedia();
                       }
-                    },
-                    onVideoPlaying: (isPlaying) {
+                    } : null,
+                    onVideoPlaying: restaurantIndex == _currentRestaurantIndex ? (isPlaying) {
                       // You can sync progress with video playback if needed
-                    },
+                    } : null,
                   ),
                 ),
 

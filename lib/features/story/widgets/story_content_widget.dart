@@ -10,6 +10,7 @@ class StoryContentWidget extends StatefulWidget {
   final VoidCallback? onVideoComplete;
   final VoidCallback? onVideoReady;
   final Function(bool)? onVideoPlaying;
+  final VoidCallback? onImageLoaded;
 
   const StoryContentWidget({
     super.key,
@@ -17,6 +18,7 @@ class StoryContentWidget extends StatefulWidget {
     this.onVideoComplete,
     this.onVideoReady,
     this.onVideoPlaying,
+    this.onImageLoaded,
   });
 
   @override
@@ -132,6 +134,22 @@ class StoryContentWidgetState extends State<StoryContentWidget> {
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
+        imageBuilder: (context, imageProvider) {
+          // Call the callback when image is loaded
+          if (widget.onImageLoaded != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              widget.onImageLoaded!();
+            });
+          }
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+        },
         placeholder: (context, url) => Container(
           color: Colors.black,
           child: const Center(

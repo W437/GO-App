@@ -106,25 +106,46 @@ class StoryStripWidget extends StatelessWidget {
                             ),
                           ),
                           child: ClipOval(
-                            child: (restaurant.logoFullUrl?.isNotEmpty == true)
-                              ? CachedNetworkImage(
-                                  imageUrl: restaurant.logoFullUrl!,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                    child: const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => Container(
-                                    color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                    child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
-                                  ),
-                                )
-                              : Container(
-                                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                  child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
-                                ),
+                            child: Builder(
+                              builder: (context) {
+                                // Debug logging to check what URLs we're getting
+                                if (index == 0) { // Only log for first item to avoid spam
+                                  print('🖼️ [STORY STRIP] Restaurant: ${restaurant.name}');
+                                  print('🖼️ [STORY STRIP] Logo URL: ${restaurant.logoFullUrl}');
+                                  print('🖼️ [STORY STRIP] Cover Photo URL: ${restaurant.coverPhotoFullUrl}');
+                                }
+
+                                // Try logo first, then cover photo as fallback
+                                final imageUrl = (restaurant.logoFullUrl?.isNotEmpty == true)
+                                    ? restaurant.logoFullUrl!
+                                    : (restaurant.coverPhotoFullUrl?.isNotEmpty == true)
+                                        ? restaurant.coverPhotoFullUrl!
+                                        : null;
+
+                                return imageUrl != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                        child: const Center(
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) {
+                                        print('🖼️ [STORY STRIP] ❌ Failed to load image: $url - Error: $error');
+                                        return Container(
+                                          color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                          child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
+                                        );
+                                      },
+                                    )
+                                  : Container(
+                                      color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                      child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
+                                    );
+                              },
+                            ),
                           ),
                         ),
                       ),

@@ -13,6 +13,21 @@ class StoryCollectionModel {
   });
 
   StoryCollectionModel.fromJson(Map<String, dynamic> json) {
+    // Debug log to see what restaurant data we're getting
+    if (json['restaurant'] != null) {
+      final restaurantJson = json['restaurant'];
+      print('🏪 [STORY COLLECTION] Parsing restaurant: ${restaurantJson['name']}');
+      print('🏪 [STORY COLLECTION] Available fields: ${restaurantJson.keys.toList()}');
+
+      // Log specific image-related fields
+      ['logo_full_url', 'logo_url', 'logo', 'image', 'thumbnail',
+       'cover_photo_full_url', 'cover_photo_url', 'cover_photo', 'cover_image'].forEach((field) {
+        if (restaurantJson.containsKey(field)) {
+          print('🏪 [STORY COLLECTION] Found $field: ${restaurantJson[field]}');
+        }
+      });
+    }
+
     restaurant = json['restaurant'] != null
         ? Restaurant.fromJson(json['restaurant'])
         : null;
