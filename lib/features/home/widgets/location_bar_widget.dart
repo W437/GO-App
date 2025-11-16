@@ -33,6 +33,7 @@ class LocationBarWidget extends StatelessWidget {
     final spacing = (Dimensions.paddingSizeSmall * (1 - clamp))
         .clamp(0.0, Dimensions.paddingSizeSmall);
     final searchVisibility = (1 - clamp).clamp(0, 1).toDouble();
+    final searchOpacity = Curves.easeOut.transform(searchVisibility);
 
     return Container(
       color: Theme.of(context).colorScheme.surface,
@@ -46,17 +47,16 @@ class LocationBarWidget extends StatelessWidget {
           children: [
             _buildHeadlineRow(context, clamp),
             SizedBox(height: spacing),
-            if (searchVisibility > 0)
-              ClipRect(
-                child: Align(
-                  heightFactor: searchVisibility,
-                  alignment: Alignment.topCenter,
-                  child: Opacity(
-                    opacity: Curves.easeOut.transform(searchVisibility),
-                    child: _buildSearchRow(context),
-                  ),
+            ClipRect(
+              child: Align(
+                heightFactor: searchVisibility,
+                alignment: Alignment.topCenter,
+                child: Opacity(
+                  opacity: searchOpacity,
+                  child: _buildSearchRow(context),
                 ),
               ),
+            ),
           ],
         ),
       ),

@@ -121,9 +121,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   @override
   bool get wantKeepAlive => true;
 
-  double _headerExpandedHeight(BuildContext context) => 130;
+  double _headerExpandedHeight(BuildContext context) => 125;
 
-  double _headerCollapsedHeight(BuildContext context) => 70;
+  double _headerCollapsedHeight(BuildContext context) => 65;
 
   @override
   void initState() {
