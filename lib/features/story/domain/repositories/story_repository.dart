@@ -36,7 +36,22 @@ class StoryRepository implements StoryRepositoryInterface {
             print('📖 [STORY REPO] ✅ Found ${dataList.length} story collections in data array');
 
             dataList.forEach((data) {
-              storyList?.add(StoryCollectionModel.fromJson(data));
+              final collection = StoryCollectionModel.fromJson(data);
+              storyList?.add(collection);
+
+              // Debug: Show how many stories per restaurant
+              final restaurantName = collection.restaurant?.name ?? 'Unknown';
+              final storiesCount = collection.stories?.length ?? 0;
+              print('📖 [STORY REPO] Restaurant "$restaurantName" has $storiesCount stories');
+
+              // Debug: Show each story's media count
+              if (collection.stories != null) {
+                for (int i = 0; i < collection.stories!.length; i++) {
+                  final story = collection.stories![i];
+                  final mediaCount = story.media?.length ?? 0;
+                  print('   Story ${i + 1} (id: ${story.id}): "$story.title" - $mediaCount media items');
+                }
+              }
             });
 
             // Cache the data array for local storage

@@ -1,4 +1,5 @@
 import 'package:flutter/rendering.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
@@ -218,10 +219,16 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 scrollController: _scrollController,
               ) : (Get.find<SplashController>().configModel!.theme == 2) ? Theme1HomeScreen(
                 scrollController: _scrollController,
-              ) : CustomScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                slivers: [
+              ) : RefreshIndicator(
+                onRefresh: () async {
+                  await HomeScreen.loadData(true);
+                },
+                displacement: 80.0, // Show below the sticky header
+                edgeOffset: 0.0,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  slivers: [
 
                   /// Sticky compact header with collapsing search bar
                   SliverPersistentHeader(
@@ -319,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ],
               ),
             ),
+          ),
           ),
 
           floatingActionButton: AuthHelper.isLoggedIn() && homeController.cashBackOfferList != null && homeController.cashBackOfferList!.isNotEmpty ?

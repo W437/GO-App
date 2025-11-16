@@ -33,6 +33,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   late PageController _restaurantPageController;
   late AnimationController _animationController;
   int _currentRestaurantIndex = 0;
+  int _currentStoryIndex = 0; // Track story within current restaurant
   int _currentMediaIndex = 0;
   bool _isPaused = false;
   Timer? _progressTimer;
@@ -99,9 +100,21 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       return;
     }
 
-    final story = collection.stories![0];
-    if (story.media == null || story.media!.isEmpty) {
+    // Ensure story index is valid
+    if (_currentStoryIndex >= collection.stories!.length) {
       _goToNextRestaurant();
+      return;
+    }
+
+    final story = collection.stories![_currentStoryIndex];
+    if (story.media == null || story.media!.isEmpty) {
+      _goToNextStory();
+      return;
+    }
+
+    // Ensure media index is valid
+    if (_currentMediaIndex >= story.media!.length) {
+      _goToNextStory();
       return;
     }
 
@@ -144,9 +157,11 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   void _goToNextMedia() {
     final collection = widget.collections[_currentRestaurantIndex];
-    final totalMedia = collection.stories?[0].media?.length ?? 0;
+    final currentStory = collection.stories?[_currentStoryIndex];
+    final totalMedia = currentStory?.media?.length ?? 0;
 
     if (_currentMediaIndex < totalMedia - 1) {
+      // More media in current story
       setState(() {
         _currentMediaIndex++;
         _contentKey = GlobalKey();
@@ -154,9 +169,59 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       _animationController.reset();
       _loadMedia();
     } else {
+      // No more media in current story, try next story
+      _goToNextStory();
+    }
+  }
+
+  void _goToNextStory() {
+    final collection = widget.collections[_currentRestaurantIndex];
+    final totalStories = collection.stories?.length ?? 0;
+
+    if (_currentStoryIndex < totalStories - 1) {
+      // More stories in current restaurant
+      setState(() {
+        _currentStoryIndex++;
+        _currentMediaIndex = 0;
+        _contentKey = GlobalKey();
+      });
+      _animationController.reset();
+      _loadMedia();
+    } else {
+      // No more stories, go to next restaurant
       _markRestaurantSeen();
       _goToNextRestaurant();
     }
+  }
+
+  /// Calculate total media count across all stories in current restaurant
+  int _getTotalMediaCount() {
+    final collection = widget.collections[_currentRestaurantIndex];
+    if (collection.stories == null) return 0;
+
+    int total = 0;
+    for (var story in collection.stories!) {
+      total += story.media?.length ?? 0;
+    }
+    return total;
+  }
+
+  /// Calculate global media index across all stories
+  int _getGlobalMediaIndex() {
+    final collection = widget.collections[_currentRestaurantIndex];
+    if (collection.stories == null) return 0;
+
+    int globalIndex = 0;
+
+    // Add media count from all previous stories
+    for (int i = 0; i < _currentStoryIndex; i++) {
+      globalIndex += collection.stories![i].media?.length ?? 0;
+    }
+
+    // Add current media index within current story
+    globalIndex += _currentMediaIndex;
+
+    return globalIndex;
   }
 
   void _goToPreviousMedia() {
@@ -165,15 +230,27 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     final currentProgress = _animationController.value;
 
     if (currentProgress < 0.1) {
-      // Go to previous media or restaurant
+      // Go to previous media, story, or restaurant
       if (_currentMediaIndex > 0) {
+        // Previous media in current story
         setState(() {
           _currentMediaIndex--;
           _contentKey = GlobalKey();
         });
         _animationController.reset();
         _loadMedia();
+      } else if (_currentStoryIndex > 0) {
+        // Previous story in current restaurant
+        setState(() {
+          _currentStoryIndex--;
+          final prevStory = widget.collections[_currentRestaurantIndex].stories![_currentStoryIndex];
+          _currentMediaIndex = (prevStory.media?.length ?? 1) - 1;
+          _contentKey = GlobalKey();
+        });
+        _animationController.reset();
+        _loadMedia();
       } else {
+        // Previous restaurant
         _goToPreviousRestaurant();
       }
     } else {
@@ -212,11 +289,12 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
           .markRestaurantStorySeen(collection.restaurant!.id!);
     }
 
-    // Mark story as viewed on backend
+    // Mark all stories in this restaurant as viewed on backend
     if (collection.stories != null && collection.stories!.isNotEmpty) {
-      final storyId = collection.stories![0].id;
-      if (storyId != null) {
-        Get.find<StoryController>().markStoryViewed(storyId, true);
+      for (var story in collection.stories!) {
+        if (story.id != null) {
+          Get.find<StoryController>().markStoryViewed(story.id!, true);
+        }
       }
     }
   }
@@ -299,11 +377,14 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     final reverseProgress = 1.0 - dragProgress;
     final currentRadius = initialRadius + (maxRadius - initialRadius) * reverseProgress;
 
-    final content = PageView.builder(
+    final content = Container(
+      color: Colors.black, // Black background for story content
+      child: PageView.builder(
           controller: _restaurantPageController,
           onPageChanged: (index) {
             setState(() {
               _currentRestaurantIndex = index;
+              _currentStoryIndex = 0; // Reset to first story of new restaurant
               _currentMediaIndex = 0;
               _contentKey = GlobalKey();
             });
@@ -314,7 +395,11 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
           itemBuilder: (context, restaurantIndex) {
             final collection = widget.collections[restaurantIndex];
             final restaurant = collection.restaurant;
-            final story = collection.stories?[0];
+            // Use current story index for this restaurant
+            final storyIndex = restaurantIndex == _currentRestaurantIndex ? _currentStoryIndex : 0;
+            final story = collection.stories != null && collection.stories!.length > storyIndex
+                ? collection.stories![storyIndex]
+                : null;
             final mediaList = story?.media ?? [];
 
             if (mediaList.isEmpty) {
@@ -381,10 +466,10 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     ),
                     child: Column(
                       children: [
-                        // Progress bars
+                        // Progress bars (show all media across all stories)
                         StoryProgressBarWidget(
-                          itemCount: mediaList.length,
-                          currentIndex: _currentMediaIndex,
+                          itemCount: _getTotalMediaCount(),
+                          currentIndex: _getGlobalMediaIndex(),
                           progress: _animationController.value,
                         ),
                         const SizedBox(height: Dimensions.paddingSizeSmall),
@@ -552,10 +637,11 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
             ),
             );
           },
-        );
+        ),
+      );
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: GestureDetector(
         onVerticalDragStart: _onVerticalDragStart,
         onVerticalDragUpdate: _onVerticalDragUpdate,
@@ -579,10 +665,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
             center: clickPosition,
             radius: currentRadius,
           ),
-          child: Transform.translate(
-            offset: Offset(0, _dragOffset),
-            child: content,
-          ),
+          child: content,
         ),
       ),
     );
