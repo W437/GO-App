@@ -1,52 +1,37 @@
-/// Menu drawer widget for mobile navigation sidebar
-/// Provides navigation menu with user profile, settings, and app links
+// Menu drawer widget for mobile navigation sidebar
+// Provides navigation menu with user profile, settings, and app links
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/web/hover/on_hover_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
-import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
-import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/auth/widgets/auth_dialog_widget.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
-import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
+import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/story_creator/config/story_creator_config.dart';
+import 'package:godelivery_user/story_creator/story_creator_flow.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class MenuDrawerWidget extends StatefulWidget {
-  const MenuDrawerWidget({super.key});
+  const MenuDrawerWidget({super.key, this.forceShow = false});
+
+  final bool forceShow;
 
   @override
   MenuDrawerWidgetState createState() => MenuDrawerWidgetState();
 }
 
 class MenuDrawerWidgetState extends State<MenuDrawerWidget> with SingleTickerProviderStateMixin {
-  final List<Menu> _menuList = [
-    Menu(icon: Images.profileIcon, title: 'profile'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getProfileRoute());
-    }),
-    Menu(icon: Images.orderMenuIcon, title: 'my_orders'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getOrderRoute());
-    }),
-    Menu(icon: Images.location, title: 'my_address'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getAddressRoute());
-    }),
-    Menu(icon: Images.language, title: 'language'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getLanguageRoute('menu'));
-    }),
-    Menu(icon: Images.coupon, title: 'coupon'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getCouponRoute(fromCheckout: false));
-    }),
-    Menu(icon: Images.support, title: 'help_support'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getSupportRoute());
-    }),
-    Menu(icon: Images.chat, title: 'live_chat'.tr, onTap: () {
-      Get.offNamed(RouteHelper.getConversationRoute());
-    }),
-  ];
+  late final List<Menu> _menuList;
 
   static const _initialDelayTime = Duration(milliseconds: 200);
   static const _itemSlideTime = Duration(milliseconds: 250);
@@ -61,6 +46,31 @@ class MenuDrawerWidgetState extends State<MenuDrawerWidget> with SingleTickerPro
   @override
   void initState() {
     super.initState();
+
+    _menuList = [
+      Menu(icon: Images.storyCreator, title: 'create_story'.tr, onTap: _openStoryCreator),
+      Menu(icon: Images.profileIcon, title: 'profile'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getProfileRoute());
+      }),
+      Menu(icon: Images.orderMenuIcon, title: 'my_orders'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getOrderRoute());
+      }),
+      Menu(icon: Images.location, title: 'my_address'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getAddressRoute());
+      }),
+      Menu(icon: Images.language, title: 'language'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getLanguageRoute('menu'));
+      }),
+      Menu(icon: Images.coupon, title: 'coupon'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getCouponRoute(fromCheckout: false));
+      }),
+      Menu(icon: Images.support, title: 'help_support'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getSupportRoute());
+      }),
+      Menu(icon: Images.chat, title: 'live_chat'.tr, onTap: () {
+        Get.offNamed(RouteHelper.getConversationRoute());
+      }),
+    ];
 
     if(Get.find<SplashController>().configModel!.refundPolicyStatus == 1) {
       _menuList.add(Menu(icon: Images.refund, title: 'refund_policy'.tr, onTap: () {
@@ -152,6 +162,35 @@ class MenuDrawerWidgetState extends State<MenuDrawerWidget> with SingleTickerPro
     }
   }
 
+  void _openStoryCreator() {
+    final authController = Get.find<AuthController>();
+    if (!authController.isLoggedIn()) {
+      Get.back();
+      showCustomSnackBar('please_login_to_continue'.tr);
+      return;
+    }
+
+    final profileController = Get.find<ProfileController>();
+    final userId = profileController.userInfoModel?.id?.toString();
+    if (userId == null) {
+      profileController.getUserInfo();
+      Get.back();
+      showCustomSnackBar('profile_loading_try_again'.tr);
+      return;
+    }
+
+    final config = StoryCreatorConfig(
+      authToken: authController.getUserToken(),
+      userId: userId,
+      baseApiUrl: AppConstants.baseUrl,
+      mediaUploadPath: '/api/v1/stories/upload',
+      storyCreatePath: '/api/v1/stories',
+    );
+
+    Get.back();
+    Get.to(() => StoryCreatorFlow(config: config), fullscreenDialog: true);
+  }
+
   @override
   void dispose() {
     _staggeredController.dispose();
@@ -160,6 +199,9 @@ class MenuDrawerWidgetState extends State<MenuDrawerWidget> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
+    if (widget.forceShow) {
+      return _buildContent();
+    }
     return ResponsiveHelper.isDesktop(context) ? _buildContent() : const SizedBox();
   }
 

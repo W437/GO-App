@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
 import 'package:godelivery_user/features/story/domain/models/story_collection_model.dart';
-import 'package:godelivery_user/features/story/domain/models/story_media_model.dart';
+import 'package:godelivery_user/features/story/domain/models/story_overlay_model.dart';
 import 'package:godelivery_user/features/story/widgets/story_content_widget.dart';
 import 'package:godelivery_user/features/story/widgets/story_progress_bar_widget.dart';
 import 'package:godelivery_user/features/story/widgets/cube_page_transformer.dart';
 import 'package:godelivery_user/features/story/widgets/circular_clipper.dart';
+import 'package:godelivery_user/features/story/widgets/story_overlays_layer.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -42,7 +43,6 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   // Drag-to-close state
   double _dragOffset = 0.0;
-  bool _isDragging = false;
   late AnimationController _dragAnimationController;
   late Animation<double> _dragAnimation;
 
@@ -123,11 +123,6 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     setState(() {
       _isMediaLoaded = false;
     });
-
-    final media = story.media![_currentMediaIndex];
-
-    // Don't start progress for images until they're loaded
-    // Video progress is handled by the content widget's callbacks
 
     Get.find<StoryController>()
         .setCurrentIndices(_currentRestaurantIndex, _currentMediaIndex);
@@ -349,9 +344,6 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   // Drag-to-close handlers
   void _onVerticalDragStart(DragStartDetails details) {
-    setState(() {
-      _isDragging = true;
-    });
     _pauseProgress();
   }
 
@@ -382,7 +374,6 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       );
       _dragAnimationController.forward(from: 0).then((_) {
         setState(() {
-          _isDragging = false;
           _dragOffset = 0.0;
         });
         _resumeProgress();
@@ -455,22 +446,36 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     key: restaurantIndex == _currentRestaurantIndex ? _contentKey : null,
                     media: currentMedia,
                     onImageLoaded: restaurantIndex == _currentRestaurantIndex ? _onImageLoaded : null,
-                    onVideoReady: restaurantIndex == _currentRestaurantIndex ? () {
-                      // Mark media as loaded for videos
-                      setState(() {
-                        _isMediaLoaded = true;
-                      });
-                    } : null,
-                    onVideoComplete: restaurantIndex == _currentRestaurantIndex ? () {
-                      if (!_isPaused) {
-                        _goToNextMedia();
-                      }
-                    } : null,
-                    onVideoPlaying: restaurantIndex == _currentRestaurantIndex ? (isPlaying) {
-                      // You can sync progress with video playback if needed
-                    } : null,
+                    onVideoReady: restaurantIndex == _currentRestaurantIndex
+                        ? () {
+                            // Mark media as loaded for videos
+                            setState(() {
+                              _isMediaLoaded = true;
+                            });
+                          }
+                        : null,
+                    onVideoComplete: restaurantIndex == _currentRestaurantIndex
+                        ? () {
+                            if (!_isPaused) {
+                              _goToNextMedia();
+                            }
+                          }
+                        : null,
+                    onVideoPlaying: restaurantIndex == _currentRestaurantIndex
+                        ? (isPlaying) {
+                            // You can sync progress with video playback if needed
+                          }
+                        : null,
                   ),
                 ),
+                if ((currentMedia.overlays?.isNotEmpty ?? false))
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: StoryOverlaysLayer(
+                        overlays: currentMedia.overlays ?? const <StoryOverlayModel>[],
+                      ),
+                    ),
+                  ),
 
                 // Top gradient overlay
                 Positioned(

@@ -43,7 +43,6 @@ import 'package:godelivery_user/features/home/widgets/max_stretch_scroll_control
 import 'package:godelivery_user/features/home/widgets/today_trends_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/what_on_your_mind_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/video_refresh_widget.dart';
-import 'package:easy_refresh/easy_refresh.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -221,14 +220,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 scrollController: _scrollController,
               ) : (Get.find<SplashController>().configModel!.theme == 2) ? Theme1HomeScreen(
                 scrollController: _scrollController,
-              ) : EasyRefresh(
-                onRefresh: () async {
-                  await HomeScreen.loadData(true);
-                },
-                header: ClassicHeader(
-                  position: IndicatorPosition.locator,
-                ),
-                child: CustomScrollView(
+              ) : CustomScrollView(
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                   slivers: [
@@ -242,9 +234,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       topPadding: MediaQuery.of(context).padding.top,
                     ),
                   ),
-
-                  // Refresh indicator appears here below the sticky header
-                  const HeaderLocator.sliver(),
 
                   /// OLD: Sticky Header (Location, Cart, Notification) - Commented out
                   /// Now using LocationBarWidget in content above instead
@@ -332,7 +321,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ],
               ),
             ),
-          ),
           ),
 
           floatingActionButton: AuthHelper.isLoggedIn() && homeController.cashBackOfferList != null && homeController.cashBackOfferList!.isNotEmpty ?

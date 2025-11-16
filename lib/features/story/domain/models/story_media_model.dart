@@ -1,3 +1,5 @@
+import 'story_overlay_model.dart';
+
 class StoryMediaModel {
   int? id;
   int? storyId;
@@ -9,6 +11,7 @@ class StoryMediaModel {
   String? caption;
   String? ctaLabel;
   String? ctaUrl;
+  List<StoryOverlayModel>? overlays;
 
   StoryMediaModel({
     this.id,
@@ -37,6 +40,16 @@ class StoryMediaModel {
     caption = json['caption'];
     ctaLabel = json['cta_label'];
     ctaUrl = json['cta_url'];
+    final overlayJson = json['overlays'];
+    if (overlayJson is List) {
+      overlays = overlayJson
+          .whereType<Map<String, dynamic>>()
+          .map(StoryOverlayModel.fromJson)
+          .toList()
+        ..sort((a, b) => a.zIndex.compareTo(b.zIndex));
+    } else {
+      overlays = const [];
+    }
   }
 
   Map<String, dynamic> toJson() {

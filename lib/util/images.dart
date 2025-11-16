@@ -25,6 +25,7 @@ class Images {
   static const String language = 'assets/image/language/language.png';
   static const String logOut = 'assets/image/misc/log_out.png';
   static const String message = 'assets/image/ui/message.png';
+  static const String storyCreator = 'assets/image/ui/upload_icon.png';
   static const String location = 'assets/image/location/location.png';
   static const String policy = 'assets/image/policies/policy.png';
   static const String support = 'assets/image/policies/support.png';

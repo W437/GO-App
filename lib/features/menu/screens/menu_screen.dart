@@ -1,34 +1,37 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/bouncy_bottom_sheet.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/auth/screens/sign_in_screen.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/developer/controllers/developer_catalog_controller.dart';
 import 'package:godelivery_user/features/developer/screens/input_test_screen.dart';
+import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/language/widgets/language_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/menu/widgets/ios_menu_item_widget.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
-import 'package:godelivery_user/features/auth/screens/sign_in_screen.dart';
-import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
-import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/story_creator/config/story_creator_config.dart';
+import 'package:godelivery_user/story_creator/story_creator_flow.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/features/developer/controllers/developer_catalog_controller.dart';
-import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:screen_corner_radius/screen_corner_radius.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -169,64 +172,81 @@ class _MenuScreenState extends State<MenuScreen> {
                         top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
                         bottom: Dimensions.paddingSizeOverLarge,
                       ),
-                      child: Row(children: [
-
-                      EmojiProfilePicture(
-                        emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
-                        bgColorHex: isLoggedIn ? profileController.userInfoModel?.profileBgColor : null,
-                        size: 70,
-                        borderWidth: 2,
-                        borderColor: Theme.of(context).cardColor,
-                      ),
-                      const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                      Expanded(
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      isLoggedIn && profileController.userInfoModel == null ? Shimmer(
-                        duration: const Duration(seconds: 2),
-                        enabled: true,
-                        child: Container(
-                          height: 16, width: 200,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[Get.find<ThemeController>().darkTheme ? 700 : 200],
-                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                      child: Row(
+                        children: [
+                          EmojiProfilePicture(
+                            emoji: isLoggedIn ? profileController.userInfoModel?.profileEmoji : null,
+                            bgColorHex: isLoggedIn ? profileController.userInfoModel?.profileBgColor : null,
+                            size: 70,
+                            borderWidth: 2,
+                            borderColor: Theme.of(context).cardColor,
                           ),
-                        ),
-                      ) : Text(
-                        isLoggedIn ? '${profileController.userInfoModel?.fName} ${profileController.userInfoModel?.lName}' : 'guest_user'.tr,
-                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).cardColor),
+                          const SizedBox(width: Dimensions.paddingSizeDefault),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                    isLoggedIn && profileController.userInfoModel == null
+                                        ? Shimmer(
+                                            duration: const Duration(seconds: 2),
+                                            enabled: true,
+                                            child: Container(
+                                              height: 16,
+                                              width: 200,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[Get.find<ThemeController>().darkTheme ? 700 : 200],
+                                                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                              ),
+                                            ),
+                                          )
+                                        : Text(
+                                            isLoggedIn
+                                                ? '${profileController.userInfoModel?.fName} ${profileController.userInfoModel?.lName}'
+                                                : 'guest_user'.tr,
+                                            style: robotoBold.copyWith(
+                                              fontSize: Dimensions.fontSizeExtraLarge,
+                                              color: Theme.of(context).cardColor,
+                                            ),
+                                          ),
+                                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                    isLoggedIn && profileController.userInfoModel != null
+                                        ? Text(
+                                            DateConverter.memberSinceFormat(
+                                                profileController.userInfoModel!.createdAt!),
+                                            style: robotoMedium.copyWith(
+                                              fontSize: Dimensions.fontSizeSmall,
+                                              color: Theme.of(context).cardColor,
+                                            ),
+                                          )
+                                        : InkWell(
+                                            onTap: () async {
+                                              if (!ResponsiveHelper.isDesktop(context)) {
+                                                Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute))?.then((value) {
+                                                  if (AuthHelper.isLoggedIn()) {
+                                                    profileController.getUserInfo();
+                                                  }
+                                                });
+                                              } else {
+                                                Get.dialog(const SignInScreen(exitFromApp: true, backFromThis: true)).then((value) {
+                                                  if (AuthHelper.isLoggedIn()) {
+                                                    profileController.getUserInfo();
+                                                  }
+                                                });
+                                              }
+                                            },
+                                            child: Text(
+                                              'login_to_view_all_feature'.tr,
+                                              style: robotoMedium.copyWith(
+                                                fontSize: Dimensions.fontSizeSmall,
+                                                color: Theme.of(context).cardColor,
+                                              ),
+                                            ),
+                                          ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                      isLoggedIn && profileController.userInfoModel != null ? Text(
-                        DateConverter.memberSinceFormat(profileController.userInfoModel!.createdAt!),
-                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).cardColor),
-                      ) : InkWell(
-                        onTap: () async {
-                          if(!ResponsiveHelper.isDesktop(context)) {
-                            Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute))?.then((value) {
-                              if(AuthHelper.isLoggedIn()) {
-                                profileController.getUserInfo();
-                              }
-                            });
-                          }else{
-                            Get.dialog(const SignInScreen(exitFromApp: true, backFromThis: true)).then((value) {
-                              if(AuthHelper.isLoggedIn()) {
-                                profileController.getUserInfo();
-                              }
-                            });
-                          }
-                        },
-                        child: Text(
-                          'login_to_view_all_feature'.tr,
-                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).cardColor),
-                        ),
-                      ) ,
-
-                        ]),
-                      ),
-
-                      ]),
                     ),
                   ],
                 ),
@@ -283,6 +303,12 @@ class _MenuScreenState extends State<MenuScreen> {
                           iconBackgroundColor: const Color(0xFFFF3B30),
                           title: 'favourite'.tr,
                           onTap: () => Get.toNamed(RouteHelper.getFavouriteScreen()),
+                        ),
+                        IosMenuItemWidget(
+                          icon: Icons.camera_alt_outlined,
+                          iconBackgroundColor: const Color(0xFFFF9500),
+                          title: 'create_story'.tr,
+                          onTap: () => _openStoryCreator(profileController),
                         ),
                         IosMenuItemWidget(
                           icon: Icons.sports_esports,
@@ -606,4 +632,36 @@ class _MenuScreenState extends State<MenuScreen> {
       }
     });
   }
+
+  void _openStoryCreator(ProfileController profileController) {
+    if (!AuthHelper.isLoggedIn()) {
+      showBouncyBottomSheet(
+        context: context,
+        builder: (context) => GuestLoginBottomSheet(
+          onLoginSuccess: () {
+            profileController.getUserInfo();
+          },
+        ),
+      );
+      return;
+    }
+
+    final userId = profileController.userInfoModel?.id?.toString();
+    if (userId == null) {
+      profileController.getUserInfo();
+      showCustomSnackBar('profile_loading_try_again'.tr);
+      return;
+    }
+
+    final config = StoryCreatorConfig(
+      authToken: Get.find<AuthController>().getUserToken(),
+      userId: userId,
+      baseApiUrl: AppConstants.baseUrl,
+      mediaUploadPath: '/api/v1/stories/upload',
+      storyCreatePath: '/api/v1/stories',
+    );
+
+    Get.to(() => StoryCreatorFlow(config: config), fullscreenDialog: true);
+  }
+
 }
