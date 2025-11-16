@@ -6,6 +6,8 @@ import 'package:godelivery_user/features/story/domain/models/story_collection_mo
 import 'package:godelivery_user/features/story/domain/models/story_media_model.dart';
 import 'package:godelivery_user/features/story/widgets/story_content_widget.dart';
 import 'package:godelivery_user/features/story/widgets/story_progress_bar_widget.dart';
+import 'package:godelivery_user/features/story/widgets/cube_page_transformer.dart';
+import 'package:godelivery_user/features/story/widgets/circular_clipper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -13,11 +15,13 @@ import 'package:godelivery_user/util/styles.dart';
 class StoryViewerScreen extends StatefulWidget {
   final List<StoryCollectionModel> collections;
   final int initialIndex;
+  final Offset? clickPosition;
 
   const StoryViewerScreen({
     super.key,
     required this.collections,
     required this.initialIndex,
+    this.clickPosition,
   });
 
   @override
@@ -25,7 +29,7 @@ class StoryViewerScreen extends StatefulWidget {
 }
 
 class _StoryViewerScreenState extends State<StoryViewerScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late PageController _restaurantPageController;
   late AnimationController _animationController;
   int _currentRestaurantIndex = 0;
@@ -33,6 +37,12 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   bool _isPaused = false;
   Timer? _progressTimer;
   GlobalKey<StoryContentWidgetState> _contentKey = GlobalKey();
+
+  // Drag-to-close state
+  double _dragOffset = 0.0;
+  bool _isDragging = false;
+  late AnimationController _dragAnimationController;
+  late Animation<double> _dragAnimation;
 
   @override
   void initState() {
@@ -52,6 +62,22 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       }
     });
 
+    // Initialize drag animation controller for bounce-back effect
+    _dragAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _dragAnimation = Tween<double>(begin: 0, end: 0).animate(
+      CurvedAnimation(
+        parent: _dragAnimationController,
+        curve: Curves.easeOut,
+      ),
+    )..addListener(() {
+        setState(() {
+          _dragOffset = _dragAnimation.value;
+        });
+      });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadMedia();
     });
@@ -61,6 +87,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   void dispose() {
     _progressTimer?.cancel();
     _animationController.dispose();
+    _dragAnimationController.dispose();
     _restaurantPageController.dispose();
     super.dispose();
   }
@@ -163,7 +190,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         curve: Curves.easeInOut,
       );
     } else {
-      Get.back();
+      Navigator.of(context).pop();
     }
   }
 
@@ -174,7 +201,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         curve: Curves.easeInOut,
       );
     } else {
-      Get.back();
+      Navigator.of(context).pop();
     }
   }
 
@@ -217,31 +244,62 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     }
   }
 
+  // Drag-to-close handlers
+  void _onVerticalDragStart(DragStartDetails details) {
+    setState(() {
+      _isDragging = true;
+    });
+    _pauseProgress();
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      // Only allow dragging down (positive delta)
+      _dragOffset = (_dragOffset + details.delta.dy).clamp(0.0, double.infinity);
+    });
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final threshold = screenHeight * 0.3; // 30% of screen height
+
+    if (_dragOffset > threshold) {
+      // Close the story viewer
+      Navigator.of(context).pop();
+    } else {
+      // Bounce back to original position
+      _dragAnimation = Tween<double>(
+        begin: _dragOffset,
+        end: 0.0,
+      ).animate(
+        CurvedAnimation(
+          parent: _dragAnimationController,
+          curve: Curves.easeOut,
+        ),
+      );
+      _dragAnimationController.forward(from: 0).then((_) {
+        setState(() {
+          _isDragging = false;
+          _dragOffset = 0.0;
+        });
+        _resumeProgress();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: GestureDetector(
-        onVerticalDragEnd: (details) {
-          if (details.velocity.pixelsPerSecond.dy > 500) {
-            Get.back();
-          }
-        },
-        onLongPressStart: (_) => _pauseProgress(),
-        onLongPressEnd: (_) => _resumeProgress(),
-        onLongPressCancel: () => _resumeProgress(),
-        onTapUp: (details) {
-          final screenWidth = MediaQuery.of(context).size.width;
-          if (details.globalPosition.dx < screenWidth / 3) {
-            // Left third: Previous media or restart
-            _goToPreviousMedia();
-          } else if (details.globalPosition.dx > screenWidth * 2 / 3) {
-            // Right third: Next media
-            _goToNextMedia();
-          }
-          // Middle third: No action (allows for accidental taps)
-        },
-        child: PageView.builder(
+    final screenSize = MediaQuery.of(context).size;
+    final clickPosition = widget.clickPosition ?? Offset(screenSize.width / 2, screenSize.height / 2);
+    final maxRadius = calculateMaxRadius(screenSize, clickPosition);
+    final initialRadius = 35.0;
+
+    // Calculate current radius based on drag progress
+    final dragProgress = (_dragOffset / screenSize.height).clamp(0.0, 1.0);
+    final reverseProgress = 1.0 - dragProgress;
+    final currentRadius = initialRadius + (maxRadius - initialRadius) * reverseProgress;
+
+    final content = PageView.builder(
           controller: _restaurantPageController,
           onPageChanged: (index) {
             setState(() {
@@ -260,17 +318,24 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
             final mediaList = story?.media ?? [];
 
             if (mediaList.isEmpty) {
-              return const Center(
-                child: Text(
-                  'No media available',
-                  style: TextStyle(color: Colors.white),
+              return CubePageTransformer(
+                controller: _restaurantPageController,
+                pageIndex: restaurantIndex,
+                child: const Center(
+                  child: Text(
+                    'No media available',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               );
             }
 
             final currentMedia = mediaList[_currentMediaIndex];
 
-            return Stack(
+            return CubePageTransformer(
+              controller: _restaurantPageController,
+              pageIndex: restaurantIndex,
+              child: Stack(
               children: [
                 // Media content
                 Positioned.fill(
@@ -403,7 +468,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                             ),
                             IconButton(
                               icon: const Icon(Icons.close, color: Colors.white),
-                              onPressed: () => Get.back(),
+                              onPressed: () => Navigator.of(context).pop(),
                             ),
                           ],
                         ),
@@ -484,8 +549,40 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     ),
                   ),
               ],
+            ),
             );
           },
+        );
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onVerticalDragStart: _onVerticalDragStart,
+        onVerticalDragUpdate: _onVerticalDragUpdate,
+        onVerticalDragEnd: _onVerticalDragEnd,
+        onLongPressStart: (_) => _pauseProgress(),
+        onLongPressEnd: (_) => _resumeProgress(),
+        onLongPressCancel: () => _resumeProgress(),
+        onTapUp: (details) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          if (details.globalPosition.dx < screenWidth / 3) {
+            // Left third: Previous media or restart
+            _goToPreviousMedia();
+          } else if (details.globalPosition.dx > screenWidth * 2 / 3) {
+            // Right third: Next media
+            _goToNextMedia();
+          }
+          // Middle third: No action (allows for accidental taps)
+        },
+        child: ClipPath(
+          clipper: CircularClipper(
+            center: clickPosition,
+            radius: currentRadius,
+          ),
+          child: Transform.translate(
+            offset: Offset(0, _dragOffset),
+            child: content,
+          ),
         ),
       ),
     );

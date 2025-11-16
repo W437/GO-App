@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
+import 'package:godelivery_user/features/story/screens/story_viewer_screen.dart';
+import 'package:godelivery_user/features/story/widgets/circular_reveal_route.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -38,17 +40,34 @@ class StoryStripWidget extends StatelessWidget {
 
               if (restaurant == null) return const SizedBox.shrink();
 
-              return GestureDetector(
-                onTap: () {
-                  Get.toNamed(
-                    RouteHelper.getStoryViewerRoute(index),
-                    arguments: {
-                      'collections': storyController.storyList,
-                      'initialIndex': index,
+              return Builder(
+                builder: (itemContext) {
+                  return GestureDetector(
+                    onTap: () {
+                      // Get the position of the tapped story circle
+                      final RenderBox? box = itemContext.findRenderObject() as RenderBox?;
+                      if (box != null) {
+                        final position = box.localToGlobal(Offset.zero);
+                        final center = Offset(
+                          position.dx + (box.size.width / 2),
+                          position.dy + (box.size.height / 2),
+                        );
+
+                        // Navigate with circular reveal animation
+                        Navigator.of(context).push(
+                          CircularRevealRoute(
+                            clickPosition: center,
+                            initialRadius: 35.0, // Story circle radius
+                            child: StoryViewerScreen(
+                              collections: storyController.storyList!,
+                              initialIndex: index,
+                              clickPosition: center,
+                            ),
+                          ),
+                        );
+                      }
                     },
-                  );
-                },
-                child: Container(
+                    child: Container(
                   width: 75,
                   margin: const EdgeInsets.only(
                     right: Dimensions.paddingSizeSmall,
@@ -120,6 +139,8 @@ class StoryStripWidget extends StatelessWidget {
                     ],
                   ),
                 ),
+                  );
+                },
               );
             },
           ),
