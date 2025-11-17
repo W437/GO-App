@@ -1,5 +1,3 @@
-import 'package:flutter/rendering.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
@@ -58,6 +56,7 @@ import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/product/controllers/product_controller.dart';
 import 'package:godelivery_user/features/review/controllers/review_controller.dart';
+import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -75,6 +74,11 @@ class HomeScreen extends StatefulWidget {
 
 
   static Future<void> loadData(bool reload) async {
+    // Always refresh config so promotional banners and other remote settings stay current
+    await Get.find<SplashController>().getConfigData(
+      handleMaintenanceMode: false,
+      source: DataSourceEnum.client,
+    );
     Get.find<HomeController>().getBannerList(reload);
     Get.find<CategoryController>().getCategoryList(reload);
     Get.find<CuisineController>().getCuisineList();
@@ -148,20 +152,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
     });
 
-    _scrollController.addListener(() {
-      if(_scrollController.position.userScrollDirection == ScrollDirection.reverse){
-        if(Get.find<HomeController>().showFavButton){
-          Get.find<HomeController>().changeFavVisibility();
-          Future.delayed(const Duration(milliseconds: 800), ()=> Get.find<HomeController>().changeFavVisibility());
-        }
-      }else {
-        if(Get.find<HomeController>().showFavButton){
-          Get.find<HomeController>().changeFavVisibility();
-          Future.delayed(const Duration(milliseconds: 800), ()=> Get.find<HomeController>().changeFavVisibility());
-        }
-      }
-    });
-
   }
 
   @override
@@ -202,6 +192,112 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
     return GetBuilder<HomeController>(builder: (homeController) {
       return GetBuilder<LocalizationController>(builder: (localizationController) {
+        Widget _buildStandardHomeLayout() {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                slivers: [
+                  /// Sticky compact header with collapsing search bar
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: HomeLocationHeaderDelegate(
+                      expandedHeight: _headerExpandedHeight(context),
+                      collapsedHeight: _headerCollapsedHeight(context),
+                      topPadding: MediaQuery.of(context).padding.top,
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: SizedBox(
+                        width: Dimensions.webMaxWidth,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const StoryStripWidget(),
+                            const BannerViewWidget(),
+                            const BadWeatherWidget(),
+                            const CategoriesCuisinesTabbedWidget(),
+                            const TodayTrendsViewWidget(),
+                            const HighlightWidgetView(),
+                            _isLogin ? const OrderAgainViewWidget() : const SizedBox(),
+                            _configModel!.mostReviewedFoods == 1
+                                ? const BestReviewItemViewWidget(isPopular: false)
+                                : const SizedBox(),
+                            _configModel.dineInOrderOption! ? DineInWidget() : const SizedBox(),
+                            _configModel.popularRestaurant == 1
+                                ? const PopularRestaurantsViewWidget()
+                                : const SizedBox(),
+                            const ReferBannerViewWidget(),
+                            _isLogin
+                                ? const PopularRestaurantsViewWidget(isRecentlyViewed: true)
+                                : const SizedBox(),
+                            _configModel.popularFood == 1
+                                ? const PopularFoodNearbyViewWidget()
+                                : const SizedBox(),
+                            _configModel.newRestaurant == 1
+                                ? const NewOnGOViewWidget(isLatest: true)
+                                : const SizedBox(),
+                            const PromotionalBannerViewWidget(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: SliverDelegate(
+                      height: 90,
+                      child: const AllRestaurantFilterWidget(),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: FooterViewWidget(
+                        child: Padding(
+                          padding: ResponsiveHelper.isDesktop(context)
+                              ? EdgeInsets.zero
+                              : EdgeInsets.only(
+                                  bottom: 65 +
+                                      MediaQuery.of(context).padding.bottom +
+                                      Dimensions.paddingSizeDefault,
+                                ),
+                          child: AllRestaurantsWidget(scrollController: _scrollController),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SliverPullRefreshIndicator(
+                scrollController: _scrollController,
+                onRefresh: () async {
+                  await HomeScreen.loadData(true);
+                },
+              ),
+            ],
+          );
+        }
+
+        Widget bodyContent;
+        final SplashController splashController = Get.find<SplashController>();
+        if (ResponsiveHelper.isDesktop(context)) {
+          bodyContent = WebHomeScreen(scrollController: _scrollController);
+        } else if (splashController.configModel!.theme == 3) {
+          bodyContent = Theme2HomeScreen(scrollController: _scrollController);
+        } else if (splashController.configModel!.theme == 2) {
+          bodyContent = Theme1HomeScreen(scrollController: _scrollController);
+        } else {
+          bodyContent = _buildStandardHomeLayout();
+        }
+
         return Scaffold(
           appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
           endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
@@ -214,124 +310,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               behavior: ScrollConfiguration.of(context).copyWith(
                 overscroll: false, // Remove default white overscroll glow
               ),
-              child: ResponsiveHelper.isDesktop(context) ? WebHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 3) ? Theme2HomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 2) ? Theme1HomeScreen(
-                scrollController: _scrollController,
-              ) : Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  CustomScrollView(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                    slivers: [
-
-                  /// Sticky compact header with collapsing search bar
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: HomeLocationHeaderDelegate(
-                      expandedHeight: _headerExpandedHeight(context),
-                      collapsedHeight: _headerCollapsedHeight(context),
-                      topPadding: MediaQuery.of(context).padding.top,
-                    ),
-                  ),
-
-                  /// OLD: Sticky Header (Location, Cart, Notification) - Commented out
-                  /// Now using LocationBarWidget in content above instead
-                  // SliverPersistentHeader(
-                  //   pinned: true,
-                  //   delegate: SliverDelegate(
-                  //     height: 110,
-                  //     child: const NewHomeHeaderWidget(),
-                  //   ),
-                  // ),
-
-                  /// OLD HEADER - PART 1: Sticky Top Bar (Profile, Location, Notification)
-                  /// Uncomment to use old header
-                  // SliverPersistentHeader(
-                  //   pinned: true,
-                  //   delegate: SliverDelegate(
-                  //     height: Dimensions.stickyHeaderHeight,
-                  //     child: StickyTopBarWidget(scrollOffset: _scrollOffset),
-                  //   ),
-                  // ),
-
-                  /// OLD HEADER - PART 2: Header Content (Title + Search) - Scrollable
-                  /// Uncomment to use old header
-                  // const SliverToBoxAdapter(
-                  //   child: HeaderContentBelowSticky(),
-                  // ),
-
-                  SliverToBoxAdapter(
-                    child: Center(child: SizedBox(
-                      width: Dimensions.webMaxWidth,
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                        const StoryStripWidget(),
-
-                        const BannerViewWidget(),
-
-                        const BadWeatherWidget(),
-
-                        const CategoriesCuisinesTabbedWidget(),
-
-                        const TodayTrendsViewWidget(),
-
-                        // LocationBannerViewWidget(),
-
-                        const HighlightWidgetView(),
-
-                        _isLogin ? const OrderAgainViewWidget() : const SizedBox(),
-
-                        _configModel!.mostReviewedFoods == 1 ?  const BestReviewItemViewWidget(isPopular: false) : const SizedBox(),
-
-                        _configModel.dineInOrderOption! ? DineInWidget() : const SizedBox(),
-
-                        _configModel.popularRestaurant == 1 ? const PopularRestaurantsViewWidget() : const SizedBox(),
-
-                        const ReferBannerViewWidget(),
-
-                        _isLogin ? const PopularRestaurantsViewWidget(isRecentlyViewed: true) : const SizedBox(),
-
-                        _configModel.popularFood == 1 ? const PopularFoodNearbyViewWidget() : const SizedBox(),
-
-                        _configModel.newRestaurant == 1 ? const NewOnGOViewWidget(isLatest: true) : const SizedBox(),
-
-                        const PromotionalBannerViewWidget(),
-
-                      ]),
-                    )),
-                  ),
-
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: SliverDelegate(
-                      height: 90,
-                      child: const AllRestaurantFilterWidget(),
-                    ),
-                  ),
-
-
-                  SliverToBoxAdapter(child: Center(child: FooterViewWidget(
-                    child: Padding(
-                      padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : EdgeInsets.only(bottom: 65 + MediaQuery.of(context).padding.bottom + Dimensions.paddingSizeDefault),
-                      child: AllRestaurantsWidget(scrollController: _scrollController),
-                    ),
-                  ))),
-
-                  ],
-                ),
-                  SliverPullRefreshIndicator(
-                    scrollController: _scrollController,
-                    onRefresh: () async {
-                      await HomeScreen.loadData(true);
-                    },
-                  ),
-                ],
-              ),
-          ),
+              child: bodyContent,
+            ),
           ),
 
           floatingActionButton: AuthHelper.isLoggedIn() && homeController.cashBackOfferList != null && homeController.cashBackOfferList!.isNotEmpty ?

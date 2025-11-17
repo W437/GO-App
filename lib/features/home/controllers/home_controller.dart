@@ -52,7 +52,9 @@ class HomeController extends GetxController implements GetxService {
       _bannerDataList = [];
       _bannerObjectList = [];
 
+      print('🎯 Processing ${bannerModel.campaigns?.length ?? 0} campaigns');
       for (var campaign in bannerModel.campaigns!) {
+        print('  ➡️ Campaign: "${campaign.title}" (ID: ${campaign.id})');
         _bannerImageList!.add(campaign.imageFullUrl);
         _bannerDataList!.add(campaign);
         // Create a Banner object for campaigns (they don't have video support yet)
@@ -63,6 +65,7 @@ class HomeController extends GetxController implements GetxService {
         ));
       }
 
+      print('🎯 Processing ${bannerModel.banners?.length ?? 0} regular banners');
       for (var banner in bannerModel.banners!) {
         // Prioritize video over image for the display list
         String? displayUrl = banner.videoFullUrl ?? banner.imageFullUrl;
@@ -82,6 +85,8 @@ class HomeController extends GetxController implements GetxService {
         // Store the actual Banner object with all fields
         _bannerObjectList!.add(banner);
       }
+
+      print('✅ Total banner items prepared: ${_bannerImageList!.length}');
     }
     update();
   }

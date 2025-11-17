@@ -448,10 +448,21 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     onImageLoaded: restaurantIndex == _currentRestaurantIndex ? _onImageLoaded : null,
                     onVideoReady: restaurantIndex == _currentRestaurantIndex
                         ? () {
-                            // Mark media as loaded for videos
-                            setState(() {
-                              _isMediaLoaded = true;
-                            });
+                            // Mark media as loaded for videos and start timer
+                            if (!_isMediaLoaded) {
+                              setState(() {
+                                _isMediaLoaded = true;
+                              });
+
+                              // Start the progress timer for video duration
+                              final collection = widget.collections[_currentRestaurantIndex];
+                              final story = collection.stories![_currentStoryIndex];
+                              final media = story.media![_currentMediaIndex];
+
+                              if (media.isVideo) {
+                                _startImageProgress(media.durationSeconds ?? 15);
+                              }
+                            }
                           }
                         : null,
                     onVideoComplete: restaurantIndex == _currentRestaurantIndex

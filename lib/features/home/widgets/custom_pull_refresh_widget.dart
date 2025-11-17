@@ -1,3 +1,4 @@
+import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -19,11 +20,17 @@ class SliverPullRefreshIndicator extends StatefulWidget {
   State<SliverPullRefreshIndicator> createState() => _SliverPullRefreshIndicatorState();
 }
 
-class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator> {
+class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator> with TickerProviderStateMixin {
   double _dragOffset = 0.0;
   bool _isRefreshing = false;
+  bool _isDismissingIndicator = false;
   bool _armedForRefresh = false;
   ValueNotifier<bool>? _scrollActivityNotifier;
+  late final AnimationController _dismissController;
+  late final AnimationController _snapController;
+  double _snapStartFraction = 0.0;
+  DateTime? _cooldownUntil;
+  static const Duration _refreshCooldownDuration = Duration(milliseconds: 900);
 
   static const double _kDragThreshold = 40.0;
   static const double _kRefreshExtent = 70.0;
@@ -33,6 +40,30 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     super.initState();
     widget.scrollController.addListener(_handleScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) => _attachScrollActivityListener());
+    _dismissController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    )..addListener(() {
+        if (_isDismissingIndicator && mounted) {
+          setState(() {});
+        }
+      })..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() {
+            _isDismissingIndicator = false;
+            _dragOffset = 0.0;
+          });
+          _cooldownUntil = DateTime.now().add(_refreshCooldownDuration);
+        }
+      });
+    _snapController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    )..addListener(() {
+        if (_isRefreshing && mounted) {
+          setState(() {});
+        }
+      })..value = 1.0;
   }
 
   @override
@@ -50,6 +81,8 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   void dispose() {
     widget.scrollController.removeListener(_handleScroll);
     _detachScrollActivityListener();
+    _dismissController.dispose();
+    _snapController.dispose();
     super.dispose();
   }
 
@@ -68,7 +101,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   void _handleScrollActivity() {
     if (!mounted || _isRefreshing) return;
     final bool isScrolling = _scrollActivityNotifier?.value ?? true;
-    if (!isScrolling && _armedForRefresh) {
+    if (!isScrolling && _armedForRefresh && !_isCoolingDown) {
       _handleRefresh();
     }
   }
@@ -79,6 +112,12 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     }
 
     final position = widget.scrollController.position;
+
+    if (!_isRefreshing && _isDismissingIndicator && position.pixels < 0) {
+      setState(() {
+        _isDismissingIndicator = false;
+      });
+    }
 
     if (position.pixels < 0) {
       if (_isRefreshing) {
@@ -125,7 +164,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
       }
 
     } else if (_dragOffset > 0 && !_isRefreshing) {
-      if (_armedForRefresh) {
+      if (_armedForRefresh && !_isCoolingDown) {
         _handleRefresh();
       } else {
         setState(() {
@@ -137,15 +176,22 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   }
 
   Future<void> _handleRefresh() async {
-    if (_isRefreshing) return;
+    if (_isRefreshing || _isCoolingDown) return;
 
     final DateTime startTime = DateTime.now();
+    final double initialSnapFraction = (_dragOffset / _kRefreshExtent).clamp(0.0, 1.0);
+    _dismissController.stop();
+    _dismissController.reset();
 
     setState(() {
       _isRefreshing = true;
+      _isDismissingIndicator = false;
       _dragOffset = _kRefreshExtent;
       _armedForRefresh = false;
+      _snapStartFraction = initialSnapFraction;
+      _cooldownUntil = null;
     });
+    _snapController.forward(from: 0.0);
 
     HapticFeedback.mediumImpact();
 
@@ -161,30 +207,38 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
       if (mounted) {
         setState(() {
           _isRefreshing = false;
-          _dragOffset = 0.0;
+          _isDismissingIndicator = true;
+          _dragOffset = _kRefreshExtent;
           _armedForRefresh = false;
         });
 
-        // Animate back to top
-        widget.scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        // Keep the completion state visible for a beat before animating out
+        Future.delayed(const Duration(milliseconds: 900), () {
+          if (mounted && _isDismissingIndicator) {
+            _dismissController.forward(from: 0);
+          }
+        });
       }
     }
   }
 
   double get _pullProgress {
-    if (_isRefreshing) return 1.0;
-    return (_dragOffset / _kRefreshExtent).clamp(0.0, 1.0);
+    if (_isRefreshing || _isDismissingIndicator) return 1.0;
+    const double maxVisualProgressOffset = _kDragThreshold * 0.05; // show 0% until 5% drag
+    final double adjustedDrag = (_dragOffset - maxVisualProgressOffset).clamp(0.0, double.infinity);
+    const double targetDistance = _kDragThreshold * 0.9; // hit 100% at 90% of threshold
+    return (adjustedDrag / targetDistance).clamp(0.0, 1.0);
   }
 
   bool get _isReadyToRelease => !_isRefreshing && _dragOffset >= _kDragThreshold;
+  bool get _showCompletionState => !_isRefreshing && _isDismissingIndicator;
+  bool get _isCoolingDown => _cooldownUntil != null && _cooldownUntil!.isAfter(DateTime.now());
 
   String get _statusHeadline {
     if (_isRefreshing) {
       return 'Refreshing your feed';
+    } else if (_showCompletionState) {
+      return 'Freshly updated';
     } else if (_isReadyToRelease) {
       return 'Release for fresh picks';
     } else {
@@ -195,6 +249,8 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   String get _statusDetail {
     if (_isRefreshing) {
       return 'Fetching the latest restaurants and offers';
+    } else if (_showCompletionState) {
+      return 'All caught up. Enjoy the new bites!';
     } else if (_isReadyToRelease) {
       return 'You\'re right there — let go to reload';
     } else {
@@ -207,6 +263,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     final double progress = _pullProgress;
     final Color borderColor = theme.primaryColor.withOpacity(0.15 + (0.25 * progress));
     final Color haloColor = theme.primaryColor.withOpacity(0.05 + (0.08 * progress));
+    const double statusWidth = 205;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -233,43 +290,95 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
         children: [
           _buildIndicatorAvatar(theme, progress),
           const SizedBox(width: 16),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 150),
-                style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ) ??
-                    TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                child: Text(_statusHeadline),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.9, end: 1.0).animate(CurvedAnimation(
+                  parent: anim,
+                  curve: Curves.easeOutBack,
+                )),
+                child: child,
               ),
-              const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 150),
-                style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.75) ??
-                          Colors.black.withOpacity(0.6),
-                    ) ??
-                    TextStyle(
-                      fontSize: 12,
-                      color: Colors.black.withOpacity(0.6),
+            ),
+            child: _showCompletionState
+                ? SizedBox(
+                    width: statusWidth,
+                    key: const ValueKey('completed'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Feed refreshed',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ) ??
+                              TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Enjoy the latest picks',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                              ) ??
+                              TextStyle(
+                                fontSize: 12,
+                                color: Colors.black.withOpacity(0.6),
+                              ),
+                        ),
+                      ],
                     ),
-                child: Text(
-                  _statusDetail,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildProgressBar(theme, progress),
-            ],
+                  )
+                : SizedBox(
+                    width: statusWidth,
+                    key: const ValueKey('default'),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 150),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ) ??
+                              TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                          child: Text(_statusHeadline, maxLines: 1, overflow: TextOverflow.fade),
+                        ),
+                        const SizedBox(height: 4),
+                        AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 150),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodySmall?.color?.withOpacity(0.75) ??
+                                    Colors.black.withOpacity(0.6),
+                              ) ??
+                              TextStyle(
+                                fontSize: 12,
+                                color: Colors.black.withOpacity(0.6),
+                              ),
+                          child: Text(
+                            _statusDetail,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildProgressBar(theme, progress),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
@@ -292,7 +401,9 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
                 strokeWidth: 2.6,
                 valueColor: AlwaysStoppedAnimation(theme.primaryColor),
               )
-            : Stack(
+            : _showCompletionState
+                ? Icon(Icons.check_rounded, color: theme.primaryColor, size: 28)
+                : Stack(
                 alignment: Alignment.center,
                 children: [
                   if (progress > 0)
@@ -348,28 +459,63 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
         ? (-widget.scrollController.position.pixels).clamp(0.0, SliverPullRefreshIndicator.maxStretchExtent)
         : (_isRefreshing ? _kRefreshExtent : 0.0);
 
-    final height = realTimeHeight;
-    final bool showIndicator = height > 6 || _isRefreshing;
-    final double translateY = (height - 20).clamp(0.0, SliverPullRefreshIndicator.maxStretchExtent);
-    final double scale = 0.9 + (0.1 * _pullProgress);
+    final bool shouldRenderIndicator = realTimeHeight > 4 || _isRefreshing || _isDismissingIndicator;
+    if (!shouldRenderIndicator) {
+      return const SizedBox.shrink();
+    }
+
+    final double indicatorHeight = (_isRefreshing || _isDismissingIndicator)
+        ? _kRefreshExtent
+        : realTimeHeight;
+    final double snapProgress = _isRefreshing ? _snapController.value.clamp(0.0, 1.0) : 1.0;
+    final double snapCurve = _isRefreshing ? Curves.elasticOut.transform(snapProgress) : 1.0;
+    final double refreshingHeight = _isRefreshing
+        ? lerpDouble(_snapStartFraction * _kRefreshExtent, _kRefreshExtent, snapCurve)!
+        : indicatorHeight;
+    final double translateY = (refreshingHeight - 20).clamp(0.0, SliverPullRefreshIndicator.maxStretchExtent);
+
+    double targetScale;
+    double targetOpacity;
+    if (_isDismissingIndicator) {
+      final dismissProgress = _dismissController.value.clamp(0.0, 1.0);
+      targetScale = 1.0 - (dismissProgress * 0.2);
+      targetOpacity = 1.0 - dismissProgress;
+    } else if (_isRefreshing) {
+      final double bounce = Curves.easeOutBack.transform(snapProgress);
+      targetScale = lerpDouble(
+        (_snapStartFraction.clamp(0.7, 1.0)),
+        1.05,
+        bounce,
+      )!;
+      targetOpacity = Curves.easeOut.transform(snapProgress);
+    } else {
+      final appearProgress = (_dragOffset / _kDragThreshold).clamp(0.0, 1.0);
+      final baseScale = 0.82;
+      final scaleRange = 0.18;
+      targetScale = baseScale + (scaleRange * appearProgress);
+      targetOpacity = appearProgress;
+    }
 
     return Positioned(
       top: Dimensions.stickyHeaderHeight - 24,
       left: 0,
       right: 0,
       child: IgnorePointer(
-        ignoring: !showIndicator,
+        ignoring: !_isRefreshing && realTimeHeight <= 4,
         child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 120),
-          opacity: showIndicator ? 1 : 0,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOut,
+          opacity: targetOpacity.clamp(0.0, 1.0),
           child: SizedBox(
             height: SliverPullRefreshIndicator.maxStretchExtent + 64,
             child: Align(
               alignment: Alignment.topCenter,
               child: Transform.translate(
                 offset: Offset(0, translateY),
-                child: Transform.scale(
-                  scale: scale,
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOut,
+                  scale: targetScale.clamp(0.7, 1.0),
                   child: _buildIndicatorBadge(context),
                 ),
               ),
