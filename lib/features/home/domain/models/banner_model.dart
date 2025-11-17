@@ -40,6 +40,10 @@ class Banner {
   String? title;
   String? type;
   String? imageFullUrl;
+  String? imageBlurhash;
+  String? videoFullUrl;
+  String? videoThumbnailUrl;
+  String? videoThumbnailBlurhash;
   Restaurant? restaurant;
   Product? food;
 
@@ -48,6 +52,10 @@ class Banner {
     this.title,
     this.type,
     this.imageFullUrl,
+    this.imageBlurhash,
+    this.videoFullUrl,
+    this.videoThumbnailUrl,
+    this.videoThumbnailBlurhash,
     this.restaurant,
     this.food,
   });
@@ -57,6 +65,10 @@ class Banner {
     title = json['title'];
     type = json['type'];
     imageFullUrl = json['image_full_url'];
+    imageBlurhash = json['image_blurhash'];
+    videoFullUrl = json['video_full_url'];
+    videoThumbnailUrl = json['video_thumbnail_url'];
+    videoThumbnailBlurhash = json['video_thumbnail_blurhash'];
     restaurant = json['restaurant'] != null ? Restaurant.fromJson(json['restaurant']) : null;
     food = json['food'] != null ? Product.fromJson(json['food']) : null;
   }
@@ -67,6 +79,10 @@ class Banner {
     data['title'] = title;
     data['type'] = type;
     data['image_full_url'] = imageFullUrl;
+    data['image_blurhash'] = imageBlurhash;
+    data['video_full_url'] = videoFullUrl;
+    data['video_thumbnail_url'] = videoThumbnailUrl;
+    data['video_thumbnail_blurhash'] = videoThumbnailBlurhash;
     if (restaurant != null) {
       data['restaurant'] = restaurant!.toJson();
     }

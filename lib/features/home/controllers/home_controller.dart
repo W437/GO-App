@@ -11,9 +11,11 @@ class HomeController extends GetxController implements GetxService {
 
   List<String?>? _bannerImageList;
   List<dynamic>? _bannerDataList;
+  List<Banner>? _bannerObjectList;
 
   List<String?>? get bannerImageList => _bannerImageList;
   List<dynamic>? get bannerDataList => _bannerDataList;
+  List<Banner>? get bannerObjectList => _bannerObjectList;
 
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
@@ -48,21 +50,37 @@ class HomeController extends GetxController implements GetxService {
     if (bannerModel != null) {
       _bannerImageList = [];
       _bannerDataList = [];
+      _bannerObjectList = [];
+
       for (var campaign in bannerModel.campaigns!) {
         _bannerImageList!.add(campaign.imageFullUrl);
         _bannerDataList!.add(campaign);
+        // Create a Banner object for campaigns (they don't have video support yet)
+        _bannerObjectList!.add(Banner(
+          imageFullUrl: campaign.imageFullUrl,
+          videoFullUrl: null,
+          videoThumbnailUrl: null,
+        ));
       }
+
       for (var banner in bannerModel.banners!) {
-        if(_bannerImageList!.contains(banner.imageFullUrl)){
-          _bannerImageList!.add('${banner.imageFullUrl}${bannerModel.banners!.indexOf(banner)}');
+        // Prioritize video over image for the display list
+        String? displayUrl = banner.videoFullUrl ?? banner.imageFullUrl;
+
+        if(_bannerImageList!.contains(displayUrl)){
+          _bannerImageList!.add('$displayUrl${bannerModel.banners!.indexOf(banner)}');
         }else {
-          _bannerImageList!.add(banner.imageFullUrl);
+          _bannerImageList!.add(displayUrl);
         }
+
         if(banner.food != null) {
           _bannerDataList!.add(banner.food);
         }else {
           _bannerDataList!.add(banner.restaurant);
         }
+
+        // Store the actual Banner object with all fields
+        _bannerObjectList!.add(banner);
       }
     }
     update();

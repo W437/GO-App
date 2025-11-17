@@ -99,15 +99,25 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                 // Page indicators
                 Padding(
                   padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                  child: SmoothPageIndicator(
-                    controller: _pageController,
-                    count: 5,
-                    effect: SwapEffect(
-                      dotHeight: 8,
-                      dotWidth: 8,
-                      spacing: 8,
-                      activeDotColor: Theme.of(context).primaryColor,
-                      dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: SmoothPageIndicator(
+                      controller: _pageController,
+                      count: 5,
+                      effect: SwapEffect(
+                        dotHeight: 8,
+                        dotWidth: 8,
+                        spacing: 8,
+                        activeDotColor: Theme.of(context).primaryColor,
+                        dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                      ),
                     ),
                   ),
                 ),

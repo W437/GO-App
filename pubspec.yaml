@@ -76,6 +76,7 @@ dependencies:
   speech_to_text: ^7.0.0
   easy_refresh: ^3.4.0
   camera: ^0.10.5+9
+  flutter_blurhash: ^0.9.1
 
 #  wakelock_plus: ^1.2.8
 #  video_player_avfoundation: ^2.6.2
