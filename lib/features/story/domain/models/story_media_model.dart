@@ -7,6 +7,7 @@ class StoryMediaModel {
   String? mediaType;
   String? mediaPath;
   String? thumbnailPath;
+  String? thumbnailBlurhash;
   int? durationSeconds;
   String? caption;
   String? ctaLabel;
@@ -20,6 +21,7 @@ class StoryMediaModel {
     this.mediaType,
     this.mediaPath,
     this.thumbnailPath,
+    this.thumbnailBlurhash,
     this.durationSeconds,
     this.caption,
     this.ctaLabel,
@@ -36,6 +38,7 @@ class StoryMediaModel {
     mediaPath = json['media_url'] ?? json['media_path'];
     // Backend sends 'thumbnail_url' but we store as 'thumbnailPath'
     thumbnailPath = json['thumbnail_url'] ?? json['thumbnail_path'];
+    thumbnailBlurhash = json['thumbnail_blurhash'];
     durationSeconds = json['duration_seconds'] ?? 5;
     caption = json['caption'];
     ctaLabel = json['cta_label'];
@@ -60,6 +63,7 @@ class StoryMediaModel {
     data['media_type'] = mediaType;
     data['media_path'] = mediaPath;
     data['thumbnail_path'] = thumbnailPath;
+    data['thumbnail_blurhash'] = thumbnailBlurhash;
     data['duration_seconds'] = durationSeconds;
     data['caption'] = caption;
     data['cta_label'] = ctaLabel;

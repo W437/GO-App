@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:godelivery_user/features/story/domain/models/story_media_model.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:video_player/video_player.dart';
@@ -129,62 +130,101 @@ class StoryContentWidgetState extends State<StoryContentWidget> {
         );
       }
 
-      return CachedNetworkImage(
-        imageUrl: widget.media.mediaPath!,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        imageBuilder: (context, imageProvider) {
-          // Call the callback when image is loaded
-          if (widget.onImageLoaded != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              widget.onImageLoaded!();
-            });
-          }
-          return Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          // Layer 1: Blurhash (appears instantly, stays visible)
+          if (widget.media.thumbnailBlurhash != null && widget.media.thumbnailBlurhash!.isNotEmpty)
+            BlurHash(
+              hash: widget.media.thumbnailBlurhash!,
+              imageFit: BoxFit.cover,
+            )
+          else
+            Container(color: Colors.black),
+
+          // Layer 2: Image (fades in on top)
+          CachedNetworkImage(
+            imageUrl: widget.media.mediaPath!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            fadeInDuration: const Duration(milliseconds: 400),
+            fadeOutDuration: Duration.zero,
+            imageBuilder: (context, imageProvider) {
+              // Call the callback when image is loaded
+              if (widget.onImageLoaded != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onImageLoaded!();
+                });
+              }
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            },
+            placeholder: (context, url) => const SizedBox(),
+            errorWidget: (context, url, error) => Container(
+              color: Colors.black,
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.broken_image, color: Colors.white, size: 48),
+                    SizedBox(height: Dimensions.paddingSizeSmall),
+                    Text(
+                      'Image failed to load',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
             ),
-          );
-        },
-        placeholder: (context, url) => Container(
-          color: Colors.black,
-          child: const Center(
-            child: CircularProgressIndicator(color: Colors.white),
           ),
-        ),
-        errorWidget: (context, url, error) => Container(
-          color: Colors.black,
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.broken_image, color: Colors.white, size: 48),
-                SizedBox(height: Dimensions.paddingSizeSmall),
-                Text(
-                  'Image failed to load',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
+        ],
       );
     } else {
-      // Video
-      if (!_isVideoInitialized || _chewieController == null) {
-        return Container(
-          color: Colors.black,
-          child: const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          ),
-        );
-      }
+      // Video - Show blurhash -> thumbnail -> video
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          // Layer 1: Blurhash (appears instantly, always visible in background)
+          if (widget.media.thumbnailBlurhash != null && widget.media.thumbnailBlurhash!.isNotEmpty)
+            BlurHash(
+              hash: widget.media.thumbnailBlurhash!,
+              imageFit: BoxFit.cover,
+            )
+          else
+            Container(color: Colors.black),
 
-      return Chewie(controller: _chewieController!);
+          // Layer 2: Thumbnail (fades in while video loads)
+          if (widget.media.thumbnailPath != null && widget.media.thumbnailPath!.isNotEmpty)
+            CachedNetworkImage(
+              imageUrl: widget.media.thumbnailPath!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              fadeInDuration: const Duration(milliseconds: 400),
+              fadeOutDuration: Duration.zero,
+              placeholder: (context, url) => const SizedBox(),
+              errorWidget: (context, url, error) => const SizedBox(),
+            ),
+
+          // Layer 3: Video player (appears when ready)
+          if (_isVideoInitialized && _chewieController != null)
+            Chewie(controller: _chewieController!)
+          else
+            Container(
+              color: Colors.transparent,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            ),
+        ],
+      );
     }
   }
 
