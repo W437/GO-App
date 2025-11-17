@@ -157,8 +157,16 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
     return GetBuilder<CategoryController>(
       key: key,
       builder: (categoryController) {
-        return categoryController.categoryList != null
-            ? ListView.builder(
+        // Show shimmer while loading
+        if (categoryController.categoryList == null) {
+          return _buildShimmer();
+        }
+        // Show empty state if no categories
+        if (categoryController.categoryList!.isEmpty) {
+          return _buildEmptyState(context, 'No categories available', Icons.category_outlined);
+        }
+        // Show categories list
+        return ListView.builder(
                 key: const PageStorageKey('categories_list'),
                 physics: ResponsiveHelper.isMobile(context)
                     ? const BouncingScrollPhysics()
@@ -248,17 +256,26 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
                   ),
                 );
               },
-            )
-          : _buildShimmer();
-    });
+            );
+      },
+    );
   }
 
   Widget _buildCuisinesView({Key? key}) {
     return GetBuilder<CuisineController>(
       key: key,
       builder: (cuisineController) {
-        return cuisineController.cuisineModel != null
-            ? ListView.builder(
+        // Show shimmer while loading
+        if (cuisineController.cuisineModel == null) {
+          return _buildShimmer();
+        }
+        // Show empty state if no cuisines
+        if (cuisineController.cuisineModel!.cuisines == null ||
+            cuisineController.cuisineModel!.cuisines!.isEmpty) {
+          return _buildEmptyState(context, 'No cuisines available', Icons.restaurant_menu_outlined);
+        }
+        // Show cuisines list
+        return ListView.builder(
                 key: const PageStorageKey('cuisines_list'),
                 physics: ResponsiveHelper.isMobile(context)
                     ? const BouncingScrollPhysics()
@@ -286,9 +303,9 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
                   ),
                 );
               },
-            )
-          : _buildShimmer();
-    });
+            );
+      },
+    );
   }
 
   Widget _buildShimmer() {
@@ -296,48 +313,81 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-      itemCount: 10,
+      itemCount: 8,
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.only(
-            bottom: Dimensions.paddingSizeSmall,
             right: Dimensions.paddingSizeDefault,
+            bottom: Dimensions.paddingSizeSmall,
           ),
           child: Column(
             children: [
+              // Simple rounded square shimmer
               Shimmer(
-                color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                duration: const Duration(seconds: 2),
                 child: Container(
-                  height: 80,
-                  width: 80,
+                  width: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                  height: ResponsiveHelper.isMobile(context) ? 70 : 90,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white,
-                        const Color(0xFFE8E8E8),
-                      ],
-                      stops: const [0.65, 1.0],
-                    ),
-                    borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                    border: Border.all(
-                      color: Theme.of(context).disabledColor.withValues(alpha: 0.2),
-                      width: 3.5,
-                    ),
+                    borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                    color: Colors.grey.shade300,
                   ),
                 ),
               ),
               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              // Text shimmer
               Shimmer(
-                color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                duration: const Duration(seconds: 2),
                 child: Container(
-                  height: 15,
-                  width: 80,
+                  width: 50,
+                  height: 10,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(4),
+                    color: Colors.grey.shade300,
                   ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, String message, IconData icon) {
+    return ListView.builder(
+      shrinkWrap: true,
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+      itemCount: 5,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            right: Dimensions.paddingSizeDefault,
+            bottom: Dimensions.paddingSizeSmall,
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                height: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.2),
+                    width: 2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              Container(
+                width: 50,
+                height: 8,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.grey.withOpacity(0.15),
                 ),
               ),
             ],

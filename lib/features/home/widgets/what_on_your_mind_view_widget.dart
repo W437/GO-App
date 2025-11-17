@@ -34,7 +34,10 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
 
         SizedBox(
           height: ResponsiveHelper.isMobile(context) ? 120 : 170,
-          child: categoryController.categoryList != null ? ListView.builder(
+          child: categoryController.categoryList != null
+            ? categoryController.categoryList!.isEmpty
+              ? _buildEmptyState(context)
+              : ListView.builder(
             physics: ResponsiveHelper.isMobile(context) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
@@ -107,6 +110,35 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
       ]);
     });
   }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+              border: Border.all(
+                color: Theme.of(context).disabledColor.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+          Text(
+            'No categories available',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).disabledColor,
+              fontSize: Dimensions.fontSizeSmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class WebWhatOnYourMindViewShimmer extends StatelessWidget {
@@ -125,36 +157,34 @@ class WebWhatOnYourMindViewShimmer extends StatelessWidget {
         padding: const EdgeInsets.only(left: Dimensions.paddingSizeSmall),
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall, top: Dimensions.paddingSizeSmall),
-            child: Container(
-              width: ResponsiveHelper.isMobile(context) ? 70 : 108,
-              height: ResponsiveHelper.isMobile(context) ? 70 : 100,
-              padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-              margin: EdgeInsets.only(top: ResponsiveHelper.isMobile(context) ? 0 : Dimensions.paddingSizeSmall),
-              child: Column(children: [
-
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                  child: Shimmer(
-                    child: Container(
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusLarge), color: Theme.of(context).shadowColor),
-                      height: ResponsiveHelper.isMobile(context) ? 70 : 80, width: 70,
+            padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall),
+            child: Column(
+              children: [
+                // Simple rounded rectangle shimmer
+                Shimmer(
+                  child: Container(
+                    width: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                    height: ResponsiveHelper.isMobile(context) ? 70 : 90,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                      color: Colors.grey.shade300,
                     ),
                   ),
                 ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
+                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                  child: Shimmer(
-                    child: Container(
-                      height: ResponsiveHelper.isMobile(context) ? 10 : 15, width: 150,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor),
+                // Text placeholder shimmer
+                Shimmer(
+                  child: Container(
+                    width: 50,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.grey.shade300,
                     ),
                   ),
                 ),
-
-              ]),
+              ],
             ),
           );
         },

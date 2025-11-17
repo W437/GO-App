@@ -224,7 +224,7 @@ class StoryStripWidget extends StatelessWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Container(
-      height: 115,
+      height: 110,
       padding: const EdgeInsets.only(
         bottom: Dimensions.paddingSizeSmall,
       ),
@@ -234,6 +234,7 @@ class StoryStripWidget extends StatelessWidget {
           horizontal: Dimensions.paddingSizeDefault,
         ),
         itemCount: 5,
+        physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           return Container(
             width: 75,
@@ -241,7 +242,6 @@ class StoryStripWidget extends StatelessWidget {
               right: Dimensions.paddingSizeSmall,
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 70,
@@ -249,37 +249,19 @@ class StoryStripWidget extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.3),
+                      color: Colors.grey.withOpacity(0.2),
                       width: 2,
                     ),
                   ),
-                  padding: const EdgeInsets.all(3),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      border: Border.all(
-                        color: Theme.of(context).cardColor,
-                        width: 3,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.restaurant,
-                      color: Theme.of(context).disabledColor,
-                      size: 24,
-                    ),
-                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'No stories',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).disabledColor,
-                        fontSize: 11,
-                      ),
+                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                Container(
+                  width: 50,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.grey.withOpacity(0.15),
+                  ),
                 ),
               ],
             ),
