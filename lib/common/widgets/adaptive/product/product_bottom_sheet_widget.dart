@@ -31,7 +31,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -146,11 +146,11 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
 
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                    child: CustomImageWidget(
-                                      image: '${product!.imageFullUrl}',
-                                      width: ResponsiveHelper.isMobile(context) ? 100 : 140,
-                                      height: ResponsiveHelper.isMobile(context) ? 100 : 140,
+                                    child: BlurhashImageWidget(
+                                      imageUrl: '${product!.imageFullUrl}',
+                                      blurhash: product!.imageBlurhash,
                                       fit: BoxFit.cover,
+                                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                     ),
                                   ),
 

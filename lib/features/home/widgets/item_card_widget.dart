@@ -16,7 +16,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:flutter/material.dart';
@@ -68,14 +68,12 @@ class ItemCardWidget extends StatelessWidget {
               children: [
                 Padding(
                   padding: isCampaignItem ? const EdgeInsets.all(0) : const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall, left: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall),
-                  child: ClipRRect(
+                  child: BlurhashImageWidget(
+                    imageUrl: product.imageFullUrl ?? '',
+                    blurhash: product.imageBlurhash,
+                    fit: BoxFit.cover,
                     borderRadius: isCampaignItem ? const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)) :
                     BorderRadius.circular(Dimensions.radiusDefault),
-                    child: CustomImageWidget(
-                      image: product.imageFullUrl ?? '',
-                      fit: BoxFit.cover, width: double.infinity, height: double.infinity,
-                      isFood: true,
-                    ),
                   ),
                 ),
 

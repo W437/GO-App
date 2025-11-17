@@ -45,6 +45,7 @@ class Product {
   String? name;
   String? description;
   String? imageFullUrl;
+  String? imageBlurhash;
   int? categoryId;
   List<CategoryIds>? categoryIds;
   List<Variation>? variations;
@@ -77,6 +78,7 @@ class Product {
     this.name,
     this.description,
     this.imageFullUrl,
+    this.imageBlurhash,
     this.categoryId,
     this.categoryIds,
     this.variations,
@@ -110,6 +112,7 @@ class Product {
     name = json['name'];
     description = json['description'];
     imageFullUrl = json['image_full_url'];
+    imageBlurhash = json['image_blurhash'];
     categoryId = json['category_id'];
     if (json['category_ids'] != null) {
       categoryIds = [];
@@ -170,6 +173,7 @@ class Product {
     data['name'] = name;
     data['description'] = description;
     data['image_full_url'] = imageFullUrl;
+    data['image_blurhash'] = imageBlurhash;
     data['category_id'] = categoryId;
     if (categoryIds != null) {
       data['category_ids'] = categoryIds!.map((v) => v.toJson()).toList();

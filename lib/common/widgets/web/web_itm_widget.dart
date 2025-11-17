@@ -11,7 +11,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
@@ -50,10 +50,14 @@ class WebItemWidget extends StatelessWidget {
           child: Column(children: [
 
             Stack(children: [
-              CustomImageWidget(
-                image: '${product?.imageFullUrl}',
-                height: 160, width: 275, fit: BoxFit.cover,
-                isFood: true,
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusSmall)),
+                child: BlurhashImageWidget(
+                  imageUrl: '${product?.imageFullUrl}',
+                  blurhash: product?.imageBlurhash,
+                  fit: BoxFit.cover,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusSmall)),
+                ),
               ),
               DiscountTagWidget(
                 discount: product?.discount,

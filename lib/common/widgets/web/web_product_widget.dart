@@ -12,7 +12,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
@@ -91,10 +91,11 @@ class WebProductWidget extends StatelessWidget {
                   Stack(children: [
                     ClipRRect(
                       borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusSmall), topRight: Radius.circular(Dimensions.radiusSmall)),
-                      child: CustomImageWidget(
-                        image: '${isRestaurant ? restaurant != null ? restaurant!.logoFullUrl : '' : product!.imageFullUrl}',
-                        height: desktop ? 160 : length == null ? 100 : 65, width: desktop ? isRestaurant ? 275 : 300 : 80, fit: BoxFit.cover,
-                        isFood: !isRestaurant, isRestaurant: isRestaurant,
+                      child: BlurhashImageWidget(
+                        imageUrl: '${isRestaurant ? restaurant != null ? restaurant!.logoFullUrl : '' : product!.imageFullUrl}',
+                        blurhash: isRestaurant ? restaurant?.logoBlurhash : product!.imageBlurhash,
+                        fit: BoxFit.cover,
+                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusSmall), topRight: Radius.circular(Dimensions.radiusSmall)),
                       ),
                     ),
 

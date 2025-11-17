@@ -111,7 +111,7 @@ class ProductWidget extends StatelessWidget {
                       width: desktop ? 120 : 110,
                       child: BlurhashImageWidget(
                         imageUrl: '${isRestaurant ? restaurant!.logoFullUrl : product!.imageFullUrl}',
-                        blurhash: isRestaurant ? restaurant!.logoBlurhash : null,
+                        blurhash: isRestaurant ? restaurant!.logoBlurhash : product!.imageBlurhash,
                         fit: BoxFit.cover,
                         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                       ),

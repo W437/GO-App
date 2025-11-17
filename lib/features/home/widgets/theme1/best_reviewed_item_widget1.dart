@@ -9,7 +9,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
@@ -73,10 +73,11 @@ class BestReviewedItemWidget1 extends StatelessWidget {
                         Stack(children: [
                           ClipRRect(
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusSmall)),
-                            child: CustomImageWidget(
-                              image: productList[index].imageFullUrl ?? '',
-                              height: 125, width: 170, fit: BoxFit.cover,
-                              isFood: true,
+                            child: BlurhashImageWidget(
+                              imageUrl: productList[index].imageFullUrl ?? '',
+                              blurhash: productList[index].imageBlurhash,
+                              fit: BoxFit.cover,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusSmall)),
                             ),
                           ),
 

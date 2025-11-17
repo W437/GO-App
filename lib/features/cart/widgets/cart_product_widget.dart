@@ -12,7 +12,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/quantity_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -85,11 +85,13 @@ class CartProductWidget extends StatelessWidget {
                           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             cart.product!.imageFullUrl != null ? Stack(
                               children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                  child: CustomImageWidget(
-                                    image: '${cart.product!.imageFullUrl}',
-                                    height: 60, width: 60, fit: BoxFit.cover, isFood: true,
+                                SizedBox(
+                                  height: 60, width: 60,
+                                  child: BlurhashImageWidget(
+                                    imageUrl: '${cart.product!.imageFullUrl}',
+                                    blurhash: cart.product!.imageBlurhash,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                                   ),
                                 ),
                                 isAvailable ? const SizedBox() : Positioned(

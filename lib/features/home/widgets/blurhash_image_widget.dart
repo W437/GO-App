@@ -35,7 +35,7 @@ class BlurhashImageWidget extends StatelessWidget {
 
     // PRODUCTION MODE: Show blurhash then load image
     if (imageUrl.isEmpty) {
-      return _buildPlaceholder();
+      return _buildPlaceholder(context);
     }
 
     return ClipRRect(
@@ -50,7 +50,7 @@ class BlurhashImageWidget extends StatelessWidget {
               imageFit: fit,
             )
           else
-            _buildPlaceholder(),
+            _buildPlaceholder(context),
 
           // Layer 2: Image (fades in on top, revealing underneath)
           CachedNetworkImage(
@@ -66,10 +66,9 @@ class BlurhashImageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
-    return CustomAssetImageWidget(
-      Images.placeholder,
-      fit: fit,
+  Widget _buildPlaceholder(BuildContext context) {
+    return Container(
+      color: Theme.of(context).cardColor,
     );
   }
 }
