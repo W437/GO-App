@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -99,14 +99,11 @@ class AllCategoriesBottomSheet extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  ClipRRect(
+                                  BlurhashImageWidget(
+                                    imageUrl: categoryController.categoryList![index].imageFullUrl ?? '',
+                                    blurhash: categoryController.categoryList![index].imageBlurhash,
+                                    fit: BoxFit.cover,
                                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                    child: CustomImageWidget(
-                                      height: 50,
-                                      width: 50,
-                                      fit: BoxFit.cover,
-                                      image: categoryController.categoryList![index].imageFullUrl ?? '',
-                                    ),
                                   ),
                                   const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                                   Text(

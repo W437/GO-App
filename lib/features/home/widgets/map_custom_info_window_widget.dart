@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/profile/domain/models/userinfo_model.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -26,9 +26,14 @@ class MapCustomInfoWindowWidget extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(50),
-            child: CustomImageWidget(
-              image: restaurant != null ? (restaurant?.logoFullUrl ?? '') : (userInfoModel?.imageFullUrl ?? ''),
-              fit: BoxFit.fill, height: 30, width: 30,
+            child: SizedBox(
+              height: 30, width: 30,
+              child: BlurhashImageWidget(
+                imageUrl: restaurant != null ? (restaurant?.logoFullUrl ?? '') : (userInfoModel?.imageFullUrl ?? ''),
+                blurhash: restaurant != null ? restaurant?.logoBlurhash : null,
+                fit: BoxFit.fill,
+                borderRadius: BorderRadius.circular(15),
+              ),
             ),
           ),
           const SizedBox(width: Dimensions.paddingSizeExtraSmall),

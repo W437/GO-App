@@ -1,20 +1,21 @@
 import 'dart:math';
 
 import 'package:godelivery_user/features/cuisine/widgets/cuisine_custom_shape_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CuisineCardWidget extends StatelessWidget {
   final String image;
+  final String? blurhash;
   final String name;
   final bool fromCuisinesPage;
   final bool fromSearchPage;
-  const CuisineCardWidget({super.key, required this.image, required this.name, this.fromCuisinesPage = false, this.fromSearchPage = false});
+  const CuisineCardWidget({super.key, required this.image, this.blurhash, required this.name, this.fromCuisinesPage = false, this.fromSearchPage = false});
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +35,11 @@ class CuisineCardWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(decoration: BoxDecoration( color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(50)),
-              child: ClipRRect(
+              child: BlurhashImageWidget(
+                imageUrl: image,
+                blurhash: blurhash,
+                fit: BoxFit.cover,
                 borderRadius: BorderRadius.circular(50),
-                child: CustomImageWidget(image: image,
-                    fit: BoxFit.cover, height: 100, width: 100),
               ),
             ),
           ),
@@ -93,13 +95,11 @@ class CuisineCardWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              child: ClipOval(
-                child: CustomImageWidget(
-                  image: image,
-                  fit: BoxFit.cover,
-                  height: avatarSize,
-                  width: avatarSize,
-                ),
+              child: BlurhashImageWidget(
+                imageUrl: image,
+                blurhash: blurhash,
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(avatarSize / 2),
               ),
             ),
             const SizedBox(height: Dimensions.paddingSizeExtraSmall),

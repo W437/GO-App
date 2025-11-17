@@ -40,6 +40,7 @@ class Restaurant {
   String? phone;
   String? email;
   String? logoFullUrl;
+  String? logoBlurhash;
   String? latitude;
   String? longitude;
   String? address;
@@ -48,6 +49,7 @@ class Restaurant {
   String? currency;
   bool? freeDelivery;
   String? coverPhotoFullUrl;
+  String? coverPhotoBlurhash;
   bool? delivery;
   bool? takeAway;
   bool? isDineInActive;
@@ -105,6 +107,7 @@ class Restaurant {
     this.phone,
     this.email,
     this.logoFullUrl,
+    this.logoBlurhash,
     this.latitude,
     this.longitude,
     this.address,
@@ -113,6 +116,7 @@ class Restaurant {
     this.currency,
     this.freeDelivery,
     this.coverPhotoFullUrl,
+    this.coverPhotoBlurhash,
     this.delivery,
     this.takeAway,
     this.isDineInActive,
@@ -176,6 +180,7 @@ class Restaurant {
                   json['logo'] ??
                   json['image'] ??
                   json['thumbnail'] ?? '';
+    logoBlurhash = json['logo_blurhash'];
     latitude = json['latitude'];
     longitude = json['longitude'];
     address = json['address'];
@@ -188,6 +193,7 @@ class Restaurant {
                         json['cover_photo_url'] ??
                         json['cover_photo'] ??
                         json['cover_image'] ?? '';
+    coverPhotoBlurhash = json['cover_photo_blurhash'];
     delivery = json['delivery'];
     takeAway = json['take_away'];
     isDineInActive = json['is_dine_in_active'];
@@ -277,6 +283,7 @@ class Restaurant {
     data['phone'] = phone;
     data['email'] = email;
     data['logo_full_url'] = logoFullUrl;
+    data['logo_blurhash'] = logoBlurhash;
     data['latitude'] = latitude;
     data['longitude'] = longitude;
     data['address'] = address;
@@ -285,6 +292,7 @@ class Restaurant {
     data['zone_id'] = zoneId;
     data['free_delivery'] = freeDelivery;
     data['cover_photo_full_url'] = coverPhotoFullUrl;
+    data['cover_photo_blurhash'] = coverPhotoBlurhash;
     data['delivery'] = delivery;
     data['take_away'] = takeAway;
     data['is_dine_in_active'] = isDineInActive;

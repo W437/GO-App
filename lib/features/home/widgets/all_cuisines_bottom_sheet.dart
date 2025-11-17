@@ -84,6 +84,7 @@ class AllCuisinesBottomSheet extends StatelessWidget {
                             },
                             child: CuisineCardWidget(
                               image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
+                              blurhash: cuisineController.cuisineModel!.cuisines![index].imageBlurhash,
                               name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
                               fromCuisinesPage: true,
                             ),

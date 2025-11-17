@@ -11,7 +11,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
@@ -68,13 +68,11 @@ class RestaurantsCardWidget extends StatelessWidget {
                               color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                             ),
-                            child: ClipRRect(
+                            child: BlurhashImageWidget(
+                              imageUrl: '${restaurant.logoFullUrl}',
+                              blurhash: restaurant.logoBlurhash,
+                              fit: BoxFit.cover,
                               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                              child:  CustomImageWidget(
-                                image: '${restaurant.logoFullUrl}',
-                                    fit: BoxFit.cover, height: isNewOnGO! ? 95 : 65, width: isNewOnGO! ? 95 : 65,
-                                isRestaurant: true,
-                              ),
                             ),
                           ),
 

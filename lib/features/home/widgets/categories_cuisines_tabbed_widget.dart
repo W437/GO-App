@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
 import 'package:godelivery_user/features/home/widgets/cuisine_card_widget.dart';
@@ -228,14 +228,11 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
                                   stops: const [0.65, 1.0],
                                 ),
                               ),
-                              child: ClipRRect(
+                              child: BlurhashImageWidget(
+                                imageUrl: '${categoryController.categoryList![index].imageFullUrl}',
+                                blurhash: categoryController.categoryList![index].imageBlurhash,
+                                fit: BoxFit.cover,
                                 borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge - 3),
-                                child: CustomImageWidget(
-                                  image: '${categoryController.categoryList![index].imageFullUrl}',
-                                  height: 80,
-                                  width: 80,
-                                  fit: BoxFit.cover,
-                                ),
                               ),
                             ),
                           ),
@@ -298,6 +295,7 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
                     radius: Dimensions.radiusDefault,
                     child: CuisineCardWidget(
                       image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
+                      blurhash: cuisineController.cuisineModel!.cuisines![index].imageBlurhash,
                       name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
                     ),
                   ),

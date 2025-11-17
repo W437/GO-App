@@ -12,7 +12,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -92,10 +92,15 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                                     borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
                                     child: Stack(
                                       children: [
-                                        CustomImageWidget(
-                                          image: '${restaurantList[index].coverPhotoFullUrl}',
-                                          fit: BoxFit.cover, height: 95, width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
-                                          isRestaurant: true,
+                                        SizedBox(
+                                          height: 95,
+                                          width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
+                                          child: BlurhashImageWidget(
+                                            imageUrl: '${restaurantList[index].coverPhotoFullUrl}',
+                                            blurhash: restaurantList[index].coverPhotoBlurhash,
+                                            fit: BoxFit.cover,
+                                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
+                                          ),
                                         ),
 
                                         !isAvailable ? Positioned(
@@ -218,13 +223,11 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                                       border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.1), width: 3),
                                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                     ),
-                                    child: ClipRRect(
+                                    child: BlurhashImageWidget(
+                                      imageUrl: '${restaurantList[index].logoFullUrl}',
+                                      blurhash: restaurantList[index].logoBlurhash,
+                                      fit: BoxFit.cover,
                                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                      child: CustomImageWidget(
-                                        image: '${restaurantList[index].logoFullUrl}',
-                                        fit: BoxFit.cover, height: 65, width: 65,
-                                        isRestaurant: true,
-                                      ),
                                     ),
                                   ),
                                 ),

@@ -1,10 +1,10 @@
 import 'package:godelivery_user/features/home/widgets/category_pop_up_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -51,11 +51,13 @@ class CategoryWidget1 extends StatelessWidget {
                                 right: Dimensions.paddingSizeExtraSmall,
                               ),
                               child: Stack(children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                  child: CustomImageWidget(
-                                    image: categoryController.categoryList![index].imageFullUrl ?? '',
-                                    height: 65, width: 75, fit: BoxFit.cover,
+                                SizedBox(
+                                  height: 65, width: 75,
+                                  child: BlurhashImageWidget(
+                                    imageUrl: categoryController.categoryList![index].imageFullUrl ?? '',
+                                    blurhash: categoryController.categoryList![index].imageBlurhash,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                   ),
                                 ),
                                 Positioned(bottom: 0, left: 0, right: 0, child: Container(

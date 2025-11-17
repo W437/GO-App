@@ -9,7 +9,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
 import 'package:flutter/material.dart';
@@ -113,9 +113,14 @@ class OrderViewWidget extends StatelessWidget {
                                       ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        child: CustomImageWidget(
-                                          image: '${orderList![index].restaurant != null ? orderList[index].restaurant!.logoFullUrl : ''}',
-                                          height: 80, width: 80, fit: BoxFit.cover, isRestaurant: true,
+                                        child: SizedBox(
+                                          height: 80, width: 80,
+                                          child: BlurhashImageWidget(
+                                            imageUrl: '${orderList![index].restaurant != null ? orderList[index].restaurant!.logoFullUrl : ''}',
+                                            blurhash: orderList[index].restaurant != null ? orderList[index].restaurant!.logoBlurhash : null,
+                                            fit: BoxFit.cover,
+                                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                          ),
                                         ),
                                       ),
                                     ),

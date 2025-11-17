@@ -12,7 +12,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
@@ -110,12 +110,14 @@ class RestaurantView extends StatelessWidget {
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
-                child: CustomImageWidget(
-                  image: '${restaurant.coverPhotoFullUrl}',
-                  fit: BoxFit.cover, height: 110, width: double.infinity,
-                  isRestaurant: true,
+              child: SizedBox(
+                height: 110,
+                width: double.infinity,
+                child: BlurhashImageWidget(
+                  imageUrl: '${restaurant.coverPhotoFullUrl}',
+                  blurhash: restaurant.coverPhotoBlurhash,
+                  fit: BoxFit.cover,
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
                 ),
               ),
             ),
@@ -156,13 +158,11 @@ class RestaurantView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                       border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.3), width: 2.5),
                     ),
-                    child: ClipRRect(
+                    child: BlurhashImageWidget(
+                      imageUrl: '${restaurant.logoFullUrl}',
+                      blurhash: restaurant.logoBlurhash,
+                      fit: BoxFit.cover,
                       borderRadius: BorderRadius.circular(3.5),
-                      child: CustomImageWidget(
-                        image: '${restaurant.logoFullUrl}',
-                        fit: BoxFit.cover, height: 70, width: 70,
-                        isRestaurant: true,
-                      ),
                     ),
                   ),
                   const SizedBox(height: Dimensions.paddingSizeExtraSmall),

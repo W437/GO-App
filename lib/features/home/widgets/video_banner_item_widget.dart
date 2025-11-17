@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:godelivery_user/features/home/widgets/blurhash_banner_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/util/images.dart';
 
 class VideoBannerItemWidget extends StatefulWidget {
@@ -100,7 +100,7 @@ class _VideoBannerItemWidgetState extends State<VideoBannerItemWidget> {
       return ClipRRect(
         borderRadius: widget.borderRadius,
         child: widget.thumbnailUrl != null
-            ? BlurhashBannerImageWidget(
+            ? BlurhashImageWidget(
                 imageUrl: widget.thumbnailUrl!,
                 blurhash: widget.thumbnailBlurhash,
                 fit: BoxFit.cover,
@@ -133,7 +133,7 @@ class _VideoBannerItemWidgetState extends State<VideoBannerItemWidget> {
             ClipRRect(
               borderRadius: widget.borderRadius,
               child: widget.thumbnailUrl != null
-                  ? BlurhashBannerImageWidget(
+                  ? BlurhashImageWidget(
                       imageUrl: widget.thumbnailUrl!,
                       blurhash: widget.thumbnailBlurhash,
                       fit: BoxFit.cover,

@@ -61,6 +61,7 @@ class CuisineViewWidget extends StatelessWidget {
                           width: ResponsiveHelper.isMobile(context) ? 100 : 120,
                           child: CuisineCardWidget(
                             image: cuisineController.cuisineModel!.cuisines![index].imageFullUrl ?? '',
+                            blurhash: cuisineController.cuisineModel!.cuisines![index].imageBlurhash,
                             name: cuisineController.cuisineModel!.cuisines![index].name ?? '',
                           ),
                         ),

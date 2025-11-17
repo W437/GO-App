@@ -7,6 +7,7 @@ class CategoryModel {
   String? _createdAt;
   String? _updatedAt;
   String? _imageFullUrl;
+  String? _imageBlurhash;
 
   CategoryModel(
       {int? id,
@@ -16,7 +17,8 @@ class CategoryModel {
         int? status,
         String? createdAt,
         String? updatedAt,
-        String? imageFullUrl}) {
+        String? imageFullUrl,
+        String? imageBlurhash}) {
     _id = id;
     _name = name;
     _parentId = parentId;
@@ -25,6 +27,7 @@ class CategoryModel {
     _createdAt = createdAt;
     _updatedAt = updatedAt;
     _imageFullUrl = imageFullUrl;
+    _imageBlurhash = imageBlurhash;
   }
 
   int? get id => _id;
@@ -35,6 +38,7 @@ class CategoryModel {
   String? get createdAt => _createdAt;
   String? get updatedAt => _updatedAt;
   String? get imageFullUrl => _imageFullUrl;
+  String? get imageBlurhash => _imageBlurhash;
 
   CategoryModel.fromJson(Map<String, dynamic> json) {
     _id = json['id'];
@@ -45,6 +49,7 @@ class CategoryModel {
     _createdAt = json['created_at'];
     _updatedAt = json['updated_at'];
     _imageFullUrl = json['image_full_url'];
+    _imageBlurhash = json['image_blurhash'];
   }
 
   Map<String, dynamic> toJson() {
@@ -57,6 +62,7 @@ class CategoryModel {
     data['created_at'] = _createdAt;
     data['updated_at'] = _updatedAt;
     data['image_full_url'] = _imageFullUrl;
+    data['image_blurhash'] = _imageBlurhash;
     return data;
   }
 }

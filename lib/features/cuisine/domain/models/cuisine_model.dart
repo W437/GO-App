@@ -25,6 +25,7 @@ class Cuisines {
   int? id;
   String? name;
   String? imageFullUrl;
+  String? imageBlurhash;
   int? status;
   String? slug;
   String? createdAt;
@@ -34,6 +35,7 @@ class Cuisines {
     this.id,
     this.name,
     this.imageFullUrl,
+    this.imageBlurhash,
     this.status,
     this.slug,
     this.createdAt,
@@ -44,6 +46,7 @@ class Cuisines {
     id = json['id'];
     name = json['name'];
     imageFullUrl = json['image_full_url'];
+    imageBlurhash = json['image_blurhash'];
     status = json['status'];
     slug = json['slug'];
     createdAt = json['created_at'];
@@ -55,6 +58,7 @@ class Cuisines {
     data['id'] = id;
     data['name'] = name;
     data['image_full_url'] = imageFullUrl;
+    data['image_blurhash'] = imageBlurhash;
     data['status'] = status;
     data['slug'] = slug;
     data['created_at'] = createdAt;

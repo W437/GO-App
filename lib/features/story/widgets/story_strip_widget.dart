@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
@@ -26,7 +26,7 @@ class StoryStripWidget extends StatelessWidget {
         return Container(
           height: 110,
           padding: const EdgeInsets.only(
-            bottom: Dimensions.paddingSizeSmall,
+            bottom: Dimensions.paddingSizeExtraSmall,
           ),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -122,23 +122,18 @@ class StoryStripWidget extends StatelessWidget {
                                         ? restaurant.coverPhotoFullUrl!
                                         : null;
 
+                                final blurhash = (restaurant.logoFullUrl?.isNotEmpty == true)
+                                    ? restaurant.logoBlurhash
+                                    : (restaurant.coverPhotoFullUrl?.isNotEmpty == true)
+                                        ? restaurant.coverPhotoBlurhash
+                                        : null;
+
                                 return imageUrl != null
-                                  ? CachedNetworkImage(
+                                  ? BlurhashImageWidget(
                                       imageUrl: imageUrl,
+                                      blurhash: blurhash,
                                       fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(
-                                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                        child: const Center(
-                                          child: CircularProgressIndicator(strokeWidth: 2),
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) {
-                                        print('🖼️ [STORY STRIP] ❌ Failed to load image: $url - Error: $error');
-                                        return Container(
-                                          color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                          child: Icon(Icons.restaurant, color: Theme.of(context).disabledColor),
-                                        );
-                                      },
+                                      borderRadius: BorderRadius.circular(100),
                                     )
                                   : Container(
                                       color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
@@ -173,8 +168,8 @@ class StoryStripWidget extends StatelessWidget {
   Widget _buildShimmer() {
     return Container(
       height: 110,
-      padding: const EdgeInsets.symmetric(
-        vertical: Dimensions.paddingSizeSmall,
+      padding: const EdgeInsets.only(
+        bottom: Dimensions.paddingSizeExtraSmall,
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -226,7 +221,7 @@ class StoryStripWidget extends StatelessWidget {
     return Container(
       height: 110,
       padding: const EdgeInsets.only(
-        bottom: Dimensions.paddingSizeSmall,
+        bottom: Dimensions.paddingSizeExtraSmall,
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,

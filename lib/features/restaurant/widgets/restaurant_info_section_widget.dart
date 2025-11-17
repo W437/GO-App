@@ -10,7 +10,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
@@ -159,13 +159,16 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                                     boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), blurRadius: 10)]
                                   ),
                                   padding: const EdgeInsets.all(2),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(500),
-                                    child: Stack(children: [
-                                      CustomImageWidget(
-                                        image: '${restaurant.logoFullUrl}',
-                                        height: 200 - (scrollingRate * 90), width: 200 - (scrollingRate * 90), fit: BoxFit.cover,
-                                        isRestaurant: true,
+                                  child: Stack(children: [
+                                      SizedBox(
+                                        height: 200 - (scrollingRate * 90),
+                                        width: 200 - (scrollingRate * 90),
+                                        child: BlurhashImageWidget(
+                                          imageUrl: '${restaurant.logoFullUrl}',
+                                          blurhash: restaurant.logoBlurhash,
+                                          fit: BoxFit.cover,
+                                          borderRadius: BorderRadius.circular(500),
+                                        ),
                                       ),
                                       restController.isRestaurantOpenNow(restaurant.active!, restaurant.schedules) ? const SizedBox() : Positioned(
                                         left: 0, right: 0, bottom: 0,
@@ -183,8 +186,8 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                                         ),
                                       ),
                                     ]),
-                                  ),
-                                ))
+                                ),
+                              ),
                               ],
                             ),
                           ),
@@ -196,13 +199,13 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
               ),
               background: Container(
                 margin: EdgeInsets.only(bottom: isDesktop ? 100 : (hasCoupon ? 200 : 100)),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(Dimensions.radiusLarge)),
-                  child: CustomImageWidget(
-                    height: 100,
-                    fit: BoxFit.cover, placeholder: Images.restaurantCover,
-                    image: '${restaurant.coverPhotoFullUrl}',
-                    isRestaurant: true,
+                child: SizedBox(
+                  height: 100,
+                  child: BlurhashImageWidget(
+                    imageUrl: '${restaurant.coverPhotoFullUrl}',
+                    blurhash: restaurant.coverPhotoBlurhash,
+                    fit: BoxFit.cover,
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(Dimensions.radiusLarge)),
                   ),
                 ),
               ),

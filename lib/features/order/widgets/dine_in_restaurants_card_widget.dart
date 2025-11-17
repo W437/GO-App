@@ -7,7 +7,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -56,10 +56,14 @@ class DineInRestaurantsCardWidget extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                        child: CustomImageWidget(
-                          image: '${restaurant.logoFullUrl}',
-                          fit: BoxFit.cover, height: 65, width: 65,
-                          isRestaurant: true,
+                        child: SizedBox(
+                          height: 65, width: 65,
+                          child: BlurhashImageWidget(
+                            imageUrl: '${restaurant.logoFullUrl}',
+                            blurhash: restaurant.logoBlurhash,
+                            fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          ),
                         ),
                       ),
                     ),

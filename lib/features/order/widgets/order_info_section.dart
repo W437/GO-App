@@ -22,6 +22,7 @@ import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
@@ -218,10 +219,15 @@ class OrderInfoSection extends StatelessWidget {
 
           ]) : const SizedBox() : const SizedBox(),
 
-          (pastOrder) ? CustomImageWidget(
-            image: '${order.restaurant!.coverPhotoFullUrl}',
-            height: 160, width: double.infinity,
-            isRestaurant: true,
+          (pastOrder) ? SizedBox(
+            height: 160,
+            width: double.infinity,
+            child: BlurhashImageWidget(
+              imageUrl: '${order.restaurant!.coverPhotoFullUrl}',
+              blurhash: order.restaurant!.coverPhotoBlurhash,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.zero,
+            ),
           ): const SizedBox(),
 
           Container(
@@ -921,9 +927,14 @@ class OrderInfoSection extends StatelessWidget {
 
               order.restaurant != null ? Row(children: [
 
-                ClipOval(child: CustomImageWidget(
-                  image: '${order.restaurant!.logoFullUrl}',
-                  height: 50, width: 50, fit: BoxFit.cover, isRestaurant: true,
+                ClipOval(child: SizedBox(
+                  height: 50, width: 50,
+                  child: BlurhashImageWidget(
+                    imageUrl: '${order.restaurant!.logoFullUrl}',
+                    blurhash: order.restaurant!.logoBlurhash,
+                    fit: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                 )),
                 const SizedBox(width: Dimensions.paddingSizeSmall),
 

@@ -328,6 +328,7 @@ class SearchScreenState extends State<SearchScreen> {
                                   height: 130,
                                   child: CuisineCardWidget(
                                     image: '${cuisineController.cuisineModel!.cuisines![index].imageFullUrl}',
+                                    blurhash: cuisineController.cuisineModel!.cuisines![index].imageBlurhash,
                                     name: cuisineController.cuisineModel!.cuisines![index].name!,
                                     fromSearchPage: true,
                                   ),

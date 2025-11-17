@@ -1,11 +1,11 @@
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
@@ -70,12 +70,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
                           radius: Dimensions.radiusDefault,
                           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
-                            ClipRRect(
+                            BlurhashImageWidget(
+                              imageUrl: '${catController.categoryList![index].imageFullUrl}',
+                              blurhash: catController.categoryList![index].imageBlurhash,
+                              fit: BoxFit.cover,
                               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                              child: CustomImageWidget(
-                                height: 50, width: 50, fit: BoxFit.cover,
-                                image: '${catController.categoryList![index].imageFullUrl}',
-                              ),
                             ),
                             const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 

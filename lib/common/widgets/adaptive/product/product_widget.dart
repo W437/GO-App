@@ -21,7 +21,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_without_image_widget.dart';
@@ -106,12 +106,14 @@ class ProductWidget extends StatelessWidget {
                 child: Row(children: [
 
                   Stack(clipBehavior: Clip.none, children: [
-                    ((image != null && image.isNotEmpty) || isRestaurant) ? ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      child: CustomImageWidget(
-                        image: '${isRestaurant ? restaurant!.logoFullUrl : product!.imageFullUrl}',
-                        height: desktop ? 120 : length == null ? 100 : 120, width: desktop ? 120 : 110, fit: BoxFit.cover,
-                        isFood: !isRestaurant, isRestaurant: isRestaurant,
+                    ((image != null && image.isNotEmpty) || isRestaurant) ? SizedBox(
+                      height: desktop ? 120 : length == null ? 100 : 120,
+                      width: desktop ? 120 : 110,
+                      child: BlurhashImageWidget(
+                        imageUrl: '${isRestaurant ? restaurant!.logoFullUrl : product!.imageFullUrl}',
+                        blurhash: isRestaurant ? restaurant!.logoBlurhash : null,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                       ),
                     ) : isAvailable ? const SizedBox() : Container(
                       height: desktop ? 120 : length == null ? 100 : 110, width: desktop ? 120 : 110,

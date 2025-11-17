@@ -1,10 +1,10 @@
 import 'package:godelivery_user/features/interest/controllers/interest_controller.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/web/web_menu_bar.dart';
@@ -74,9 +74,14 @@ class _InterestScreenState extends State<InterestScreen> {
                           ),
                           alignment: Alignment.center,
                           child: Row(children: [
-                            CustomImageWidget(
-                              image: '${interestController.categoryList![index].imageFullUrl}',
+                            SizedBox(
                               height: 30, width: 30,
+                              child: BlurhashImageWidget(
+                                imageUrl: '${interestController.categoryList![index].imageFullUrl}',
+                                blurhash: interestController.categoryList![index].imageBlurhash,
+                                fit: BoxFit.cover,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                             ),
                             const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                             Flexible(child: Text(

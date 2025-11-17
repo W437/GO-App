@@ -1,8 +1,8 @@
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -58,9 +58,11 @@ class CategoryPopUpWidget extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                     boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, blurRadius: 5, spreadRadius: 1)],
                                   ),
-                                  child: CustomImageWidget(
-                                    image: categoryController.categoryList![index].imageFullUrl ?? '',
-                                    height: 50, width: 50, fit: BoxFit.cover,
+                                  child: BlurhashImageWidget(
+                                    imageUrl: categoryController.categoryList![index].imageFullUrl ?? '',
+                                    blurhash: categoryController.categoryList![index].imageBlurhash,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                   ),
                                 ),
                                 Text(

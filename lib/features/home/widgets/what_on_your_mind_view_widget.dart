@@ -4,11 +4,11 @@ import 'package:godelivery_user/features/home/widgets/all_categories_bottom_shee
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -72,14 +72,11 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
                         ),
                         child: Container(
                           margin: const EdgeInsets.all(2),
-                          child: ClipRRect(
+                          child: BlurhashImageWidget(
+                            imageUrl: categoryController.categoryList![index].imageFullUrl ?? '',
+                            blurhash: categoryController.categoryList![index].imageBlurhash,
+                            fit: BoxFit.cover,
                             borderRadius: BorderRadius.circular(Dimensions.radiusLarge - 2),
-                            child: CustomImageWidget(
-                              image: categoryController.categoryList![index].imageFullUrl ?? '',
-                              height: ResponsiveHelper.isMobile(context) ? 66 : 86,
-                              width: ResponsiveHelper.isMobile(context) ? 66 : 86,
-                              fit: BoxFit.cover,
-                            ),
                           ),
                         ),
                       ),
