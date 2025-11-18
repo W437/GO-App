@@ -100,6 +100,8 @@ class Restaurant {
   bool? isActiveDineIn;
   int? dineInBookingDuration;
   String? dineInBookingDurationTimeFormat;
+  String? description;
+  String? shortDescription;
 
   Restaurant({
     this.id,
@@ -167,6 +169,8 @@ class Restaurant {
     this.isActiveDineIn,
     this.dineInBookingDuration,
     this.dineInBookingDurationTimeFormat,
+    this.description,
+    this.shortDescription,
   });
 
   Restaurant.fromJson(Map<String, dynamic> json) {
@@ -274,6 +278,8 @@ class Restaurant {
     isActiveDineIn = json['is_dine_in_active'] ?? false;
     dineInBookingDuration = json['schedule_advance_dine_in_booking_duration'] ?? 0;
     dineInBookingDurationTimeFormat = json['schedule_advance_dine_in_booking_duration_time_format'];
+    description = json['description'];
+    shortDescription = json['short_description'];
   }
 
   Map<String, dynamic> toJson() {
@@ -347,6 +353,8 @@ class Restaurant {
     data['is_dine_in_active'] = isActiveDineIn;
     data['schedule_advance_dine_in_booking_duration'] = dineInBookingDuration;
     data['schedule_advance_dine_in_booking_duration_time_format'] = dineInBookingDurationTimeFormat;
+    data['description'] = description;
+    data['short_description'] = shortDescription;
     return data;
   }
 }

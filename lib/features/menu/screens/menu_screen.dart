@@ -15,6 +15,7 @@ import 'package:godelivery_user/features/favourite/controllers/favourite_control
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/language/widgets/language_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/menu/widgets/ios_menu_item_widget.dart';
+import 'package:godelivery_user/features/menu/widgets/modern_menu_button_widget.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
@@ -262,142 +263,133 @@ class _MenuScreenState extends State<MenuScreen> {
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20, bottom: 8),
+                      padding: const EdgeInsets.only(left: 20, bottom: 12),
                       child: Text(
                         'general'.tr.toUpperCase(),
                         style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeExtraSmall,
+                          fontSize: Dimensions.fontSizeSmall,
                           color: const Color(0xFF6D6D72),
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
 
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
+                    ModernMenuButtonWidget(
+                      icon: Icons.person,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'profile'.tr,
+                      onTap: () {
+                        if (AuthHelper.isLoggedIn()) {
+                          Get.toNamed(RouteHelper.getProfileRoute());
+                        } else {
+                          showBouncyBottomSheet(
+                            context: context,
+                            builder: (context) => GuestLoginBottomSheet(
+                              onLoginSuccess: () {
+                                profileController.getUserInfo();
+                              },
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.favorite,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'favourite'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getFavouriteScreen()),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.camera_alt,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'create_story'.tr,
+                      onTap: () => _openStoryCreator(profileController),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.sports_esports,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'Hopa! Bird Game',
+                      onTap: () => Get.toNamed(RouteHelper.getFlappyBirdGameScreen()),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.input,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'Modern Input Test',
+                      onTap: () => Get.to(() => const InputTestScreen()),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.location_on,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'my_address'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getAddressRoute()),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.language,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'language'.tr,
+                      onTap: () => _manageLanguageFunctionality(),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.dark_mode,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'dark_mode'.tr,
+                      showChevron: false,
+                      trailing: CupertinoSwitch(
+                        value: Get.isDarkMode,
+                        onChanged: (bool value) {
+                          Get.find<ThemeController>().toggleTheme();
+                        },
                       ),
-                      child: Column(children: [
-                        IosMenuItemWidget(
-                          icon: Icons.person_outline,
-                          iconBackgroundColor: const Color(0xFF007AFF),
-                          title: 'profile'.tr,
-                          onTap: () {
-                            if (AuthHelper.isLoggedIn()) {
-                              Get.toNamed(RouteHelper.getProfileRoute());
-                            } else {
-                              showBouncyBottomSheet(
-                                context: context,
-                                builder: (context) => GuestLoginBottomSheet(
-                                  onLoginSuccess: () {
-                                    profileController.getUserInfo();
-                                  },
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.favorite_border,
-                          iconBackgroundColor: const Color(0xFFFF3B30),
-                          title: 'favourite'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getFavouriteScreen()),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.camera_alt_outlined,
-                          iconBackgroundColor: const Color(0xFFFF9500),
-                          title: 'create_story'.tr,
-                          onTap: () => _openStoryCreator(profileController),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.sports_esports,
-                          iconBackgroundColor: const Color(0xFF34C759),
-                          title: 'Hopa! Bird Game',
-                          onTap: () => Get.toNamed(RouteHelper.getFlappyBirdGameScreen()),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.input,
-                          iconBackgroundColor: const Color(0xFFFF2D55),
-                          title: 'Modern Input Test',
-                          onTap: () => Get.to(() => const InputTestScreen()),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.location_on_outlined,
-                          iconBackgroundColor: const Color(0xFF007AFF),
-                          title: 'my_address'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getAddressRoute()),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.language_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'language'.tr,
-                          onTap: () => _manageLanguageFunctionality(),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.dark_mode_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'dark_mode'.tr,
-                          showChevron: false,
-                          hideSeparator: true,
-                          trailing: CupertinoSwitch(
-                            value: Get.isDarkMode,
-                            onChanged: (bool value) {
-                              Get.find<ThemeController>().toggleTheme();
-                            },
-                          ),
-                        ),
-                      ]),
                     ),
                   ]),
                   const SizedBox(height: 35),
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20, bottom: 8),
+                      padding: const EdgeInsets.only(left: 20, bottom: 12),
                       child: Text(
                         'promotional_activity'.tr.toUpperCase(),
                         style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeExtraSmall,
+                          fontSize: Dimensions.fontSizeSmall,
                           color: const Color(0xFF6D6D72),
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
 
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(children: [
-                        IosMenuItemWidget(
-                          icon: Icons.local_offer_outlined,
-                          iconBackgroundColor: const Color(0xFFFF9500),
-                          title: 'coupon'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getCouponRoute(fromCheckout: false)),
-                          hideSeparator: Get.find<SplashController>().configModel!.loyaltyPointStatus != 1 && Get.find<SplashController>().configModel!.customerWalletStatus != 1,
-                        ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.local_offer,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'coupon'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getCouponRoute(fromCheckout: false)),
+                    ),
 
-                        (Get.find<SplashController>().configModel!.loyaltyPointStatus == 1) ? IosMenuItemWidget(
-                          icon: Icons.stars_outlined,
-                          iconBackgroundColor: const Color(0xFFAF52DE),
-                          title: 'loyalty_points'.tr,
-                          badge: !isLoggedIn ? null : profileController.userInfoModel == null ? null : '${Get.find<ProfileController>().userInfoModel!.loyaltyPoint ?? 0}',
-                          onTap: () => Get.toNamed(RouteHelper.getLoyaltyRoute()),
-                          hideSeparator: Get.find<SplashController>().configModel!.customerWalletStatus != 1,
-                        ) : const SizedBox(),
+                    (Get.find<SplashController>().configModel!.loyaltyPointStatus == 1) ? ModernMenuButtonWidget(
+                      icon: Icons.stars,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'loyalty_points'.tr,
+                      badge: !isLoggedIn ? null : profileController.userInfoModel == null ? null : '${Get.find<ProfileController>().userInfoModel!.loyaltyPoint ?? 0}',
+                      onTap: () => Get.toNamed(RouteHelper.getLoyaltyRoute()),
+                    ) : const SizedBox(),
 
-                        (Get.find<SplashController>().configModel!.customerWalletStatus == 1) ? IosMenuItemWidget(
-                          icon: Icons.account_balance_wallet_outlined,
-                          iconBackgroundColor: const Color(0xFF34C759),
-                          title: 'my_wallet'.tr,
-                          badge: !isLoggedIn ? null : profileController.userInfoModel == null ? null : PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance ?? 0),
-                          onTap: () => Get.toNamed(RouteHelper.getWalletRoute(fromMenuPage: true)),
-                          hideSeparator: true,
-                        ) : const SizedBox(),
-                      ]),
-                    )
+                    (Get.find<SplashController>().configModel!.customerWalletStatus == 1) ? ModernMenuButtonWidget(
+                      icon: Icons.account_balance_wallet,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'my_wallet'.tr,
+                      badge: !isLoggedIn ? null : profileController.userInfoModel == null ? null : PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance ?? 0),
+                      onTap: () => Get.toNamed(RouteHelper.getWalletRoute(fromMenuPage: true)),
+                    ) : const SizedBox(),
                   ]),
                   const SizedBox(height: 35),
 
@@ -405,170 +397,148 @@ class _MenuScreenState extends State<MenuScreen> {
                    || (Get.find<SplashController>().configModel!.toggleDmRegistration! && !ResponsiveHelper.isDesktop(context))
                    || (Get.find<SplashController>().configModel!.toggleRestaurantRegistration! && !ResponsiveHelper.isDesktop(context)) ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20, bottom: 8),
+                      padding: const EdgeInsets.only(left: 20, bottom: 12),
                       child: Text(
                         'earnings'.tr.toUpperCase(),
                         style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeExtraSmall,
+                          fontSize: Dimensions.fontSizeSmall,
                           color: const Color(0xFF6D6D72),
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
 
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(children: [
+                    (Get.find<SplashController>().configModel!.refEarningStatus == 1 ) ? ModernMenuButtonWidget(
+                      icon: Icons.card_giftcard,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'refer_and_earn'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getReferAndEarnRoute()),
+                    ) : const SizedBox(),
 
-                        (Get.find<SplashController>().configModel!.refEarningStatus == 1 ) ? IosMenuItemWidget(
-                          icon: Icons.card_giftcard_outlined,
-                          iconBackgroundColor: const Color(0xFFFF2D55),
-                          title: 'refer_and_earn'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getReferAndEarnRoute()),
-                          hideSeparator: Get.find<SplashController>().configModel!.toggleDmRegistration != true && Get.find<SplashController>().configModel!.toggleRestaurantRegistration != true,
-                        ) : const SizedBox(),
+                    (Get.find<SplashController>().configModel!.toggleDmRegistration! && !ResponsiveHelper.isDesktop(context)) ? ModernMenuButtonWidget(
+                      icon: Icons.delivery_dining,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'join_as_a_delivery_man'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getDeliverymanRegistrationRoute()),
+                    ) : const SizedBox(),
 
-                        (Get.find<SplashController>().configModel!.toggleDmRegistration! && !ResponsiveHelper.isDesktop(context)) ? IosMenuItemWidget(
-                          icon: Icons.delivery_dining_outlined,
-                          iconBackgroundColor: const Color(0xFF5AC8FA),
-                          title: 'join_as_a_delivery_man'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getDeliverymanRegistrationRoute()),
-                          hideSeparator: Get.find<SplashController>().configModel!.toggleRestaurantRegistration != true,
-                        ) : const SizedBox(),
+                    (Get.find<SplashController>().configModel!.toggleRestaurantRegistration! && !ResponsiveHelper.isDesktop(context)) ? ModernMenuButtonWidget(
+                      icon: Icons.store,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'open_store'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getRestaurantRegistrationRoute()),
+                    ) : const SizedBox(),
 
-                        (Get.find<SplashController>().configModel!.toggleRestaurantRegistration! && !ResponsiveHelper.isDesktop(context)) ? IosMenuItemWidget(
-                          icon: Icons.store_outlined,
-                          iconBackgroundColor: const Color(0xFFFF9500),
-                          title: 'open_store'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getRestaurantRegistrationRoute()),
-                          hideSeparator: true,
-                        ) : const SizedBox(),
-                      ]),
-                    ),
                     const SizedBox(height: 35),
                   ]) : const SizedBox(),
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20, bottom: 8),
+                      padding: const EdgeInsets.only(left: 20, bottom: 12),
                       child: Text(
                         'help_and_support'.tr.toUpperCase(),
                         style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeExtraSmall,
+                          fontSize: Dimensions.fontSizeSmall,
                           color: const Color(0xFF6D6D72),
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
 
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(children: [
-                        IosMenuItemWidget(
-                          icon: Icons.chat_bubble_outline,
-                          iconBackgroundColor: const Color(0xFF007AFF),
-                          title: 'live_chat'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getConversationRoute()),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.help_outline,
-                          iconBackgroundColor: const Color(0xFFFF9500),
-                          title: 'help_and_support'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getSupportRoute()),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.info_outline,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'about_us'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('about-us')),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.description_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'terms_conditions'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('terms-and-condition')),
-                        ),
-                        IosMenuItemWidget(
-                          icon: Icons.privacy_tip_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'privacy_policy'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('privacy-policy')),
-                          hideSeparator: Get.find<SplashController>().configModel!.refundPolicyStatus != 1 &&
-                                        Get.find<SplashController>().configModel!.cancellationPolicyStatus != 1 &&
-                                        Get.find<SplashController>().configModel!.shippingPolicyStatus != 1,
-                        ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.chat_bubble,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'live_chat'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getConversationRoute()),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.help,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'help_and_support'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getSupportRoute()),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.info,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'about_us'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('about-us')),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.description,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'terms_conditions'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('terms-and-condition')),
+                    ),
+                    ModernMenuButtonWidget(
+                      icon: Icons.privacy_tip,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'privacy_policy'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('privacy-policy')),
+                    ),
 
-                        (Get.find<SplashController>().configModel!.refundPolicyStatus == 1 ) ? IosMenuItemWidget(
-                          icon: Icons.replay_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'refund_policy'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('refund-policy')),
-                          hideSeparator: Get.find<SplashController>().configModel!.cancellationPolicyStatus != 1 &&
-                                        Get.find<SplashController>().configModel!.shippingPolicyStatus != 1,
-                        ) : const SizedBox(),
+                    (Get.find<SplashController>().configModel!.refundPolicyStatus == 1 ) ? ModernMenuButtonWidget(
+                      icon: Icons.replay,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'refund_policy'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('refund-policy')),
+                    ) : const SizedBox(),
 
-                        (Get.find<SplashController>().configModel!.cancellationPolicyStatus == 1 ) ? IosMenuItemWidget(
-                          icon: Icons.cancel_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'cancellation_policy'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('cancellation-policy')),
-                          hideSeparator: Get.find<SplashController>().configModel!.shippingPolicyStatus != 1,
-                        ) : const SizedBox(),
+                    (Get.find<SplashController>().configModel!.cancellationPolicyStatus == 1 ) ? ModernMenuButtonWidget(
+                      icon: Icons.cancel,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'cancellation_policy'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('cancellation-policy')),
+                    ) : const SizedBox(),
 
-                        (Get.find<SplashController>().configModel!.shippingPolicyStatus == 1 ) ? IosMenuItemWidget(
-                          icon: Icons.local_shipping_outlined,
-                          iconBackgroundColor: const Color(0xFF8E8E93),
-                          title: 'shipping_policy'.tr,
-                          onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('shipping-policy')),
-                          hideSeparator: true,
-                        ) : const SizedBox(),
-
-                      ]),
-                    )
+                    (Get.find<SplashController>().configModel!.shippingPolicyStatus == 1 ) ? ModernMenuButtonWidget(
+                      icon: Icons.local_shipping,
+                      iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                      iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                      title: 'shipping_policy'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('shipping-policy')),
+                    ) : const SizedBox(),
                   ]),
                   const SizedBox(height: 35),
 
                   // Logout/Sign In Button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IosMenuItemWidget(
-                      icon: Get.find<AuthController>().isLoggedIn()
-                          ? Icons.logout_outlined
-                          : Icons.login_outlined,
-                      iconBackgroundColor: const Color(0xFFFF3B30),
-                      title: Get.find<AuthController>().isLoggedIn() ? 'logout'.tr : 'sign_in'.tr,
-                      showChevron: false,
-                      hideSeparator: true,
-                      onTap: () async {
-                        if(Get.find<AuthController>().isLoggedIn()) {
-                          Get.dialog(ConfirmationDialogWidget(icon: Images.support, description: 'are_you_sure_to_logout'.tr, isLogOut: true, onYesPressed: () async {
-                            Get.find<ProfileController>().setForceFullyUserEmpty();
-                            Get.find<AuthController>().socialLogout();
-                            Get.find<AuthController>().resetOtpView();
-                            Get.find<CartController>().clearCartList();
-                            Get.find<FavouriteController>().removeFavourites();
-                            await Get.find<AuthController>().clearSharedData();
-                            Get.offAllNamed(RouteHelper.getInitialRoute());
-                          }), useSafeArea: false);
-                        }else {
+                  ModernMenuButtonWidget(
+                    icon: Get.find<AuthController>().isLoggedIn()
+                        ? Icons.logout
+                        : Icons.login,
+                    iconBackgroundColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                    iconColor: Get.isDarkMode ? Colors.white : const Color(0xFF3C3C43),
+                    title: Get.find<AuthController>().isLoggedIn() ? 'logout'.tr : 'sign_in'.tr,
+                    showChevron: false,
+                    onTap: () async {
+                      if(Get.find<AuthController>().isLoggedIn()) {
+                        Get.dialog(ConfirmationDialogWidget(icon: Images.support, description: 'are_you_sure_to_logout'.tr, isLogOut: true, onYesPressed: () async {
+                          Get.find<ProfileController>().setForceFullyUserEmpty();
+                          Get.find<AuthController>().socialLogout();
+                          Get.find<AuthController>().resetOtpView();
+                          Get.find<CartController>().clearCartList();
                           Get.find<FavouriteController>().removeFavourites();
-                          await Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute));
-                          if(AuthHelper.isLoggedIn()) {
-                            await Get.find<FavouriteController>().getFavouriteList();
-                            profileController.getUserInfo();
-                          }
+                          await Get.find<AuthController>().clearSharedData();
+                          Get.offAllNamed(RouteHelper.getInitialRoute());
+                        }), useSafeArea: false);
+                      }else {
+                        Get.find<FavouriteController>().removeFavourites();
+                        await Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute));
+                        if(AuthHelper.isLoggedIn()) {
+                          await Get.find<FavouriteController>().getFavouriteList();
+                          profileController.getUserInfo();
                         }
-                      },
-                    ),
+                      }
+                    },
                   ),
                   const SizedBox(height: 20),
 

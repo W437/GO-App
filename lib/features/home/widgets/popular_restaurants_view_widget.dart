@@ -73,23 +73,33 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                           height: 185, width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Get.isDarkMode
+                                    ? Colors.black.withValues(alpha: 0.3)
+                                    : Colors.grey.withValues(alpha: 0.15),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
                           child: CustomInkWellWidget(
                             onTap: () => Get.toNamed(RouteHelper.getRestaurantRoute(restaurantList[index].id),
                               arguments: RestaurantScreen(restaurant: restaurantList[index]),
                             ),
-                            radius: Dimensions.radiusDefault,
+                            radius: Dimensions.radiusLarge,
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
                                 Container(
                                   height: 95, width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
                                   decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
+                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
+                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
                                     child: Stack(
                                       children: [
                                         SizedBox(
@@ -99,7 +109,7 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                                             imageUrl: '${restaurantList[index].coverPhotoFullUrl}',
                                             blurhash: restaurantList[index].coverPhotoBlurhash,
                                             fit: BoxFit.cover,
-                                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
+                                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
                                           ),
                                         ),
 
@@ -107,8 +117,15 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                                           top: 0, left: 0, right: 0, bottom: 0,
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
-                                              color: Colors.black.withValues(alpha: 0.3),
+                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.black.withValues(alpha: 0.4),
+                                                  Colors.black.withValues(alpha: 0.6),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ) : const SizedBox(),
@@ -117,18 +134,35 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                                   ),
                                 ),
 
-                                !isAvailable ? Positioned(top: 30, left: 60, child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusLarge)
+                                !isAvailable ? Positioned(top: 35, left: 0, right: 0, child: Center(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).cardColor.withValues(alpha: 0.95),
+                                      borderRadius: BorderRadius.circular(30),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.2),
+                                          blurRadius: 10,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.schedule_rounded, size: 14, color: Theme.of(context).colorScheme.error),
+                                        const SizedBox(width: 6),
+                                        Text('closed_now'.tr.toUpperCase(),
+                                          style: robotoMedium.copyWith(
+                                            color: Theme.of(context).colorScheme.error,
+                                            fontSize: 11,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  padding: EdgeInsets.symmetric(horizontal: Dimensions.fontSizeExtraLarge, vertical: Dimensions.paddingSizeExtraSmall),
-                                  child: Row(children: [
-                                    Icon(Icons.access_time, size: 12, color: Theme.of(context).cardColor),
-                                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                                    Text('closed_now'.tr, style: robotoMedium.copyWith(color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeSmall)),
-                                  ]),
                                 )) : const SizedBox(),
 
                                 Positioned(
@@ -195,39 +229,66 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                                 ),
 
                                 Positioned(
-                                  top: 71, right: 10,
-                                  child: ClipPath(
-                                    clipper: CurvedTopClipper(),
-                                    child: Container(
-                                      height: 25,
-                                      color: Theme.of(context).cardColor,
-                                      alignment: Alignment.center,
-                                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                                      child: Center(
-                                        child: Text( '${restController.getRestaurantDistance(
-                                          LatLng(double.parse(restaurantList[index].latitude!), double.parse(restaurantList[index].longitude!)),
-                                        ).toStringAsFixed(2)} ${'km'.tr}',
-                                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                                  top: 10, right: 10,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).cardColor.withValues(alpha: 0.95),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.15),
+                                          blurRadius: 8,
+                                          spreadRadius: 0,
                                         ),
-                                      ),
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.location_on_rounded,
+                                          size: 12,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          '${restController.getRestaurantDistance(
+                                            LatLng(double.parse(restaurantList[index].latitude!), double.parse(restaurantList[index].longitude!)),
+                                          ).toStringAsFixed(1)} km',
+                                          style: robotoBold.copyWith(
+                                            fontSize: 11,
+                                            color: Theme.of(context).textTheme.bodyLarge!.color,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
 
                                 Positioned(
-                                  top: 75, left: Dimensions.paddingSizeSmall,
+                                  top: 70, left: Dimensions.paddingSizeSmall,
                                   child: Container(
-                                    height: 65, width: 65,
+                                    height: 68, width: 68,
+                                    padding: const EdgeInsets.all(2),
                                     decoration:  BoxDecoration(
                                       color: Theme.of(context).cardColor,
-                                      border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.1), width: 3),
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Get.isDarkMode
+                                              ? Colors.black.withValues(alpha: 0.3)
+                                              : Colors.grey.withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                                     ),
                                     child: BlurhashImageWidget(
                                       imageUrl: '${restaurantList[index].logoFullUrl}',
                                       blurhash: restaurantList[index].logoBlurhash,
                                       fit: BoxFit.cover,
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
                                 ),

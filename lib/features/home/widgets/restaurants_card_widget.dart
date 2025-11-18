@@ -44,8 +44,17 @@ class RestaurantsCardWidget extends StatelessWidget {
           width: isNewOnGO! ? ResponsiveHelper.isMobile(context) ? 350 : 380  : ResponsiveHelper.isMobile(context) ? 330: 355,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-            boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 0, blurRadius: 10, offset: const Offset(0, 1))],
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+            boxShadow: [
+              BoxShadow(
+                color: Get.isDarkMode
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.grey.withValues(alpha: 0.12),
+                spreadRadius: 0,
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: CustomInkWellWidget(
             onTap: () {
@@ -54,7 +63,7 @@ class RestaurantsCardWidget extends StatelessWidget {
                 arguments: RestaurantScreen(restaurant: restaurant),
               );
             },
-            radius: Dimensions.radiusDefault,
+            radius: Dimensions.radiusLarge,
             child: Padding(
               padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -62,22 +71,60 @@ class RestaurantsCardWidget extends StatelessWidget {
                       Stack(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(isNewOnGO! ? 2 : 3),
+                            padding: const EdgeInsets.all(3),
                             height: isNewOnGO! ? 95 : 65, width: isNewOnGO! ? 95 : 65,
                             decoration:  BoxDecoration(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(isNewOnGO! ? 20 : 16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Get.isDarkMode
+                                      ? Colors.black.withValues(alpha: 0.2)
+                                      : Colors.grey.withValues(alpha: 0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            child: BlurhashImageWidget(
-                              imageUrl: '${restaurant.logoFullUrl}',
-                              blurhash: restaurant.logoBlurhash,
-                              fit: BoxFit.cover,
-                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(isNewOnGO! ? 17 : 13),
+                              child: Stack(
+                                children: [
+                                  BlurhashImageWidget(
+                                    imageUrl: '${restaurant.logoFullUrl}',
+                                    blurhash: restaurant.logoBlurhash,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(isNewOnGO! ? 17 : 13),
+                                  ),
+                                  if (!isAvailable)
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.5),
+                                        borderRadius: BorderRadius.circular(isNewOnGO! ? 17 : 13),
+                                      ),
+                                      child: Center(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).cardColor.withValues(alpha: 0.9),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            'closed_now'.tr.toUpperCase(),
+                                            style: robotoMedium.copyWith(
+                                              fontSize: 8,
+                                              color: Theme.of(context).colorScheme.error,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
-
-                          isAvailable ? const SizedBox() : const NotAvailableWidget(isRestaurant: true),
-
                         ],
                       ),
                       const SizedBox(width: Dimensions.paddingSizeSmall),
@@ -90,11 +137,18 @@ class RestaurantsCardWidget extends StatelessWidget {
                             Text(
                               restaurant.name!,
                               overflow: TextOverflow.ellipsis, maxLines: 1,
-                              style: robotoMedium.copyWith(fontWeight: FontWeight.w600),
+                              style: robotoMedium.copyWith(
+                                fontSize: isNewOnGO! ? Dimensions.fontSizeLarge : Dimensions.fontSizeDefault,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             SizedBox(height: isNewOnGO! ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeExtraSmall),
 
-                            characteristics != '' ? Text(
+                            (restaurant.shortDescription != null && restaurant.shortDescription!.isNotEmpty) ? Text(
+                              restaurant.shortDescription!,
+                              overflow: TextOverflow.ellipsis, maxLines: 1,
+                              style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
+                            ) : characteristics != '' ? Text(
                               characteristics,
                               overflow: TextOverflow.ellipsis, maxLines: 1,
                               style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
@@ -103,32 +157,86 @@ class RestaurantsCardWidget extends StatelessWidget {
 
                             Row(mainAxisAlignment: MainAxisAlignment.start, children: [
 
-                              isNewOnGO! ? restaurant.freeDelivery! ? ImageWithTextRowWidget(
-                                widget: Image.asset(Images.deliveryIcon, height: 20, width: 20),
-                                text: 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                              ) : const SizedBox() : IconWithTextRowWidget(
-                                icon: Icons.star_border, text: restaurant.avgRating!.toStringAsFixed(1),
-                                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)
-                              ),
-                              isNewOnGO! ? const SizedBox(width : Dimensions.paddingSizeExtraSmall) : const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                              isNewOnGO! ? ImageWithTextRowWidget(
-                                widget: Image.asset(Images.distanceKm, height: 20, width: 20),
-                                text: '${distance > 100 ? '100+' : distance.toStringAsFixed(2)} ${'km'.tr}',
-                                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                              ) : restaurant.freeDelivery! ? ImageWithTextRowWidget(widget: Image.asset(Images.deliveryIcon, height: 20, width: 20),
-                                  text: 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)) : const SizedBox(),
-                              isNewOnGO! ? const SizedBox(width : Dimensions.paddingSizeExtraSmall) : restaurant.freeDelivery! ? const SizedBox(width: Dimensions.paddingSizeSmall) : const SizedBox(),
-
-                              isNewOnGO! ? ImageWithTextRowWidget(
-                                  widget: Image.asset(Images.itemCount, height: 20, width: 20),
-                                  text: '${restaurant.foodsCount} + ${'item'.tr}',
-                                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)
-                              ) : IconWithTextRowWidget(
-                                icon: Icons.access_time_outlined,
-                                text: restaurant.deliveryTime!,
-                                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                              ),
+                              if (isNewOnGO!) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.location_on_rounded,
+                                        size: 14,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${distance > 100 ? '100+' : distance.toStringAsFixed(1)} km',
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.restaurant_menu_rounded,
+                                        size: 14,
+                                        color: Theme.of(context).hintColor,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${restaurant.foodsCount}+ ${'item'.tr}',
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          color: Theme.of(context).hintColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ] else ...[
+                                IconWithTextRowWidget(
+                                  icon: Icons.star_rounded,
+                                  text: restaurant.avgRating!.toStringAsFixed(1),
+                                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall),
+                                ),
+                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                                if (restaurant.freeDelivery!)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      'free_delivery'.tr,
+                                      style: robotoMedium.copyWith(
+                                        fontSize: Dimensions.fontSizeExtraSmall,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ),
+                                if (restaurant.freeDelivery!)
+                                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                                IconWithTextRowWidget(
+                                  icon: Icons.schedule_rounded,
+                                  text: restaurant.deliveryTime!,
+                                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                                ),
+                              ],
 
                             ]),
                           ],
