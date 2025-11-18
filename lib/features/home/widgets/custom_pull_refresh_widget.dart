@@ -29,6 +29,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   late final AnimationController _dismissController;
   late final AnimationController _snapController;
   double _snapStartFraction = 0.0;
+  late final AnimationController _completionPulseController;
   DateTime? _cooldownUntil;
   static const Duration _refreshCooldownDuration = Duration(milliseconds: 900);
 
@@ -63,7 +64,20 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
         if (_isRefreshing && mounted) {
           setState(() {});
         }
-      })..value = 1.0;
+      })..addStatusListener((status) {
+        if (mounted) {
+          setState(() {});
+        }
+      })
+      ..value = 1.0;
+    _completionPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 480),
+    )..addListener(() {
+        if (_showCompletionState && mounted) {
+          setState(() {});
+        }
+      });
   }
 
   @override
@@ -83,6 +97,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     _detachScrollActivityListener();
     _dismissController.dispose();
     _snapController.dispose();
+    _completionPulseController.dispose();
     super.dispose();
   }
 
@@ -114,9 +129,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     final position = widget.scrollController.position;
 
     if (!_isRefreshing && _isDismissingIndicator && position.pixels < 0) {
-      setState(() {
-        _isDismissingIndicator = false;
-      });
+      return;
     }
 
     if (position.pixels < 0) {
@@ -164,7 +177,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
       }
 
     } else if (_dragOffset > 0 && !_isRefreshing) {
-      if (_armedForRefresh && !_isCoolingDown) {
+      if (_armedForRefresh && !_isCoolingDown && !_isDismissingIndicator) {
         _handleRefresh();
       } else {
         setState(() {
@@ -176,12 +189,13 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   }
 
   Future<void> _handleRefresh() async {
-    if (_isRefreshing || _isCoolingDown) return;
+    if (_isRefreshing || _isCoolingDown || _isDismissingIndicator) return;
 
     final DateTime startTime = DateTime.now();
     final double initialSnapFraction = (_dragOffset / _kRefreshExtent).clamp(0.0, 1.0);
     _dismissController.stop();
     _dismissController.reset();
+    _completionPulseController.reset();
 
     setState(() {
       _isRefreshing = true;
@@ -211,6 +225,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
           _dragOffset = _kRefreshExtent;
           _armedForRefresh = false;
         });
+        _completionPulseController.forward(from: 0.0);
 
         // Keep the completion state visible for a beat before animating out
         Future.delayed(const Duration(milliseconds: 900), () {
@@ -224,18 +239,19 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
 
   double get _pullProgress {
     if (_isRefreshing || _isDismissingIndicator) return 1.0;
-    const double maxVisualProgressOffset = _kDragThreshold * 0.05; // show 0% until 5% drag
-    final double adjustedDrag = (_dragOffset - maxVisualProgressOffset).clamp(0.0, double.infinity);
-    const double targetDistance = _kDragThreshold * 0.9; // hit 100% at 90% of threshold
-    return (adjustedDrag / targetDistance).clamp(0.0, 1.0);
+    const double deadZone = _kDragThreshold * 0.45; // extended idle zone
+    final double completionZone = (_kDragThreshold * 2 - deadZone).clamp(1, double.infinity);
+    final double adjustedDrag = (_dragOffset - deadZone).clamp(0.0, completionZone);
+    return (adjustedDrag / completionZone).clamp(0.0, 1.0);
   }
 
   bool get _isReadyToRelease => !_isRefreshing && _dragOffset >= _kDragThreshold;
   bool get _showCompletionState => !_isRefreshing && _isDismissingIndicator;
+  bool get _showRefreshingCopy => _isRefreshing;
   bool get _isCoolingDown => _cooldownUntil != null && _cooldownUntil!.isAfter(DateTime.now());
 
   String get _statusHeadline {
-    if (_isRefreshing) {
+    if (_showRefreshingCopy) {
       return 'Refreshing your feed';
     } else if (_showCompletionState) {
       return 'Freshly updated';
@@ -247,7 +263,7 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
   }
 
   String get _statusDetail {
-    if (_isRefreshing) {
+    if (_showRefreshingCopy) {
       return 'Fetching the latest restaurants and offers';
     } else if (_showCompletionState) {
       return 'All caught up. Enjoy the new bites!';
@@ -478,7 +494,9 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
     double targetOpacity;
     if (_isDismissingIndicator) {
       final dismissProgress = _dismissController.value.clamp(0.0, 1.0);
-      targetScale = 1.0 - (dismissProgress * 0.2);
+      final double pulse =
+          1 + 0.06 * Curves.elasticOut.transform(_completionPulseController.value.clamp(0.0, 1.0));
+      targetScale = (1.0 - (dismissProgress * 0.2)) * pulse;
       targetOpacity = 1.0 - dismissProgress;
     } else if (_isRefreshing) {
       final double bounce = Curves.easeOutBack.transform(snapProgress);
@@ -489,11 +507,12 @@ class _SliverPullRefreshIndicatorState extends State<SliverPullRefreshIndicator>
       )!;
       targetOpacity = Curves.easeOut.transform(snapProgress);
     } else {
-      final appearProgress = (_dragOffset / _kDragThreshold).clamp(0.0, 1.0);
-      final baseScale = 0.82;
-      final scaleRange = 0.18;
-      targetScale = baseScale + (scaleRange * appearProgress);
-      targetOpacity = appearProgress;
+      final appearProgress = (_dragOffset / SliverPullRefreshIndicator.maxStretchExtent).clamp(0.0, 1.0);
+      final curve = Curves.easeOutExpo.transform(appearProgress);
+      const double baseScale = 0.55;
+      const double scaleRange = 0.45;
+      targetScale = baseScale + (scaleRange * curve);
+      targetOpacity = Curves.easeOutCubic.transform(appearProgress);
     }
 
     return Positioned(

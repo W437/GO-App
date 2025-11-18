@@ -41,6 +41,9 @@ class CampaignController extends GetxController implements GetxService {
   }
 
   Future<void> getItemCampaignList(bool reload, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
+    print('🔍 getItemCampaignList called - reload: $reload, dataSource: $dataSource, fromRecall: $fromRecall');
+    print('🔍 Current _itemCampaignList: ${_itemCampaignList?.length ?? "null"}');
+
     if(_itemCampaignList == null || reload || fromRecall) {
       if(!fromRecall) {
         _itemCampaignList = null;
@@ -48,20 +51,31 @@ class CampaignController extends GetxController implements GetxService {
 
       List<Product>? itemCampaignList;
       if(dataSource == DataSourceEnum.local) {
+        print('📦 Fetching from LOCAL cache...');
         itemCampaignList = await campaignServiceInterface.getItemCampaignList(source: DataSourceEnum.local);
+        print('📦 Local result: ${itemCampaignList?.length ?? "null"} items');
         _prepareItemBasicCampaign(itemCampaignList);
         getItemCampaignList(false, dataSource: DataSourceEnum.client, fromRecall: true);
       } else {
+        print('🌐 Fetching from API...');
         itemCampaignList = await campaignServiceInterface.getItemCampaignList(source: DataSourceEnum.client);
+        print('🌐 API result: ${itemCampaignList?.length ?? "null"} items');
         _prepareItemBasicCampaign(itemCampaignList);
       }
     }
   }
 
   _prepareItemBasicCampaign(List<Product>? itemCampaignList) {
+    print('🔄 _prepareItemBasicCampaign called with: ${itemCampaignList?.length ?? "null"} items');
     if (itemCampaignList != null) {
       _itemCampaignList = [];
       _itemCampaignList = itemCampaignList;
+      print('✅ Set _itemCampaignList to ${_itemCampaignList!.length} items');
+      if (_itemCampaignList!.isNotEmpty) {
+        print('📋 First item: ${_itemCampaignList![0].name} (ID: ${_itemCampaignList![0].id})');
+      }
+    } else {
+      print('⚠️ itemCampaignList is null, not updating _itemCampaignList');
     }
     update();
   }

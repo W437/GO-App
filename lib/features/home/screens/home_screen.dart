@@ -23,6 +23,7 @@ import 'package:godelivery_user/features/home/widgets/location_banner_view_widge
 import 'package:godelivery_user/features/home/widgets/new_on_go_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/order_again_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/popular_foods_nearby_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/theme1/item_campaign_widget1.dart';
 import 'package:godelivery_user/features/home/widgets/popular_restaurants_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/refer_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/screens/theme1_home_screen.dart';
@@ -223,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             const BannerViewWidget(),
                             const BadWeatherWidget(),
                             const CategoriesCuisinesTabbedWidget(),
+                            const ItemCampaignWidget1(),
                             const TodayTrendsViewWidget(),
                             const HighlightWidgetView(),
                             _isLogin ? const OrderAgainViewWidget() : const SizedBox(),

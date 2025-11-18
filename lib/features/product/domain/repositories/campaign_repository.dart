@@ -62,11 +62,33 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     switch(source!){
       case DataSourceEnum.client:
+        print('🍔 Fetching item campaigns with headers: ${apiClient.getHeader()}');
+        print('🍔 API URL: ${AppConstants.itemCampaignUri}');
         Response response = await apiClient.getData(AppConstants.itemCampaignUri);
+        print('🍔 Item campaign response status: ${response.statusCode}');
+        print('🍔 Response body type: ${response.body.runtimeType}');
+        print('🍔 Response body: ${response.body}');
         if(response.statusCode == 200){
           itemCampaignList = [];
-          response.body.forEach((campaign) => itemCampaignList!.add(Product.fromJson(campaign)));
+          if(response.body != null && response.body is List) {
+            print('🍔 Processing ${(response.body as List).length} campaign items...');
+            response.body.forEach((campaign) {
+              try {
+                Product product = Product.fromJson(campaign);
+                itemCampaignList!.add(product);
+                print('✅ Added product: ${product.name} (ID: ${product.id})');
+              } catch (e) {
+                print('❌ Error parsing campaign item: $e');
+                print('❌ Failed item data: $campaign');
+              }
+            });
+          } else {
+            print('⚠️ Response body is not a list or is null');
+          }
+          print('🍔 Item campaigns loaded: ${itemCampaignList.length} items');
           LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        } else {
+          print('⚠️ Item campaign API failed: ${response.statusText}');
         }
       case DataSourceEnum.local:
         String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
