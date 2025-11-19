@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,10 +8,11 @@ import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
 import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
-import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -34,51 +36,12 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Modern Section Header
+            // Section Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).primaryColor,
-                              Theme.of(context).primaryColor.withValues(alpha: 0.7),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.star_rounded, color: Colors.white, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              'SPONSORED',
-                              style: robotoMedium.copyWith(
-                                fontSize: Dimensions.fontSizeSmall,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
                   Text(
                     'highlights_for_you'.tr,
                     style: robotoBold.copyWith(
@@ -111,7 +74,7 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
 
                 return restaurants.isNotEmpty
                   ? SizedBox(
-                      height: 305,
+                      height: 220,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
@@ -119,13 +82,11 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
                         itemCount: restaurants.length,
                         itemBuilder: (context, index) {
                           return Container(
-                            width: ResponsiveHelper.isMobile(context)
-                                ? MediaQuery.of(context).size.width - (Dimensions.paddingSizeDefault * 2)
-                                : 400,
+                            width: 160,
                             margin: EdgeInsets.only(
-                              right: index < restaurants.length - 1 ? Dimensions.paddingSizeLarge : 0,
+                              right: index < restaurants.length - 1 ? Dimensions.paddingSizeDefault : 0,
                             ),
-                            child: RestaurantView(restaurant: restaurants[index]),
+                            child: SponsoredRestaurantCard(restaurant: restaurants[index]),
                           );
                         },
                       ),
@@ -137,6 +98,223 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
         ),
       ) : advertisementController.advertisementList == null ? const AdvertisementShimmer() : const SizedBox();
     });
+  }
+}
+
+class SponsoredRestaurantCard extends StatelessWidget {
+  final Restaurant restaurant;
+  const SponsoredRestaurantCard({super.key, required this.restaurant});
+
+  @override
+  Widget build(BuildContext context) {
+    // If 'open' field is null, assume restaurant is open (backend returns incomplete data)
+    bool isAvailable = (restaurant.open == null || restaurant.open == 1) && (restaurant.active ?? false);
+
+    String openUntil = restaurant.currentOpeningTime ??
+                       (restaurant.restaurantOpeningTime != null
+                         ? DateConverter.convertTimeToTime(restaurant.restaurantOpeningTime!)
+                         : '23:00');
+
+    return InkWell(
+      onTap: () {
+        Get.toNamed(
+          RouteHelper.getRestaurantRoute(restaurant.id),
+          arguments: RestaurantScreen(restaurant: restaurant),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Get.isDarkMode
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // Top - Cover Image (fills remaining space) with subtle blur
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        BlurhashImageWidget(
+                          imageUrl: restaurant.coverPhotoFullUrl ?? '',
+                          blurhash: restaurant.coverPhotoBlurhash,
+                          fit: BoxFit.cover,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.05),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Bottom - White Background (wraps content)
+                Container(
+                  padding: const EdgeInsets.fromLTRB(8, 32, 8, 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        // Restaurant Name (centered)
+                        Text(
+                          restaurant.name ?? '',
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 2),
+
+                        // Open Status
+                        if (isAvailable)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.schedule_rounded,
+                                  size: 10,
+                                  color: Colors.green,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  'Open until $openUntil',
+                                  style: robotoRegular.copyWith(
+                                    fontSize: 9,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'closed_now'.tr.toUpperCase(),
+                              style: robotoMedium.copyWith(
+                                fontSize: 9,
+                                color: Theme.of(context).colorScheme.error,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 2),
+
+                        // Rating - Always show
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).hintColor.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.star_rounded,
+                                size: 12,
+                                color: const Color(0xFFFFB800),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${restaurant.avgRating?.toStringAsFixed(1) ?? "0.0"}',
+                                style: robotoBold.copyWith(
+                                  fontSize: 11,
+                                ),
+                              ),
+                              if (restaurant.ratingCount != null && restaurant.ratingCount! > 0) ...[
+                                const SizedBox(width: 2),
+                                Text(
+                                  '(${restaurant.ratingCount})',
+                                  style: robotoRegular.copyWith(
+                                    fontSize: 9,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                  ),
+                ),
+              ],
+            ),
+
+            // Centered Logo - Positioned at junction (overlapping image and content)
+            Positioned(
+              bottom: 72, // Position from bottom to overlap perfectly
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: BlurhashImageWidget(
+                      imageUrl: restaurant.logoFullUrl ?? '',
+                      blurhash: restaurant.logoBlurhash,
+                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
