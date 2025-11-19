@@ -1,3 +1,5 @@
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+
 class AdvertisementModel {
   int? id;
   int? restaurantId;
@@ -27,6 +29,7 @@ class AdvertisementModel {
   List<Storage>? storage;
   double? averageRating;
   int? reviewsCommentsCount;
+  Restaurant? restaurant;
 
   AdvertisementModel({
     this.id,
@@ -57,6 +60,7 @@ class AdvertisementModel {
     this.storage,
     this.averageRating,
     this.reviewsCommentsCount,
+    this.restaurant,
   });
 
   AdvertisementModel.fromJson(Map<String, dynamic> json) {
@@ -93,6 +97,7 @@ class AdvertisementModel {
     }
     averageRating = json['average_rating']?.toDouble();
     reviewsCommentsCount = json['reviews_comments_count'];
+    restaurant = json['restaurant'] != null ? Restaurant.fromJson(json['restaurant']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -127,6 +132,9 @@ class AdvertisementModel {
     }
     data['average_rating'] = averageRating;
     data['reviews_comments_count'] = reviewsCommentsCount;
+    if (restaurant != null) {
+      data['restaurant'] = restaurant!.toJson();
+    }
     return data;
   }
 }

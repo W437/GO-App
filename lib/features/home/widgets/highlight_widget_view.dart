@@ -1,22 +1,19 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
-import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
 import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
+import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
+import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:video_player/video_player.dart';
 
@@ -29,211 +26,117 @@ class HighlightWidgetView extends StatefulWidget {
 
 class _HighlightWidgetViewState extends State<HighlightWidgetView> {
 
-  final CarouselSliderController _carouselController = CarouselSliderController();
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdvertisementController>(builder: (advertisementController) {
-      return advertisementController.advertisementList != null && advertisementController.advertisementList!.isNotEmpty ? Padding(
-        padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeDefault),
-        child: Stack(
+      return advertisementController.advertisementList != null && advertisementController.advertisementList!.isNotEmpty ? Container(
+        margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            CustomAssetImageWidget(
-              Images.highlightBg, width: context.width,
-              fit: BoxFit.cover,
-            ),
-
-            Column(children: [
-
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeExtraSmall,
-                ),
-                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Modern Section Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text('highlights_for_you'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.black)),
-                      const SizedBox(width: 5),
-
-                      Text('see_our_most_popular_restaurant_and_foods'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).primaryColor,
+                              Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.star_rounded, color: Colors.white, size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              'SPONSORED',
+                              style: robotoMedium.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-
-                  const CustomAssetImageWidget(
-                    Images.highlightIcon, height: 50, width: 50,
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                  Text(
+                    'highlights_for_you'.tr,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeOverLarge,
+                      fontWeight: FontWeight.w800,
+                      height: 1.2,
+                    ),
                   ),
-
-                ]),
+                  const SizedBox(height: 4),
+                  Text(
+                    'see_our_most_popular_restaurant_and_foods'.tr,
+                    style: robotoRegular.copyWith(
+                      color: Theme.of(context).hintColor,
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                  ),
+                ],
               ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
 
-              CarouselSlider.builder(
-                carouselController: _carouselController,
-                itemCount: advertisementController.advertisementList!.length,
-                options: CarouselOptions(
-                  enableInfiniteScroll: advertisementController.advertisementList!.length > 2,
-                  autoPlay: advertisementController.autoPlay,
-                  enlargeCenterPage: false,
-                  height: 280,
-                  viewportFraction: 1,
-                  disableCenter: true,
-                  onPageChanged: (index, reason) {
+            // Restaurant Cards - Horizontal List
+            GetBuilder<RestaurantController>(
+              builder: (restaurantController) {
+                // Get restaurants from advertisements
+                List<Restaurant> restaurants = advertisementController.advertisementList!
+                    .where((ad) => ad.restaurant != null && ad.addType != 'video_promotion')
+                    .map((ad) => ad.restaurant!)
+                    .toList();
 
-                    advertisementController.setCurrentIndex(index, true);
-
-                    if(advertisementController.advertisementList?[index].addType == "video_promotion"){
-                      advertisementController.updateAutoPlayStatus(status: false);
-                    }else{
-                      advertisementController.updateAutoPlayStatus(status: true);
-                    }
-
-                  },
-                ),
-                itemBuilder: (context, index, realIndex) {
-                  return advertisementController.advertisementList?[index].addType == 'video_promotion' ? HighlightVideoWidget(
-                    advertisement: advertisementController.advertisementList![index],
-                  ) : HighlightRestaurantWidget(advertisement: advertisementController.advertisementList![index]);
-                },
-              ),
-
-              const AdvertisementIndicator(),
-
-              const SizedBox(height: Dimensions.paddingSizeExtraSmall,),
-
-            ]),
+                return restaurants.isNotEmpty
+                  ? SizedBox(
+                      height: 305,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                        itemCount: restaurants.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            width: ResponsiveHelper.isMobile(context)
+                                ? MediaQuery.of(context).size.width - (Dimensions.paddingSizeDefault * 2)
+                                : 400,
+                            margin: EdgeInsets.only(
+                              right: index < restaurants.length - 1 ? Dimensions.paddingSizeLarge : 0,
+                            ),
+                            child: RestaurantView(restaurant: restaurants[index]),
+                          );
+                        },
+                      ),
+                    )
+                  : const SizedBox();
+              },
+            ),
           ],
         ),
       ) : advertisementController.advertisementList == null ? const AdvertisementShimmer() : const SizedBox();
     });
-  }
-}
-
-class HighlightRestaurantWidget extends StatelessWidget {
-  final AdvertisementModel advertisement;
-  const HighlightRestaurantWidget({super.key, required this.advertisement});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      height: 280,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-        color: Theme.of(context).cardColor,
-        border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.07), width: 2),
-      ),
-      child: InkWell(
-        onTap: (){
-          Get.toNamed(RouteHelper.getRestaurantRoute(advertisement.restaurantId),
-            arguments: RestaurantScreen(restaurant: Restaurant(id: advertisement.restaurantId)),
-          );
-        },
-        child: Column(children: [
-
-          Expanded(
-            flex: 5,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusDefault)),
-              child: Stack(
-                children: [
-                  CustomImageWidget(
-                    image: advertisement.coverImageFullUrl ?? '',
-                    fit: BoxFit.cover, height: 160, width: double.infinity,
-                  ),
-
-                  (advertisement.isRatingActive == 1 || advertisement.isReviewActive == 1) ? Positioned(
-                    right: 10, bottom: 10,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(50),
-                        border: Border.all(color: Theme.of(context).cardColor, width: 2),
-                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 0)],
-                      ),
-                      child: Row(
-                        children: [
-                          advertisement.isRatingActive == 1 ? Icon(Icons.star, color: Theme.of(context).cardColor, size: 15) : const SizedBox(),
-                          SizedBox(width: advertisement.isRatingActive == 1 ? 5 : 0),
-
-                          advertisement.isRatingActive == 1 ? Text('${advertisement.averageRating?.toStringAsFixed(1)}', style: robotoBold.copyWith(color: Theme.of(context).cardColor)) : const SizedBox(),
-                          SizedBox(width: advertisement.isRatingActive == 1 ? 5 : 0),
-
-                          advertisement.isReviewActive == 1 ? Text('(${advertisement.reviewsCommentsCount})', style: robotoRegular.copyWith(color: Theme.of(context).cardColor)) : const SizedBox(),
-                        ],
-                      ),
-                    ),
-                  ) : const SizedBox(),
-
-                ],
-              ),
-            ),
-          ),
-
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(children: [
-
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.1), width: 2),
-                  ),
-                  child: ClipOval(
-                    child: CustomImageWidget(
-                      image: advertisement.profileImageFullUrl ?? '',
-                      height: 60, width: 60, fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                Flexible(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-                      Flexible(
-                        child: Text(
-                          advertisement.title ?? '', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600),
-                          maxLines: 1, overflow: TextOverflow.ellipsis
-                        ),
-                      ),
-
-                      GetBuilder<FavouriteController>(builder: (favouriteController) {
-                        bool isWished = favouriteController.wishRestIdList.contains(advertisement.restaurantId);
-                        return CustomFavouriteWidget(
-                          isWished: isWished,
-                          isRestaurant: true,
-                          restaurantId: advertisement.restaurantId,
-                        );
-                      }),
-
-                    ]),
-                    const SizedBox(height: 3),
-
-                    Text(
-                      advertisement.description ?? '',
-                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
-                      maxLines: 2, overflow: TextOverflow.ellipsis,
-                    ),
-
-                  ]),
-                ),
-
-
-              ]),
-            ),
-          ),
-
-        ]),
-      ),
-    );
   }
 }
 
@@ -299,78 +202,123 @@ class _HighlightVideoWidgetState extends State<HighlightVideoWidget> {
   Widget build(BuildContext context) {
     return GetBuilder<AdvertisementController>(builder: (advertisementController) {
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        height: 280,
+        margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+        height: 320,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          borderRadius: BorderRadius.circular(24),
           color: Theme.of(context).cardColor,
-          border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.07), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Get.isDarkMode
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.12),
+              blurRadius: 24,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        child: Column(children: [
-
-          Expanded(
-            flex: 5,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusDefault)),
-              child: Stack(
-                children: [
-                  _chewieController != null &&  _chewieController!.videoPlayerController.value.isInitialized ? Stack(
-                    children: [
-                      Chewie(controller: _chewieController!),
-                    ],
-                  ) : const Center(child: CircularProgressIndicator()),
-                ],
+        child: Column(
+          children: [
+            // Video Section
+            Expanded(
+              flex: 6,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized)
+                      Chewie(controller: _chewieController!)
+                    else
+                      Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                Text(
-                  widget.advertisement.title ?? '',
-                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, fontWeight: FontWeight.w600),
-                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                  Expanded(
-                    child: Text(
-                      widget.advertisement.description ?? '',
-                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
-                      maxLines: 2, overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                  InkWell(
-                    onTap: (){
-                      Get.toNamed(RouteHelper.getRestaurantRoute(widget.advertisement.restaurantId),
-                        arguments: RestaurantScreen(restaurant: Restaurant(id: widget.advertisement.restaurantId)),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            // Bottom Content Section
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Title and Description
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.advertisement.title ?? '',
+                            style: robotoBold.copyWith(
+                              fontSize: Dimensions.fontSizeLarge,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            widget.advertisement.description ?? '',
+                            style: robotoRegular.copyWith(
+                              fontSize: Dimensions.fontSizeDefault,
+                              color: Theme.of(context).hintColor,
+                              height: 1.4,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      child: Icon(Icons.arrow_forward, color: Theme.of(context).cardColor, size: 20),
                     ),
-                  ),
+                    const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                ]),
-
-              ]),
+                    // Action Button
+                    InkWell(
+                      onTap: () {
+                        Get.toNamed(
+                          RouteHelper.getRestaurantRoute(widget.advertisement.restaurantId),
+                          arguments: RestaurantScreen(restaurant: Restaurant(id: widget.advertisement.restaurantId)),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).primaryColor,
+                              Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-
-        ]),
+          ],
+        ),
       );
     });
   }

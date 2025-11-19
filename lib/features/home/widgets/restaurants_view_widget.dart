@@ -82,11 +82,18 @@ class RestaurantView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isAvailable = restaurant.open == 1 && restaurant.active!;
+    bool isAvailable = restaurant.open == 1 && (restaurant.active ?? false);
     bool isRTL = Get.find<LocalizationController>().isLtr == false;
-    double distance = Get.find<RestaurantController>().getRestaurantDistance(
-      LatLng(double.parse(restaurant.latitude!), double.parse(restaurant.longitude!)),
-    );
+    double distance = 0.0;
+    if (restaurant.latitude != null && restaurant.longitude != null) {
+      try {
+        distance = Get.find<RestaurantController>().getRestaurantDistance(
+          LatLng(double.parse(restaurant.latitude!), double.parse(restaurant.longitude!)),
+        );
+      } catch (e) {
+        distance = 0.0;
+      }
+    }
     String characteristics = '';
     if(restaurant.characteristics != null) {
       for (var v in restaurant.characteristics!) {
@@ -96,11 +103,12 @@ class RestaurantView extends StatelessWidget {
 
     // Determine restaurant type/category
     String category = '';
-    if(characteristics.toLowerCase().contains('pizza') || restaurant.name!.toLowerCase().contains('pizza')) {
+    String restaurantName = restaurant.name ?? '';
+    if(characteristics.toLowerCase().contains('pizza') || restaurantName.toLowerCase().contains('pizza')) {
       category = 'PIZZERIA';
-    } else if(characteristics.toLowerCase().contains('burger') || restaurant.name!.toLowerCase().contains('burger')) {
+    } else if(characteristics.toLowerCase().contains('burger') || restaurantName.toLowerCase().contains('burger')) {
       category = 'BURGERS';
-    } else if(characteristics.toLowerCase().contains('coffee') || restaurant.name!.toLowerCase().contains('cafe')) {
+    } else if(characteristics.toLowerCase().contains('coffee') || restaurantName.toLowerCase().contains('cafe')) {
       category = 'CAFE';
     } else {
       category = 'RESTAURANT';
@@ -257,7 +265,7 @@ class RestaurantView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               // Rating
-                              if (restaurant.ratingCount! > 0)
+                              if (restaurant.ratingCount != null && restaurant.ratingCount! > 0)
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -268,7 +276,7 @@ class RestaurantView extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 2),
                                     Text(
-                                      '${restaurant.avgRating!.toStringAsFixed(1)}',
+                                      '${restaurant.avgRating?.toStringAsFixed(1) ?? "0.0"}',
                                       style: robotoMedium.copyWith(
                                         fontSize: 12,
                                         color: Colors.white.withValues(alpha: 0.9),
@@ -428,7 +436,7 @@ class RestaurantView extends StatelessWidget {
                         Row(
                           children: [
                             // Delivery Cost
-                            if (restaurant.freeDelivery!) ...[
+                            if (restaurant.freeDelivery ?? false) ...[
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
@@ -472,7 +480,7 @@ class RestaurantView extends StatelessWidget {
                             ],
 
                             // Rating
-                            if (restaurant.ratingCount! > 0) ...[
+                            if (restaurant.ratingCount != null && restaurant.ratingCount! > 0) ...[
                               Icon(
                                 Icons.star_rounded,
                                 size: 18,
@@ -480,7 +488,7 @@ class RestaurantView extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                restaurant.avgRating!.toStringAsFixed(1),
+                                restaurant.avgRating?.toStringAsFixed(1) ?? '0.0',
                                 style: robotoMedium.copyWith(
                                   fontSize: Dimensions.fontSizeDefault,
                                 ),
