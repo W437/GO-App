@@ -28,6 +28,7 @@ class CustomInkWellWidget extends StatefulWidget {
 class _CustomInkWellWidgetState extends State<CustomInkWellWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool _isPressed = false;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _CustomInkWellWidgetState extends State<CustomInkWellWidget> with SingleTi
   }
 
   void _animateDown() {
+    setState(() => _isPressed = true);
     if (!widget.enableScaleEffect) return;
     _controller.duration = const Duration(milliseconds: 150);
     _controller.reset();
@@ -57,6 +59,7 @@ class _CustomInkWellWidgetState extends State<CustomInkWellWidget> with SingleTi
   }
 
   Future<void> _animateUp() async {
+    setState(() => _isPressed = false);
     if (!widget.enableScaleEffect) return;
 
     // Wait for press animation to complete if it's still running
@@ -90,9 +93,28 @@ class _CustomInkWellWidgetState extends State<CustomInkWellWidget> with SingleTi
             child: child,
           );
         },
-        child: Padding(
-          padding: widget.padding!,
-          child: widget.child,
+        child: Stack(
+          children: [
+            Padding(
+              padding: widget.padding!,
+              child: widget.child,
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  curve: Curves.easeInOut,
+                  duration: const Duration(milliseconds: 200),
+                  opacity: _isPressed ? 1.0 : 0.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: widget.highlightColor ?? Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(widget.radius ?? 0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
