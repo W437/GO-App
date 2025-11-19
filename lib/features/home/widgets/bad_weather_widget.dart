@@ -26,19 +26,36 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
 
   Future<BadWeatherAlertData?> _fetchAlertData() async {
     final address = AddressHelper.getAddressFromSharedPref();
-    if (address == null) return null;
+    print('🌧️ [BAD WEATHER] Checking alert...');
+    if (address == null) {
+      print('   ❌ No address');
+      return null;
+    }
 
     await _locationController.getZone(address.latitude, address.longitude, false);
+    print('   Zone ID: ${address.zoneId}');
 
-    final zoneData = address.zoneData?.firstWhereOrNull(
+    // Use fresh zone data from controller, not stale cached data from address
+    final zoneData = _locationController.zoneList?.firstWhereOrNull(
       (data) => data.id == address.zoneId &&
       data.increasedDeliveryFeeStatus == 1 &&
-      data.increaseDeliveryFeeMessage?.isNotEmpty == true,
+      data.increaseDeliveryChargeMessage?.isNotEmpty == true,
     );
+
+    if (zoneData != null) {
+      print('   ✅ ALERT SHOWING!');
+      print('   Message: "${zoneData.increaseDeliveryChargeMessage}"');
+    } else {
+      print('   ❌ No alert');
+      print('   Controller zones: ${_locationController.zoneList?.length}');
+      _locationController.zoneList?.forEach((z) {
+        print('   Zone ${z.id}: status=${z.increasedDeliveryFeeStatus}, msg="${z.increaseDeliveryChargeMessage}"');
+      });
+    }
 
     return zoneData != null ? BadWeatherAlertData(
       showAlert: zoneData.increasedDeliveryFeeStatus == 1,
-      message: zoneData.increaseDeliveryFeeMessage ?? '',
+      message: zoneData.increaseDeliveryChargeMessage ?? '',
     ) : null;
   }
 
