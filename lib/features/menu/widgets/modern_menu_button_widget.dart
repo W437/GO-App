@@ -46,7 +46,7 @@ class _ModernMenuButtonWidgetState extends State<ModernMenuButtonWidget> {
         : Colors.black.withValues(alpha: 0.03);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 4),
       child: GestureDetector(
         onTapDown: widget.onTap != null ? (_) {
           setState(() => _isPressed = true);
@@ -74,7 +74,7 @@ class _ModernMenuButtonWidgetState extends State<ModernMenuButtonWidget> {
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: 0,
-            vertical: 12,
+            vertical: 8,
           ),
           child: Row(
             children: [

@@ -89,6 +89,10 @@ class Restaurant {
   bool? freeDeliveryDistanceStatus;
   double? freeDeliveryDistanceValue;
   String? restaurantOpeningTime;
+  String? currentOpeningTime;
+  double? deliveryFee;
+  String? availableTimeStarts;
+  String? availableTimeEnds;
   bool? extraPackagingStatusIsMandatory;
   double? extraPackagingAmount;
   List<int>? ratings;
@@ -158,6 +162,10 @@ class Restaurant {
     this.freeDeliveryDistanceStatus,
     this.freeDeliveryDistanceValue,
     this.restaurantOpeningTime,
+    this.currentOpeningTime,
+    this.deliveryFee,
+    this.availableTimeStarts,
+    this.availableTimeEnds,
     this.extraPackagingStatusIsMandatory,
     this.extraPackagingAmount,
     this.ratings,
@@ -257,6 +265,23 @@ class Restaurant {
     freeDeliveryDistanceStatus = json['free_delivery_distance_status'];
     freeDeliveryDistanceValue = (json['free_delivery_distance_value'] != null && json['free_delivery_distance_value'] != '') ? double.parse(json['free_delivery_distance_value'].toString()) : null;
     restaurantOpeningTime = json['current_opening_time'];
+    currentOpeningTime = json['current_opening_time'];
+    // Handle delivery_fee which can be a number or "out_of_range" string
+    if (json['delivery_fee'] != null) {
+      if (json['delivery_fee'] is num) {
+        deliveryFee = json['delivery_fee'].toDouble();
+      } else if (json['delivery_fee'] is String && json['delivery_fee'] != 'out_of_range') {
+        try {
+          deliveryFee = double.parse(json['delivery_fee']);
+        } catch (e) {
+          deliveryFee = null;
+        }
+      } else {
+        deliveryFee = null; // Set to null if "out_of_range"
+      }
+    }
+    availableTimeStarts = json['available_time_starts'];
+    availableTimeEnds = json['available_time_ends'];
     extraPackagingStatusIsMandatory = json['extra_packaging_status'] ?? false;
     extraPackagingAmount = json['extra_packaging_amount']?.toDouble() ?? 0;
     if (json['ratings'] != null && json['ratings'] != 0) {
@@ -338,7 +363,10 @@ class Restaurant {
     data['customer_order_date'] = customerOrderDate;
     data['free_delivery_distance_status'] = freeDeliveryDistanceStatus;
     data['free_delivery_distance_value'] = freeDeliveryDistanceValue;
-    data['current_opening_time'] = restaurantOpeningTime;
+    data['current_opening_time'] = currentOpeningTime ?? restaurantOpeningTime;
+    data['delivery_fee'] = deliveryFee;
+    data['available_time_starts'] = availableTimeStarts;
+    data['available_time_ends'] = availableTimeEnds;
     data['extra_packaging_status'] = extraPackagingStatusIsMandatory;
     data['extra_packaging_amount'] = extraPackagingAmount;
     data['ratings'] = ratings;

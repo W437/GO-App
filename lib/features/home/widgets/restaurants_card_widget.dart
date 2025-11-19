@@ -233,7 +233,7 @@ class RestaurantsCardWidget extends StatelessWidget {
                                   const SizedBox(width: Dimensions.paddingSizeSmall),
                                 IconWithTextRowWidget(
                                   icon: Icons.schedule_rounded,
-                                  text: restaurant.deliveryTime!,
+                                  text: restaurant.deliveryTime?.replaceAll('-min', ' min') ?? '30-45 min',
                                   style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
                                 ),
                               ],

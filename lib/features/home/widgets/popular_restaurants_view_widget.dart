@@ -67,10 +67,14 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                           characteristics = '$characteristics${characteristics.isNotEmpty ? ', ' : ''}$v';
                         }
                       }
+                      double distance = restController.getRestaurantDistance(
+                        LatLng(double.parse(restaurantList[index].latitude!), double.parse(restaurantList[index].longitude!)),
+                      );
+
                       return Padding(
                         padding: EdgeInsets.only(left: (ResponsiveHelper.isDesktop(context) && index == 0 && Get.find<LocalizationController>().isLtr) ? 0 : Dimensions.paddingSizeDefault),
                         child: Container(
-                          height: 185, width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
+                          height: 185, width: ResponsiveHelper.isDesktop(context) ? 280 : MediaQuery.of(context).size.width * 0.75,
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
@@ -90,212 +94,229 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                               arguments: RestaurantScreen(restaurant: restaurantList[index]),
                             ),
                             radius: Dimensions.radiusLarge,
-                            child: Stack(
-                              clipBehavior: Clip.none,
+                            child: Column(
                               children: [
+                                // Cover Image Section with Logo
                                 Container(
-                                  height: 95, width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
-                                    child: Stack(
-                                      children: [
-                                        SizedBox(
-                                          height: 95,
-                                          width: ResponsiveHelper.isDesktop(context) ? 253 : MediaQuery.of(context).size.width * 0.7,
+                                  height: 90,
+                                  child: Stack(
+                                    children: [
+                                      // Cover Image
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(Dimensions.radiusLarge),
+                                          topRight: Radius.circular(Dimensions.radiusLarge)
+                                        ),
+                                        child: SizedBox(
+                                          height: 90,
+                                          width: double.infinity,
                                           child: BlurhashImageWidget(
                                             imageUrl: '${restaurantList[index].coverPhotoFullUrl}',
                                             blurhash: restaurantList[index].coverPhotoBlurhash,
                                             fit: BoxFit.cover,
-                                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(Dimensions.radiusLarge),
+                                              topRight: Radius.circular(Dimensions.radiusLarge)
+                                            ),
                                           ),
                                         ),
+                                      ),
 
-                                        !isAvailable ? Positioned(
+                                      // Gradient overlay if closed
+                                      if (!isAvailable)
+                                        Positioned(
                                           top: 0, left: 0, right: 0, bottom: 0,
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusLarge), topRight: Radius.circular(Dimensions.radiusLarge)),
+                                              borderRadius: const BorderRadius.only(
+                                                topLeft: Radius.circular(Dimensions.radiusLarge),
+                                                topRight: Radius.circular(Dimensions.radiusLarge)
+                                              ),
                                               gradient: LinearGradient(
                                                 begin: Alignment.topCenter,
                                                 end: Alignment.bottomCenter,
                                                 colors: [
+                                                  Colors.black.withValues(alpha: 0.2),
                                                   Colors.black.withValues(alpha: 0.4),
-                                                  Colors.black.withValues(alpha: 0.6),
                                                 ],
                                               ),
                                             ),
                                           ),
-                                        ) : const SizedBox(),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                !isAvailable ? Positioned(top: 35, left: 0, right: 0, child: Center(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).cardColor.withValues(alpha: 0.95),
-                                      borderRadius: BorderRadius.circular(30),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.2),
-                                          blurRadius: 10,
-                                          spreadRadius: 1,
                                         ),
-                                      ],
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.schedule_rounded, size: 14, color: Theme.of(context).colorScheme.error),
-                                        const SizedBox(width: 6),
-                                        Text('closed_now'.tr.toUpperCase(),
-                                          style: robotoMedium.copyWith(
-                                            color: Theme.of(context).colorScheme.error,
-                                            fontSize: 11,
-                                            letterSpacing: 0.5,
+
+                                      // Logo in top right corner
+                                      Positioned(
+                                        top: 10,
+                                        right: 10,
+                                        child: Container(
+                                          height: 45,
+                                          width: 45,
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(alpha: 0.2),
+                                                blurRadius: 8,
+                                                spreadRadius: 0,
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipOval(
+                                            child: BlurhashImageWidget(
+                                              imageUrl: '${restaurantList[index].logoFullUrl}',
+                                              blurhash: restaurantList[index].logoBlurhash,
+                                              fit: BoxFit.cover,
+                                              borderRadius: BorderRadius.circular(22.5),
+                                            ),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                )) : const SizedBox(),
-
-                                Positioned(
-                                  top: 100, left: 85, right: 0,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: characteristics == '' ? Dimensions.paddingSizeSmall : 0),
-
-                                      Text(restaurantList[index].name!, overflow: TextOverflow.ellipsis, maxLines: 1, style: robotoBold),
-
-                                      Text(
-                                        characteristics,
-                                        overflow: TextOverflow.ellipsis, maxLines: 1,
-                                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
                                       ),
                                     ],
                                   ),
                                 ),
 
-
-                                Positioned(
-                                  bottom: 15, left: 0, right: 0,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-
-                                      restaurantList[index].ratingCount! > 0 ? IconWithTextRowWidget(
-                                        icon: Icons.star_border,
-                                        text: restaurantList[index].avgRating!.toStringAsFixed(1),
-                                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall),
-                                      ) : const SizedBox(),
-                                      SizedBox(width: restaurantList[index].ratingCount! > 0 ? Dimensions.paddingSizeDefault : 0),
-
-                                      restaurantList[index].freeDelivery! ? ImageWithTextRowWidget(
-                                        widget: Image.asset(Images.deliveryIcon, height: 20, width: 20),
-                                        text: 'free'.tr,
-                                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                                      ): const SizedBox(),
-                                      restaurantList[index].freeDelivery! ? const SizedBox(width: Dimensions.paddingSizeDefault) : const SizedBox(),
-
-                                      IconWithTextRowWidget(
-                                        icon: Icons.access_time_outlined,
-                                        text: '${restaurantList[index].deliveryTime}',
-                                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyLarge!.color),
-                                      ),
-
-                                    ],
-                                  ),
-                                ),
-
-
-                                Positioned(
-                                  top: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-                                  child: GetBuilder<FavouriteController>(builder: (favouriteController) {
-                                    bool isWished = favouriteController.wishRestIdList.contains(restaurantList[index].id);
-                                      return CustomFavouriteWidget(
-                                        isWished: isWished,
-                                        isRestaurant: true,
-                                        restaurant: restaurantList[index],
-                                      );
-                                    }
-                                  ),
-                                ),
-
-                                Positioned(
-                                  top: 10, right: 10,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).cardColor.withValues(alpha: 0.95),
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.15),
-                                          blurRadius: 8,
-                                          spreadRadius: 0,
-                                        ),
-                                      ],
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                // Content Section
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Icon(Icons.location_on_rounded,
-                                          size: 12,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                        const SizedBox(width: 3),
-                                        Text(
-                                          '${restController.getRestaurantDistance(
-                                            LatLng(double.parse(restaurantList[index].latitude!), double.parse(restaurantList[index].longitude!)),
-                                          ).toStringAsFixed(1)} km',
-                                          style: robotoBold.copyWith(
-                                            fontSize: 11,
-                                            color: Theme.of(context).textTheme.bodyLarge!.color,
+                                        // Restaurant Name and Description
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                restaurantList[index].name ?? '',
+                                                style: robotoMedium.copyWith(
+                                                  fontSize: Dimensions.fontSizeDefault,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              if (restaurantList[index].shortDescription != null && restaurantList[index].shortDescription!.isNotEmpty) ...[
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  restaurantList[index].shortDescription!,
+                                                  style: robotoRegular.copyWith(
+                                                    fontSize: Dimensions.fontSizeSmall,
+                                                    color: Theme.of(context).hintColor,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ] else if (characteristics.isNotEmpty) ...[
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  characteristics,
+                                                  style: robotoRegular.copyWith(
+                                                    fontSize: Dimensions.fontSizeSmall,
+                                                    color: Theme.of(context).hintColor,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ],
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
 
-                                Positioned(
-                                  top: 70, left: Dimensions.paddingSizeSmall,
-                                  child: Container(
-                                    height: 68, width: 68,
-                                    padding: const EdgeInsets.all(2),
-                                    decoration:  BoxDecoration(
-                                      color: Theme.of(context).cardColor,
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Get.isDarkMode
-                                              ? Colors.black.withValues(alpha: 0.3)
-                                              : Colors.grey.withValues(alpha: 0.2),
-                                          blurRadius: 8,
-                                          spreadRadius: 1,
-                                          offset: const Offset(0, 2),
+                                        // Separator
+                                        Container(
+                                          height: 1,
+                                          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                          margin: const EdgeInsets.only(bottom: 6, top: 4),
+                                        ),
+
+                                        // Bottom Stats Row
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // Left: ETA and Delivery
+                                            Row(
+                                              children: [
+                                                // ETA
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: Text(
+                                                    restaurantList[index].deliveryTime?.replaceAll('-min', ' min') ?? '30-45 min',
+                                                    style: robotoMedium.copyWith(
+                                                      fontSize: Dimensions.fontSizeSmall,
+                                                      color: Theme.of(context).primaryColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+
+                                                // Delivery Cost
+                                                if (restaurantList[index].freeDelivery!) ...[
+                                                  Icon(
+                                                    Icons.local_shipping,
+                                                    size: 14,
+                                                    color: Colors.green,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    'free'.tr,
+                                                    style: robotoMedium.copyWith(
+                                                      fontSize: Dimensions.fontSizeSmall,
+                                                      color: Colors.green,
+                                                    ),
+                                                  ),
+                                                ] else ...[
+                                                  Icon(
+                                                    Icons.delivery_dining,
+                                                    size: 14,
+                                                    color: Theme.of(context).hintColor,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    '₪${restaurantList[index].deliveryFee?.toStringAsFixed(0) ?? restaurantList[index].minimumShippingCharge?.toStringAsFixed(0) ?? "5"}',
+                                                    style: robotoRegular.copyWith(
+                                                      fontSize: Dimensions.fontSizeSmall,
+                                                      color: Theme.of(context).hintColor,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+
+                                            // Right: Distance
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.near_me,
+                                                  size: 12,
+                                                  color: Theme.of(context).hintColor,
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Text(
+                                                  '${distance.toStringAsFixed(1)} km',
+                                                  style: robotoRegular.copyWith(
+                                                    fontSize: Dimensions.fontSizeSmall,
+                                                    color: Theme.of(context).hintColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ],
-                                    ),
-                                    child: BlurhashImageWidget(
-                                      imageUrl: '${restaurantList[index].logoFullUrl}',
-                                      blurhash: restaurantList[index].logoBlurhash,
-                                      fit: BoxFit.cover,
-                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-
                         ),
                       );
                     },

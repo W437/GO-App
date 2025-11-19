@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/layout/custom_distance_cliper_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
@@ -37,7 +38,7 @@ class RestaurantsViewWidget extends StatelessWidget {
           crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : ResponsiveHelper.isTab(context) ? 3 : 4,
           mainAxisSpacing: Dimensions.paddingSizeLarge,
           crossAxisSpacing: Dimensions.paddingSizeLarge,
-          mainAxisExtent: 260,
+          mainAxisExtent: 305,
         ),
         padding: EdgeInsets.symmetric(horizontal: !ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeDefault : 0),
         itemBuilder: (context, index) {
@@ -61,7 +62,7 @@ class RestaurantsViewWidget extends StatelessWidget {
           crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : ResponsiveHelper.isTab(context) ? 3 : 4,
           mainAxisSpacing: Dimensions.paddingSizeLarge,
           crossAxisSpacing: Dimensions.paddingSizeLarge,
-          mainAxisExtent: 260,
+          mainAxisExtent: 305,
         ),
         padding: EdgeInsets.symmetric(horizontal: !ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0),
         itemBuilder: (context, index) {
@@ -200,114 +201,126 @@ class RestaurantView extends StatelessWidget {
                     ),
                   ),
 
-                  // Logo and restaurant name in center
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          height: 60,
-                          width: 60,
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 10,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: BlurhashImageWidget(
-                              imageUrl: '${restaurant.logoFullUrl}',
-                              blurhash: restaurant.logoBlurhash,
-                              fit: BoxFit.cover,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          restaurant.name ?? '',
-                          style: robotoBold.copyWith(
-                            fontSize: Dimensions.fontSizeLarge,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Opening hours or closed status at bottom
+                  // Logo in top right corner
                   Positioned(
-                    bottom: 8,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isAvailable ? Icons.access_time : Icons.lock_clock,
-                              size: 12,
-                              color: isAvailable ? Colors.white : Colors.redAccent,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              isAvailable
-                                ? restaurant.deliveryTime ?? '30-45 min'
-                                : 'closed'.tr,
-                              style: robotoRegular.copyWith(
-                                fontSize: 11,
-                                color: isAvailable ? Colors.white : Colors.redAccent,
-                              ),
-                            ),
-                          ],
+                    top: 12,
+                    right: isRTL ? null : 12,
+                    left: isRTL ? 12 : null,
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: BlurhashImageWidget(
+                          imageUrl: '${restaurant.logoFullUrl}',
+                          blurhash: restaurant.logoBlurhash,
+                          fit: BoxFit.cover,
+                          borderRadius: BorderRadius.circular(25),
                         ),
                       ),
                     ),
                   ),
 
-                  // Favorite button
+                  // Status bar at bottom with blur effect - always show
                   Positioned(
-                    top: 12,
-                    right: isRTL ? null : 12,
-                    left: isRTL ? 12 : null,
-                    child: GetBuilder<FavouriteController>(builder: (favouriteController) {
-                      bool isWished = favouriteController.wishRestIdList.contains(restaurant.id);
-                      return Container(
-                        height: 36,
-                        width: 36,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          shape: BoxShape.circle,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Rating
+                              if (restaurant.ratingCount! > 0)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.star_rounded,
+                                      size: 14,
+                                      color: const Color(0xFFFFB800),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '${restaurant.avgRating!.toStringAsFixed(1)}',
+                                      style: robotoMedium.copyWith(
+                                        fontSize: 12,
+                                        color: Colors.white.withValues(alpha: 0.9),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '(${restaurant.ratingCount})',
+                                      style: robotoRegular.copyWith(
+                                        fontSize: 11,
+                                        color: Colors.white.withValues(alpha: 0.7),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                const SizedBox(),
+
+                              // Open/Closed Status
+                              Flexible(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isAvailable ? Icons.access_time : Icons.lock_clock,
+                                      size: 14,
+                                      color: isAvailable ? Colors.green : Colors.orange,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        isAvailable
+                                          ? 'closes_at'.tr + ' ${restaurant.availableTimeEnds ?? "23:00"}'
+                                          : restaurant.currentOpeningTime ??
+                                            'opens_at'.tr + ' ${restaurant.availableTimeStarts ?? "09:00"}',
+                                        style: robotoMedium.copyWith(
+                                          fontSize: 11,
+                                          color: isAvailable ? Colors.green : Colors.orange,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: CustomFavouriteWidget(
-                          isWished: isWished,
-                          isRestaurant: true,
-                          restaurant: restaurant,
-                        ),
-                      );
-                    }),
+                      ),
+                    ),
                   ),
+
                 ],
               ),
             ),
@@ -315,166 +328,208 @@ class RestaurantView extends StatelessWidget {
             // Content Section
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Restaurant Name and Description
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // Restaurant Name, Description and ETA
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          restaurant.name ?? '',
-                          style: robotoMedium.copyWith(
-                            fontSize: Dimensions.fontSizeDefault,
-                            fontWeight: FontWeight.w600,
+                        // Left side: Name and Description
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                restaurant.name ?? '',
+                                style: robotoMedium.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (restaurant.shortDescription != null && restaurant.shortDescription!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  restaurant.shortDescription!,
+                                  style: robotoRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeSmall,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ] else if (characteristics.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  characteristics,
+                                  style: robotoRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeSmall,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (restaurant.shortDescription != null && restaurant.shortDescription!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            restaurant.shortDescription!,
-                            style: robotoRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 12),
+                        // Right side: ETA badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                        ] else if (characteristics.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            characteristics,
-                            style: robotoRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                restaurant.deliveryTime?.replaceAll('-min', '').replaceAll(' min', '') ?? '30-45',
+                                style: robotoMedium.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault,
+                                  color: Theme.of(context).primaryColor,
+                                  height: 1.0,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                'min'.tr,
+                                style: robotoRegular.copyWith(
+                                  fontSize: Dimensions.fontSizeSmall,
+                                  color: Theme.of(context).primaryColor,
+                                  height: 1.2,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ],
                     ),
 
+                    // Separator line
+                    Container(
+                      height: 1,
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                    ),
+
                     // Bottom Info Row
-                    Directionality(
-                      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Delivery time
-                          Row(
-                            children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Left side: Delivery Cost and Rating
+                        Row(
+                          children: [
+                            // Delivery Cost
+                            if (restaurant.freeDelivery!) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.local_shipping,
+                                      size: 16,
+                                      color: Colors.green,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'free_delivery'.tr,
+                                      style: robotoMedium.copyWith(
+                                        fontSize: Dimensions.fontSizeDefault,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                            ] else ...[
                               Icon(
-                                Icons.schedule_rounded,
-                                size: 14,
+                                Icons.delivery_dining,
+                                size: 18,
                                 color: Theme.of(context).hintColor,
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                restaurant.deliveryTime ?? '30-45',
+                                '₪${restaurant.deliveryFee?.toStringAsFixed(0) ?? restaurant.minimumShippingCharge?.toStringAsFixed(0) ?? "5"}',
+                                style: robotoRegular.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                            ],
+
+                            // Rating
+                            if (restaurant.ratingCount! > 0) ...[
+                              Icon(
+                                Icons.star_rounded,
+                                size: 18,
+                                color: const Color(0xFFFFB800),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                restaurant.avgRating!.toStringAsFixed(1),
+                                style: robotoMedium.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '(${restaurant.ratingCount})',
                                 style: robotoRegular.copyWith(
                                   fontSize: Dimensions.fontSizeSmall,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
+                            ] else ...[
+                              Icon(
+                                Icons.star_border_rounded,
+                                size: 18,
+                                color: Theme.of(context).hintColor,
+                              ),
                               const SizedBox(width: 4),
                               Text(
-                                'min'.tr,
+                                'new'.tr,
                                 style: robotoRegular.copyWith(
-                                  fontSize: Dimensions.fontSizeExtraSmall,
+                                  fontSize: Dimensions.fontSizeDefault,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
                             ],
-                          ),
+                          ],
+                        ),
 
-                          // Status
-                          if (!isAvailable)
+                        // Right side: Distance
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.near_me,
+                              size: 16,
+                              color: Theme.of(context).hintColor,
+                            ),
+                            const SizedBox(width: 4),
                             Text(
-                              'closed'.tr,
-                              style: robotoMedium.copyWith(
-                                fontSize: Dimensions.fontSizeSmall,
-                                color: Theme.of(context).colorScheme.error,
+                              '${distance.toStringAsFixed(1)} km',
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeDefault,
+                                color: Theme.of(context).hintColor,
                               ),
                             ),
-
-                          // Rating with reviews
-                          if (restaurant.ratingCount! > 0)
-                            Row(
-                              children: [
-                                Text(
-                                  restaurant.avgRating!.toStringAsFixed(1),
-                                  style: robotoMedium.copyWith(
-                                    fontSize: Dimensions.fontSizeSmall,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '(${restaurant.ratingCount})',
-                                  style: robotoRegular.copyWith(
-                                    fontSize: Dimensions.fontSizeExtraSmall,
-                                    color: Theme.of(context).hintColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Icon(
-                                  Icons.star_rounded,
-                                  size: 16,
-                                  color: const Color(0xFFFFB800),
-                                ),
-                              ],
-                            ),
-
-                          // Free delivery badge or distance
-                          if (restaurant.freeDelivery!)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.local_shipping_outlined,
-                                    size: 14,
-                                    color: Colors.green,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'free'.tr.toUpperCase(),
-                                    style: robotoMedium.copyWith(
-                                      fontSize: Dimensions.fontSizeSmall,
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  size: 14,
-                                  color: Theme.of(context).hintColor,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  '${distance.toStringAsFixed(1)} km',
-                                  style: robotoRegular.copyWith(
-                                    fontSize: Dimensions.fontSizeSmall,
-                                    color: Theme.of(context).hintColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -258,7 +258,7 @@ class _MenuScreenState extends State<MenuScreen> {
             Expanded(child: SingleChildScrollView(
               child: Ink(
                 color: Get.find<ThemeController>().darkTheme ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 35),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Column(children: [
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -350,7 +350,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       ),
                     ),
                   ]),
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 20),
 
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(
@@ -391,7 +391,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       onTap: () => Get.toNamed(RouteHelper.getWalletRoute(fromMenuPage: true)),
                     ) : const SizedBox(),
                   ]),
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 20),
 
                   (Get.find<SplashController>().configModel!.refEarningStatus == 1)
                    || (Get.find<SplashController>().configModel!.toggleDmRegistration! && !ResponsiveHelper.isDesktop(context))
@@ -508,7 +508,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('shipping-policy')),
                     ) : const SizedBox(),
                   ]),
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 20),
 
                   // Logout/Sign In Button
                   ModernMenuButtonWidget(

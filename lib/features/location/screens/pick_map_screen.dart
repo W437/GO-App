@@ -4,6 +4,7 @@ import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_wid
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
@@ -46,6 +47,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
   CameraPosition? _cameraPosition;
   late LatLng _initialPosition;
   bool _showLocationPermissionOverlay = false;
+  int? _currentZoneId;
 
   @override
   void initState() {
@@ -99,8 +101,23 @@ class _PickMapScreenState extends State<PickMapScreen> {
                         ),
                         minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
                         polygons: _zonePolygons(locationController, context),
+                        // markers: _zoneMarkers(locationController),  // Removed zone name markers
                         onMapCreated: (GoogleMapController mapController) {
                           _mapController = mapController;
+
+                          // Initialize current zone based on initial position
+                          if (widget.fromAddAddress) {
+                            _currentZoneId = ZonePolygonHelper.getZoneIdForPoint(
+                              LatLng(locationController.position.latitude, locationController.position.longitude),
+                              locationController.zoneList,
+                            );
+                          } else {
+                            _currentZoneId = ZonePolygonHelper.getZoneIdForPoint(
+                              _initialPosition,
+                              locationController.zoneList,
+                            );
+                          }
+
                           // Don't auto-request location if showing permission overlay
                           if (!widget.fromAddAddress && widget.route != 'splash' && !_showLocationPermissionOverlay) {
                             Get.find<LocationController>()
@@ -121,6 +138,18 @@ class _PickMapScreenState extends State<PickMapScreen> {
                         },
                         onCameraIdle: () {
                           Get.find<LocationController>().updatePosition(_cameraPosition, false);
+                          // Update the current zone when camera stops moving
+                          if (_cameraPosition != null) {
+                            final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
+                              _cameraPosition!.target,
+                              locationController.zoneList,
+                            );
+                            if (newZoneId != _currentZoneId) {
+                              setState(() {
+                                _currentZoneId = newZoneId;
+                              });
+                            }
+                          }
                         },
                         style: Get.isDarkMode
                             ? Get.find<ThemeController>().darkMap
@@ -371,11 +400,66 @@ class _PickMapScreenState extends State<PickMapScreen> {
     }
 
     final theme = Theme.of(context);
+
     return ZonePolygonHelper.buildPolygons(
       zones: controller.zoneList,
       baseColor: theme.colorScheme.primary,
-      strokeOpacity: 0.7,
-      fillOpacity: 0.1,
+      strokeOpacity: 0.85,
+      fillOpacity: 0.15,  // Slightly reduced for better balance with thinner strokes
+      highlightedZoneId: _currentZoneId,  // Use the tracked current zone ID
+      useEnhancedStyle: true,
+      onZoneTap: (zoneId) {
+        // When a zone is clicked, move the camera to its center
+        _moveToZoneCenter(zoneId, controller.zoneList);
+      },
     );
   }
+
+  void _moveToZoneCenter(int zoneId, List<ZoneListModel> zones) {
+    // Find the zone with this ID
+    ZoneListModel? zone;
+    for (var z in zones) {
+      if (z.id == zoneId) {
+        zone = z;
+        break;
+      }
+    }
+
+    if (zone != null && zone.formattedCoordinates != null && zone.formattedCoordinates!.isNotEmpty) {
+      // Calculate the center of the zone
+      double sumLat = 0;
+      double sumLng = 0;
+      int count = 0;
+
+      for (final coord in zone.formattedCoordinates!) {
+        if (coord.lat != null && coord.lng != null) {
+          sumLat += coord.lat!;
+          sumLng += coord.lng!;
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        final centerLat = sumLat / count;
+        final centerLng = sumLng / count;
+
+        // Move the camera to the zone center without changing zoom
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(centerLat, centerLng),
+          ),
+        );
+
+        // Update the current zone ID
+        setState(() {
+          _currentZoneId = zoneId;
+        });
+      }
+    }
+  }
+
+  // Removed zone marker methods as we're not showing zone name badges anymore
+  // Set<Marker> _zoneMarkers(LocationController controller) {
+  //   return <Marker>{};
+  // }
 }
