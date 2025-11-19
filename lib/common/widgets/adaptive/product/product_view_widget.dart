@@ -9,6 +9,7 @@ import 'package:godelivery_user/common/widgets/adaptive/product/product_widget.d
 import 'package:godelivery_user/features/home/widgets/theme1/restaurant_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/web/web_restaurant_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -49,27 +50,72 @@ class ProductViewWidget extends StatelessWidget {
 
     return Column(children: [
 
-      !isNull ? length > 0 ? GridView.builder(
-        key: UniqueKey(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisSpacing: Dimensions.paddingSizeLarge,
-          mainAxisSpacing: ResponsiveHelper.isDesktop(context) && !isWebRestaurant! ? Dimensions.paddingSizeLarge : isWebRestaurant! ? Dimensions.paddingSizeLarge : 0.01,
-          //childAspectRatio: ResponsiveHelper.isDesktop(context) && !isWebRestaurant! ? 3 : isWebRestaurant! ? 1.5 : showTheme1Restaurant ? 1.9 : 3.3,
-          mainAxisExtent: ResponsiveHelper.isDesktop(context) && !isWebRestaurant! ? 142 : isWebRestaurant! ? 280 : showTheme1Restaurant ? 200 : 150,
-          crossAxisCount: ResponsiveHelper.isMobile(context) && !isWebRestaurant! ? 1 : isWebRestaurant! ? 4 : 3,
-        ),
-        physics: isScrollable ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
-        shrinkWrap: isScrollable ? false : true,
-        itemCount: length,
-        padding: padding,
-        itemBuilder: (context, index) {
-          return showTheme1Restaurant ? RestaurantWidget(restaurant: restaurants![index], index: index, inStore: inRestaurantPage)
-          : isWebRestaurant! ? WebRestaurantWidget(restaurant: restaurants![index]) : ProductWidget(
-            isRestaurant: isRestaurant, product: isRestaurant ? null : products![index],
-            restaurant: isRestaurant ? restaurants![index] : null, index: index, length: length, isCampaign: isCampaign,
-            inRestaurant: inRestaurantPage,
-          );
-        },
+      !isNull ? length > 0 ? (inRestaurantPage && !isRestaurant
+        // Horizontal list for restaurant menu items
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                child: Text(
+                  'Most Popular',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeLarge,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 240,
+                child: ListView.builder(
+              key: UniqueKey(),
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+              itemCount: length,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: 160,
+                  margin: EdgeInsets.only(
+                    right: index < length - 1 ? Dimensions.paddingSizeDefault : 0,
+                  ),
+                  child: ProductWidget(
+                    isRestaurant: false,
+                    product: products![index],
+                    restaurant: null,
+                    index: index,
+                    length: length,
+                    isCampaign: isCampaign,
+                    inRestaurant: true,
+                  ),
+                );
+              },
+            ),
+              ),
+            ],
+          )
+        // Grid for other views
+        : GridView.builder(
+            key: UniqueKey(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisSpacing: Dimensions.paddingSizeLarge,
+              mainAxisSpacing: ResponsiveHelper.isDesktop(context) && !isWebRestaurant! ? Dimensions.paddingSizeLarge : isWebRestaurant! ? Dimensions.paddingSizeLarge : 0.01,
+              mainAxisExtent: ResponsiveHelper.isDesktop(context) && !isWebRestaurant! ? 142 : isWebRestaurant! ? 280 : showTheme1Restaurant ? 200 : 150,
+              crossAxisCount: ResponsiveHelper.isMobile(context) && !isWebRestaurant! ? 1 : isWebRestaurant! ? 4 : 3,
+            ),
+            physics: isScrollable ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+            shrinkWrap: isScrollable ? false : true,
+            itemCount: length,
+            padding: padding,
+            itemBuilder: (context, index) {
+              return showTheme1Restaurant ? RestaurantWidget(restaurant: restaurants![index], index: index, inStore: inRestaurantPage)
+              : isWebRestaurant! ? WebRestaurantWidget(restaurant: restaurants![index]) : ProductWidget(
+                isRestaurant: isRestaurant, product: isRestaurant ? null : products![index],
+                restaurant: isRestaurant ? restaurants![index] : null, index: index, length: length, isCampaign: isCampaign,
+                inRestaurant: inRestaurantPage,
+              );
+            },
+          )
       ) : NoDataScreen(
         isEmptyRestaurant: isRestaurant ? true : false,
         isEmptyWishlist: fromFavorite! ? true : false,

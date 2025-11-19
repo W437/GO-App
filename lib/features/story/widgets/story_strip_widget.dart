@@ -182,13 +182,12 @@ class StoryStripWidget extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Shimmer(
-                  duration: const Duration(seconds: 2),
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                ClipOval(
+                  child: Shimmer(
+                    duration: const Duration(seconds: 2),
+                    child: Container(
+                      width: 70,
+                      height: 70,
                       color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                     ),
                   ),

@@ -11,6 +11,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
@@ -28,9 +29,9 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
     final double realSpaceNeeded = xyz/2;
 
     return SliverAppBar(
-      expandedHeight: isDesktop ? 350 : hasCoupon ? 400 : 300,
-      toolbarHeight: isDesktop ? 150 : 90,
-      pinned: true, floating: false, elevation: 0.5,
+      expandedHeight: isDesktop ? 350 : 280,
+      toolbarHeight: isDesktop ? 150 : 70,
+      pinned: true, floating: false, elevation: 0,
       backgroundColor: Theme.of(context).cardColor,
       leading: const SizedBox(),
       leadingWidth: 0,
@@ -43,55 +44,18 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
             child: FlexibleSpaceBar(
               titlePadding: EdgeInsets.zero,
               centerTitle: true,
-              expandedTitleScale: isDesktop ? 1 : 1.1,
+              expandedTitleScale: isDesktop ? 1 : 1.0,
               title: CustomizableSpaceBarWidget(
                 builder: (context, scrollingRate) {
-                  final showText = scrollingRate < 0.5;
                   return !isDesktop ? Stack(
                     children: [
-                      Container(
-                        color: Theme.of(context).cardColor.withValues(alpha: scrollingRate),
-                        padding: EdgeInsets.only(
-                          bottom: 0,
-                          left: Get.find<LocalizationController>().isLtr ? 40 * scrollingRate : 0,
-                          right: Get.find<LocalizationController>().isLtr ? 0 : 40 * scrollingRate,
-                        ),
-                        child: Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Container(
-                            height: (hasCoupon ? 260 : 160) - (scrollingRate * 25),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1 - (0.1 * scrollingRate)), blurRadius: 10)]
-                            ),
-                            margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
-                            padding: EdgeInsets.only(
-                              left: Get.find<LocalizationController>().isLtr ? 20 : 0,
-                              right: Get.find<LocalizationController>().isLtr ? 0 : 20,
-                              top: scrollingRate * (context.height * 0.035)
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall - (scrollingRate * Dimensions.paddingSizeSmall)),
-                              child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-
-                                InfoViewWidget(restaurant: restaurant, restController: restController, scrollingRate: scrollingRate),
-                                SizedBox(height: Dimensions.paddingSizeLarge - (scrollingRate * (isDesktop ? 2 : Dimensions.paddingSizeLarge))),
-
-                                scrollingRate < 0.8 ? CouponViewWidget(scrollingRate: scrollingRate) : const SizedBox(),
-
-                              ]),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Floating back button - positioned below status bar dynamically
+                      // Floating back button
                       Positioned(
-                        top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
+                        top: MediaQuery.of(context).padding.top + 10,
                         left: Dimensions.paddingSizeDefault,
                         child: CircularBackButtonWidget(
-                          showText: showText,
-                          backgroundColor: Theme.of(context).cardColor.withOpacity(showText ? 1.0 : 0.95),
+                          showText: true,
+                          backgroundColor: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ],
@@ -120,7 +84,6 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                               Image.asset(Images.announcement, height: 26, width: 26),
                               const SizedBox(width: Dimensions.paddingSizeSmall),
-
                               Flexible(
                                 child: Marquee(
                                   text: restaurant.announcementMessage!,
@@ -141,16 +104,11 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                               clipBehavior: Clip.none,
                               children: [
                                 Row(children: [
-
                                   SizedBox(width: 250 /*(context.width * 0.17)*/ - (scrollingRate * 90)),
-
                                   Expanded(child: InfoViewWidget(restaurant: restaurant, restController: restController, scrollingRate: scrollingRate)),
                                   const SizedBox(width: Dimensions.paddingSizeSmall),
-
                                   hasCoupons ? Expanded(child: CouponViewWidget(scrollingRate: scrollingRate)) : const SizedBox(),
-
                                 ]),
-
                                 Positioned(left: Get.find<LocalizationController>().isLtr ? 30 : null, right: Get.find<LocalizationController>().isLtr ? null : 30, top: - 80 + (scrollingRate * 77), child: Container(
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
@@ -197,17 +155,57 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                   );
                 },
               ),
-              background: Container(
-                margin: EdgeInsets.only(bottom: isDesktop ? 100 : (hasCoupon ? 200 : 100)),
-                child: SizedBox(
-                  height: 100,
-                  child: BlurhashImageWidget(
-                    imageUrl: '${restaurant.coverPhotoFullUrl}',
-                    blurhash: restaurant.coverPhotoBlurhash,
-                    fit: BoxFit.cover,
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(Dimensions.radiusLarge)),
+              background: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Hero Image
+                  Container(
+                    height: isDesktop ? 350 : 280,
+                    width: double.infinity,
+                    child: BlurhashImageWidget(
+                      imageUrl: '${restaurant.coverPhotoFullUrl}',
+                      blurhash: restaurant.coverPhotoBlurhash,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
+                  // Gradient Overlay for text readability
+                  Container(
+                    height: isDesktop ? 350 : 280,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.6),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Restaurant Name Overlay
+                  Positioned(
+                    bottom: 24,
+                    left: 24,
+                    right: 24,
+                    child: Text(
+                      restaurant.name ?? '',
+                      style: robotoBold.copyWith(
+                        fontSize: 32,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           );

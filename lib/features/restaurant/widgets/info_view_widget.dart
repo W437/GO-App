@@ -26,171 +26,128 @@ class InfoViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    return Column(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
-      Row(children: [
 
-        !isDesktop ? Container(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Centered Logo
+        Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Theme.of(context).primaryColor, width: 0.2),
+            border: Border.all(color: Theme.of(context).cardColor, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              )
+            ],
           ),
-          padding: const EdgeInsets.all(2),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: Stack(children: [
-              CustomImageWidget(
-                image: '${restaurant.logoFullUrl}',
-                height: 60 - (scrollingRate * 15), width: 60 - (scrollingRate * 15), fit: BoxFit.cover,
+            borderRadius: BorderRadius.circular(60),
+            child: CustomImageWidget(
+              image: '${restaurant.logoFullUrl}',
+              height: 100 - (scrollingRate * 30),
+              width: 100 - (scrollingRate * 30),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeDefault),
+
+        // Name & Info Centered
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Restaurant Name
+            Text(
+              restaurant.name!,
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeOverLarge,
+                color: Colors.black87,
+                fontWeight: FontWeight.w700,
               ),
-              restController.isRestaurantOpenNow(restaurant.active!, restaurant.schedules) ? const SizedBox() : Positioned(
-                left: 0, right: 0, bottom: 0,
-                child: Container(
-                  height: 30,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(Dimensions.radiusSmall)),
-                    color: Colors.black.withValues(alpha: 0.6),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+
+            // Rating & Time Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.star, color: Colors.amber, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  '${restaurant.avgRating!.toStringAsFixed(1)}',
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
                   ),
-                  child: Text(
-                    'closed_now'.tr, textAlign: TextAlign.center,
-                    style: robotoRegular.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeSmall),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeDefault),
+                Icon(Icons.access_time, color: Theme.of(context).hintColor, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  restaurant.deliveryTime?.replaceAll('-min', ' min') ?? '30-40 min',
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Description
+            if (restaurant.description != null && restaurant.description!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                child: Text(
+                  restaurant.description!,
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
+                    height: 1.4,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            const SizedBox(height: 12),
+
+            // Details Button
+            InkWell(
+              onTap: () {
+                // Show restaurant details
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Dimensions.paddingSizeLarge,
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Details',
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
                   ),
                 ),
               ),
-            ]),
-          ),
-        ) : const SizedBox(),
-        const SizedBox(width: Dimensions.paddingSizeSmall),
-
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(
-            restaurant.name!, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge - (scrollingRate * 3), color: Theme.of(context).textTheme.bodyMedium!.color),
-            maxLines: 1, overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-          Text(
-            restaurant.address ?? '', maxLines: 1, overflow: TextOverflow.ellipsis,
-            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall - (scrollingRate * 2), color: Theme.of(context).disabledColor),
-          ),
-          SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraSmall : 0),
-
-          Row(children: [
-            Text('start_from'.tr, style: robotoRegular.copyWith(
-              fontSize: Dimensions.fontSizeExtraSmall - (scrollingRate * 2), color: Theme.of(context).disabledColor,
-            )),
-            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-            Text(
-              PriceConverter.convertPrice(restaurant.minimumOrder), textDirection: TextDirection.ltr,
-              style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall - (scrollingRate * 2), color: Theme.of(context).primaryColor),
             ),
-          ]),
-
-        ])),
-        const SizedBox(width: Dimensions.paddingSizeSmall),
-
-        Column(children: [
-          GetBuilder<FavouriteController>(builder: (favouriteController) {
-              bool isWished = favouriteController.wishRestIdList.contains(restaurant.id);
-              return CustomFavouriteWidget(
-                isWished: isWished,
-                isRestaurant: true,
-                restaurant: restaurant,
-                size: 24  - (scrollingRate * 4),
-              );
-            }),
-
-          const SizedBox(height: Dimensions.paddingSizeSmall),
-
-          AppConstants.webHostedUrl.isNotEmpty ? InkWell(
-            onTap: (){
-              if(isDesktop) {
-                // String? hostname = html.window.location.hostname;
-                // String protocol = html.window.location.protocol;
-                // String shareUrl = '$protocol//$hostname${restController.filteringUrl(restaurant.slug ?? '')}';
-                String shareUrl = '${AppConstants.webHostedUrl}${restController.filteringUrl(restaurant.slug ?? '')}';
-                Clipboard.setData(ClipboardData(text: shareUrl));
-                showCustomSnackBar('restaurant_url_copied'.tr, isError: false);
-              } else {
-                String shareUrl = '${AppConstants.webHostedUrl}${restController.filteringUrl(restaurant.slug ?? '')}';
-                Share.share(shareUrl);
-              }
-            },
-            child: Icon(
-              Icons.share, size: 20  - (scrollingRate * 4),
-            ),
-          ) : const SizedBox(),
-        ]),
-        const SizedBox(width: Dimensions.paddingSizeLarge),
-
-      ]),
-      SizedBox(height: Dimensions.paddingSizeLarge - (scrollingRate * (isDesktop ? 2 : Dimensions.paddingSizeLarge))),
-
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Expanded(child: SizedBox()),
-
-        Column(children: [
-          Icon(Icons.access_time, color: Theme.of(context).primaryColor, size: 20 - (scrollingRate * (isDesktop ? 2 : 20))),
-          // const SizedBox(height: 2),
-
-          Text(restaurant.deliveryTime!, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall - (scrollingRate * (isDesktop ? 2 : Dimensions.fontSizeSmall)), color: Theme.of(context).textTheme.bodyLarge!.color)),
-        ]),
-        const Expanded(child: SizedBox()),
-
-        InkWell(
-          onTap: () => Get.toNamed(RouteHelper.getMapRoute(
-            AddressModel(
-              id: restaurant.id, address: restaurant.address, latitude: restaurant.latitude,
-              longitude: restaurant.longitude, contactPersonNumber: '', contactPersonName: '', addressType: '',
-            ), 'restaurant',
-            restaurantName: restaurant.name,
-          )),
-          child: Column(children: [
-            Image.asset(Images.restaurantLocationIcon, height: 20 - (scrollingRate * (isDesktop ? 2 : 20)), width: 20 - (scrollingRate * (isDesktop ? 2 : 20)), color: Theme.of(context).primaryColor),
-            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-            Text('location'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall - (scrollingRate * (isDesktop ? 2 : Dimensions.fontSizeSmall)), color: Theme.of(context).textTheme.bodyLarge!.color)),
-          ]),
-        ),
-        const Expanded(child: SizedBox()),
-
-        InkWell(
-          onTap: () => Get.toNamed(RouteHelper.getRestaurantReviewRoute(restaurant.id, restaurant.name, restaurant)),
-          child: Column(children: [
-            Row(children: [
-              Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20 - (scrollingRate * (isDesktop ? 2 : 20))),
-              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-              Text(
-                restaurant.avgRating!.toStringAsFixed(1),
-                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall - (scrollingRate * (isDesktop ? 2 : Dimensions.fontSizeSmall)), color: Theme.of(context).textTheme.bodyLarge!.color),
-              ),
-            ]),
-            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-            Text(
-              '${restaurant.ratingCount} + ${'ratings'.tr}',
-              style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall - (scrollingRate * (isDesktop ? 2 : Dimensions.fontSizeSmall)), color: Theme.of(context).primaryColor),
-            ),
-          ]),
+          ],
         ),
 
-        (restaurant.delivery! && restaurant.freeDelivery!) ? const Expanded(child: SizedBox()) : const SizedBox(),
-
-        (restaurant.delivery! && restaurant.freeDelivery!) ? Column(children: [
-          Icon(Icons.money_off, color: Theme.of(context).primaryColor, size: 20 - (scrollingRate * (isDesktop ? 2 : 20))),
-          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-          Text(
-            'free_delivery'.tr,
-            style: robotoRegular.copyWith(
-              fontSize: Dimensions.fontSizeExtraSmall - (scrollingRate * (isDesktop ? 2 : Dimensions.fontSizeExtraSmall)),
-              color: Theme.of(context).textTheme.bodyMedium!.color!,
-            ),
-          ),
-        ]) : const SizedBox(),
-
-        const Expanded(child: SizedBox()),
-
-      ]),
-    ]);
+        const SizedBox(height: Dimensions.paddingSizeDefault),
+      ],
+    );
   }
+
+  // Helper methods removed as they are no longer used in this simplified view
 }

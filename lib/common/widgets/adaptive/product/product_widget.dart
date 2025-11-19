@@ -138,7 +138,7 @@ class ProductWidget extends StatelessWidget {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
 
                         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                          Flexible(
+                          Expanded(
                             child: Text(
                               isRestaurant ? restaurant!.name! : product!.name!,
                               style: robotoMedium,
@@ -155,8 +155,6 @@ class ProductWidget extends StatelessWidget {
 
                           !isRestaurant && product!.isRestaurantHalalActive! && product!.isHalalFood! ? const CustomAssetImageWidget(
                             Images.halalIcon, height: 13, width: 13) : const SizedBox(),
-
-                          const SizedBox(width: Dimensions.paddingSizeLarge),
                         ]),
 
                         const SizedBox(height: Dimensions.paddingSizeExtraSmall),
