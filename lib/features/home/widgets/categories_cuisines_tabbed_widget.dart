@@ -30,7 +30,7 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
         Padding(
           padding: const EdgeInsets.fromLTRB(
             Dimensions.paddingSizeExtraLarge,
-            Dimensions.paddingSizeLarge,
+            0,
             Dimensions.paddingSizeExtraLarge,
             Dimensions.paddingSizeDefault,
           ),

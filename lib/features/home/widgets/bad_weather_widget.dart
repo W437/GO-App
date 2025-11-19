@@ -70,7 +70,7 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
       margin: EdgeInsets.symmetric(
         horizontal: ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeDefault,
-        vertical: Dimensions.paddingSizeSmall,
+        vertical: Dimensions.paddingSizeExtraSmall,
       ),
       child: Row(children: [
 

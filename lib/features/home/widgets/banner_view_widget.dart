@@ -113,7 +113,7 @@ class _BannerViewWidgetState extends State<BannerViewWidget> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 40), // Increased bottom padding for shadow
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -252,7 +252,7 @@ class _BannerViewWidgetState extends State<BannerViewWidget> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 40), // Match loaded state padding
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
