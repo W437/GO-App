@@ -114,31 +114,31 @@ class RestaurantView extends StatelessWidget {
       category = 'RESTAURANT';
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: isSelected ? Border.all(color: Theme.of(context).primaryColor, width: 2) : null,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Get.isDarkMode
-                ? Colors.black.withValues(alpha: 0.4)
-                : Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 0,
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: CustomInkWellWidget(
-        onTap: onTap ?? () {
-          if(restaurant.restaurantStatus == 1){
-            Get.toNamed(RouteHelper.getRestaurantRoute(restaurant.id), arguments: RestaurantScreen(restaurant: restaurant));
-          }else if(restaurant.restaurantStatus == 0){
-            showCustomSnackBar('restaurant_is_not_available'.tr);
-          }
-        },
-        radius: 20,
+    return CustomInkWellWidget(
+      onTap: onTap ?? () {
+        if(restaurant.restaurantStatus == 1){
+          Get.toNamed(RouteHelper.getRestaurantRoute(restaurant.id), arguments: RestaurantScreen(restaurant: restaurant));
+        }else if(restaurant.restaurantStatus == 0){
+          showCustomSnackBar('restaurant_is_not_available'.tr);
+        }
+      },
+      radius: 20,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          border: isSelected ? Border.all(color: Theme.of(context).primaryColor, width: 2) : null,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Get.isDarkMode
+                  ? Colors.black.withValues(alpha: 0.4)
+                  : Colors.grey.withValues(alpha: 0.1),
+              spreadRadius: 0,
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

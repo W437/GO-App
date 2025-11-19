@@ -40,30 +40,30 @@ class RestaurantsCardWidget extends StatelessWidget {
 
     return Stack(
       children: [
-        Container(
-          width: isNewOnGO! ? ResponsiveHelper.isMobile(context) ? 350 : 380  : ResponsiveHelper.isMobile(context) ? 330: 355,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-            boxShadow: [
-              BoxShadow(
-                color: Get.isDarkMode
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.grey.withValues(alpha: 0.12),
-                spreadRadius: 0,
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: CustomInkWellWidget(
-            onTap: () {
-              Get.toNamed(
-                RouteHelper.getRestaurantRoute(restaurant.id),
-                arguments: RestaurantScreen(restaurant: restaurant),
-              );
-            },
-            radius: Dimensions.radiusLarge,
+        CustomInkWellWidget(
+          onTap: () {
+            Get.toNamed(
+              RouteHelper.getRestaurantRoute(restaurant.id),
+              arguments: RestaurantScreen(restaurant: restaurant),
+            );
+          },
+          radius: Dimensions.radiusLarge,
+          child: Container(
+            width: isNewOnGO! ? ResponsiveHelper.isMobile(context) ? 350 : 380  : ResponsiveHelper.isMobile(context) ? 330: 355,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+              boxShadow: [
+                BoxShadow(
+                  color: Get.isDarkMode
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.12),
+                  spreadRadius: 0,
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
             child: Padding(
               padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [

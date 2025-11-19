@@ -188,52 +188,30 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
                           categoryController.categoryList![index].id,
                           categoryController.categoryList![index].name!,
                         )),
-                        radius: Dimensions.radiusExtraLarge,
+                        radius: 20,
                         child: Container(
                           height: 80,
                           width: 80,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Theme.of(context).primaryColor.withValues(alpha: 0.85),
-                                Theme.of(context).primaryColor.withValues(alpha: 0.85),
-                                Colors.white,
-                                Colors.white,
-                              ],
-                              stops: const [0.0, 0.2, 0.65, 1.0],
-                            ),
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
+                                color: Get.isDarkMode
+                                    ? Colors.black.withValues(alpha: 0.3)
+                                    : Colors.grey.withValues(alpha: 0.12),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(3.5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge - 3),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.white,
-                                    const Color(0xFFE8E8E8),
-                                  ],
-                                  stops: const [0.65, 1.0],
-                                ),
-                              ),
-                              child: BlurhashImageWidget(
-                                imageUrl: '${categoryController.categoryList![index].imageFullUrl}',
-                                blurhash: categoryController.categoryList![index].imageBlurhash,
-                                fit: BoxFit.cover,
-                                borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge - 3),
-                              ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BlurhashImageWidget(
+                              imageUrl: '${categoryController.categoryList![index].imageFullUrl}',
+                              blurhash: categoryController.categoryList![index].imageBlurhash,
+                              fit: BoxFit.cover,
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
                         ),

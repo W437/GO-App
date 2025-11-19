@@ -42,37 +42,74 @@ class CategoryWidget1 extends StatelessWidget {
                           onTap: () => Get.toNamed(RouteHelper.getCategoryProductRoute(
                             categoryController.categoryList![index].id, categoryController.categoryList![index].name!,
                           )),
-                          child: SizedBox(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
                             width: 75,
-                            child: Container(
-                              height: 65, width: 75,
-                              margin: EdgeInsets.only(
-                                left: index == 0 ? 0 : Dimensions.paddingSizeExtraSmall,
-                                right: Dimensions.paddingSizeExtraSmall,
-                              ),
-                              child: Stack(children: [
-                                SizedBox(
-                                  height: 65, width: 75,
-                                  child: BlurhashImageWidget(
+                            height: 65,
+                            margin: EdgeInsets.only(
+                              left: index == 0 ? 0 : Dimensions.paddingSizeExtraSmall,
+                              right: Dimensions.paddingSizeExtraSmall,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Get.isDarkMode
+                                      ? Colors.black.withValues(alpha: 0.3)
+                                      : Colors.grey.withValues(alpha: 0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  BlurhashImageWidget(
                                     imageUrl: categoryController.categoryList![index].imageFullUrl ?? '',
                                     blurhash: categoryController.categoryList![index].imageBlurhash,
                                     fit: BoxFit.cover,
-                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                ),
-                                Positioned(bottom: 0, left: 0, right: 0, child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 2),
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(Dimensions.radiusSmall)),
-                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.black.withValues(alpha: 0.7),
+                                          ],
+                                        ),
+                                      ),
+                                      child: Text(
+                                        categoryController.categoryList![index].name!,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeExtraSmall,
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withValues(alpha: 0.5),
+                                              blurRadius: 2,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  child: Text(
-                                    categoryController.categoryList![index].name!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.white),
-                                  ),
-                                )),
-                              ]),
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
 import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
@@ -52,7 +53,7 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'see_our_most_popular_restaurant_and_foods'.tr,
+                    'Featured partner restaurants near you',
                     style: robotoRegular.copyWith(
                       color: Theme.of(context).hintColor,
                       fontSize: Dimensions.fontSizeDefault,
@@ -67,6 +68,10 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
             GetBuilder<RestaurantController>(
               builder: (restaurantController) {
                 // Get restaurants from advertisements
+                if (advertisementController.advertisementList == null) {
+                  return const SizedBox.shrink();
+                }
+
                 List<Restaurant> restaurants = advertisementController.advertisementList!
                     .where((ad) => ad.restaurant != null && ad.addType != 'video_promotion')
                     .map((ad) => ad.restaurant!)
@@ -115,14 +120,14 @@ class SponsoredRestaurantCard extends StatelessWidget {
                          ? DateConverter.convertTimeToTime(restaurant.restaurantOpeningTime!)
                          : '23:00');
 
-    return InkWell(
+    return CustomInkWellWidget(
       onTap: () {
         Get.toNamed(
           RouteHelper.getRestaurantRoute(restaurant.id),
           arguments: RestaurantScreen(restaurant: restaurant),
         );
       },
-      borderRadius: BorderRadius.circular(20),
+      radius: 20,
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
@@ -141,24 +146,42 @@ class SponsoredRestaurantCard extends StatelessWidget {
           children: [
             Column(
               children: [
-                // Top - Cover Image (fills remaining space) with subtle blur
+                // Top - Cover Image with Gradual Blur (fills remaining space)
                 Expanded(
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
+                        // Layer 1: Clear image (bottom layer)
                         BlurhashImageWidget(
                           imageUrl: restaurant.coverPhotoFullUrl ?? '',
                           blurhash: restaurant.coverPhotoBlurhash,
                           fit: BoxFit.cover,
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                         ),
-                        BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.05),
+
+                        // Layer 2: Blurred image with gradient mask (top layer)
+                        ShaderMask(
+                          shaderCallback: (rect) {
+                            return const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent, // Top stays clear
+                                Colors.black,       // Bottom gets blurred
+                              ],
+                              stops: [0.3, 1.0], // Blur starts at 30% down
+                            ).createShader(rect);
+                          },
+                          blendMode: BlendMode.dstIn,
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                            child: BlurhashImageWidget(
+                              imageUrl: restaurant.coverPhotoFullUrl ?? '',
+                              blurhash: restaurant.coverPhotoBlurhash,
+                              fit: BoxFit.cover,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                             ),
                           ),
                         ),
@@ -289,14 +312,14 @@ class SponsoredRestaurantCard extends StatelessWidget {
                     color: Colors.white,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                      width: 3,
+                      color: Colors.grey.withValues(alpha: 0.25),
+                      width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),

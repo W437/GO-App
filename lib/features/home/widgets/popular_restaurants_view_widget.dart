@@ -73,27 +73,27 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
 
                       return Padding(
                         padding: EdgeInsets.only(left: (ResponsiveHelper.isDesktop(context) && index == 0 && Get.find<LocalizationController>().isLtr) ? 0 : Dimensions.paddingSizeDefault),
-                        child: Container(
-                          height: 185, width: ResponsiveHelper.isDesktop(context) ? 280 : MediaQuery.of(context).size.width * 0.75,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Get.isDarkMode
-                                    ? Colors.black.withValues(alpha: 0.3)
-                                    : Colors.grey.withValues(alpha: 0.15),
-                                blurRadius: 20,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
+                        child: CustomInkWellWidget(
+                          onTap: () => Get.toNamed(RouteHelper.getRestaurantRoute(restaurantList[index].id),
+                            arguments: RestaurantScreen(restaurant: restaurantList[index]),
                           ),
-                          child: CustomInkWellWidget(
-                            onTap: () => Get.toNamed(RouteHelper.getRestaurantRoute(restaurantList[index].id),
-                              arguments: RestaurantScreen(restaurant: restaurantList[index]),
+                          radius: Dimensions.radiusLarge,
+                          child: Container(
+                            height: 185, width: ResponsiveHelper.isDesktop(context) ? 280 : MediaQuery.of(context).size.width * 0.75,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Get.isDarkMode
+                                      ? Colors.black.withValues(alpha: 0.3)
+                                      : Colors.grey.withValues(alpha: 0.15),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
                             ),
-                            radius: Dimensions.radiusLarge,
                             child: Column(
                               children: [
                                 // Cover Image Section with Logo
