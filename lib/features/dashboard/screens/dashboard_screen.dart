@@ -215,7 +215,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                    color: Theme.of(context).cardColor.withValues(alpha: 0.85),
+                    color: Theme.of(context).cardColor.withValues(alpha: 0.90),
                     child: SizedBox(
                       height: 65,
                       child: Row(

@@ -30,30 +30,31 @@ class InfoViewWidget extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Centered Logo
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Theme.of(context).cardColor, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              )
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(60),
-            child: CustomImageWidget(
-              image: '${restaurant.logoFullUrl}',
-              height: 100 - (scrollingRate * 30),
-              width: 100 - (scrollingRate * 30),
-              fit: BoxFit.cover,
+        if (isDesktop) ...[
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Theme.of(context).cardColor, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(60),
+              child: CustomImageWidget(
+                image: '${restaurant.logoFullUrl}',
+                height: 100 - (scrollingRate * 30),
+                width: 100 - (scrollingRate * 30),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: Dimensions.paddingSizeDefault),
+          const SizedBox(height: Dimensions.paddingSizeDefault),
+        ],
 
         // Name & Info Centered
         Column(
@@ -74,27 +75,38 @@ class InfoViewWidget extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Rating & Time Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: Dimensions.paddingSizeDefault,
+              runSpacing: Dimensions.paddingSizeExtraSmall,
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  '${restaurant.avgRating!.toStringAsFixed(1)}',
-                  style: robotoMedium.copyWith(
-                    fontSize: Dimensions.fontSizeSmall,
-                    color: Theme.of(context).hintColor,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.star, color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      restaurant.avgRating!.toStringAsFixed(1),
+                      style: robotoMedium.copyWith(
+                        fontSize: Dimensions.fontSizeSmall,
+                        color: Theme.of(context).hintColor,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: Dimensions.paddingSizeDefault),
-                Icon(Icons.access_time, color: Theme.of(context).hintColor, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  restaurant.deliveryTime?.replaceAll('-min', ' min') ?? '30-40 min',
-                  style: robotoMedium.copyWith(
-                    fontSize: Dimensions.fontSizeSmall,
-                    color: Theme.of(context).hintColor,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.access_time, color: Theme.of(context).hintColor, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      restaurant.deliveryTime?.replaceAll('-min', ' min') ?? '30-40 min',
+                      style: robotoMedium.copyWith(
+                        fontSize: Dimensions.fontSizeSmall,
+                        color: Theme.of(context).hintColor,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

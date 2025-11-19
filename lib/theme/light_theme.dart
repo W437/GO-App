@@ -1,29 +1,31 @@
+import 'package:godelivery_user/util/app_colors.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 ThemeData light({String? languageCode}) => ThemeData(
   fontFamily: AppConstants.getFontFamily(languageCode ?? Get.locale?.languageCode ?? 'en'),
-  primaryColor: const Color(0xFF9463ac),
-  secondaryHeaderColor: const Color(0x9B9463ac),
-  disabledColor: const Color(0xFF9B9B9B),
+  primaryColor: AppColors.brandPrimary,
+  secondaryHeaderColor: AppColors.brandSecondary,
+  disabledColor: AppColors.textMuted,
   brightness: Brightness.light,
-  hintColor: const Color(0xFF5E6472),
-  cardColor: Colors.white,
-  shadowColor: Colors.black.withValues(alpha: 0.03),
-  textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: const Color(0xFF9463ac))),
-  colorScheme: const ColorScheme.light(primary: Color(0xFF9463ac),
-    tertiary: Color(0xFF7d4f92),
-    tertiaryContainer: Color(0xFF7d4f92),
-    secondary: Color(0xFF9463ac)).copyWith(surface: const Color(0xFFF5F6F8)).copyWith(error: const Color(0xFFE84D4F),
-  ),
-  popupMenuTheme: const PopupMenuThemeData(color: Colors.white, surfaceTintColor: Colors.white),
-  dialogTheme: const DialogThemeData(surfaceTintColor: Colors.white),
+  hintColor: AppColors.textSecondary,
+  cardColor: AppColors.backgroundPrimary,
+  shadowColor: AppColors.shadowLight,
+  textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: AppColors.brandPrimary)),
+  colorScheme: const ColorScheme.light(
+    primary: AppColors.brandPrimary,
+    tertiary: AppColors.brandSecondary,
+    tertiaryContainer: AppColors.brandSecondaryLight,
+    secondary: AppColors.brandPrimary,
+  ).copyWith(surface: AppColors.backgroundSecondary).copyWith(error: AppColors.semanticError),
+  popupMenuTheme: const PopupMenuThemeData(color: AppColors.backgroundPrimary, surfaceTintColor: AppColors.backgroundPrimary),
+  dialogTheme: const DialogThemeData(surfaceTintColor: AppColors.backgroundPrimary),
   floatingActionButtonTheme: FloatingActionButtonThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(500))),
   bottomAppBarTheme: const BottomAppBarThemeData(
-    surfaceTintColor: Colors.white, height: 60,
+    surfaceTintColor: AppColors.backgroundPrimary, height: 60,
     padding: EdgeInsets.symmetric(vertical: 5),
   ),
-  dividerTheme: DividerThemeData(color: const Color(0xFFBABFC4).withValues(alpha: 0.25), thickness: 0.5),
+  dividerTheme: DividerThemeData(color: AppColors.borderLight.withValues(alpha: 0.25), thickness: 0.5),
   tabBarTheme: const TabBarThemeData(dividerColor: Colors.transparent),
 );

@@ -72,6 +72,7 @@ class Product {
   int? itemStock;
   List<String>? nutritionsName;
   List<String>? allergiesName;
+  int? likeCount;
 
   Product({
     this.id,
@@ -105,6 +106,7 @@ class Product {
     this.itemStock,
     this.nutritionsName,
     this.allergiesName,
+    this.likeCount,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -165,6 +167,7 @@ class Product {
     itemStock = int.tryParse(json['item_stock'].toString());
     nutritionsName = json['nutritions_name']?.cast<String>();
     allergiesName = json['allergies_name']?.cast<String>();
+    likeCount = json['like_count'];
   }
 
   Map<String, dynamic> toJson() {
@@ -208,6 +211,7 @@ class Product {
     data['item_stock'] = itemStock;
     data['nutritions_name'] = nutritionsName;
     data['allergies_name'] = allergiesName;
+    data['like_count'] = likeCount;
     return data;
   }
 }

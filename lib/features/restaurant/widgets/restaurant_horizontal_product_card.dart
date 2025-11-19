@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+
+class RestaurantHorizontalProductCard extends StatelessWidget {
+  final Product product;
+  const RestaurantHorizontalProductCard({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    double price = product.price!;
+    double discount = product.discount!;
+    String discountType = product.discountType!;
+    double discountPrice = PriceConverter.convertWithDiscount(price, discount, discountType)!;
+
+    return Container(
+      width: 160,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 1),
+          )
+        ],
+      ),
+      child: CustomInkWellWidget(
+        onTap: () {
+          ResponsiveHelper.isMobile(context)
+              ? Get.bottomSheet(
+                  ProductBottomSheetWidget(product: product, inRestaurantPage: true),
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                )
+              : Get.dialog(
+                  Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
+                );
+        },
+        radius: Dimensions.radiusDefault,
+        child: Padding(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Product Image
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  child: BlurhashImageWidget(
+                    imageUrl: product.imageFullUrl ?? '',
+                    blurhash: product.imageBlurhash,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
+
+              // Likes & Price Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.favorite, color: Colors.orange, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${product.likeCount ?? 0}',
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeSmall,
+                          color: Theme.of(context).hintColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    PriceConverter.convertPrice(discountPrice),
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
+
+              // Name
+              Text(
+                product.name ?? '',
+                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              
+              // Description (if available)
+              if (product.description != null && product.description!.isNotEmpty) ...[
+                 const SizedBox(height: 4),
+                 Text(
+                  product.description!,
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Extension to safely access unit if it's not in the model definition we saw earlier
+// If 'unit' is not in Product, we might need to check if it's available or use something else.
+// Based on the model file I read, I didn't see 'unit'. I saw 'choiceOptions', 'variations'.
+// The reference image shows "350g", "1.5L". This is usually a 'unit' field.
+// I'll check the Product model again quickly to see if I missed 'unit' or similar.
+// If not, I'll just omit it or use description for now.
