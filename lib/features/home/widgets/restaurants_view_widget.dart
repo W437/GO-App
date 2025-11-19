@@ -166,16 +166,17 @@ class RestaurantView extends StatelessWidget {
                             topRight: Radius.circular(20),
                           ),
                         ),
-                        // Dark gradient overlay
+                        // Subtle gradient overlay (bottom 20% only)
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
+                                Colors.transparent,
                                 Colors.black.withValues(alpha: 0.3),
-                                Colors.black.withValues(alpha: 0.5),
                               ],
+                              stops: const [0.8, 1.0], // Only bottom 20%
                             ),
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),

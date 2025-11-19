@@ -42,25 +42,28 @@ class AllRestaurantFilterWidget extends StatelessWidget {
           ) : Container(
             transform: Matrix4.translationValues(0, -2, 0),
             color: Theme.of(context).colorScheme.surface,
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, /*vertical: Dimensions.paddingSizeExtraSmall*/),
-            child: Column(children: [
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
 
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text('all_restaurants'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                Flexible(
-                  child: Text(
-                    '${restaurantController.restaurantModel != null ? restaurantController.restaurantModel!.totalSize : 0} ${'restaurants_near_you'.tr}',
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Text('all_restaurants'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
+                  Flexible(
+                    child: Text(
+                      '${restaurantController.restaurantModel != null ? restaurantController.restaurantModel!.totalSize : 0} ${'restaurants_near_you'.tr}',
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                    ),
                   ),
-                ),
-              ]),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
+                ]),
+              ),
+              const SizedBox(height: 6),
 
               filter(context, restaurantController),
-              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-              Divider(),
+              const Divider(),
             ]),
           ),
         );
@@ -70,8 +73,9 @@ class AllRestaurantFilterWidget extends StatelessWidget {
 
   Widget filter(BuildContext context, RestaurantController restaurantController) {
     return SizedBox(
-      height: ResponsiveHelper.isDesktop(context) ? 40 : 30,
+      height: ResponsiveHelper.isDesktop(context) ? 40 : 38,
       child: ListView(
+        padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         children: [

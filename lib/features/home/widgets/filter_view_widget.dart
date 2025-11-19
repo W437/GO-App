@@ -71,16 +71,16 @@ class FilterViewWidget extends StatelessWidget {
             ),
           ];
         },
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusLarge)),
         child: Container(
           height: 35,
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+          width: 35,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-            border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+            border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.3)),
           ),
-          child: Icon(Icons.tune, color: Theme.of(context).primaryColor, size: 20),
+          child: Icon(Icons.tune, color: Theme.of(context).textTheme.bodyMedium!.color, size: 20),
         ),
         onSelected: (dynamic value) => restaurant.setRestaurantType(value),
       );

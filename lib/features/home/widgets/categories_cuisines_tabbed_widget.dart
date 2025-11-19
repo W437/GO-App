@@ -48,23 +48,51 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
               ),
               // Tab switcher
               Container(
+                height: 35,
+                width: 160,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
                 ),
-                child: Row(
+                child: Stack(
                   children: [
-                    _buildTab(
-                      context: context,
-                      label: 'categories'.tr,
-                      isSelected: _selectedTab == 0,
-                      onTap: () => setState(() => _selectedTab = 0),
+                    // Sliding indicator
+                    AnimatedAlign(
+                      alignment: _selectedTab == 0 ? Alignment.centerLeft : Alignment.centerRight,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutCubic,
+                      child: Container(
+                        width: 80,
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    _buildTab(
-                      context: context,
-                      label: 'cuisines'.tr,
-                      isSelected: _selectedTab == 1,
-                      onTap: () => setState(() => _selectedTab = 1),
+                    // Tab Labels
+                    Row(
+                      children: [
+                        _buildTab(
+                          context: context,
+                          label: 'categories'.tr,
+                          isSelected: _selectedTab == 0,
+                          onTap: () => setState(() => _selectedTab = 0),
+                        ),
+                        _buildTab(
+                          context: context,
+                          label: 'cuisines'.tr,
+                          isSelected: _selectedTab == 1,
+                          onTap: () => setState(() => _selectedTab = 1),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -114,40 +142,23 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(
-          horizontal: Dimensions.paddingSizeDefault,
-          vertical: Dimensions.paddingSizeSmall,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).cardColor
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          style: robotoBold.copyWith(
-            fontSize: Dimensions.fontSizeSmall,
-            color: isSelected
-                ? Theme.of(context).textTheme.bodyLarge!.color
-                : Theme.of(context).hintColor,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          alignment: Alignment.center,
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            style: robotoBold.copyWith(
+              fontSize: Dimensions.fontSizeSmall,
+              color: isSelected
+                  ? Theme.of(context).textTheme.bodyLarge!.color
+                  : Theme.of(context).hintColor,
+            ),
+            child: Text(label),
           ),
-          child: Text(label),
         ),
       ),
     );
