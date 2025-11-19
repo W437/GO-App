@@ -23,132 +23,169 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     
     return SliverToBoxAdapter(
-      child: Container(
-        color: Theme.of(context).cardColor, // Use card color (white in light mode)
-        child: Column(
+      child: Transform.translate(
+        offset: const Offset(0, -30),
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            // Content
-            Padding(
-              padding: const EdgeInsets.only(top: 40, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Add top padding for logo space
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              padding: const EdgeInsets.only(top: 60, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Increased top padding for logo
               child: Column(
-                  children: [
-                    // Restaurant Name
-                    Text(
-                      restaurant.name ?? '',
-                      style: robotoBold.copyWith(
-                        fontSize: 24,
-                        color: Theme.of(context).textTheme.bodyLarge!.color,
+                children: [
+                  // Restaurant Name
+                  Text(
+                    restaurant.name ?? '',
+                    style: robotoBold.copyWith(
+                      fontSize: 24,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                  // Stats Row: Rating - Closing Time - Min Order
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.sentiment_satisfied_alt, color: Theme.of(context).hintColor, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${restaurant.avgRating?.toStringAsFixed(1) ?? '0.0'}',
+                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                      const SizedBox(width: 8),
+                      Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Closes at ${restaurant.schedules != null && restaurant.schedules!.isNotEmpty ? restaurant.schedules![0].closingTime : 'N/A'}', // Simplified logic
+                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Min. order ${PriceConverter.convertPrice(restaurant.minimumOrder)}',
+                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
 
-                    // Stats Row: Rating - Closing Time - Min Order
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.sentiment_satisfied_alt, color: Theme.of(context).hintColor, size: 18),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${restaurant.avgRating?.toStringAsFixed(1) ?? '0.0'}',
-                          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Closes at ${restaurant.schedules != null && restaurant.schedules!.isNotEmpty ? restaurant.schedules![0].closingTime : 'N/A'}', // Simplified logic
-                          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Min. order ${PriceConverter.convertPrice(restaurant.minimumOrder)}',
-                          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-
-                    // Delivery Fee Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.delivery_dining, color: Theme.of(context).hintColor, size: 18),
-                        const SizedBox(width: 4),
-                        Text(
-                          PriceConverter.convertPrice(restaurant.deliveryFee),
-                          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Service fee up to 5%', // Placeholder as per ref
-                          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-                    // Action Buttons
-                    Row(
-                      children: [
-                        // Delivery Time Button
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.pedal_bike, color: Theme.of(context).primaryColor, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Delivery ${restaurant.deliveryTime ?? '30-40'} min',
-                                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(Icons.keyboard_arrow_down, color: Theme.of(context).primaryColor, size: 16),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeSmall),
-                        
-                        // Group Order Button
-                        Container(
-                          padding: const EdgeInsets.all(12),
+                  // Delivery Fee Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.delivery_dining, color: Theme.of(context).hintColor, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        PriceConverter.convertPrice(restaurant.deliveryFee),
+                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Service fee up to 5%', // Placeholder as per ref
+                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  // Action Buttons
+                  Row(
+                    children: [
+                      // Delivery Time Button
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                           ),
-                          child: Icon(Icons.group_add_outlined, color: Theme.of(context).primaryColor, size: 24),
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                        // Share Button
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.pedal_bike, color: Theme.of(context).primaryColor, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Delivery ${restaurant.deliveryTime ?? '30-40'} min',
+                                style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.keyboard_arrow_down, color: Theme.of(context).primaryColor, size: 16),
+                            ],
                           ),
-                          child: Icon(Icons.ios_share, color: Theme.of(context).primaryColor, size: 24),
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                      
+                      // Group Order Button
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Icon(Icons.group_add_outlined, color: Theme.of(context).primaryColor, size: 24),
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                      // Share Button
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Icon(Icons.ios_share, color: Theme.of(context).primaryColor, size: 24),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeLarge),
+                ],
+              ),
+            ),
+            // Logo
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    child: SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: BlurhashImageWidget(
+                        imageUrl: restaurant.logoFullUrl ?? '',
+                        blurhash: restaurant.logoBlurhash,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    const SizedBox(height: Dimensions.paddingSizeLarge),
-                  ],
+                  ),
                 ),
               ),
-
+            ),
           ],
         ),
       ),

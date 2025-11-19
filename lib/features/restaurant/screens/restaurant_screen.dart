@@ -11,6 +11,7 @@ import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_horizontal_product_card.dart';
+import 'package:godelivery_user/features/restaurant/widgets/restaurant_app_bar_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_details_section_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_info_section_widget.dart';
@@ -270,31 +271,30 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
             
             final Restaurant activeRestaurant = restaurant ?? restController.restaurant!;
 
-            return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: scrollController,
-              slivers: [
-                
-                // 1. Info Section (SliverAppBar)
-                RestaurantInfoSectionWidget(
-                  restaurant: activeRestaurant,
-                  restController: restController,
-                  hasCoupon: hasCoupon,
-                  searchController: _searchController,
-                ),
-              
-                RestaurantDetailsSectionWidget(
-                  restaurant: activeRestaurant,
-                  restController: restController,
-                ),
+            return Stack(
+              children: [
+                CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: scrollController,
+                  slivers: [
+                    // Cover Image (Unpinned, so it scrolls under the content)
+                    RestaurantInfoSectionWidget(
+                      restaurant: activeRestaurant,
+                      restController: restController,
+                      hasCoupon: hasCoupon,
+                    ),
 
-                // 2. Sticky Header (Categories)
-                if (restController.categoryList!.isNotEmpty && !restController.isSearching)
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: SliverDelegate(
-                      height: 60, // Reduced height for cleaner look
-                      child: Center(
+                    // Restaurant Details (Overlaps the cover image)
+                    RestaurantDetailsSectionWidget(
+                      restaurant: activeRestaurant,
+                      restController: restController,
+                    ),
+
+                    // Sticky Header (Menu Categories)
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: SliverDelegate(
+                        height: 60,
                         child: Container(
                           width: Dimensions.webMaxWidth,
                           color: Theme.of(context).cardColor,
@@ -306,29 +306,37 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                         ),
                       ),
                     ),
-                  ),
 
-                // 3. Content (Menu or Search Results)
-                SliverToBoxAdapter(
-                  child: FooterViewWidget(
-                    child: Center(
-                      child: Container(
-                        width: Dimensions.webMaxWidth,
-                        padding: const EdgeInsets.only(
-                          top: Dimensions.paddingSizeDefault,
-                          bottom: Dimensions.paddingSizeExtraLarge,
+                    // 3. Content (Menu or Search Results)
+                    SliverToBoxAdapter(
+                      child: FooterViewWidget(
+                        child: Center(
+                          child: Container(
+                            width: Dimensions.webMaxWidth,
+                            padding: const EdgeInsets.only(
+                              top: Dimensions.paddingSizeDefault,
+                              bottom: Dimensions.paddingSizeExtraLarge,
+                            ),
+                            child: restController.isSearching
+                                ? _buildSearchResults(restController)
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: _buildMenuSections(context, restController),
+                                  ),
+                          ),
                         ),
-                        child: restController.isSearching
-                            ? _buildSearchResults(restController)
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: _buildMenuSections(context, restController),
-                              ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-
+                
+                // Fixed Top Action Bar (Back, Search, Heart)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: RestaurantAppBarWidget(restController: restController),
+                ),
               ],
             );
           });
