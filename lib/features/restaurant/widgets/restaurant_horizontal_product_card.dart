@@ -20,34 +20,34 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
     String discountType = product.discountType!;
     double discountPrice = PriceConverter.convertWithDiscount(price, discount, discountType)!;
 
-    return Container(
-      width: 160,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, 1),
-          )
-        ],
-      ),
-      child: CustomInkWellWidget(
-        onTap: () {
-          ResponsiveHelper.isMobile(context)
-              ? Get.bottomSheet(
-                  ProductBottomSheetWidget(product: product, inRestaurantPage: true),
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
-                )
-              : Get.dialog(
-                  Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
-                );
-        },
-        radius: Dimensions.radiusDefault,
-        padding: EdgeInsets.zero,
+    return CustomInkWellWidget(
+      onTap: () {
+        ResponsiveHelper.isMobile(context)
+            ? Get.bottomSheet(
+                ProductBottomSheetWidget(product: product, inRestaurantPage: true),
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+              )
+            : Get.dialog(
+                Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
+              );
+      },
+      radius: Dimensions.radiusDefault,
+      padding: EdgeInsets.zero,
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              spreadRadius: 1,
+              blurRadius: 10,
+              offset: const Offset(0, 1),
+            )
+          ],
+        ),
         child: Padding(
           padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           child: Column(

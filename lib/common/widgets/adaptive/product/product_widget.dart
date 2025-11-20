@@ -67,15 +67,8 @@ class ProductWidget extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: desktop ? 0 : Dimensions.paddingSizeExtraSmall),
-      child: Container(
-        margin: desktop ? null : const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          color: Theme.of(context).cardColor,
-          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-        ),
-        child: CustomInkWellWidget(
-          onTap: () {
+      child: CustomInkWellWidget(
+        onTap: () {
             if(isRestaurant) {
               if(restaurant != null && restaurant!.restaurantStatus == 1){
                 Get.toNamed(RouteHelper.getRestaurantRoute(restaurant!.id), arguments: RestaurantScreen(restaurant: restaurant));
@@ -97,7 +90,14 @@ class ProductWidget extends StatelessWidget {
           },
           radius: Dimensions.radiusDefault,
           padding: EdgeInsets.zero,
-          child: Padding(
+          child: Container(
+            margin: desktop ? null : const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+              color: Theme.of(context).cardColor,
+              boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+            ),
+            child: Padding(
             padding: desktop ? EdgeInsets.all(fromCartSuggestion ? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeSmall)
                 : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -376,8 +376,8 @@ class ProductWidget extends StatelessWidget {
 
             ]),
           ),
-        ),
-      ),
+        )
+      )
     );
   }
 
