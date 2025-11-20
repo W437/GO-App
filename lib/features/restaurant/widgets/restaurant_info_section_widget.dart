@@ -14,6 +14,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_app_bar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
@@ -52,6 +53,7 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
         titlePadding: EdgeInsets.zero,
         centerTitle: true,
         expandedTitleScale: 1.1,
+        collapseMode: CollapseMode.none,
         background: OverflowBox(
           minHeight: 280,
           maxHeight: 280,
@@ -74,6 +76,44 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.6],
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -60,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 4),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 6,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                      child: CustomImageWidget(
+                        image: '${restaurant.logoFullUrl}',
+                        height: 120,
+                        width: 120,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
               ),

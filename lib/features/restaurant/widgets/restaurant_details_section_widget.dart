@@ -143,42 +143,9 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                 ],
               ),
             ),
-            // Logo
-            Positioned(
-              top: -60,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      )
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(2),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    child: SizedBox(
-                      height: 120,
-                      width: 120,
-                      child: BlurhashImageWidget(
-                        imageUrl: restaurant.logoFullUrl ?? '',
-                        blurhash: restaurant.logoBlurhash,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
       ),
     );
+
   }
 }
