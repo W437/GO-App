@@ -111,17 +111,16 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Dimensions.paddingSizeSmall,
-                  vertical: 6,
+                  horizontal: Dimensions.paddingSizeDefault,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(50),
                   color: isActive
                       ? Theme.of(context).primaryColor
                       : Theme.of(context).disabledColor.withValues(alpha: 0.1),
                 ),
-                child: Center(
-                  child: Text(
+                child: Text(
                     category.name ?? '',
                     style: robotoMedium.copyWith(
                       fontSize: Dimensions.fontSizeSmall,
@@ -129,7 +128,6 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
                     ),
                   ),
                 ),
-              ),
             ),
           ),
         );
