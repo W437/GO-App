@@ -37,7 +37,7 @@ class RestaurantScreen extends StatefulWidget {
   State<RestaurantScreen> createState() => _RestaurantScreenState();
 }
 
-class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerProviderStateMixin {
+class _RestaurantScreenState extends State<RestaurantScreen> with TickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
@@ -54,6 +54,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
   bool _hasBouncedOnReturn = false;
+  double _previousScrollOffset = 0.0;
+
+  late AnimationController _pressController;
+  late Animation<double> _pressAnimation;
 
   static const double _categoryBarHeight = 50.0; // lane height; chips are slightly shorter
 
@@ -64,22 +68,50 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
     scrollController.addListener(_onScroll);
     _initDataCall();
 
-    // Initialize bounce animation
+    // Initialize bounce animation with smooth continuous spring
     _bounceController = AnimationController(
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
     _bounceAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeOut)),
-        weight: 50,
+        tween: Tween<double>(begin: 1.0, end: 1.12)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 30,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.15, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 50,
+        tween: Tween<double>(begin: 1.12, end: 0.98)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.02)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 20,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
       ),
     ]).animate(_bounceController);
+
+    // Initialize press animation
+    _pressController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+
+    _pressAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.92,
+    ).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeOut,
+      ),
+    );
   }
 
   @override
@@ -87,6 +119,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     _bounceController.dispose();
+    _pressController.dispose();
     super.dispose();
   }
 
@@ -120,17 +153,22 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
       // Fade out: Start fading at 200px, fully transparent at 350px scroll
       _logoOpacity = (1.0 - (animationOffset / animationRange)).clamp(0.0, 1.0);
 
-      // Scale down: Start at 1.0, scale to 0.7 over animation range
-      _logoScale = (1.0 - (animationOffset / animationRange) * 0.3).clamp(0.7, 1.0);
+      // Scale down: Start at 1.0, scale to 0.35 over animation range
+      _logoScale = (1.0 - (animationOffset / animationRange) * 0.65).clamp(0.35, 1.0);
     });
 
-    // Trigger bounce animation when returning to default position
-    if (offset <= 5.0 && !_hasBouncedOnReturn && offset > 0) {
+    // Trigger bounce animation when scrolling up and hitting the top
+    final bool isScrollingUp = offset < _previousScrollOffset;
+    final bool isAtTop = offset <= 10.0; // At or near the top
+
+    if (isScrollingUp && isAtTop && !_hasBouncedOnReturn) {
       _hasBouncedOnReturn = true;
       _bounceController.forward(from: 0.0);
-    } else if (offset > 10.0) {
+    } else if (!isAtTop) {
       _hasBouncedOnReturn = false;
     }
+
+    _previousScrollOffset = offset;
 
     // Logic to detect active category based on scroll position
     // We iterate through keys and check which one is at the top
@@ -415,45 +453,77 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
                       child: Opacity(
                         opacity: _logoOpacity, // Fade out as we scroll
                         child: AnimatedBuilder(
-                          animation: _bounceAnimation,
+                          animation: Listenable.merge([_bounceAnimation, _pressAnimation]),
                           builder: (context, child) {
                             return Transform.scale(
-                              scale: _logoScale * _bounceAnimation.value, // Combine scroll scale with bounce
+                              scale: _logoScale * _bounceAnimation.value * _pressAnimation.value, // Combine scroll, bounce, and press scales
                               child: child,
                             );
                           },
-                          child: Container(
-                            height: _logoSize,
-                            width: _logoSize,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                              border: Border.all(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
+                          child: GestureDetector(
+                            onTapDown: (_) {
+                              _pressController.forward();
+                            },
+                            onTapUp: (_) {
+                              _pressController.reverse();
+                            },
+                            onTapCancel: () {
+                              _pressController.reverse();
+                            },
+                            onTap: () {
+                              _bounceController.forward(from: 0.0);
+                            },
+                            child: Container(
+                              height: _logoSize,
+                              width: _logoSize,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                                border: Border.all(
                                   color: Colors.black.withValues(alpha: 0.08),
-                                  blurRadius: 12,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 4),
+                                  width: 2.0,
                                 ),
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 6,
-                                  spreadRadius: 0,
-                                  offset: const Offset(0, 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                                    blurRadius: 1,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, 2),
+                                  ),
+                                  BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                                    blurRadius: 2,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, 4),
+                                  ),
+                                  BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                                    blurRadius: 4,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, 8),
+                                  ),
+                                  BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                                    blurRadius: 8,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, 16),
+                                  ),
+                                  BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                                    blurRadius: 16,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, 32),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                                child: CustomImageWidget(
+                                  image: '${activeRestaurant.logoFullUrl}',
+                                  height: _logoSize,
+                                  width: _logoSize,
+                                  fit: BoxFit.cover,
                                 ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                              child: CustomImageWidget(
-                                image: '${activeRestaurant.logoFullUrl}',
-                                height: _logoSize,
-                                width: _logoSize,
-                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
