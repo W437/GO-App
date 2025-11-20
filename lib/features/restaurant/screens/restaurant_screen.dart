@@ -36,14 +36,23 @@ class RestaurantScreen extends StatefulWidget {
   State<RestaurantScreen> createState() => _RestaurantScreenState();
 }
 
-class _RestaurantScreenState extends State<RestaurantScreen> {
+class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
   int? _activeCategoryId;
-  double _logoTopPosition = 190.0; // Initial position of the logo
+
+  static const double _logoSize = 120.0;
+  static const double _expandedHeight = 250.0;
+  static const double _sectionOverlap = 40.0; // White section overlaps cover by 40px
+  static const double _logoCenterOffset = 5.0; // Additional offset to center between sections (reduced due to overlap)
+  double _logoTopPosition = _expandedHeight - (_logoSize / 2) + _logoCenterOffset; // Position centered between sections
   double _logoOpacity = 1.0; // Initial opacity
   double _logoScale = 1.0; // Initial scale
+
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+  bool _hasBouncedOnReturn = false;
 
   static const double _categoryBarHeight = 50.0; // lane height; chips are slightly shorter
 
@@ -53,12 +62,30 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
     scrollController.addListener(_onScroll);
     _initDataCall();
+
+    // Initialize bounce animation
+    _bounceController = AnimationController(
+      duration: const Duration(milliseconds: 350),
+      vsync: this,
+    );
+
+    _bounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.15, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 50,
+      ),
+    ]).animate(_bounceController);
   }
 
   @override
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
+    _bounceController.dispose();
     super.dispose();
   }
 
@@ -80,15 +107,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
     // Update logo position, opacity, and scale based on scroll offset
     final double offset = scrollController.offset;
+    const double animationThreshold = 50.0; // Start animations after 100px scroll
+    const double animationRange = 100.0; // Complete animation over 150px
+
     setState(() {
-      _logoTopPosition = 190.0 - offset;
+      _logoTopPosition = (_expandedHeight - (_logoSize / 2) + _logoCenterOffset) - offset;
 
-      // Fade out: Start fading at 0, fully transparent at 150px scroll
-      _logoOpacity = (1.0 - (offset / 150.0)).clamp(0.0, 1.0);
+      // Only start fade/scale after threshold
+      final double animationOffset = (offset - animationThreshold).clamp(0.0, animationRange);
 
-      // Scale down: Start at 1.0, scale to 0.7 at 150px scroll
-      _logoScale = (1.0 - (offset / 150.0) * 0.3).clamp(0.7, 1.0);
+      // Fade out: Start fading at 200px, fully transparent at 350px scroll
+      _logoOpacity = (1.0 - (animationOffset / animationRange)).clamp(0.0, 1.0);
+
+      // Scale down: Start at 1.0, scale to 0.7 over animation range
+      _logoScale = (1.0 - (animationOffset / animationRange) * 0.3).clamp(0.7, 1.0);
     });
+
+    // Trigger bounce animation when returning to default position
+    if (offset <= 5.0 && !_hasBouncedOnReturn && offset > 0) {
+      _hasBouncedOnReturn = true;
+      _bounceController.forward(from: 0.0);
+    } else if (offset > 10.0) {
+      _hasBouncedOnReturn = false;
+    }
 
     // Logic to detect active category based on scroll position
     // We iterate through keys and check which one is at the top
@@ -321,15 +362,23 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     automaticallyImplyLeading: false,
                     backgroundColor: Theme.of(context).cardColor,
                     elevation: 0,
-                    toolbarHeight: _categoryBarHeight,
+                    toolbarHeight: _categoryBarHeight + 1, // Extra 1px for separator
                     titleSpacing: 0,
-                    title: SizedBox(
-                      height: _categoryBarHeight,
-                      child: RestaurantStickyHeaderWidget(
-                        restController: restController,
-                        activeCategoryId: _activeCategoryId,
-                        onCategorySelected: _handleCategoryTap,
-                      ),
+                    title: Column(
+                      children: [
+                        SizedBox(
+                          height: _categoryBarHeight,
+                          child: RestaurantStickyHeaderWidget(
+                            restController: restController,
+                            activeCategoryId: _activeCategoryId,
+                            onCategorySelected: _handleCategoryTap,
+                          ),
+                        ),
+                        Container(
+                          height: 1,
+                          color: Colors.black.withValues(alpha: 0.06),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -363,14 +412,24 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     child: Center(
                       child: Opacity(
                         opacity: _logoOpacity, // Fade out as we scroll
-                        child: Transform.scale(
-                          scale: _logoScale, // Scale down as we scroll
+                        child: AnimatedBuilder(
+                          animation: _bounceAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _logoScale * _bounceAnimation.value, // Combine scroll scale with bounce
+                              child: child,
+                            );
+                          },
                           child: Container(
-                            height: 120,
-                            width: 120,
+                            height: _logoSize,
+                            width: _logoSize,
                             decoration: BoxDecoration(
                               color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                              border: Border.all(
+                                color: Colors.black.withValues(alpha: 0.06),
+                                width: 1.5,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.08),
@@ -390,8 +449,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                               borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
                               child: CustomImageWidget(
                                 image: '${activeRestaurant.logoFullUrl}',
-                                height: 120,
-                                width: 120,
+                                height: _logoSize,
+                                width: _logoSize,
                                 fit: BoxFit.cover,
                               ),
                             ),
