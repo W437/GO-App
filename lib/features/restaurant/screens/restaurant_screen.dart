@@ -18,6 +18,7 @@ import 'package:godelivery_user/features/restaurant/widgets/restaurant_info_sect
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_screen_shimmer_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_sticky_header_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -43,9 +44,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
   int? _activeCategoryId;
 
   static const double _logoSize = 120.0;
-  static const double _expandedHeight = 250.0;
+  static const double _expandedHeight = 210.0; // Reduced to create 40px overlap
   static const double _sectionOverlap = 40.0; // White section overlaps cover by 40px
-  static const double _logoCenterOffset = 5.0; // Additional offset to center between sections (reduced due to overlap)
+  static const double _logoCenterOffset = 5.0; // Additional offset to center between sections
   double _logoTopPosition = _expandedHeight - (_logoSize / 2) + _logoCenterOffset; // Position centered between sections
   double _logoOpacity = 1.0; // Initial opacity
   double _logoScale = 1.0; // Initial scale
@@ -340,23 +341,23 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
                   CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     controller: scrollController,
-                    clipBehavior: Clip.none, // Allow logo to overflow
+                    clipBehavior: Clip.none,
                     slivers: [
-                      // Cover Image & App Bar (Pinned SliverAppBar)
+                      // Cover Image & App Bar
                       RestaurantInfoSectionWidget(
                         restaurant: activeRestaurant,
                         restController: restController,
                         hasCoupon: hasCoupon,
                       ),
 
-                      // Restaurant Details (Overlaps the cover image)
+                      // Restaurant Details (Card overlay effect)
                       RestaurantDetailsSectionWidget(
                         restaurant: activeRestaurant,
                         restController: restController,
                       ),
 
-                      // Sticky categories (Secondary Pinned SliverAppBar)
-                  SliverAppBar(
+                      // Sticky categories
+                      SliverAppBar(
                     pinned: true,
                     primary: false,
                     automaticallyImplyLeading: false,
@@ -402,10 +403,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> with SingleTickerPr
                       ),
                     ),
                   ),
-                    ],
-                  ),
-                  // Restaurant Logo - Top Layer (renders above all elements)
-                  Positioned(
+                ],
+              ),
+
+              // Restaurant Logo - Top Layer (renders above all elements)
+              Positioned(
                     top: _logoTopPosition, // Dynamic position that moves with scroll
                     left: 0,
                     right: 0,

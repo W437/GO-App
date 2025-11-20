@@ -24,14 +24,23 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
 
     return SliverToBoxAdapter(
       child: Transform.translate(
-        offset: const Offset(0, -40), // Move up 40px to overlap cover image
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          padding: const EdgeInsets.only(top: 75, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Adjusted top padding to accommodate logo
-          child: Column(
+        offset: const Offset(0, -40), // Move up to overlay cover
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 24,
+                  spreadRadius: 0,
+                  offset: const Offset(0, -8),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.only(top: 75, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault),
+            child: Column(
                 children: [
                   // Restaurant Name
                   Text(
@@ -141,6 +150,7 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                   const SizedBox(height: Dimensions.paddingSizeLarge),
           ],
         ),
+          ),
         ),
       ),
     );

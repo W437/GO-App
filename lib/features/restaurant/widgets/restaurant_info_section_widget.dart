@@ -36,7 +36,7 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
 
     return SliverAppBar(
-      expandedHeight: 250,
+      expandedHeight: 210, // Reduced by 40px to create overlap with white section
       toolbarHeight: 50,
       pinned: true,
       floating: false,
@@ -55,8 +55,8 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
         expandedTitleScale: 1.1,
         collapseMode: CollapseMode.none,
         background: OverflowBox(
-          minHeight: 280,
-          maxHeight: 280,
+          minHeight: 240, // Reduced to match new expanded height
+          maxHeight: 240,
           alignment: Alignment.topCenter,
           child: Stack(
             fit: StackFit.expand,
