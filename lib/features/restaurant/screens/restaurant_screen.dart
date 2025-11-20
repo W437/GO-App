@@ -485,34 +485,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Color.fromRGBO(0, 0, 0, 0.09),
-                                    blurRadius: 1,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, 2),
-                                  ),
-                                  BoxShadow(
-                                    color: Color.fromRGBO(0, 0, 0, 0.09),
-                                    blurRadius: 2,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, 4),
-                                  ),
-                                  BoxShadow(
-                                    color: Color.fromRGBO(0, 0, 0, 0.09),
-                                    blurRadius: 4,
+                                    color: Color.fromRGBO(149, 157, 165, 0.2),
+                                    blurRadius: 24,
                                     spreadRadius: 0,
                                     offset: Offset(0, 8),
-                                  ),
-                                  BoxShadow(
-                                    color: Color.fromRGBO(0, 0, 0, 0.09),
-                                    blurRadius: 8,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, 16),
-                                  ),
-                                  BoxShadow(
-                                    color: Color.fromRGBO(0, 0, 0, 0.09),
-                                    blurRadius: 16,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, 32),
                                   ),
                                 ],
                               ),
