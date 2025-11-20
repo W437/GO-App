@@ -17,8 +17,9 @@ class AppColors {
   static const Color backgroundSecondary = Color(0xFFf9fafb);    // Light gray background
   static const Color backgroundTertiary = Color(0xFFf3f4f6);    // Slightly darker gray
   static const Color backgroundDark = Color(0xFF003a5b);         // Hopa Deep Blue (header/footer)
-  static const Color backgroundDarkLight = Color(0xFF334a52);    // Deep Slate - dark mode backgrounds
-  static const Color backgroundDarkGray = Color(0xFF334a52);     // Deep Slate - navigation bars, cards
+  static const Color backgroundDarkLight = Color(0xFF0a0a0b);    // Very dark - main dark mode background
+  static const Color backgroundDarkGray = Color(0xFF151517);     // Slightly elevated dark - cards, navigation bars
+  static const Color backgroundDarkElevated = Color(0xFF1e1e20); // More elevated dark - modals, dropdowns
 
   // Text colors
   static const Color textPrimary = Color(0xFF111827);      // Main dark text
@@ -36,7 +37,7 @@ class AppColors {
   // Border colors
   static const Color borderLight = Color(0xFFe5e7eb);        // Light border
   static const Color borderMedium = Color(0xFF96afb8);       // Soft Steel - borders, dividers
-  static const Color borderDark = Color(0xFF334a52);         // Deep Slate - dark borders
+  static const Color borderDark = Color(0xFF2a2a2d);         // Darker borders for dark mode
   static const Color borderFocus = Color(0xFF0acaf0);        // Focus border (Hopa Blue)
 
   // Shadow colors (for consistency)

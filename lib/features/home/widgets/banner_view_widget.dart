@@ -206,6 +206,7 @@ class _BannerViewWidgetState extends State<BannerViewWidget> {
                                       thumbnailBlurhash: banner.videoThumbnailBlurhash,
                                       onVideoEnd: _handleVideoEnd,
                                       borderRadius: BorderRadius.circular(16),
+                                      isActive: index == _currentIndex, // Only play if visible
                                     )
                                   : BlurhashImageWidget(
                                       imageUrl: banner?.imageFullUrl ?? '',

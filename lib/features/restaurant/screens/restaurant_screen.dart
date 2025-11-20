@@ -40,6 +40,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
   int? _activeCategoryId;
+  static const double _topActionBarHeight = 72.0;
+  static const double _categoryBarHeight = 52.0; // lane height; chips are slightly shorter
+  double _pinnedHeaderHeight = _topActionBarHeight + _categoryBarHeight;
+  double _appBarOpacity = 0;
+  double _fadeStart = 220;
+  double _fadeEnd = 420;
 
   @override
   void initState() {
@@ -74,6 +80,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     
     // Logic to detect active category based on scroll position
     // We iterate through keys and check which one is at the top
+    final double headerLimit = _pinnedHeaderHeight + 40;
     for (var entry in _categorySectionKeys.entries) {
       final key = entry.value;
       final context = key.currentContext;
@@ -82,7 +89,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         final position = box.localToGlobal(Offset.zero);
         // Check if the section is near the top (accounting for header height)
         // 150 is an approximation of the sticky header + app bar height
-        if (position.dy >= 0 && position.dy <= 250) {
+        if (position.dy >= 0 && position.dy <= headerLimit) {
           if (_activeCategoryId != entry.key) {
             setState(() {
               _activeCategoryId = entry.key;
@@ -92,6 +99,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         }
       }
     }
+
+    // Fade in the top bar after scrolling past the cover/details
+    double newOpacity = ((scrollController.offset - _fadeStart) / (_fadeEnd - _fadeStart)).clamp(0, 1);
+    if ((newOpacity - _appBarOpacity).abs() > 0.02) {
+      setState(() {
+        _appBarOpacity = newOpacity;
+      });
+    }
   }
 
   void _handleCategoryTap(int categoryId) {
@@ -99,12 +114,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       _activeCategoryId = categoryId;
     });
     final key = _categorySectionKeys[categoryId];
-    if(key?.currentContext != null) {
-      Scrollable.ensureVisible(
-        key!.currentContext!,
+    if(key?.currentContext != null && scrollController.hasClients) {
+      final box = key!.currentContext!.findRenderObject() as RenderBox;
+      final position = box.localToGlobal(Offset.zero);
+      final double targetOffset = (scrollController.offset + position.dy) - _pinnedHeaderHeight;
+      final double clampedTarget = targetOffset.clamp(0, scrollController.position.maxScrollExtent).toDouble();
+
+      scrollController.animateTo(
+        clampedTarget,
         duration: const Duration(milliseconds: 450),
         curve: Curves.easeInOutCubic,
-        alignment: 0.12, // Adjust alignment to account for sticky header
       );
     }
   }
@@ -270,6 +289,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
             }
             
             final Restaurant activeRestaurant = restaurant ?? restController.restaurant!;
+            final double screenHeight = MediaQuery.of(context).size.height;
+            _fadeStart = screenHeight * 0.35;
+            _fadeEnd = screenHeight * 0.7;
+
+            _pinnedHeaderHeight = _topActionBarHeight + _categoryBarHeight;
+            final double stickyHeaderHeight = _pinnedHeaderHeight;
 
             return Stack(
               children: [
@@ -290,20 +315,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                       restController: restController,
                     ),
 
-                    // Sticky Header (Menu Categories)
+                    // Sticky categories; top spacing shrinks as we scroll, bar is overlaid
                     SliverPersistentHeader(
                       pinned: true,
                       delegate: SliverDelegate(
-                        height: 60,
-                        child: Container(
-                          width: Dimensions.webMaxWidth,
-                          color: Theme.of(context).cardColor,
-                          child: RestaurantStickyHeaderWidget(
-                            restController: restController,
-                            activeCategoryId: _activeCategoryId,
-                            onCategorySelected: _handleCategoryTap,
-                          ),
-                        ),
+                        maxHeight: _topActionBarHeight + _categoryBarHeight,
+                        minHeight: _categoryBarHeight,
+                        builder: (shrinkOffset, overlapsContent) {
+                          final double topPad = shrinkOffset.clamp(0, _topActionBarHeight);
+                          return Container(
+                            width: Dimensions.webMaxWidth,
+                            color: Theme.of(context).cardColor,
+                            padding: EdgeInsets.only(top: topPad),
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
+                              height: _categoryBarHeight,
+                              child: RestaurantStickyHeaderWidget(
+                                restController: restController,
+                                activeCategoryId: _activeCategoryId,
+                                onCategorySelected: _handleCategoryTap,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
 
@@ -314,7 +348,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                           child: Container(
                             width: Dimensions.webMaxWidth,
                             padding: const EdgeInsets.only(
-                              top: Dimensions.paddingSizeDefault,
+                              top: 0,
                               bottom: Dimensions.paddingSizeExtraLarge,
                             ),
                             child: restController.isSearching
@@ -329,13 +363,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     ),
                   ],
                 ),
-                
+
                 // Fixed Top Action Bar (Back, Search, Heart)
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: RestaurantAppBarWidget(restController: restController),
+                  child: RestaurantAppBarWidget(
+                    restController: restController,
+                    backgroundOpacity: _appBarOpacity,
+                  ),
                 ),
               ],
             );
@@ -351,24 +388,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 }
 
 class SliverDelegate extends SliverPersistentHeaderDelegate {
-  Widget child;
-  double height;
+  final double maxHeight;
+  final double minHeight;
+  final Widget Function(double shrinkOffset, bool overlapsContent) builder;
 
-  SliverDelegate({required this.child, this.height = 100});
+  SliverDelegate({
+    required this.maxHeight,
+    required this.builder,
+    double? minHeight,
+  }) : minHeight = minHeight ?? maxHeight;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
+    return SizedBox.expand(child: builder(shrinkOffset, overlapsContent));
   }
 
   @override
-  double get maxExtent => height;
+  double get maxExtent => maxHeight;
 
   @override
-  double get minExtent => height;
+  double get minExtent => minHeight;
 
   @override
   bool shouldRebuild(SliverDelegate oldDelegate) {
-    return oldDelegate.maxExtent != height || oldDelegate.minExtent != height || child != oldDelegate.child;
+    return oldDelegate.maxExtent != maxHeight || oldDelegate.minExtent != minHeight;
   }
 }
