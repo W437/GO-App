@@ -23,17 +23,15 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     
     return SliverToBoxAdapter(
-      child: Transform.translate(
-        offset: const Offset(0, -30),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
               ),
-              padding: const EdgeInsets.only(top: 60, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Increased top padding for logo
+              padding: const EdgeInsets.only(top: 50, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Adjusted top padding
               child: Column(
                 children: [
                   // Restaurant Name
@@ -85,13 +83,6 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         PriceConverter.convertPrice(restaurant.deliveryFee),
-                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                      ),
-                      const SizedBox(width: 8),
-                      Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Service fee up to 5%', // Placeholder as per ref
                         style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
                       ),
                     ],
@@ -154,7 +145,7 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
             ),
             // Logo
             Positioned(
-              top: -50,
+              top: -60,
               left: 0,
               right: 0,
               child: Center(
@@ -174,8 +165,8 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                     child: SizedBox(
-                      height: 100,
-                      width: 100,
+                      height: 120,
+                      width: 120,
                       child: BlurhashImageWidget(
                         imageUrl: restaurant.logoFullUrl ?? '',
                         blurhash: restaurant.logoBlurhash,
@@ -187,7 +178,6 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
               ),
             ),
           ],
-        ),
       ),
     );
   }

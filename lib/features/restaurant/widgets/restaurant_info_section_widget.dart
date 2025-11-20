@@ -13,6 +13,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/features/restaurant/widgets/restaurant_app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
@@ -34,45 +35,50 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
 
     return SliverAppBar(
-      expandedHeight: 250, // Reduced height as info is now separate
-      toolbarHeight: 0, // Hide toolbar space
-      collapsedHeight: 0, // Hide collapsed space
-      pinned: false, // Allow it to scroll away so content can overlap
+      expandedHeight: 250,
+      toolbarHeight: 50,
+      pinned: true,
       floating: false,
       elevation: 0,
-      backgroundColor: Theme.of(context).cardColor, // Match theme
+      backgroundColor: Theme.of(context).cardColor,
       leading: const SizedBox(),
       leadingWidth: 0,
-      actions: const [],
+      title: RestaurantAppBarWidget(restController: restController),
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      clipBehavior: Clip.none,
       
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: EdgeInsets.zero,
         centerTitle: true,
         expandedTitleScale: 1.1,
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            BlurhashImageWidget(
-              imageUrl: '${restaurant.coverPhotoFullUrl}',
-              blurhash: restaurant.coverPhotoBlurhash,
-              fit: BoxFit.cover,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.3],
+        background: OverflowBox(
+          minHeight: 280,
+          maxHeight: 280,
+          alignment: Alignment.topCenter,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              BlurhashImageWidget(
+                imageUrl: '${restaurant.coverPhotoFullUrl}',
+                blurhash: restaurant.coverPhotoBlurhash,
+                fit: BoxFit.cover,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.6),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.6],
+                  ),
                 ),
               ),
-            ),
-            
-
-          ],
+            ],
+          ),
         ),
       ),
     );

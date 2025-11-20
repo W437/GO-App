@@ -88,23 +88,22 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
   @override
   Widget build(BuildContext context) {
     final categories = widget.restController.categoryList ?? [];
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        key: _listKey,
-        controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeDefault,
-          vertical: 2,
-        ),
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: Dimensions.paddingSizeSmall),
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final bool isActive = category.id != null && category.id == widget.activeCategoryId;
-          return KeyedSubtree(
+    return ListView.separated(
+      key: _listKey,
+      controller: _scrollController,
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeDefault,
+        vertical: 2,
+      ),
+      itemCount: categories.length,
+      separatorBuilder: (_, __) => const SizedBox(width: Dimensions.paddingSizeSmall),
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        final bool isActive = category.id != null && category.id == widget.activeCategoryId;
+        return Center(
+          child: KeyedSubtree(
             key: _itemKeys.length > index ? _itemKeys[index] : null,
             child: CustomInkWellWidget(
               radius: 18,
@@ -132,9 +131,9 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
