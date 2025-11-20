@@ -41,6 +41,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
   int? _activeCategoryId;
+  double _logoTopPosition = 190.0; // Initial position of the logo
+  double _logoOpacity = 1.0; // Initial opacity
+  double _logoScale = 1.0; // Initial scale
 
   static const double _categoryBarHeight = 50.0; // lane height; chips are slightly shorter
 
@@ -74,7 +77,19 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   void _onScroll() {
     if(!scrollController.hasClients) return;
-    
+
+    // Update logo position, opacity, and scale based on scroll offset
+    final double offset = scrollController.offset;
+    setState(() {
+      _logoTopPosition = 190.0 - offset;
+
+      // Fade out: Start fading at 0, fully transparent at 150px scroll
+      _logoOpacity = (1.0 - (offset / 150.0)).clamp(0.0, 1.0);
+
+      // Scale down: Start at 1.0, scale to 0.7 at 150px scroll
+      _logoScale = (1.0 - (offset / 150.0) * 0.3).clamp(0.7, 1.0);
+    });
+
     // Logic to detect active category based on scroll position
     // We iterate through keys and check which one is at the top
     final double headerLimit = _categoryBarHeight + 120; // Adjusted for new header
@@ -299,7 +314,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                         restController: restController,
                       ),
 
-                  // Sticky categories (Secondary Pinned SliverAppBar)
+                      // Sticky categories (Secondary Pinned SliverAppBar)
                   SliverAppBar(
                     pinned: true,
                     primary: false,
@@ -342,38 +357,44 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   ),
                   // Restaurant Logo - Top Layer (renders above all elements)
                   Positioned(
-                    top: 190, // 250px (expanded height) - 60px (bottom offset)
+                    top: _logoTopPosition, // Dynamic position that moves with scroll
                     left: 0,
                     right: 0,
                     child: Center(
-                      child: Container(
-                        height: 120,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                              offset: const Offset(0, 4),
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 6,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                          child: CustomImageWidget(
-                            image: '${activeRestaurant.logoFullUrl}',
+                      child: Opacity(
+                        opacity: _logoOpacity, // Fade out as we scroll
+                        child: Transform.scale(
+                          scale: _logoScale, // Scale down as we scroll
+                          child: Container(
                             height: 120,
                             width: 120,
-                            fit: BoxFit.cover,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                  offset: const Offset(0, 4),
+                                ),
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 6,
+                                  spreadRadius: 0,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                              child: CustomImageWidget(
+                                image: '${activeRestaurant.logoFullUrl}',
+                                height: 120,
+                                width: 120,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
                       ),

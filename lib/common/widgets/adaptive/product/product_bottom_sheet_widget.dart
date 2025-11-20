@@ -83,12 +83,11 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: MediaQuery.of(context).size.height * 0.92,
       width: 550,
-      margin: EdgeInsets.only(top: GetPlatform.isWeb ? 0 : 30),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: ResponsiveHelper.isMobile(context) ? const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusExtraLarge))
-            : const BorderRadius.all(Radius.circular(Dimensions.radiusExtraLarge)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusExtraLarge)),
       ),
       child: GetBuilder<ProductController>(builder: (productController) {
         product = productController.product;
@@ -107,625 +106,476 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
         List<AddOn> addOnIdList = _getAddonIdList(product!, productController);
         List<AddOns> addOnsList = _getAddonList(product!, productController);
 
-        debugPrint('===total : $addonsCost + (($variationPriceWithDiscount + $price) , $discount , $discountType ) * ${productController.quantity}');
         double priceWithAddonsVariationWithDiscount = addonsCost + (PriceConverter.convertWithDiscount(variationPrice + price , discount, discountType)! * productController.quantity!);
         double priceWithAddonsVariation = ((price + variationPrice) * productController.quantity!) + addonsCost;
         double priceWithVariation = price + variationPrice;
         bool isAvailable = DateConverter.isAvailable(product!.availableTimeStarts, product!.availableTimeEnds);
 
-        return ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
-          child: Stack(
-            children: [
-
-              Column( mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: GetPlatform.isIOS || GetPlatform.isDesktop ? Dimensions.paddingSizeLarge : 0),
-
-                  Flexible(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeDefault),
-                      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                            right: Dimensions.paddingSizeDefault, top: ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeDefault,
-                          ),
-                          child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                            ///Product
-                            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-
-                              (product!.imageFullUrl != null && product!.imageFullUrl!.isNotEmpty) ? SizedBox(
-                                height: 100,
-                                width: 100,
-                                child: InkWell(
-                                  onTap: widget.isCampaign ? null : () {
-                                    if(!widget.isCampaign) {
-                                      Get.toNamed(RouteHelper.getItemImagesRoute(product!));
-                                    }
-                                  },
-                                  child: Stack(children: [
-
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                      child: BlurhashImageWidget(
-                                        imageUrl: '${product!.imageFullUrl}',
-                                        blurhash: product!.imageBlurhash,
-                                        fit: BoxFit.cover,
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                      ),
-                                    ),
-
-                                    DiscountTagWidget(discount: discount, discountType: discountType, isProductBottomSheet: true),
-
-                                  ]),
-                                ),
-                              ) : const SizedBox.shrink(),
-                              const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                              Expanded(
-                                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Text(
-                                    product!.name ?? '', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
-                                    maxLines: 2, overflow: TextOverflow.ellipsis,
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      if(widget.inRestaurantPage) {
-                                        Get.back();
-                                      }else {
-                                        Get.offNamed(RouteHelper.getRestaurantRoute(product!.restaurantId));
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(0, 5, 5, 5),
-                                      child: Text(
-                                        product!.restaurantName ?? '',
-                                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
-                                      ),
-                                    ),
-                                  ),
-                                  RatingBarWidget(rating: product!.avgRating, size: 15, ratingCount: product!.ratingCount),
-                                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                  Wrap(children: [
-                                    price > priceWithDiscountForView ? Text(
-                                      PriceConverter.convertPrice(price), textDirection: TextDirection.ltr,
-                                      style: robotoMedium.copyWith(color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough),
-                                    ) : const SizedBox(),
-                                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                                    (product!.imageFullUrl != null && product!.imageFullUrl!.isNotEmpty)? const SizedBox.shrink()
-                                        : DiscountTagWithoutImageWidget(discount: discount, discountType: discountType),
-
-                                    Text(
-                                      PriceConverter.convertPrice(priceWithDiscountForView),
-                                      textDirection: TextDirection.ltr,
-                                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
-                                    ),
-
-                                    (!widget.isCampaign && product!.stockType != 'unlimited' && product!.itemStock! <= 0)
-                                        ? Text(' (${'out_of_stock'.tr})', style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error))
-                                        : const SizedBox(),
-
-                                    (!widget.isCampaign && product!.stockType != 'unlimited' && productController.quantity != 1 && productController.quantity! >= product!.itemStock!)
-                                        ? Text(' (${'only'.tr} ${product!.itemStock!} ${'item_available'.tr})', style: robotoRegular.copyWith(color: Colors.blue, fontSize: Dimensions.fontSizeSmall))
-                                        : const SizedBox(),
-
-                                  ]),
-
-                                ]),
-                              ),
-
-                              Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.end, children: [
-                                widget.isCampaign ? const SizedBox(height: 25) : GetBuilder<FavouriteController>(builder: (favouriteController) {
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                      color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                                    ),
-                                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                    margin: EdgeInsets.only(top: GetPlatform.isAndroid ? 0 : Dimensions.paddingSizeLarge),
-                                    child: CustomFavouriteWidget(
-                                      isWished: favouriteController.wishProductIdList.contains(product!.id),
-                                      product: product, isRestaurant: false,
-                                    ),
-                                  );
-                                }),
-                                SizedBox(height: product!.isRestaurantHalalActive! && product!.isHalalFood! ? 30 : 20),
-
-                                product!.isRestaurantHalalActive! && product!.isHalalFood! ? Padding(
-                                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                  child: CustomToolTip(
-                                    message: 'this_is_a_halal_food'.tr,
-                                    preferredDirection: AxisDirection.up,
-                                    tooltipController: tooTipController,
-                                    child: Image.asset(Images.halalIcon, height: 35, width: 35),
-                                  ),
-                                ) : const SizedBox(),
-
-                              ]),
-                            ]),
-
-                            const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                            (product!.description != null && product!.description!.isNotEmpty) ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-
-                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-                                  Text('description'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-
-                                  (Get.find<SplashController>().configModel!.toggleVegNonVeg!) ? Container(
-                                    padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                                        color: Theme.of(context).cardColor,
-                                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 1)],
-                                    ),
-                                    child: Row(children: [
-                                      Image.asset(product!.veg == 1 ? Images.vegLogo : Images.nonVegLogo, height: 20, width: 20),
-                                      const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                                      Text(product!.veg == 1 ? 'veg'.tr : 'non_veg'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                                    ]),
-                                  ) : const SizedBox(),
-
-                                ]),
-                                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                Text(product!.description ?? '', style: robotoRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color?.withValues(alpha: 0.8)), textAlign: TextAlign.justify),
-                                const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                              ],
-                            ) : const SizedBox(),
-
-                            (product!.nutritionsName != null && product!.nutritionsName!.isNotEmpty) ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('nutrition_details'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                Wrap(children: List.generate(product!.nutritionsName!.length, (index) {
-                                  return Text(
-                                    '${product!.nutritionsName![index]}${product!.nutritionsName!.length-1 == index ? '.' : ', '}',
-                                    style: robotoRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color?.withValues(alpha: 0.8)),
-                                  );
-                                })),
-                                const SizedBox(height: Dimensions.paddingSizeLarge),
-                              ],
-                            ) : const SizedBox(),
-
-                            (product!.allergiesName != null && product!.allergiesName!.isNotEmpty) ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('allergic_ingredients'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                Wrap(children: List.generate(product!.allergiesName!.length, (index) {
-                                  return Text(
-                                    '${product!.allergiesName![index]}${product!.allergiesName!.length-1 == index ? '.' : ', '}',
-                                    style: robotoRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color?.withValues(alpha: 0.8)),
-                                  );
-                                })),
-                                const SizedBox(height: Dimensions.paddingSizeLarge),
-                              ],
-                            ) : const SizedBox(),
-
-                            /// Variation
-                            product!.variations != null ? ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: product!.variations!.length,
-                              physics: const NeverScrollableScrollPhysics(),
-                              padding: EdgeInsets.only(bottom: ( product!.variations != null && product!.variations!.isNotEmpty) ? Dimensions.paddingSizeLarge : 0),
-                              itemBuilder: (context, index) {
-                                int selectedCount = 0;
-                                if(product!.variations![index].required!){
-                                  for (var value in productController.selectedVariations[index]) {
-                                    if(value == true){
-                                      selectedCount++;
-                                    }
-                                  }
-                                }
-                                return Container(
-                                  padding: EdgeInsets.all(product!.variations![index].required! ? (product!.variations![index].multiSelect! ? product!.variations![index].min! : 1) <= selectedCount
-                                      ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeSmall : 0),
-                                  margin: EdgeInsets.only(bottom: index != product!.variations!.length - 1 ? Dimensions.paddingSizeDefault : 0),
-                                  decoration: BoxDecoration(
-                                      color: product!.variations![index].required! ? (product!.variations![index].multiSelect! ? product!.variations![index].min! : 1) <= selectedCount
-                                          ? Theme.of(context).primaryColor.withValues(alpha: 0.05) :Theme.of(context).disabledColor.withValues(alpha: 0.05) : Colors.transparent,
-                                      border: Border.all(color: product!.variations![index].required! ? (product!.variations![index].multiSelect! ? product!.variations![index].min! : 1) <= selectedCount
-                                          ? Theme.of(context).primaryColor.withValues(alpha: 0.3) : Theme.of(context).disabledColor.withValues(alpha: 0.1) : Colors.transparent, width: 1),
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault)
-                                  ),
-                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                      Text(product!.variations![index].name!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-
-                                      AnimatedContainer(
-                                        duration: Duration(milliseconds: 800),
-                                        curve: Curves.easeIn,
-                                        decoration: BoxDecoration(
-                                          color: product!.variations![index].required! ? (product!.variations![index].multiSelect! ? product!.variations![index].min! : 1) > selectedCount
-                                              ? Theme.of(context).colorScheme.error.withValues(alpha: 0.1) : Theme.of(context).primaryColor.withValues(alpha: 0.1) : Theme.of(context).disabledColor.withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        ),
-                                        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-
-                                        child: Text(
-                                          product!.variations![index].required!
-                                              ? (product!.variations![index].multiSelect! ? product!.variations![index].min! : 1) <= selectedCount ? 'completed'.tr : 'required'.tr
-                                              : 'optional'.tr,
-                                          style: robotoRegular.copyWith(
-                                            color: product!.variations![index].required!
-                                                ? (product!.variations![index].multiSelect! ? product!.variations![index].min! : 1) <= selectedCount ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.error
-                                                : Theme.of(context).hintColor,
-                                            fontSize: Dimensions.fontSizeSmall,
-                                          ),
-                                        ),
-                                      ),
-                                    ]),
-                                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                    Row(children: [
-                                      product!.variations![index].multiSelect! ? Text(
-                                        '${'select_minimum'.tr} ${'${product!.variations![index].min}'
-                                            ' ${'and_up_to'.tr} ${product!.variations![index].max} ${'options'.tr}'}',
-                                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).hintColor),
-                                      ) : Text(
-                                        'select_one'.tr,
-                                        style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).hintColor),
-                                      ),
-                                    ]),
-                                    SizedBox(height: product!.variations![index].multiSelect! ? Dimensions.paddingSizeExtraSmall : 0),
-
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      padding: EdgeInsets.zero,
-                                      itemCount: productController.collapseVariation[index] ? product!.variations![index].variationValues!.length > 4
-                                          ? 5 : product!.variations![index].variationValues!.length : product!.variations![index].variationValues!.length,
-                                      itemBuilder: (context, i) {
-
-                                        if(i == 4 && productController.collapseVariation[index]){
-                                          return Padding(
-                                            padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                                            child: InkWell(
-                                              onTap: ()=> productController.showMoreSpecificSection(index),
-                                              child: Row(children: [
-                                                Icon(Icons.expand_more, size: 18, color: Theme.of(context).primaryColor),
-                                                const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                                                Text(
-                                                  '${'view'.tr} ${product!.variations![index].variationValues!.length - 4} ${'more_option'.tr}',
-                                                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                                                ),
-                                              ]),
-                                            ),
-                                          );
-                                        } else{
-                                          return Padding(
-                                            padding: EdgeInsets.symmetric(vertical: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraSmall : 0),
-                                            child: InkWell(
-                                              onTap: () {
-                                                productController.setCartVariationIndex(index, i, product, product!.variations![index].multiSelect!);
-                                                productController.setExistInCartForBottomSheet(product!, productController.selectedVariations);
-                                              },
-                                              child: Row(children: [
-                                                Flexible(
-                                                  child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                                    product!.variations![index].multiSelect! ? Checkbox(
-                                                      value: productController.selectedVariations[index][i],
-                                                      activeColor: Theme.of(context).primaryColor,
-                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
-                                                      onChanged:(bool? newValue) {
-                                                        productController.setCartVariationIndex(index, i, product, product!.variations![index].multiSelect!);
-                                                        productController.setExistInCartForBottomSheet(product!, productController.selectedVariations);
-                                                      },
-                                                      visualDensity: const VisualDensity(horizontal: -3, vertical: -3),
-                                                      side: BorderSide(width: 2, color: Theme.of(context).disabledColor),
-                                                    ) : Radio(
-                                                      value: i,
-                                                      groupValue: productController.selectedVariations[index].indexOf(true),
-                                                      onChanged: (dynamic value) {
-                                                        productController.setCartVariationIndex(index, i, product, product!.variations![index].multiSelect!);
-                                                        productController.setExistInCartForBottomSheet(product!, productController.selectedVariations);
-                                                      },
-                                                      activeColor: Theme.of(context).primaryColor,
-                                                      toggleable: false,
-                                                      visualDensity: const VisualDensity(horizontal: -3, vertical: -3),
-                                                      fillColor: WidgetStateColor.resolveWith((states) => productController.selectedVariations[index][i]! ? Theme.of(context).primaryColor : Theme.of(context).disabledColor),
-                                                    ),
-
-                                                    Flexible(
-                                                      child: Text(
-                                                        product!.variations![index].variationValues![i].level!.trim(),
-                                                        maxLines: 1, overflow: TextOverflow.ellipsis,
-                                                        style: productController.selectedVariations[index][i]! ? robotoMedium : robotoRegular.copyWith(color: Theme.of(context).hintColor),
-                                                      ),
-                                                    ),
-
-                                                    Flexible(
-                                                      child: (productController.selectedVariations[index][i]! && (productController.quantity == product!.variations![index].variationValues![i].currentStock))
-                                                          ? Text(' (${'only'.tr} ${product!.variations![index].variationValues![i].currentStock} ${'item_available'.tr})',
-                                                          style: robotoRegular.copyWith(color: Colors.blue, fontSize: Dimensions.fontSizeExtraSmall),
-                                                      ) : Text(
-                                                        ' (${'out_of_stock'.tr})',
-                                                        maxLines: 1, overflow: TextOverflow.ellipsis,
-                                                        style: (product!.variations![index].variationValues![i].stockType != 'unlimited' && product!.variations![index].variationValues![i].currentStock != null && product!.variations![index].variationValues![i].currentStock! <= 0)
-                                                            ? robotoMedium.copyWith(color: Theme.of(context).colorScheme.error, fontSize: Dimensions.fontSizeExtraSmall)
-                                                            : robotoRegular.copyWith(color: Colors.transparent),
-                                                      ),
-                                                    ),
-
-                                                  ]),
-                                                ),
-
-                                                (price > priceWithDiscount) && (discountType == 'percent') ? Text(
-                                                  PriceConverter.convertPrice(product!.variations![index].variationValues![i].optionPrice),
-                                                  maxLines: 1, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr,
-                                                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough),
-                                                ) : const SizedBox(),
-                                                SizedBox(width: price > priceWithDiscount ? Dimensions.paddingSizeExtraSmall : 0),
-
-                                                Text(
-                                                  '+${PriceConverter.convertPrice(product!.variations![index].variationValues![i].optionPrice, discount: discount, discountType: discountType, isVariation: true)}',
-                                                  maxLines: 1, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr,
-                                                  style: productController.selectedVariations[index][i]! ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall)
-                                                      : robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
-                                                )
-                                              ]),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ]),
-                                );
-                              },
-                            ) : const SizedBox(),
-
-                            SizedBox(height: (product!.variations != null && product!.variations!.isNotEmpty) ? 0 : 0),
-
-
-                            product!.addOns!.isNotEmpty ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeExtraSmall),
-                                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                    Text('addons'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                      ),
-                                      padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                                      child: Text(
-                                        'optional'.tr,
-                                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                                      ),
-                                    ),
-                                  ]),
-                                ),
-                                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  padding: EdgeInsets.zero,
-                                  itemCount: product!.addOns!.length,
-                                  itemBuilder: (context, index) {
-                                    return InkWell(
-                                      onTap: () {
-                                        if (!productController.addOnActiveList[index]) {
-                                          productController.addAddOn(true, index, product!.addOns![index].stockType, product!.addOns![index].addonStock);
-                                        } else if (productController.addOnQtyList[index] == 1) {
-                                          productController.addAddOn(false, index, product!.addOns![index].stockType, product!.addOns![index].addonStock);
-                                        }
-                                      },
-                                      child: Row(children: [
-
-                                        Flexible(
-                                          child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-
-                                            Checkbox(
-                                              value: productController.addOnActiveList[index],
-                                              activeColor: Theme.of(context).primaryColor,
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
-                                              onChanged:(bool? newValue) {
-                                                if (!productController.addOnActiveList[index]) {
-                                                  productController.addAddOn(true, index, product!.addOns![index].stockType, product!.addOns![index].addonStock);
-                                                } else if (productController.addOnQtyList[index] == 1) {
-                                                  productController.addAddOn(false, index, product!.addOns![index].stockType, product!.addOns![index].addonStock);
-                                                }
-                                              },
-                                              visualDensity: const VisualDensity(horizontal: -3, vertical: -3),
-                                              side: BorderSide(width: 2, color: Theme.of(context).disabledColor),
-                                            ),
-
-                                            Text(
-                                              product!.addOns![index].name!,
-                                              maxLines: 1, overflow: TextOverflow.ellipsis,
-                                              style: productController.addOnActiveList[index] ? robotoMedium : robotoRegular.copyWith(color: Theme.of(context).hintColor),
-                                            ),
-
-                                            Flexible(
-                                              child: Text(
-                                                ' (${'out_of_stock'.tr})',
-                                                maxLines: 1, overflow: TextOverflow.ellipsis,
-                                                style: product!.addOns![index].stockType != 'unlimited' && product!.addOns![index].addonStock != null && product!.addOns![index].addonStock! <= 0
-                                                    ? robotoMedium.copyWith(color: Theme.of(context).colorScheme.error, fontSize: Dimensions.fontSizeExtraSmall)
-                                                    : robotoRegular.copyWith(color: Colors.transparent),
-                                              ),
-                                            ),
-                                          ]),
-                                        ),
-
-                                        Text(
-                                          product!.addOns![index].price! > 0 ? PriceConverter.convertPrice(product!.addOns![index].price) : 'free'.tr,
-                                          maxLines: 1, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr,
-                                          style: productController.addOnActiveList[index] ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)
-                                              : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-                                        ),
-
-                                        productController.addOnActiveList[index] ? Container(
-                                          height: 25, width: 90,
-                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).cardColor),
-                                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  if (productController.addOnQtyList[index]! > 1) {
-                                                    productController.setAddOnQuantity(false, index, product!.addOns![index].stockType, product!.addOns![index].addonStock);
-                                                  } else {
-                                                    productController.addAddOn(false, index, product!.addOns![index].stockType, product!.addOns![index].addonStock);
-                                                  }
-                                                },
-                                                child: Center(child: Icon(
-                                                  (productController.addOnQtyList[index]! > 1) ? Icons.remove : CupertinoIcons.delete, size: 18,
-                                                  color: (productController.addOnQtyList[index]! > 1) ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.error,
-                                                )),
-                                              ),
-                                            ),
-                                            Text(
-                                              productController.addOnQtyList[index].toString(),
-                                              style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
-                                            ),
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () => productController.setAddOnQuantity(true, index, product!.addOns![index].stockType, product!.addOns![index].addonStock),
-                                                child: Center(child: Icon(Icons.add, size: 18, color: Theme.of(context).primaryColor)),
-                                              ),
-                                            ),
-                                          ]),
-                                        ) : const SizedBox(),
-
-                                      ]),
-                                    );
-
-                                  },
-                                ),
-                                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                              ],
-                            ) : const SizedBox(),
-
-                          ]),
+        return Stack(
+          children: [
+            // 1. Cover Image Background
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 300,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusExtraLarge)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    BlurhashImageWidget(
+                      imageUrl: '${product!.imageFullUrl}',
+                      blurhash: product!.imageBlurhash,
+                      fit: BoxFit.cover,
+                    ),
+                    // Gradient overlay for text visibility if needed, or just style
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.3),
+                            Colors.transparent,
+                          ],
+                          stops: const [0.0, 0.4],
                         ),
-                      ]),
-                    ),
-                  ),
-
-                  ///Bottom side..
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(ResponsiveHelper.isDesktop(context) ? Dimensions.radiusExtraLarge : 0)),
-                      boxShadow: ResponsiveHelper.isDesktop(context) ? null : [BoxShadow(color: Colors.grey[300]!, blurRadius: 10)]
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeDefault),
-
-                    child: SafeArea(
-                      child: Column(
-                        children: [
-                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            Text('${'total_amount'.tr}:', style: robotoBold.copyWith(color: Theme.of(context).primaryColor)),
-                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                            Row(children: [
-                              (priceWithAddonsVariation > priceWithAddonsVariationWithDiscount) ? PriceConverter.convertAnimationPrice(
-                                priceWithAddonsVariation,
-                                textStyle: robotoMedium.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall, decoration: TextDecoration.lineThrough),
-                              ) : const SizedBox(),
-                              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                              PriceConverter.convertAnimationPrice(
-                                priceWithAddonsVariationWithDiscount,
-                                textStyle: robotoBold.copyWith(color: Theme.of(context).primaryColor),
-                              ),
-
-                            ]),
-                          ]),
-                          const SizedBox(height: Dimensions.paddingSizeSmall),
-
-
-                          Row(
-                            children: [
-                              Row(children: [
-                                QuantityButton(
-                                  onTap: () {
-                                    if (productController.quantity! > 1) {
-                                      productController.setQuantity(false, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign);
-                                    }
-                                  },
-                                  isIncrement: false,
-                                ),
-
-                                AnimatedFlipCounter(
-                                  duration: const Duration(milliseconds: 500),
-                                  value: productController.quantity!.toDouble(),
-                                  textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
-                                ),
-
-                                QuantityButton(
-                                  onTap: () => productController.setQuantity(true, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign),
-                                  isIncrement: true,
-                                ),
-                              ]),
-                              const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                              Expanded(
-                                child: GetBuilder<CartController>(
-                                  builder: (cartController) {
-                                    return CustomButtonWidget(
-                                      radius : Dimensions.paddingSizeDefault,
-                                      width: ResponsiveHelper.isDesktop(context) ? MediaQuery.of(context).size.width / 2.0 : null,
-                                      isLoading: cartController.isLoading,
-                                      buttonText: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) ? 'not_available_now'.tr
-                                          : widget.isCampaign ? 'order_now'.tr : (widget.cart != null || productController.cartIndex != -1) ? 'update_in_cart'.tr : 'add_to_cart'.tr,
-                                      onPressed: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) || (widget.cart != null && productController.checkOutOfStockVariationSelected(product?.variations) != null) ? null : () async {
-
-                                        _onButtonPressed(productController, cartController, priceWithVariation, priceWithDiscount, price, discount, discountType, addOnIdList, addOnsList, priceWithAddonsVariation);
-
-                                      },
-                                    );
-                                  }
-                                ),
-                              ),
-                            ],
-                          ),
-
-                        ],
                       ),
                     ),
-                  ),
-
-                ],
+                  ],
+                ),
               ),
+            ),
 
-              GetPlatform.isAndroid ? const SizedBox() : Positioned(
-                top: 5, right: 10,
-                child: InkWell(
-                  onTap: () => Get.back(),
-                  child: Container(
-                    padding:  const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), blurRadius: 5)],
+            // 2. Close Button
+            Positioned(
+              top: Dimensions.paddingSizeDefault,
+              left: Dimensions.paddingSizeDefault,
+              child: InkWell(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, size: 20, color: Colors.black),
+                ),
+              ),
+            ),
+
+            // 3. Scrollable Content
+            Positioned.fill(
+              top: 260, // Overlap start
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusExtraLarge)),
+                ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Handle Bar
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ),
+
+                            // Title & Price
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    product!.name ?? '',
+                                    style: robotoBold.copyWith(fontSize: 24),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      PriceConverter.convertPrice(priceWithDiscountForView),
+                                      style: robotoBold.copyWith(fontSize: 24, color: Theme.of(context).primaryColor),
+                                    ),
+                                    if (price > priceWithDiscountForView)
+                                      Text(
+                                        PriceConverter.convertPrice(price),
+                                        style: robotoRegular.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          color: Theme.of(context).disabledColor,
+                                          decoration: TextDecoration.lineThrough,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                            // Tags (Spicy, Veg, etc.)
+                            Wrap(
+                              spacing: Dimensions.paddingSizeSmall,
+                              children: [
+                                if (product!.isRestaurantHalalActive! && product!.isHalalFood!)
+                                  _buildTag('Halal', Icons.verified_user_outlined, Colors.green),
+                                if (Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+                                  _buildTag(
+                                    product!.veg == 1 ? 'veg'.tr : 'non_veg'.tr,
+                                    Icons.eco,
+                                    product!.veg == 1 ? Colors.green : Colors.red,
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                            // Description & Nutrition Buttons
+                            Row(
+                              children: [
+                                if (product!.description != null && product!.description!.isNotEmpty)
+                                  _buildInfoButton('Description', () {
+                                    // Toggle description visibility or show dialog
+                                    // For now, we can just show it inline below or keep it simple
+                                  }),
+                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                                if (product!.nutritionsName != null && product!.nutritionsName!.isNotEmpty)
+                                  _buildInfoButton('Nutrition Information', () {}),
+                              ],
+                            ),
+                            
+                            if (product!.description != null && product!.description!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                                child: Text(
+                                  product!.description!,
+                                  style: robotoRegular.copyWith(color: Theme.of(context).hintColor),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+
+                            const SizedBox(height: Dimensions.paddingSizeLarge),
+
+                            // Variations (Visual Cards)
+                            if (product!.variations != null)
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: product!.variations!.length,
+                                itemBuilder: (context, index) {
+                                  return _buildVariationSection(product!.variations![index], index, productController);
+                                },
+                              ),
+
+                            // Addons (Visual Cards)
+                            if (product!.addOns != null && product!.addOns!.isNotEmpty)
+                              _buildAddonsSection(product!, productController),
+
+                            const SizedBox(height: 100), // Space for bottom bar
+                          ],
+                        ),
+                      ),
                     ),
-                    child: const Icon(Icons.close, size: 14),
+                  ],
+                ),
+              ),
+            ),
+
+            // 4. Bottom Bar (Sticky)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -5))],
+                ),
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      // Quantity
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Row(
+                          children: [
+                            QuantityButton(
+                              onTap: () {
+                                if (productController.quantity! > 1) {
+                                  productController.setQuantity(false, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign);
+                                }
+                              },
+                              isIncrement: false,
+                            ),
+                            AnimatedFlipCounter(
+                              duration: const Duration(milliseconds: 500),
+                              value: productController.quantity!.toDouble(),
+                              textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                            ),
+                            QuantityButton(
+                              onTap: () => productController.setQuantity(true, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign),
+                              isIncrement: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeDefault),
+
+                      // Add to Cart Button
+                      Expanded(
+                        child: GetBuilder<CartController>(
+                          builder: (cartController) {
+                            return CustomButtonWidget(
+                              radius: Dimensions.radiusDefault,
+                              isLoading: cartController.isLoading,
+                              buttonText: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) ? 'not_available_now'.tr
+                                  : widget.isCampaign ? 'order_now'.tr : (widget.cart != null || productController.cartIndex != -1) ? 'update_in_cart'.tr : 'add_to_cart'.tr,
+                              onPressed: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) || (widget.cart != null && productController.checkOutOfStockVariationSelected(product?.variations) != null) ? null : () async {
+                                _onButtonPressed(productController, cartController, priceWithVariation, priceWithDiscount, price, discount, discountType, addOnIdList, addOnsList, priceWithAddonsVariation);
+                              },
+                            );
+                          }
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildTag(String text, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(text, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: color)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoButton(String text, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+        ),
+        child: Text(text, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyMedium!.color)),
+      ),
+    );
+  }
+
+  Widget _buildVariationSection(Variation variation, int index, ProductController productController) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(variation.name ?? '', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+              if (variation.required!)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  ),
+                  child: Text('Required', style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).primaryColor)),
+                ),
             ],
           ),
-        );
+        ),
+        Text(
+          variation.multiSelect! ? 'Select up to ${variation.max}' : 'Select 1',
+          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+        
+        // Grid of Options
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 0.8,
+            crossAxisSpacing: Dimensions.paddingSizeSmall,
+            mainAxisSpacing: Dimensions.paddingSizeSmall,
+          ),
+          itemCount: variation.variationValues!.length,
+          itemBuilder: (context, i) {
+            final value = variation.variationValues![i];
+            final isSelected = productController.selectedVariations[index][i]!;
+            
+            return InkWell(
+              onTap: () {
+                productController.setCartVariationIndex(index, i, product, variation.multiSelect!);
+                productController.setExistInCartForBottomSheet(product!, productController.selectedVariations);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.05) : Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  border: Border.all(
+                    color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).disabledColor.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Placeholder for Option Image (if available in future)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          child: Image.asset(Images.placeholder, fit: BoxFit.cover), // Using placeholder for now
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        value.level ?? '',
+                        style: isSelected ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall) : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    if (value.optionPrice! > 0)
+                    Text(
+                      '+${PriceConverter.convertPrice(value.optionPrice!)}',
+                      style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).hintColor),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+      ],
+    );
+  }
 
-      }),
+  Widget _buildAddonsSection(Product product, ProductController productController) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Add Toppings', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+        Text(
+          'Optional - Choose up to ${product.addOns!.length}',
+          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+        
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 0.8,
+            crossAxisSpacing: Dimensions.paddingSizeSmall,
+            mainAxisSpacing: Dimensions.paddingSizeSmall,
+          ),
+          itemCount: product.addOns!.length,
+          itemBuilder: (context, index) {
+            final addon = product.addOns![index];
+            final isSelected = productController.addOnActiveList[index];
+            
+            return InkWell(
+              onTap: () {
+                 if (!productController.addOnActiveList[index]) {
+                    productController.addAddOn(true, index, addon.stockType, addon.addonStock);
+                  } else if (productController.addOnQtyList[index] == 1) {
+                    productController.addAddOn(false, index, addon.stockType, addon.addonStock);
+                  }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.05) : Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  border: Border.all(
+                    color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).disabledColor.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          child: Image.asset(Images.placeholder, fit: BoxFit.cover),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        addon.name ?? '',
+                        style: isSelected ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall) : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '+${PriceConverter.convertPrice(addon.price)}',
+                      style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).hintColor),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

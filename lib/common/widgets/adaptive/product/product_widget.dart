@@ -96,6 +96,7 @@ class ProductWidget extends StatelessWidget {
             }
           },
           radius: Dimensions.radiusDefault,
+          padding: EdgeInsets.zero,
           child: Padding(
             padding: desktop ? EdgeInsets.all(fromCartSuggestion ? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeSmall)
                 : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),

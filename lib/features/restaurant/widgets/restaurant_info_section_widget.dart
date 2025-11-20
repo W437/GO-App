@@ -79,7 +79,6 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              // Logo removed - will be rendered at screen level for top z-index
             ],
           ),
         ),

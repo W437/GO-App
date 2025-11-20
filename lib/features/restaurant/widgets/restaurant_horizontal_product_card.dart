@@ -47,6 +47,7 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                 );
         },
         radius: Dimensions.radiusDefault,
+        padding: EdgeInsets.zero,
         child: Padding(
           padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           child: Column(

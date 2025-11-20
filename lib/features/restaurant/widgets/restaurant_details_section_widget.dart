@@ -21,18 +21,15 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    
+
     return SliverToBoxAdapter(
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              padding: const EdgeInsets.only(top: 75, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Adjusted top padding to accommodate logo
-              child: Column(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        padding: const EdgeInsets.only(top: 75, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Adjusted top padding to accommodate logo
+        child: Column(
                 children: [
                   // Restaurant Name
                   Text(
@@ -140,10 +137,8 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: Dimensions.paddingSizeLarge),
-                ],
-              ),
-            ),
           ],
+        ),
       ),
     );
 
