@@ -79,44 +79,7 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                bottom: -60,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    height: 120,
-                    width: 120,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 4),
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 6,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                      child: CustomImageWidget(
-                        image: '${restaurant.logoFullUrl}',
-                        height: 120,
-                        width: 120,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Logo removed - will be rendered at screen level for top z-index
             ],
           ),
         ),

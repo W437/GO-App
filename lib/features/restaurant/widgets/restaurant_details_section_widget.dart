@@ -31,7 +31,7 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                 color: Theme.of(context).cardColor,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
               ),
-              padding: const EdgeInsets.only(top: 50, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Adjusted top padding
+              padding: const EdgeInsets.only(top: 75, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault), // Adjusted top padding to accommodate logo
               child: Column(
                 children: [
                   // Restaurant Name

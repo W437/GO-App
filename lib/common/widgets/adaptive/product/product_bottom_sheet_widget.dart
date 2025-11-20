@@ -136,27 +136,31 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                             ///Product
                             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
 
-                              (product!.imageFullUrl != null && product!.imageFullUrl!.isNotEmpty) ? InkWell(
-                                onTap: widget.isCampaign ? null : () {
-                                  if(!widget.isCampaign) {
-                                    Get.toNamed(RouteHelper.getItemImagesRoute(product!));
-                                  }
-                                },
-                                child: Stack(children: [
+                              (product!.imageFullUrl != null && product!.imageFullUrl!.isNotEmpty) ? SizedBox(
+                                height: 100,
+                                width: 100,
+                                child: InkWell(
+                                  onTap: widget.isCampaign ? null : () {
+                                    if(!widget.isCampaign) {
+                                      Get.toNamed(RouteHelper.getItemImagesRoute(product!));
+                                    }
+                                  },
+                                  child: Stack(children: [
 
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                    child: BlurhashImageWidget(
-                                      imageUrl: '${product!.imageFullUrl}',
-                                      blurhash: product!.imageBlurhash,
-                                      fit: BoxFit.cover,
+                                    ClipRRect(
                                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                      child: BlurhashImageWidget(
+                                        imageUrl: '${product!.imageFullUrl}',
+                                        blurhash: product!.imageBlurhash,
+                                        fit: BoxFit.cover,
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                      ),
                                     ),
-                                  ),
 
-                                  DiscountTagWidget(discount: discount, discountType: discountType, isProductBottomSheet: true),
+                                    DiscountTagWidget(discount: discount, discountType: discountType, isProductBottomSheet: true),
 
-                                ]),
+                                  ]),
+                                ),
                               ) : const SizedBox.shrink(),
                               const SizedBox(width: Dimensions.paddingSizeSmall),
 

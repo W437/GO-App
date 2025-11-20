@@ -17,6 +17,7 @@ import 'package:godelivery_user/features/restaurant/controllers/restaurant_contr
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_info_section_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_screen_shimmer_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_sticky_header_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -277,23 +278,26 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
             
             final Restaurant activeRestaurant = restaurant ?? restController.restaurant!;
 
-              return CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: scrollController,
-                clipBehavior: Clip.none, // Allow logo to overflow
-                slivers: [
-                  // Cover Image & App Bar (Pinned SliverAppBar)
-                  RestaurantInfoSectionWidget(
-                    restaurant: activeRestaurant,
-                    restController: restController,
-                    hasCoupon: hasCoupon,
-                  ),
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: scrollController,
+                    clipBehavior: Clip.none, // Allow logo to overflow
+                    slivers: [
+                      // Cover Image & App Bar (Pinned SliverAppBar)
+                      RestaurantInfoSectionWidget(
+                        restaurant: activeRestaurant,
+                        restController: restController,
+                        hasCoupon: hasCoupon,
+                      ),
 
-                  // Restaurant Details (Overlaps the cover image)
-                  RestaurantDetailsSectionWidget(
-                    restaurant: activeRestaurant,
-                    restController: restController,
-                  ),
+                      // Restaurant Details (Overlaps the cover image)
+                      RestaurantDetailsSectionWidget(
+                        restaurant: activeRestaurant,
+                        restController: restController,
+                      ),
 
                   // Sticky categories (Secondary Pinned SliverAppBar)
                   SliverAppBar(
@@ -330,6 +334,47 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: _buildMenuSections(context, restController),
                                 ),
+                        ),
+                      ),
+                    ),
+                  ),
+                    ],
+                  ),
+                  // Restaurant Logo - Top Layer (renders above all elements)
+                  Positioned(
+                    top: 190, // 250px (expanded height) - 60px (bottom offset)
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        height: 120,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 4),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 6,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                          child: CustomImageWidget(
+                            image: '${activeRestaurant.logoFullUrl}',
+                            height: 120,
+                            width: 120,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
