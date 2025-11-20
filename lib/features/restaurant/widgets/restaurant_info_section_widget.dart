@@ -23,11 +23,13 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
   final Restaurant restaurant;
   final RestaurantController restController;
   final bool hasCoupon;
+  final double scrollOffset;
   const RestaurantInfoSectionWidget({
     super.key,
     required this.restaurant,
     required this.restController,
     required this.hasCoupon,
+    this.scrollOffset = 0.0,
   });
 
 
@@ -44,7 +46,11 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
       backgroundColor: Theme.of(context).cardColor,
       leading: const SizedBox(),
       leadingWidth: 0,
-      title: RestaurantAppBarWidget(restController: restController),
+      title: RestaurantAppBarWidget(
+        restController: restController,
+        restaurant: restaurant,
+        scrollOffset: scrollOffset,
+      ),
       centerTitle: true,
       automaticallyImplyLeading: false,
       clipBehavior: Clip.none,

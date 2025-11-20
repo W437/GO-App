@@ -386,6 +386,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                         restaurant: activeRestaurant,
                         restController: restController,
                         hasCoupon: hasCoupon,
+                        scrollOffset: scrollController.hasClients ? scrollController.offset : 0.0,
                       ),
 
                       // Restaurant Details (Card overlay effect)

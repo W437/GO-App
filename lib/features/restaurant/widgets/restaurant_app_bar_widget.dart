@@ -11,10 +11,14 @@ import 'package:godelivery_user/features/favourite/controllers/favourite_control
 class RestaurantAppBarWidget extends StatefulWidget {
   final RestaurantController restController;
   final double backgroundOpacity;
+  final dynamic restaurant;
+  final double scrollOffset;
   const RestaurantAppBarWidget({
     super.key,
     required this.restController,
     this.backgroundOpacity = 0,
+    this.restaurant,
+    this.scrollOffset = 0.0,
   });
 
   @override
@@ -26,6 +30,16 @@ class _RestaurantAppBarWidgetState extends State<RestaurantAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate transition progress (0.0 = at top, 1.0 = fully scrolled)
+    const double transitionStart = 50.0;
+    const double transitionEnd = 150.0;
+    final double transitionProgress = ((widget.scrollOffset - transitionStart) / (transitionEnd - transitionStart)).clamp(0.0, 1.0);
+
+    // Morph the display text
+    final String displayText = transitionProgress > 0.5
+        ? (widget.restaurant?.name ?? 'Search')
+        : 'Search';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
       child: Row(
@@ -45,8 +59,8 @@ class _RestaurantAppBarWidgetState extends State<RestaurantAppBarWidget> {
             ),
           ),
           const SizedBox(width: Dimensions.paddingSizeSmall),
-          
-          // Search Pill
+
+          // Search Pill with morphing content
           Expanded(
             child: Container(
               height: 40,
@@ -54,48 +68,59 @@ class _RestaurantAppBarWidgetState extends State<RestaurantAppBarWidget> {
                 color: Colors.black.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: (String query) {
-                        if(widget.restController.isSearching) {
-                          widget.restController.changeSearchStatus();
-                        }
-                        widget.restController.initSearchData();
-                        widget.restController.getRestaurantProductList(widget.restController.restaurant!.id, 1, widget.restController.type, true);
-                      },
-                      textAlignVertical: TextAlignVertical.center,
-                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
-                      cursorColor: Colors.white,
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        hintStyle: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeLarge,
-                          color: Colors.white70,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        prefixIcon: const Icon(Icons.search, color: Colors.white70, size: 24),
-                        prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 24),
-                        contentPadding: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.white70,
+                        size: 20,
                       ),
                     ),
-                  ),
-                  if(_searchController.text.isNotEmpty)
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(Icons.clear, color: Colors.white, size: 20),
-                      onPressed: () {
-                        _searchController.clear();
-                        widget.restController.initSearchData();
-                        setState(() {});
-                      },
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            alignment: Alignment.centerLeft,
+                            children: <Widget>[
+                              ...previousChildren,
+                              if (currentChild != null) currentChild,
+                            ],
+                          );
+                        },
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.0, 0.3),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Text(
+                          displayText,
+                          key: ValueKey<String>(displayText),
+                          textAlign: TextAlign.left,
+                          style: robotoMedium.copyWith(
+                            fontSize: Dimensions.fontSizeLarge,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
