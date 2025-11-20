@@ -42,6 +42,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
   int? _activeCategoryId;
+  bool _isManualScrolling = false;
 
   static const double _logoSize = 120.0;
   static const double _expandedHeight = 210.0; // Reduced to create 40px overlap
@@ -171,43 +172,62 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     _previousScrollOffset = offset;
 
     // Logic to detect active category based on scroll position
-    // We iterate through keys and check which one is at the top
-    final double headerLimit = _categoryBarHeight + 120; // Adjusted for new header
-    for (var entry in _categorySectionKeys.entries) {
-      final key = entry.value;
-      final context = key.currentContext;
-      if (context != null) {
-        final box = context.findRenderObject() as RenderBox;
-        final position = box.localToGlobal(Offset.zero);
-        // Check if the section is near the top (accounting for header height)
-        if (position.dy >= 0 && position.dy <= headerLimit) {
-          if (_activeCategoryId != entry.key) {
-            setState(() {
-              _activeCategoryId = entry.key;
-            });
+    // Skip auto-detection during manual/programmatic scrolls (prevents flickering)
+    if (!_isManualScrolling) {
+      // Calculate 50% viewport trigger point (middle of screen)
+      final double viewportHeight = MediaQuery.of(context).size.height;
+      final double midpoint = viewportHeight / 2;
+      const double tolerance = 50.0; // Tolerance range for activation
+
+      // We iterate through keys and check which one is at the midpoint
+      for (var entry in _categorySectionKeys.entries) {
+        final key = entry.value;
+        final context = key.currentContext;
+        if (context != null) {
+          final box = context.findRenderObject() as RenderBox;
+          final position = box.localToGlobal(Offset.zero);
+          // Check if the section is near the viewport midpoint (50%)
+          if (position.dy >= (midpoint - tolerance) && position.dy <= (midpoint + tolerance)) {
+            if (_activeCategoryId != entry.key) {
+              setState(() {
+                _activeCategoryId = entry.key;
+              });
+            }
+            break;
           }
-          break;
         }
       }
     }
   }
 
-  void _handleCategoryTap(int categoryId) {
+  void _handleCategoryTap(int categoryId) async {
     setState(() {
       _activeCategoryId = categoryId;
+      _isManualScrolling = true;
     });
     final key = _categorySectionKeys[categoryId];
     if(key?.currentContext != null && scrollController.hasClients) {
       final box = key!.currentContext!.findRenderObject() as RenderBox;
       final position = box.localToGlobal(Offset.zero);
-      final double targetOffset = (scrollController.offset + position.dy) - (_categoryBarHeight + 50);
+
+      // Calculate viewport center
+      final double viewportHeight = MediaQuery.of(context).size.height;
+      final double appBarHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
+      final double availableHeight = viewportHeight - appBarHeight;
+
+      // Center the section in the viewport, accounting for sticky category bar
+      final double targetOffset = (scrollController.offset + position.dy) - (availableHeight / 2) + (_categoryBarHeight / 2);
       final double clampedTarget = targetOffset.clamp(0, scrollController.position.maxScrollExtent).toDouble();
 
-      scrollController.animateTo(
+      await scrollController.animateTo(
         clampedTarget,
         duration: const Duration(milliseconds: 450),
         curve: Curves.easeInOutCubic,
       );
+
+      setState(() {
+        _isManualScrolling = false;
+      });
     }
   }
 
