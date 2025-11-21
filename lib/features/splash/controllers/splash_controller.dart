@@ -13,19 +13,24 @@ import 'package:godelivery_user/features/notification/domain/models/notification
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
+import 'package:godelivery_user/features/splash/domain/services/config_service.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/utilities/maintance_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/helper/navigation/splash_route_helper.dart';
+import 'package:godelivery_user/helper/navigation/app_navigator.dart';
+import 'package:godelivery_user/helper/navigation/splash_route_helper.dart'; // OLD - keeping for deprecated getConfigData()
 import 'package:universal_html/html.dart' as html;
 
 class SplashController extends GetxController implements GetxService {
   final SplashServiceInterface splashServiceInterface;
+  late final ConfigService _configService;
 
-  SplashController({required this.splashServiceInterface});
+  SplashController({required this.splashServiceInterface}) {
+    _configService = ConfigService(splashServiceInterface);
+  }
 
   ConfigModel? _configModel;
   ConfigModel? get configModel => _configModel;
@@ -50,52 +55,18 @@ class SplashController extends GetxController implements GetxService {
 
   DateTime get currentTime => DateTime.now();
 
-  // Future<bool> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local}) async {
-  //   bool isSuccess = false;
+  // ═══════════════════════════════════════════════════════════════════════════
+  // OLD ARCHITECTURE - DEPRECATED (keeping temporarily for reference/rollback)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // This old method mixed config loading with navigation, causing bugs.
+  // It has been replaced by:
+  // - loadConfig() for data fetching
+  // - AppNavigator for navigation
   //
-  //   // Fetch from local cache
-  //   isSuccess = await _fetchAndSetConfigData(source: DataSourceEnum.local, handleMaintenanceMode: handleMaintenanceMode);
-  //
-  //   // Fetch from API in the background
-  //   _fetchAndSetConfigData(source: DataSourceEnum.client, handleMaintenanceMode: handleMaintenanceMode);
-  //
-  //   return isSuccess;
-  // }
-  //
-  // Future<bool> _fetchAndSetConfigData({required DataSourceEnum source, bool? handleMaintenanceMode}) async {
-  //   Response response = await splashServiceInterface.getConfigData(source: source);
-  //   bool isSuccess = false;
-  //
-  //   if(response.statusCode == 200) {
-  //     ConfigModel? fetchedConfig = splashServiceInterface.prepareConfigData(response);
-  //     if(fetchedConfig != null) {
-  //       _configModel = fetchedConfig;
-  //       _handleMaintenanceMode(handleMaintenanceMode: handleMaintenanceMode);
-  //       isSuccess = true;
-  //       update();
-  //     }
-  //   } else {
-  //     if(response.statusText == ApiClient.noInternetMessage) {
-  //       _hasConnection = false;
-  //     }
-  //   }
-  //
-  //   return isSuccess;
-  // }
-  //
-  // void _handleMaintenanceMode({bool? handleMaintenanceMode}) {
-  //   if(!GetPlatform.isWeb){
-  //     bool isMaintenanceMode = _configModel?.maintenanceMode ?? false;
-  //     bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
-  //
-  //     if (isInMaintenance) {
-  //       Get.offNamed(RouteHelper.getUpdateRoute(false));
-  //     } else if ((Get.currentRoute.contains(RouteHelper.update) && !isMaintenanceMode) || !isInMaintenance) {
-  //       Get.offNamed(RouteHelper.getInitialRoute());
-  //     }
-  //   }
-  // }
+  // All callsites have been migrated. This code can be removed after testing.
+  // ═══════════════════════════════════════════════════════════════════════════
 
+  @Deprecated('Use loadConfig() and AppNavigator.navigateOnAppLaunch() instead')
   Future<void> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local, NotificationBodyModel? notificationBody, bool fromMainFunction = false, bool fromDemoReset = false, bool shouldNavigate = true}) async {
     _hasConnection = true;
     _savedCookiesData = getCookiesData();
@@ -119,6 +90,93 @@ class SplashController extends GetxController implements GetxService {
 
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NEW ARCHITECTURE: Separated config loading from navigation
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /// Load config data (pure data operation, no navigation)
+  ///
+  /// This is the NEW way to load config. It ONLY fetches and stores data,
+  /// with NO navigation side effects.
+  ///
+  /// Use cases:
+  /// - App initialization (main.dart)
+  /// - Ensuring config exists before operations
+  /// - Background refresh
+  /// - After demo reset (followed by explicit navigation)
+  ///
+  /// Returns true if config was loaded successfully
+  Future<bool> loadConfig({bool forceRefresh = false}) async {
+    try {
+      _savedCookiesData = getCookiesData();
+
+      final config = forceRefresh
+          ? await _configService.fetchConfig()
+          : await _configService.fetchConfigCached();
+
+      if (config != null) {
+        _configModel = config;
+        _hasConnection = true;
+
+        // 🔍 DEBUG: Print loaded config
+        print('═══════════════════════════════════════════════════════════');
+        print('🔍 [CONFIG DEBUG] Configuration loaded successfully!');
+        print('   Business Name: ${_configModel!.businessName ?? "N/A"}');
+        if(_configModel!.centralizeLoginSetup != null) {
+          print('📱 [CONFIG DEBUG] Centralize Login Setup:');
+          print('   Manual Login: ${_configModel!.centralizeLoginSetup!.manualLoginStatus}');
+          print('   OTP Login: ${_configModel!.centralizeLoginSetup!.otpLoginStatus}');
+          print('   Social Login: ${_configModel!.centralizeLoginSetup!.socialLoginStatus}');
+        }
+        print('═══════════════════════════════════════════════════════════');
+
+        update();
+        _onRemoveLoader();
+        return true;
+      } else {
+        _hasConnection = false;
+        update();
+        return false;
+      }
+    } catch (e) {
+      print('❌ [CONFIG] Error loading config: $e');
+      _hasConnection = false;
+      update();
+      return false;
+    }
+  }
+
+  /// Refresh config in background (no side effects, no navigation)
+  ///
+  /// This forces a fresh fetch from the API without blocking.
+  /// Used for keeping data fresh without disrupting user experience.
+  ///
+  /// Use cases:
+  /// - Periodic background refresh
+  /// - Pull-to-refresh in screens
+  /// - Ensuring latest promotional content
+  Future<void> refreshConfig() async {
+    try {
+      final freshConfig = await _configService.fetchConfig();
+      if (freshConfig != null) {
+        _configModel = freshConfig;
+        print('✅ [CONFIG] Background refresh completed');
+        update();
+      }
+    } catch (e) {
+      print('⚠️ [CONFIG] Background refresh failed: $e');
+      // Silent fail - don't disrupt user experience
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // OLD ARCHITECTURE SUPPORT METHODS - DEPRECATED
+  // ═══════════════════════════════════════════════════════════════════════════
+  // These methods support the deprecated getConfigData() above.
+  // Can be removed after testing confirms migration was successful.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  @Deprecated('Part of old getConfigData() architecture')
   void _handleConfigResponse(Response response, bool handleMaintenanceMode, bool fromMainFunction, bool fromDemoReset, {required bool shouldNavigate, required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
     if(response.statusCode == 200) {
       _configModel = splashServiceInterface.prepareConfigData(response);
@@ -180,6 +238,7 @@ class SplashController extends GetxController implements GetxService {
     }
   }
 
+  @Deprecated('Part of old getConfigData() architecture')
   _mainConfigRouting() async {
     if(GetPlatform.isWeb) {
       bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();

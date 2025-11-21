@@ -11,6 +11,7 @@ import 'package:godelivery_user/features/profile/controllers/profile_controller.
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/wallet/controllers/wallet_controller.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/helper/navigation/app_navigator.dart';
 import 'package:godelivery_user/common/enums/user_type.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -60,13 +61,16 @@ class NotificationHelper {
       return;
     });
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       debugPrint("onMessage: ${message.data}, type: ${message.data['type']}");
 
       if(message.data['type'] == AppConstants.demoResetTopic) {
         Get.dialog(const DemoResetDialogWidget(), barrierDismissible: false);
       }else if(message.data['type'] == 'maintenance'){
-        Get.find<SplashController>().getConfigData(handleMaintenanceMode: true, shouldNavigate: false);
+        // Refresh config to get latest maintenance status
+        await Get.find<SplashController>().loadConfig(forceRefresh: true);
+        // Navigate to maintenance if enabled
+        AppNavigator.navigateToMaintenance();
       }
       if(message.data['type'] == 'message' && Get.currentRoute.startsWith(RouteHelper.messages)) {
         if(Get.find<AuthController>().isLoggedIn()) {

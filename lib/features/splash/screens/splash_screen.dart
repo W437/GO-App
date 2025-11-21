@@ -7,6 +7,7 @@ import 'package:godelivery_user/features/notification/domain/models/notification
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/helper/navigation/app_navigator.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -181,8 +182,32 @@ class SplashScreenState extends State<SplashScreen> {
     _route();
   }
 
-  void _route() {
-    Get.find<SplashController>().getConfigData(handleMaintenanceMode: false, notificationBody: widget.notificationBody);
+  Future<void> _route() async {
+    print('🚀 [SPLASH] _route() called - loading config');
+
+    // 1. Load config data (no navigation)
+    final success = await Get.find<SplashController>().loadConfig();
+
+    if (!success) {
+      print('❌ [SPLASH] Config load failed - showing no internet screen');
+      // Config load failed - navigate to no internet screen
+      Get.off(() => NoInternetScreen(
+        child: SplashScreen(
+          notificationBody: widget.notificationBody,
+          linkBody: widget.linkBody,
+          muteVideo: widget.muteVideo,
+        ),
+      ));
+      return;
+    }
+
+    print('✅ [SPLASH] Config loaded successfully - navigating');
+
+    // 2. Navigate based on app state (explicit, separate)
+    await AppNavigator.navigateOnAppLaunch(
+      notification: widget.notificationBody,
+      linkBody: widget.linkBody,
+    );
   }
 
   @override

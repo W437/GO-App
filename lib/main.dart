@@ -126,7 +126,8 @@ class _MyAppState extends State<MyApp> {
       if(Get.find<AuthController>().isLoggedIn() || Get.find<AuthController>().isGuestLoggedIn()) {
         Get.find<CartController>().getCartDataOnline();
       }
-      Get.find<SplashController>().getConfigData(fromMainFunction: true, shouldNavigate: false);
+      // Load config data (no navigation - web handles routing differently)
+      await Get.find<SplashController>().loadConfig();
       if (Get.find<AuthController>().isLoggedIn()) {
         Get.find<AuthController>().updateToken();
         await Get.find<FavouriteController>().getFavouriteList();

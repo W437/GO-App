@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 class DemoResetDialogWidget extends StatefulWidget {
@@ -82,7 +83,12 @@ class _DemoResetDialogWidgetState extends State<DemoResetDialogWidget> {
               setState(() {
                 _isLoading = true;
               });
-              await Get.find<SplashController>().getConfigData(fromDemoReset: true);
+
+              // 1. Refresh config to get latest data after demo reset
+              await Get.find<SplashController>().loadConfig(forceRefresh: true);
+
+              // 2. Navigate to home (explicit navigation)
+              Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
 
               setState(() {
                 _isLoading = false;

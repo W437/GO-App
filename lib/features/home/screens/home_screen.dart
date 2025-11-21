@@ -76,10 +76,9 @@ class HomeScreen extends StatefulWidget {
 
   static Future<void> loadData(bool reload) async {
     // Always refresh config so promotional banners and other remote settings stay current
-    await Get.find<SplashController>().getConfigData(
-      handleMaintenanceMode: false,
-      source: DataSourceEnum.client,
-    );
+    // This is a force refresh from API to get latest promotional content
+    await Get.find<SplashController>().refreshConfig();
+
     Get.find<HomeController>().getBannerList(reload);
     Get.find<CategoryController>().getCategoryList(reload);
     Get.find<CuisineController>().getCuisineList();

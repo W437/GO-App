@@ -36,8 +36,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   void _loadData() async {
     Get.find<NotificationController>().clearNotification();
+    // Ensure config is loaded before proceeding
     if(Get.find<SplashController>().configModel == null) {
-      await Get.find<SplashController>().getConfigData(shouldNavigate: false);
+      await Get.find<SplashController>().loadConfig();
     }
     if(Get.find<AuthController>().isLoggedIn()) {
       Get.find<NotificationController>().getNotificationList(true);
