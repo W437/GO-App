@@ -157,9 +157,8 @@ class _MyAppState extends State<MyApp> {
             fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),
             initialRoute: GetPlatform.isWeb ? RouteHelper.getInitialRoute() : RouteHelper.getSplashRoute(widget.body, widget.linkBody),
             getPages: RouteHelper.routes,
-            customTransition: CustomPageTransition(), // Your custom transition!
-            defaultTransition: Transition.custom,
-            transitionDuration: const Duration(milliseconds: 400),
+            customTransition: CustomPageTransition(),
+            transitionDuration: const Duration(milliseconds: 450),
             builder: (BuildContext context, widget) {
               return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)), child: Material(
                 child: SafeArea(
