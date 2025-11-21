@@ -390,6 +390,52 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     );
   }
 
+  List<Widget> _buildMenuShimmer() {
+    return List.generate(3, (categoryIndex) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Category title shimmer
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+              child: Container(
+                height: 20,
+                width: 150,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                ),
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+            // Product cards shimmer
+            SizedBox(
+              height: 250,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                itemCount: 3,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 180,
+                    margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
@@ -407,13 +453,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
             }
             restController.setCategoryList();
             bool hasCoupon = (couponController.couponList!= null && couponController.couponList!.isNotEmpty);
-            final bool hasData = restController.restaurant != null && restController.restaurant!.name != null && categoryController.categoryList != null;
-            
-            if(!hasData) {
-              return const RestaurantScreenShimmerWidget();
-            }
-            
-            final Restaurant activeRestaurant = restaurant ?? restController.restaurant!;
+            final bool hasProductsData = restController.restaurantProducts != null && categoryController.categoryList != null;
+
+            // Use widget.restaurant for initial data, fallback to controller data when loaded
+            final Restaurant activeRestaurant = restController.restaurant ?? widget.restaurant!;
 
               return Stack(
                 clipBehavior: Clip.none,
@@ -437,32 +480,33 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                         restController: restController,
                       ),
 
-                      // Sticky categories
-                      SliverAppBar(
-                    pinned: true,
-                    primary: false,
-                    automaticallyImplyLeading: false,
-                    backgroundColor: Theme.of(context).cardColor,
-                    elevation: 0,
-                    toolbarHeight: _categoryBarHeight + 1, // Extra 1px for separator
-                    titleSpacing: 0,
-                    title: Column(
-                      children: [
-                        SizedBox(
-                          height: _categoryBarHeight,
-                          child: RestaurantStickyHeaderWidget(
-                            restController: restController,
-                            activeCategoryId: _activeCategoryId,
-                            onCategorySelected: _handleCategoryTap,
+                      // Sticky categories (only show when categories are loaded)
+                      if (categoryController.categoryList != null)
+                        SliverAppBar(
+                          pinned: true,
+                          primary: false,
+                          automaticallyImplyLeading: false,
+                          backgroundColor: Theme.of(context).cardColor,
+                          elevation: 0,
+                          toolbarHeight: _categoryBarHeight + 1, // Extra 1px for separator
+                          titleSpacing: 0,
+                          title: Column(
+                            children: [
+                              SizedBox(
+                                height: _categoryBarHeight,
+                                child: RestaurantStickyHeaderWidget(
+                                  restController: restController,
+                                  activeCategoryId: _activeCategoryId,
+                                  onCategorySelected: _handleCategoryTap,
+                                ),
+                              ),
+                              Container(
+                                height: 1,
+                                color: Colors.black.withValues(alpha: 0.06),
+                              ),
+                            ],
                           ),
                         ),
-                        Container(
-                          height: 1,
-                          color: Colors.black.withValues(alpha: 0.06),
-                        ),
-                      ],
-                    ),
-                  ),
 
                   // 3. Content (Menu or Search Results)
                   SliverToBoxAdapter(
@@ -477,8 +521,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                           child: restController.isSearching
                               ? _buildSearchResults(restController)
                               : Column(
+                                  key: ValueKey('menu-${hasProductsData ? 'loaded' : 'loading'}'),
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: _buildMenuSections(context, restController),
+                                  children: hasProductsData
+                                      ? _buildMenuSections(context, restController)
+                                      : _buildMenuShimmer(),
                                 ),
                         ),
                       ),

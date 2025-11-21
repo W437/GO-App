@@ -1,3 +1,5 @@
+import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/home/widgets/item_card_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -7,7 +9,8 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 class RestaurantScreenShimmerWidget extends StatelessWidget {
-  const RestaurantScreenShimmerWidget({super.key});
+  final Restaurant? restaurant;
+  const RestaurantScreenShimmerWidget({super.key, this.restaurant});
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +18,24 @@ class RestaurantScreenShimmerWidget extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       child: ResponsiveHelper.isMobile(context) ? Column(children: [
 
-        Shimmer(
-          child: Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Theme.of(context).shadowColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusLarge)),
-            ),
-          ),
+        // Cover image with blurhash
+        SizedBox(
+          height: 200,
+          child: restaurant?.coverPhotoBlurhash != null
+              ? BlurhashImageWidget(
+                  imageUrl: restaurant!.coverPhotoFullUrl ?? '',
+                  blurhash: restaurant!.coverPhotoBlurhash,
+                  fit: BoxFit.cover,
+                )
+              : Shimmer(
+                  child: Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).shadowColor,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusLarge)),
+                    ),
+                  ),
+                ),
         ),
         const SizedBox(height: Dimensions.paddingSizeSmall),
 
@@ -37,16 +50,26 @@ class RestaurantScreenShimmerWidget extends StatelessWidget {
           child: Row(
             children: [
 
+              // Logo with blurhash
               ClipRRect(
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                child: Shimmer(
-                  child: Container(
-                    height: 90, width: 90,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).shadowColor,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    ),
-                  ),
+                child: SizedBox(
+                  height: 90, width: 90,
+                  child: restaurant?.logoBlurhash != null
+                      ? BlurhashImageWidget(
+                          imageUrl: restaurant!.logoFullUrl ?? '',
+                          blurhash: restaurant!.logoBlurhash,
+                          fit: BoxFit.cover,
+                        )
+                      : Shimmer(
+                          child: Container(
+                            height: 90, width: 90,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).shadowColor,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: Dimensions.paddingSizeLarge),
@@ -266,16 +289,26 @@ class RestaurantScreenShimmerWidget extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
+                // Desktop cover with blurhash
                 ClipRRect(
                   borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.radiusLarge), bottomRight: Radius.circular(Dimensions.radiusLarge)),
-                  child: Shimmer(
-                    child: Container(
-                      height: 250, width: Dimensions.webMaxWidth,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).shadowColor,
-                        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.radiusLarge), bottomRight: Radius.circular(Dimensions.radiusLarge)),
-                      ),
-                    ),
+                  child: SizedBox(
+                    height: 250, width: Dimensions.webMaxWidth,
+                    child: restaurant?.coverPhotoBlurhash != null
+                        ? BlurhashImageWidget(
+                            imageUrl: restaurant!.coverPhotoFullUrl ?? '',
+                            blurhash: restaurant!.coverPhotoBlurhash,
+                            fit: BoxFit.cover,
+                          )
+                        : Shimmer(
+                            child: Container(
+                              height: 250, width: Dimensions.webMaxWidth,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).shadowColor,
+                                borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.radiusLarge), bottomRight: Radius.circular(Dimensions.radiusLarge)),
+                              ),
+                            ),
+                          ),
                   ),
                 ),
                 Positioned(
@@ -291,15 +324,25 @@ class RestaurantScreenShimmerWidget extends StatelessWidget {
                   ),
                     child: Row(children: [
 
+                      // Desktop logo with blurhash
                       ClipOval(
-                        child: Shimmer(
-                          child: Container(
-                            height: 120, width: 120,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).shadowColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
+                        child: SizedBox(
+                          height: 120, width: 120,
+                          child: restaurant?.logoBlurhash != null
+                              ? BlurhashImageWidget(
+                                  imageUrl: restaurant!.logoFullUrl ?? '',
+                                  blurhash: restaurant!.logoBlurhash,
+                                  fit: BoxFit.cover,
+                                )
+                              : Shimmer(
+                                  child: Container(
+                                    height: 120, width: 120,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).shadowColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(width: 100),

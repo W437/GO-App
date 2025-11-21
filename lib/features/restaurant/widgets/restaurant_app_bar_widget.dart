@@ -128,12 +128,15 @@ class _RestaurantAppBarWidgetState extends State<RestaurantAppBarWidget> {
 
           // Favorite Button
           GetBuilder<FavouriteController>(builder: (favouriteController) {
-            bool isWished = favouriteController.wishRestIdList.contains(widget.restController.restaurant!.id);
+            final restaurantId = widget.restController.restaurant?.id ?? widget.restaurant?.id;
+            if (restaurantId == null) return const SizedBox.shrink();
+
+            bool isWished = favouriteController.wishRestIdList.contains(restaurantId);
             return CustomInkWellWidget(
               onTap: () {
                 if(AuthHelper.isLoggedIn()) {
-                  isWished ? favouriteController.removeFromFavouriteList(widget.restController.restaurant!.id, true)
-                      : favouriteController.addToFavouriteList(null, widget.restController.restaurant!.id, true);
+                  isWished ? favouriteController.removeFromFavouriteList(restaurantId, true)
+                      : favouriteController.addToFavouriteList(null, restaurantId, true);
                 }else {
                   showCustomSnackBar('you_are_not_logged_in'.tr);
                 }

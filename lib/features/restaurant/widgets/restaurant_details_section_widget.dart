@@ -88,17 +88,18 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   // Delivery Fee Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.delivery_dining, color: Theme.of(context).hintColor, size: 18),
-                      const SizedBox(width: 4),
-                      Text(
-                        PriceConverter.convertPrice(restaurant.deliveryFee),
-                        style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
-                      ),
-                    ],
-                  ),
+                  if (restaurant.deliveryFee != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.delivery_dining, color: Theme.of(context).hintColor, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          PriceConverter.convertPrice(restaurant.deliveryFee),
+                          style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: Dimensions.paddingSizeExtraLarge),
                   // Action Buttons
                   Row(
