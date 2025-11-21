@@ -39,9 +39,24 @@ class SplashScreenState extends State<SplashScreen> {
   bool _videoFailedToLoad = false;
   bool _skipPressed = false;
 
+  // Skip button configuration
+  static const int? skipButtonDelaySeconds = 2; // Set to null to disable skip button
+  bool _skipButtonEnabled = false;
+
   @override
   void initState() {
     super.initState();
+
+    // Enable skip button after delay (if configured)
+    if (skipButtonDelaySeconds != null) {
+      Future.delayed(Duration(seconds: skipButtonDelaySeconds!), () {
+        if (mounted) {
+          setState(() {
+            _skipButtonEnabled = true;
+          });
+        }
+      });
+    }
 
     _initializeVideo();
 
@@ -75,6 +90,27 @@ class SplashScreenState extends State<SplashScreen> {
     if(Get.find<AuthController>().isGuestLoggedIn() || Get.find<AuthController>().isLoggedIn()) {
       Get.find<CartController>().getCartDataOnline();
     }
+
+    // Start loading config and all data in parallel with video
+    _startDataLoading();
+  }
+
+  /// Start data loading in parallel with video playback
+  Future<void> _startDataLoading() async {
+    print('🚀 [SPLASH] Starting parallel data loading...');
+    final splashController = Get.find<SplashController>();
+
+    // Load config first (required for everything else)
+    final configSuccess = await splashController.loadConfig();
+
+    if (!configSuccess) {
+      print('❌ [SPLASH] Config load failed during parallel load');
+      return; // Will be handled in _route()
+    }
+
+    // Load all data while video plays - always fetch fresh on app launch
+    await splashController.loadAllData(useCache: false);
+    print('✅ [SPLASH] Parallel data loading complete');
   }
 
   @override
@@ -183,16 +219,23 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _route() async {
-    print('🚀 [SPLASH] _route() called - loading config and data');
+    print('🚀 [SPLASH] _route() called - checking data loading status');
 
     final splashController = Get.find<SplashController>();
 
-    // 1. Load config data (no navigation)
-    final configSuccess = await splashController.loadConfig();
+    // Check if data loading already completed (from parallel load in initState)
+    if (splashController.dataLoadingComplete) {
+      print('✅ [SPLASH] Data already loaded in parallel - navigating immediately');
+      await AppNavigator.navigateOnAppLaunch(
+        notification: widget.notificationBody,
+        linkBody: widget.linkBody,
+      );
+      return;
+    }
 
-    if (!configSuccess) {
-      print('❌ [SPLASH] Config load failed - showing no internet screen');
-      // Config load failed - navigate to no internet screen
+    // Check if data loading failed during parallel load
+    if (splashController.dataLoadingFailed) {
+      print('❌ [SPLASH] Data loading failed - showing no internet screen');
       Get.off(() => NoInternetScreen(
         child: SplashScreen(
           notificationBody: widget.notificationBody,
@@ -203,14 +246,25 @@ class SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    print('✅ [SPLASH] Config loaded successfully - loading all data');
+    // Data still loading - wait for it to complete
+    print('⏳ [SPLASH] Data still loading, waiting for completion...');
 
-    // 2. Load all application data with progress tracking
-    final dataSuccess = await splashController.loadAllData(useCache: true);
+    // Wait for data loading to complete (should be quick since it started in parallel)
+    int attempts = 0;
+    while (!splashController.dataLoadingComplete && !splashController.dataLoadingFailed && attempts < 100) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
+    }
 
-    if (!dataSuccess) {
-      print('❌ [SPLASH] Data load failed - showing no internet screen');
-      // Data load failed - navigate to no internet screen with retry
+    // Check final status
+    if (splashController.dataLoadingComplete) {
+      print('✅ [SPLASH] Data loading completed - navigating');
+      await AppNavigator.navigateOnAppLaunch(
+        notification: widget.notificationBody,
+        linkBody: widget.linkBody,
+      );
+    } else {
+      print('❌ [SPLASH] Data loading failed or timed out - showing no internet screen');
       Get.off(() => NoInternetScreen(
         child: SplashScreen(
           notificationBody: widget.notificationBody,
@@ -218,16 +272,7 @@ class SplashScreenState extends State<SplashScreen> {
           muteVideo: widget.muteVideo,
         ),
       ));
-      return;
     }
-
-    print('✅ [SPLASH] All data loaded successfully - navigating to app');
-
-    // 3. Navigate based on app state (explicit, separate)
-    await AppNavigator.navigateOnAppLaunch(
-      notification: widget.notificationBody,
-      linkBody: widget.linkBody,
-    );
   }
 
   @override
@@ -282,57 +327,54 @@ class SplashScreenState extends State<SplashScreen> {
             // Progress indicator for data loading
             GetBuilder<SplashController>(
               builder: (splashController) {
-                // Only show progress after video completes and we're loading data
-                if (_videoCompleted && splashController.loadingProgress > 0) {
+                // Show progress and keep visible even at 100%
+                if (splashController.loadingProgress > 0) {
                   return Positioned(
                     bottom: 80,
                     left: 0,
                     right: 0,
                     child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Progress bar
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: LinearProgressIndicator(
-                                value: splashController.loadingProgress / 100,
-                                minHeight: 6,
-                                backgroundColor: Colors.grey.shade200,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).primaryColor,
-                                ),
-                              ),
+                      child: Center(
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            tween: Tween<double>(
+                              begin: splashController.loadingProgress / 100,
+                              end: splashController.loadingProgress / 100,
                             ),
-                            const SizedBox(height: Dimensions.paddingSizeSmall),
-                            // Loading message and percentage
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
+                            builder: (context, value, child) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Progress bar
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: LinearProgressIndicator(
+                                      value: value.clamp(0.01, 1.0),
+                                      minHeight: 6,
+                                      backgroundColor: Colors.grey.shade200,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                                  // Loading message (centered)
+                                  Text(
                                     splashController.loadingMessage,
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
-                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
                                   ),
-                                ),
-                                Text(
-                                  '${splashController.loadingProgress.toStringAsFixed(0)}%',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -342,43 +384,46 @@ class SplashScreenState extends State<SplashScreen> {
               },
             ),
 
-            // Skip button at the bottom
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                  child: Center(
-                    child: TextButton(
-                      onPressed: () {
-                        if (!_hasTriggeredRoute) {
-                          print('🎥 [SPLASH] Skip button pressed - hiding splash immediately');
-                          setState(() {
-                            _skipPressed = true;
-                            _hasTriggeredRoute = true;
-                            _videoCompleted = true;
-                          });
-                          // Stop video
-                          _videoController.pause();
-                          // Navigate
-                          _route();
-                        }
-                      },
-                      child: Text(
-                        'skip'.tr,
-                        style: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+            // Skip button at the bottom (only if enabled)
+            if (skipButtonDelaySeconds != null)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                    child: Center(
+                      child: AnimatedOpacity(
+                        opacity: _skipButtonEnabled ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 500),
+                        child: TextButton(
+                          onPressed: _skipButtonEnabled && !_hasTriggeredRoute ? () {
+                            print('🎥 [SPLASH] Skip button pressed - hiding splash immediately');
+                            setState(() {
+                              _skipPressed = true;
+                              _hasTriggeredRoute = true;
+                              _videoCompleted = true;
+                            });
+                            // Stop video
+                            _videoController.pause();
+                            // Navigate
+                            _route();
+                          } : null,
+                          child: Text(
+                            'skip'.tr,
+                            style: TextStyle(
+                              color: _skipButtonEnabled ? Colors.grey.shade400 : Colors.transparent,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         );
       },

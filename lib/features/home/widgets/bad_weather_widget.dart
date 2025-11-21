@@ -102,12 +102,23 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
       ),
       child: Row(children: [
 
-        Image.asset(Images.weather, height: 50, width: 50),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.cloud_outlined,
+            size: 32,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
         const SizedBox(width: Dimensions.paddingSizeSmall),
 
         Expanded(
           child: Text(
-            "Weather's rough out there! Delivery fees are up 25% to support our amazing delivery partners. All proceeds go directly to them. 💙",
+            "Weather's rough out there! Delivery fees are up 10% to support our amazing delivery partners. All proceeds go directly to them. 💙",
             style: robotoMedium.copyWith(
               fontSize: Dimensions.fontSizeDefault,
               color: Theme.of(context).textTheme.bodyLarge?.color,

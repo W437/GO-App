@@ -72,8 +72,13 @@ class SplashDataLoaderService {
 
       print('🚀 [SPLASH DATA LOADER] Starting comprehensive data load...');
 
+      // Show initial progress immediately
+      onProgress(1.0, 'Waking up the kitchen...');
+      await Future.delayed(const Duration(milliseconds: 50));
+
       // Step 1: Config (required first) - already loaded in splash, just verify
-      _updateProgress('config', 'Loading configuration...', onProgress);
+      _updateProgress('config', 'Getting everything ready...', onProgress);
+      await Future.delayed(const Duration(milliseconds: 100));
 
       // Config should already be loaded, but we'll verify
       if (Get.find<SplashController>().configModel == null) {
@@ -85,6 +90,10 @@ class SplashDataLoaderService {
       // Step 2: User Data (if logged in)
       if (Get.find<AuthController>().isLoggedIn()) {
         await _loadUserData(onProgress, onError, useCache);
+      } else {
+        // Guest user - skip to appropriate progress
+        _updateProgress('profile', 'Preparing your experience...', onProgress);
+        await Future.delayed(const Duration(milliseconds: 50));
       }
 
       // Step 3: Core Data (parallel)
@@ -96,9 +105,22 @@ class SplashDataLoaderService {
       // Step 5: Auth-dependent Data (if logged in)
       if (Get.find<AuthController>().isLoggedIn()) {
         await _loadAuthData(onProgress, onError, useCache);
+      } else {
+        // Guest user - smoothly progress to 100%
+        final guestMessages = [
+          'Almost there...',
+          'Plating your favorites...',
+          'Setting the table...',
+          'Adding final touches...',
+          'Taste testing everything...',
+        ];
+        for (var i = 0; i < 5; i++) {
+          await Future.delayed(const Duration(milliseconds: 100));
+          _updateProgress(['recently_viewed', 'order_again', 'notifications', 'orders', 'addresses'][i], guestMessages[i], onProgress);
+        }
       }
 
-      _updateProgress('cashback', 'Data loading complete!', onProgress);
+      _updateProgress('cashback', 'Bon appétit!', onProgress);
       print('✅ [SPLASH DATA LOADER] All data loaded successfully');
 
       return true;
@@ -124,14 +146,14 @@ class SplashDataLoaderService {
       await Future.wait([
         _loadWithRetry(
           'profile',
-          'Loading profile...',
+          'Getting to know you...',
           () => Get.find<ProfileController>().getUserInfo(),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'addresses',
-          'Loading addresses...',
+          'Finding your favorite spots...',
           () => Get.find<AddressController>().getAddressList(),
           onProgress,
           onError,
@@ -154,71 +176,78 @@ class SplashDataLoaderService {
     final dataSource = useCache ? DataSourceEnum.local : DataSourceEnum.client;
 
     try {
-      // Load all core data in parallel (limit to 5 concurrent to avoid overwhelming network)
-      await Future.wait([
-        _loadWithRetry(
-          'categories',
-          'Loading categories...',
-          () => Get.find<CategoryController>().getCategoryList(false, dataSource: dataSource),
-          onProgress,
-          onError,
-        ),
-        _loadWithRetry(
-          'banners',
-          'Loading banners...',
-          () => Get.find<HomeController>().getBannerList(false, dataSource: dataSource),
-          onProgress,
-          onError,
-        ),
-        _loadWithRetry(
-          'cuisines',
-          'Loading cuisines...',
-          () => Get.find<CuisineController>().getCuisineList(dataSource: dataSource),
-          onProgress,
-          onError,
-        ),
-        _loadWithRetry(
-          'advertisements',
-          'Loading advertisements...',
-          () => Get.find<AdvertisementController>().getAdvertisementList(),
-          onProgress,
-          onError,
-        ),
-        _loadWithRetry(
-          'stories',
-          'Loading stories...',
-          () => Get.find<StoryController>().getStories(reload: !useCache),
-          onProgress,
-          onError,
-        ),
-      ]);
+      // Load core data sequentially for visible progress
+      await _loadWithRetry(
+        'categories',
+        'Finding delicious options...',
+        () => Get.find<CategoryController>().getCategoryList(false, dataSource: dataSource),
+        onProgress,
+        onError,
+      );
+      await Future.delayed(const Duration(milliseconds: 50));
 
-      // Second batch
+      await _loadWithRetry(
+        'banners',
+        'Spicing things up...',
+        () => Get.find<HomeController>().getBannerList(false, dataSource: dataSource),
+        onProgress,
+        onError,
+      );
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      await _loadWithRetry(
+        'cuisines',
+        'Exploring cuisines...',
+        () => Get.find<CuisineController>().getCuisineList(dataSource: dataSource),
+        onProgress,
+        onError,
+      );
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      await _loadWithRetry(
+        'advertisements',
+        'Checking for deals...',
+        () => Get.find<AdvertisementController>().getAdvertisementList(),
+        onProgress,
+        onError,
+      );
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      await _loadWithRetry(
+        'stories',
+        'What\'s cooking today...',
+        () => Get.find<StoryController>().getStories(reload: !useCache),
+        onProgress,
+        onError,
+      );
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      // Load remaining in parallel (faster)
       await Future.wait([
         _loadWithRetry(
           'zones',
-          'Loading zones...',
+          'Mapping your neighborhood...',
           () => Get.find<LocationController>().getZoneList(),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'dine_in',
-          'Loading dine-in restaurants...',
+          'Finding dine-in spots...',
           () => Get.find<DineInController>().getDineInRestaurantList(1, false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'restaurants',
-          'Loading restaurants...',
+          'Hunting down the best spots...',
           () => Get.find<RestaurantController>().getRestaurantList(1, false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'campaigns',
-          'Loading campaigns...',
+          'Looking for surprises...',
           () => Get.find<CampaignController>().getItemCampaignList(false),
           onProgress,
           onError,
@@ -245,7 +274,7 @@ class SplashDataLoaderService {
     if (config.popularRestaurant == 1) {
       futures.add(_loadWithRetry(
         'popular_restaurants',
-        'Loading popular restaurants...',
+        'Finding crowd favorites...',
         () => Get.find<RestaurantController>().getPopularRestaurantList(false, 'all', false),
         onProgress,
         onError,
@@ -255,7 +284,7 @@ class SplashDataLoaderService {
     if (config.popularFood == 1) {
       futures.add(_loadWithRetry(
         'popular_products',
-        'Loading popular products...',
+        'Picking trending dishes...',
         () => Get.find<ProductController>().getPopularProductList(false, 'all', false),
         onProgress,
         onError,
@@ -265,7 +294,7 @@ class SplashDataLoaderService {
     if (config.newRestaurant == 1) {
       futures.add(_loadWithRetry(
         'latest_restaurants',
-        'Loading new restaurants...',
+        'Discovering new places...',
         () => Get.find<RestaurantController>().getLatestRestaurantList(false, 'all', false),
         onProgress,
         onError,
@@ -275,7 +304,7 @@ class SplashDataLoaderService {
     if (config.mostReviewedFoods == 1) {
       futures.add(_loadWithRetry(
         'reviewed_products',
-        'Loading reviewed products...',
+        'Reading reviews for you...',
         () => Get.find<ReviewController>().getReviewedProductList(false, 'all', false),
         onProgress,
         onError,
@@ -304,35 +333,35 @@ class SplashDataLoaderService {
       await Future.wait([
         _loadWithRetry(
           'recently_viewed',
-          'Loading recently viewed...',
+          'Remembering your favorites...',
           () => Get.find<RestaurantController>().getRecentlyViewedRestaurantList(false, 'all', false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'order_again',
-          'Loading order again...',
+          'Your usual order is ready...',
           () => Get.find<RestaurantController>().getOrderAgainRestaurantList(false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'notifications',
-          'Loading notifications...',
+          'Checking for updates...',
           () => Get.find<NotificationController>().getNotificationList(false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'orders',
-          'Loading orders...',
+          'Tracking your orders...',
           () => Get.find<OrderController>().getRunningOrders(1, notify: false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'cashback',
-          'Loading cashback offers...',
+          'Finding rewards for you...',
           () => Get.find<HomeController>().getCashBackOfferList(dataSource: useCache ? DataSourceEnum.local : DataSourceEnum.client),
           onProgress,
           onError,

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
@@ -62,6 +63,15 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
   static const double _categoryBarHeight = 50.0; // lane height; chips are slightly shorter
 
+  // Cart widget animation delay
+  bool _showCartWidget = false;
+  Timer? _cartWidgetTimer;
+  int _previousCartCount = 0;
+
+  // Cart widget bounce animation
+  late AnimationController _cartBounceController;
+  late Animation<double> _cartBounceAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -113,6 +123,30 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
         curve: Curves.easeOut,
       ),
     );
+
+    // Initialize cart bounce animation (same as logo bounce)
+    _cartBounceController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _cartBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.01)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.01, end: 0.995)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.995, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 45,
+      ),
+    ]).animate(_cartBounceController);
   }
 
   @override
@@ -121,6 +155,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     scrollController.dispose();
     _bounceController.dispose();
     _pressController.dispose();
+    _cartBounceController.dispose();
+    _cartWidgetTimer?.cancel();
     super.dispose();
   }
 
@@ -588,7 +624,70 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
 
       bottomNavigationBar: GetBuilder<CartController>(builder: (cartController) {
-          return cartController.cartList.isNotEmpty && !isDesktop ? BottomCartWidget(restaurantId: cartController.cartList[0].product!.restaurantId!, fromDineIn: widget.fromDineIn) : const SizedBox();
+          final currentCartCount = cartController.cartList.length;
+
+          // Detect when cart goes from empty to having items
+          if (currentCartCount > 0 && _previousCartCount == 0) {
+            // Cart just got its first item - start delay timer
+            _showCartWidget = false;
+            _cartWidgetTimer?.cancel();
+            _cartWidgetTimer = Timer(const Duration(seconds: 1), () {
+              if (mounted) {
+                setState(() {
+                  _showCartWidget = true;
+                });
+                // Trigger bounce after slide animation completes (500ms)
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (mounted) {
+                    _cartBounceController.forward(from: 0.0);
+                  }
+                });
+              }
+            });
+          } else if (currentCartCount == 0 && _previousCartCount > 0) {
+            // Cart just became empty - hide immediately
+            _showCartWidget = false;
+            _cartWidgetTimer?.cancel();
+          }
+
+          _previousCartCount = currentCartCount;
+
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              // Slide animation only
+              final offsetAnimation = Tween<Offset>(
+                begin: const Offset(0.0, 1.0), // Start from bottom
+                end: Offset.zero, // End at position
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic, // Smooth, fluid motion
+              ));
+
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+            child: _showCartWidget && cartController.cartList.isNotEmpty && !isDesktop
+                ? AnimatedBuilder(
+                    key: const ValueKey('cart-widget'),
+                    animation: _cartBounceAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _cartBounceAnimation.value,
+                        child: child,
+                      );
+                    },
+                    child: BottomCartWidget(
+                      restaurantId: cartController.cartList[0].product!.restaurantId!,
+                      fromDineIn: widget.fromDineIn,
+                    ),
+                  )
+                : const SizedBox(key: ValueKey('empty-cart')),
+          );
         })
     );
   }
