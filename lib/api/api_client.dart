@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:godelivery_user/api/api_checker.dart';
+import 'package:godelivery_user/config/environment.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
@@ -48,6 +49,7 @@ class ApiClient extends GetxService {
     Map<String, String> header = {};
     header.addAll({
       'Content-Type': 'application/json; charset=UTF-8',
+      'X-API-Key': Environment.apiKey,
       AppConstants.zoneId: zoneIDs != null ? jsonEncode(zoneIDs) : '',
       AppConstants.localizationKey: languageCode ?? AppConstants.languages[0].languageCode!,
       AppConstants.latitude: latitude ?? '',

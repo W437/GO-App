@@ -33,48 +33,11 @@ class CartDetailsWidget extends StatefulWidget {
 
 class _CartDetailsWidgetState extends State<CartDetailsWidget> {
   final ScrollController scrollController = ScrollController();
-  GlobalKey<ExpandableBottomSheetState> key = GlobalKey();
-  final GlobalKey _widgetKey = GlobalKey();
-  double _height = 0;
 
   @override
-  void initState() {
-    super.initState();
-    _initialBottomSheetShowHide();
-  }
-
-  void _initialBottomSheetShowHide() {
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (key.currentState != null) {
-        key.currentState!.expand();
-      }
-    }).then((_) {
-      Future.delayed(const Duration(seconds: 3), () {
-        if (key.currentState != null) {
-          key.currentState!.contract();
-        }
-      });
-    });
-  }
-
-  void _getExpandedBottomSheetHeight() {
-    if (_widgetKey.currentContext != null) {
-      final RenderBox renderBox = _widgetKey.currentContext!.findRenderObject() as RenderBox;
-      final size = renderBox.size;
-      setState(() {
-        _height = size.height;
-      });
-    }
-  }
-
-  void _onExpanded() {
-    _getExpandedBottomSheetHeight();
-  }
-
-  void _onContracted() {
-    setState(() {
-      _height = 0;
-    });
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override

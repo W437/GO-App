@@ -40,7 +40,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
     Get.find<CartController>().setAvailableIndex(-1, willUpdate: false);
     Get.find<CheckoutController>().setInstruction(-1, willUpdate: false);
     await Get.find<CartController>().getCartDataOnline();
-    
+
     // Fetch history for "Order again"
     Get.find<OrderController>().getHistoryOrders(1, notify: false);
 
@@ -55,6 +55,12 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
       }
       Get.find<RestaurantController>().getCartRestaurantSuggestedItemList(Get.find<CartController>().cartList[0].product!.restaurantId);
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override

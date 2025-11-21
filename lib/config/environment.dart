@@ -14,7 +14,7 @@ class Environment {
   // API Configuration
   static String get baseUrl => dotenv.env['BASE_URL'] ?? '';
   static String get webHostedUrl => dotenv.env['WEB_HOSTED_URL'] ?? '';
-
+  static String get apiKey => dotenv.env['API_KEY'] ?? '';
   // Firebase Configuration
   static String get firebaseApiKey => dotenv.env['FIREBASE_API_KEY'] ?? 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA';
   static String get firebaseAppId => dotenv.env['FIREBASE_APP_ID'] ?? '1:491987943015:android:fe79b69339834d5c8f1ec2';
