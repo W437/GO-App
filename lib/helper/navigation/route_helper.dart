@@ -16,6 +16,7 @@ import 'package:godelivery_user/features/checkout/screens/payment_screen.dart';
 import 'package:godelivery_user/features/checkout/screens/payment_webview_screen.dart';
 import 'package:godelivery_user/features/dine_in/screens/dine_in_restaurant_screen.dart';
 import 'package:godelivery_user/features/story/screens/story_viewer_screen.dart';
+import 'package:godelivery_user/features/mart/screens/mart_screen.dart';
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
 import 'package:godelivery_user/features/explore/screens/explore_screen.dart';
 import 'package:godelivery_user/features/game/screens/flappy_bird_game_screen.dart';
@@ -158,6 +159,7 @@ class RouteHelper {
   static const String flappyBirdGame = '/flappy-bird-game';
   static const String dineInRestaurant = '/dine-in-restaurant';
   static const String storyViewer = '/story-viewer';
+  static const String mart = '/mart';
 
   static String getInitialRoute({bool fromSplash = false}) => '$initial?from-splash=$fromSplash';
 
@@ -335,9 +337,10 @@ class RouteHelper {
   static String getFlappyBirdGameScreen() => flappyBirdGame;
   static String getDineInRestaurantScreen() => dineInRestaurant;
   static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
+  static String getMartRoute() => mart;
 
   static List<GetPage> routes = [
-    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 1, fromSplash: (Get.parameters['from-splash'] == 'true')))),
+    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true')))),
     GetPage(name: splash, page: () {
       NotificationBodyModel? data;
       DeepLinkBody? linkData;
@@ -397,9 +400,10 @@ class RouteHelper {
     }),
     GetPage(name: interest, page: () => const InterestScreen()),
     GetPage(name: main, page: () => getRoute(DashboardScreen(
-      pageIndex: Get.parameters['page'] == 'home' ? 1 : Get.parameters['page'] == 'favourite' ? 0
+      pageIndex: Get.parameters['page'] == 'home' ? 2 : Get.parameters['page'] == 'favourite' ? 0
           : Get.parameters['page'] == 'explore' ? 0
-          : Get.parameters['page'] == 'order' ? 2 : Get.parameters['page'] == 'menu' ? 3 : 1,
+          : Get.parameters['page'] == 'mart' ? 1
+          : Get.parameters['page'] == 'order' ? 3 : Get.parameters['page'] == 'menu' ? 4 : 2,
     ))),
     GetPage(name: forgotPassword, page: () => ForgetPassScreen()),
     /*GetPage(name: resetPassword, page: () => NewPassScreen(
@@ -622,6 +626,7 @@ class RouteHelper {
         initialIndex: args['initialIndex'],
       );
     }),
+    GetPage(name: mart, page: () => getRoute(const MartScreen())),
   ];
 
   static getRoute(Widget? navigateTo, {bool byPuss = false}) {

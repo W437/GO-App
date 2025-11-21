@@ -20,6 +20,7 @@ import 'package:godelivery_user/features/dashboard/widgets/running_order_view_wi
 import 'package:godelivery_user/features/favourite/screens/favourite_screen.dart';
 import 'package:godelivery_user/features/explore/screens/explore_screen.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
+import 'package:godelivery_user/features/mart/screens/mart_screen.dart';
 import 'package:godelivery_user/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -85,7 +86,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
 
     _pageController = PageController(initialPage: widget.pageIndex);
 
-    _screenKeys = List.generate(4, (_) => GlobalKey());
+    _screenKeys = List.generate(5, (_) => GlobalKey());
 
     _screens = [
       KeyedSubtree(
@@ -94,14 +95,18 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       ),
       KeyedSubtree(
         key: _screenKeys[1],
-        child: const HomeScreen(key: PageStorageKey('home')),
+        child: const MartScreen(key: PageStorageKey('mart')),
       ),
       KeyedSubtree(
         key: _screenKeys[2],
-        child: const OrderScreen(key: PageStorageKey('orders')),
+        child: const HomeScreen(key: PageStorageKey('home')),
       ),
       KeyedSubtree(
         key: _screenKeys[3],
+        child: const OrderScreen(key: PageStorageKey('orders')),
+      ),
+      KeyedSubtree(
+        key: _screenKeys[4],
         child: const MenuScreen(key: PageStorageKey('menu')),
       ),
     ];
@@ -154,8 +159,8 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       canPop: Navigator.canPop(context),
       onPopInvokedWithResult: (didPop, result) async{
         debugPrint('$_canExit');
-        if (_pageIndex != 1) {
-          _setPage(1);
+        if (_pageIndex != 2) {
+          _setPage(2);
         } else {
           if(_canExit) {
             if (GetPlatform.isAndroid) {
@@ -221,22 +226,28 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                     onTap: (details) => _setPage(0, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconPath: 'assets/image/ui/home_icon.png',
-                    label: 'Home',
+                    iconData: Icons.storefront_outlined,
+                    label: 'Mart',
                     isSelected: _pageIndex == 1,
                     onTap: (details) => _setPage(1, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconPath: 'assets/image/ui/orders_icon.png',
-                    label: 'Orders',
+                    iconPath: 'assets/image/ui/home_icon.png',
+                    label: 'Home',
                     isSelected: _pageIndex == 2,
                     onTap: (details) => _setPage(2, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconPath: 'assets/image/ui/profile_icon.png',
-                    label: 'Menu',
+                    iconPath: 'assets/image/ui/orders_icon.png',
+                    label: 'Orders',
                     isSelected: _pageIndex == 3,
                     onTap: (details) => _setPage(3, details.globalPosition),
+                  ),
+                  BottomNavItem(
+                    iconPath: 'assets/image/ui/profile_icon.png',
+                    label: 'Menu',
+                    isSelected: _pageIndex == 4,
+                    onTap: (details) => _setPage(4, details.globalPosition),
                   ),
                 ],
                       ),
