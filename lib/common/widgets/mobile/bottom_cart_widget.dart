@@ -115,11 +115,18 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
         if (currentCartCount > 0 && _previousCartCount > 0 && currentCartCount != _previousCartCount) {
           // Cart was updated (item added or removed)
           _updateBounceTimer?.cancel();
-          _updateBounceTimer = Timer(const Duration(milliseconds: 1500), () {
+
+          // Price bounces at 1500ms
+          Timer(const Duration(milliseconds: 1500), () {
             if (mounted) {
-              // Trigger both animations in parallel
-              _iconBounceController.forward(from: 0.0);
               _priceBounceController.forward(from: 0.0);
+            }
+          });
+
+          // Icon bounces at 1750ms (250ms later)
+          _updateBounceTimer = Timer(const Duration(milliseconds: 1750), () {
+            if (mounted) {
+              _iconBounceController.forward(from: 0.0);
             }
           });
         }
@@ -197,7 +204,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                                 ),
                                 child: Row(
                                   children: [
-                                    // Shopping bag icon with badge - animated
+                                    // Shopping bag icon - animated
                                     AnimatedBuilder(
                                       animation: _iconBounceAnimation,
                                       builder: (context, child) {
@@ -206,47 +213,35 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                                           child: child,
                                         );
                                       },
-                                      child: SizedBox(
-                                        width: 32,
-                                        height: 32,
-                                        child: Stack(
-                                          clipBehavior: Clip.none,
-                                          children: [
-                                            // Bag icon - centered
-                                            Center(
-                                              child: Icon(
-                                                Icons.shopping_bag,
-                                                color: Colors.white,
-                                                size: 26,
-                                              ),
-                                            ),
-                                            // Badge with count
-                                            Positioned(
-                                              right: -4,
-                                              top: -4,
-                                              child: Container(
-                                                padding: const EdgeInsets.all(4),
-                                                decoration: BoxDecoration(
-                                                  color: Theme.of(context).primaryColor,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: AnimatedTextTransition(
-                                                  value: cartController.cartList.length,
-                                                  delay: const Duration(milliseconds: 1500),
-                                                  style: robotoBold.copyWith(
-                                                    fontSize: 9,
-                                                    color: Colors.white,
-                                                    height: 1,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                      child: Icon(
+                                        Icons.shopping_bag,
+                                        color: Colors.white,
+                                        size: 26,
                                       ),
                                     ),
 
-                                    const SizedBox(width: Dimensions.paddingSizeDefault),
+                                    // Item count badge - no bounce (only text transition), overlaps icon
+                                    Transform.translate(
+                                      offset: const Offset(-6, 0),
+                                      child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: AnimatedTextTransition(
+                                        value: cartController.cartList.length,
+                                        delay: const Duration(milliseconds: 1500),
+                                        style: robotoBold.copyWith(
+                                          fontSize: 11,
+                                          color: Colors.white,
+                                          height: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    ),
+
+                                    const SizedBox(width: Dimensions.paddingSizeSmall),
 
                                     // Total price - animated with bounce
                                     AnimatedBuilder(

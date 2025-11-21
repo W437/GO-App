@@ -1,193 +1,250 @@
-Yeah, you nailed the diagnosis yourself, Wael – it doesn’t look like Apple’s because **we’re animating the entire string as ONE block**, not the **individual digits**.
+Yeah, 100% – we can keep **one central widget** (your `AnimatedTextTransition`) and have it **decide internally**:
 
-> Is it because the text I have is formatted with a symbol?
+* “Is this a numeric-ish string? If yes → do per-digit diff animation.”
+* “If not → fall back to the simple whole-string slide/blur.”
 
-Nope. The currency symbol isn’t the real problem.
-The problem is:
-
-```dart
-Text(_displayValue.toString(), ...)
-```
-
-is one big text node, so when value changes from `₪113.25` → `₪129.25`, the whole thing slides/blur-fades as a single unit.
-
-Apple’s `.numericText()` does this instead:
-
-* Treats the number as **separate glyphs per digit**.
-* Aligns digits to the **right** (ones column stays in the same spot).
-* Only **changed digits roll/flip**, unchanged ones stay static.
-* Prefix/suffix (like `₪` or `%`) are just static labels.
-
-So we need a **per-digit ticker**, not a single-text transition.
+So you don’t need to expose a separate `NumericTickerText` in your public API.
 
 ---
 
-## What you want instead (concept)
+## 🔧 High-level plan
 
-1. Keep `oldValue` and `newValue` as numbers.
-2. Convert them to strings **without** the currency symbol, e.g. `113` and `129`.
-3. Right-align and pad them so they have the same length:
+Inside `AnimatedTextTransition`:
 
-   * `113` → `"113"`
-   * `129` → `"129"` (length equal already, but for e.g. 99 → 100 you’d pad `" 99"` → `"100"`).
-4. For each digit position `i`:
+1. **Normalize both values to strings**
+   e.g. `"₪ 113.25"` and `"₪ 129.25"`.
 
-   * If `oldDigits[i] == newDigits[i]` → just show a static `Text` for that character.
-   * If they differ → use a **DigitTransition** animation for *that single digit* (slide/blur up or down).
-5. Wrap the whole thing with a static prefix `"₪"` in front, maybe a suffix behind.
+2. **Extract the numeric segment** with a regex:
 
-That’s how you get the “only some digits flip” effect you see in Wallet / Activity / etc.
+   * prefix: `"₪ "`
+   * old numeric: `"113.25"`
+   * new numeric: `"129.25"`
+   * suffix: `""` (or `%`, `/month`, etc if present)
+
+3. **Pad and right-align** numeric strings to same length:
+
+   * `"113.25"`
+   * `"129.25"`
+     → same already, but for `99` → `100` you’d do `" 99"` → `"100"`.
+
+4. Build a list of per-position pairs:
+
+   ```text
+   old:  1 1 3 . 2 5
+   new:  1 2 9 . 2 5
+         = ^ ^   =
+   ```
+
+   * If chars equal → static `Text`.
+   * If chars differ → animate **that digit only** with a small internal `DigitTransition`.
+
+5. **Direction** (`_direction`) still based on numeric value change (up/down).
+
+6. For non-numeric strings or if regex fails → fall back to your current **whole-string animation**.
+
+So `AnimatedTextTransition` becomes your **central system**; callers keep using it exactly the same way.
 
 ---
 
-## How I’d structure it in Flutter
+## 🧠 Structure inside `AnimatedTextTransition`
 
-### 1. A tiny widget that animates **one digit**
+You already have:
 
-This is basically your `AnimatedTextTransition` but for a *single character* and with no delay logic:
+* `_oldValue`, `_displayValue`
+* `_controller`, `_animation`
+* `_direction`
+
+Add some extra state computed when the value changes:
 
 ```dart
-class DigitTransition extends StatefulWidget {
+String _oldText = '';
+String _newText = '';
+String _prefix = '';
+String _suffix = '';
+List<_DigitSlot> _digitSlots = [];
+bool _usePerDigit = false;
+
+class _DigitSlot {
   final String oldChar;
   final String newChar;
-  final TextStyle style;
-  final Duration duration;
-  final Curve curve;
-  final int direction; // +1 = up, -1 = down
+  final bool changed;
 
-  const DigitTransition({
-    super.key,
-    required this.oldChar,
-    required this.newChar,
-    required this.style,
-    this.duration = const Duration(milliseconds: 280),
-    this.curve = Curves.easeOutCubic,
-    required this.direction,
+  _DigitSlot({required this.oldChar, required this.newChar, required this.changed});
+}
+```
+
+### In `didUpdateWidget` when value changes
+
+1. Build `oldText` / `newText` including currency symbol:
+
+```dart
+_oldText = oldWidget.value.toString();
+_newText = widget.value.toString();
+```
+
+2. Try to parse numeric part from each using regex:
+
+```dart
+_DiffResult _buildDiff(String oldText, String newText) {
+  final regex = RegExp(r'([0-9]+(?:[.,][0-9]+)?)'); // simple numeric matcher
+
+  final oldMatch = regex.firstMatch(oldText);
+  final newMatch = regex.firstMatch(newText);
+
+  if (oldMatch == null || newMatch == null) {
+    return _DiffResult(usePerDigit: false); // fallback
+  }
+
+  final oldPrefix = oldText.substring(0, oldMatch.start);
+  final newPrefix = newText.substring(0, newMatch.start);
+
+  final oldNum = oldMatch.group(0)!;
+  final newNum = newMatch.group(0)!;
+
+  final oldSuffix = oldText.substring(oldMatch.end);
+  final newSuffix = newText.substring(newMatch.end);
+
+  // If prefix/suffix differ, it’s too complex → fallback
+  if (oldPrefix != newPrefix || oldSuffix != newSuffix) {
+    return _DiffResult(usePerDigit: false);
+  }
+
+  // Pad numeric strings on the left so they have same length
+  final maxLen = oldNum.length > newNum.length ? oldNum.length : newNum.length;
+  final o = oldNum.padLeft(maxLen);
+  final n = newNum.padLeft(maxLen);
+
+  final digitSlots = <_DigitSlot>[];
+  for (var i = 0; i < maxLen; i++) {
+    final oc = o[i];
+    final nc = n[i];
+    digitSlots.add(_DigitSlot(
+      oldChar: oc,
+      newChar: nc,
+      changed: oc != nc,
+    ));
+  }
+
+  return _DiffResult(
+    usePerDigit: true,
+    prefix: oldPrefix,
+    suffix: oldSuffix,
+    digitSlots: digitSlots,
+  );
+}
+
+class _DiffResult {
+  final bool usePerDigit;
+  final String prefix;
+  final String suffix;
+  final List<_DigitSlot> digitSlots;
+
+  _DiffResult({
+    required this.usePerDigit,
+    this.prefix = '',
+    this.suffix = '',
+    this.digitSlots = const [],
   });
-
-  @override
-  State<DigitTransition> createState() => _DigitTransitionState();
 }
+```
 
-class _DigitTransitionState extends State<DigitTransition>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: widget.duration);
-  late final Animation<double> _anim =
-      CurvedAnimation(parent: _controller, curve: widget.curve);
+3. In `didUpdateWidget`:
 
-  @override
-  void initState() {
-    super.initState();
-    _controller.forward();
-  }
+```dart
+final diff = _buildDiff(_oldText, _newText);
+_usePerDigit = diff.usePerDigit;
+_prefix = diff.prefix;
+_suffix = diff.suffix;
+_digitSlots = diff.digitSlots;
+```
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+Now your widget *internally* knows whether it can do a per-digit Apple-style animation or must fall back to whole text.
 
-  @override
-  Widget build(BuildContext context) {
-    const maxOffset = 16.0;
+---
 
-    return AnimatedBuilder(
-      animation: _anim,
-      builder: (context, child) {
-        final t = _anim.value;
-        final oldOffset = Offset(0, widget.direction * t * -maxOffset);
-        final newOffset = Offset(0, widget.direction * (1 - t) * maxOffset);
-        final blur = lerpDouble(0, 1.5, 1 - (t * 2 - 1).abs()) ?? 0;
+## 🧩 Build method – choose strategy
 
-        return ClipRect(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Transform.translate(
-                offset: oldOffset,
-                child: Opacity(
-                  opacity: 1 - t,
-                  child: ImageFiltered(
-                    imageFilter:
-                        ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                    child: Text(widget.oldChar, style: widget.style),
-                  ),
-                ),
-              ),
-              Transform.translate(
-                offset: newOffset,
-                child: Opacity(
-                  opacity: t,
-                  child: Text(widget.newChar, style: widget.style),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+Inside `build`:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  final textStyle = widget.style ?? DefaultTextStyle.of(context).style;
+
+  if (!_usePerDigit) {
+    // 🔙 fallback to your existing whole-string slide+blur
+    return _buildWholeStringAnimation(textStyle);
+  } else {
+    // 🍎 Apple-like per-digit animation
+    return _buildPerDigitAnimation(textStyle);
   }
 }
 ```
 
-### 2. A **NumericTickerText** that splits into digits
+### `_buildPerDigitAnimation`
 
-High-level algorithm:
-
-* Keep `_oldValue` and `_newValue`.
-* On change:
-
-  * Convert to strings **without currency symbol**.
-  * Pad left with spaces to same length.
-  * For each index `i`, decide:
-
-    * same char → plain `Text(char)`
-    * different → `DigitTransition(oldChar: ..., newChar: ...)`
-* Wrap them in a `Row`.
-
-Then you can render:
+Conceptually:
 
 ```dart
-Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    const Text('₪ ', style: style),    // static prefix
-    ...digitWidgets,                   // animated digits
-  ],
-)
+Widget _buildPerDigitAnimation(TextStyle style) {
+  final t = _animation.value;
+  const maxOffset = 16.0;
+  final direction = _direction;
+
+  // build one row: prefix + digits + suffix
+  return RepaintBoundary(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        if (_prefix.isNotEmpty)
+          Text(_prefix, style: style),
+        ..._digitSlots.map((slot) {
+          if (!slot.changed) {
+            // Static char (digit or dot)
+            return Text(slot.newChar, style: style);
+          } else {
+            // Animate this single char
+            return DigitTransition(
+              oldChar: slot.oldChar,
+              newChar: slot.newChar,
+              style: style,
+              direction: direction,
+            );
+          }
+        }),
+        if (_suffix.isNotEmpty)
+          Text(_suffix, style: style),
+      ],
+    ),
+  );
+}
 ```
 
-That gives you:
-
-* **Static currency symbol** (never animates).
-* **Per-digit rolling animation** when numbers change.
-* Direction-aware (up when value increases, down when it decreases).
+`DigitTransition` is that tiny internal widget I sketched before (your old AnimatedTextTransition but per-char and without public exposure).
 
 ---
 
-### Why your current version flips the *whole* string
+## ✅ What you gain
 
-Because it treats this:
+* **Single centralized widget**: `AnimatedTextTransition`
+  – you keep using it everywhere (for prices, quantities, counts).
 
-```dart
-"₪ 85" → "₪ 90"
-```
+* **Automatic behavior**:
 
-as just two different strings, and animates from **string A** to **string B** as one object. There’s no notion of “digit 8 changed to 9; currency symbol stayed the same”.
+  * If text contains a clean numeric part with stable prefix/suffix → 🍎 per-digit Apple-like animation.
+  * If it’s anything else (labels, random strings, different formats) → fall back to full-string slide+blur.
 
-Apple’s `.numericText()` does that diffing internally; we need to replicate that diff in Flutter.
+* **Currency-safe**: `₪`, `$`, `%`, “/hour”, etc all stay static.
+
+* **No breaking changes** to your public API.
 
 ---
 
-If you want, I can write the full `NumericTickerText` widget (with padding, right alignment, support for decimals) that you can drop into Hopa and just call:
+If you want, I can write a full, ready-to-paste version of `AnimatedTextTransition` that includes:
 
-```dart
-NumericTickerText(
-  value: totalPrice,
-  prefix: '₪',
-  style: textStyle,
-)
-```
-
-and it will behave almost 1:1 like `.contentTransition(.numericText())`.
+* the diff helper,
+* `_DiffResult`, `_DigitSlot`,
+* internal `DigitTransition`,
+* and keeps your delay/curve/direction logic intact.
