@@ -121,21 +121,36 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     scrollController.dispose();
     _bounceController.dispose();
     _pressController.dispose();
-    Get.find<RestaurantController>().makeEmptyRestaurant(willUpdate: false);
     super.dispose();
   }
 
   Future<void> _initDataCall() async {
-    if(Get.find<RestaurantController>().isSearching) {
-      Get.find<RestaurantController>().changeSearchStatus(isUpdate: false);
+    final restController = Get.find<RestaurantController>();
+    final categoryController = Get.find<CategoryController>();
+    final couponController = Get.find<CouponController>();
+
+    if(restController.isSearching) {
+      restController.changeSearchStatus(isUpdate: false);
     }
-    await Get.find<RestaurantController>().getRestaurantDetails(Restaurant(id: widget.restaurant!.id), slug: widget.slug);
-    if(Get.find<CategoryController>().categoryList == null) {
-      Get.find<CategoryController>().getCategoryList(true);
+
+    // Check if we already have cached data for this restaurant
+    final bool isSameRestaurant = restController.restaurant?.id == widget.restaurant!.id;
+    final bool hasProducts = restController.restaurantProducts != null;
+
+    // Always get restaurant details (lightweight)
+    await restController.getRestaurantDetails(Restaurant(id: widget.restaurant!.id), slug: widget.slug);
+
+    // Only fetch categories if not loaded
+    if(categoryController.categoryList == null) {
+      categoryController.getCategoryList(true);
     }
-    Get.find<CouponController>().getRestaurantCouponList(restaurantId: widget.restaurant!.id ?? Get.find<RestaurantController>().restaurant!.id!);
-    Get.find<RestaurantController>().getRestaurantRecommendedItemList(widget.restaurant!.id ?? Get.find<RestaurantController>().restaurant!.id!, false);
-    Get.find<RestaurantController>().getRestaurantProductList(widget.restaurant!.id ?? Get.find<RestaurantController>().restaurant!.id!, 1, 'all', false);
+
+    // Only fetch data if we don't have cached data for this restaurant
+    if (!isSameRestaurant || !hasProducts) {
+      couponController.getRestaurantCouponList(restaurantId: widget.restaurant!.id ?? restController.restaurant!.id!);
+      restController.getRestaurantRecommendedItemList(widget.restaurant!.id ?? restController.restaurant!.id!, false);
+      restController.getRestaurantProductList(widget.restaurant!.id ?? restController.restaurant!.id!, 1, 'all', false);
+    }
   }
 
   void _onScroll() {
