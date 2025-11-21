@@ -46,6 +46,7 @@ import 'package:godelivery_user/features/restaurant/screens/all_restaurant_scree
 import 'package:godelivery_user/features/restaurant/screens/campaign_screen.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_product_search_screen.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
+import 'package:godelivery_user/features/restaurant/screens/restaurant_details_screen.dart';
 import 'package:godelivery_user/features/review/domain/models/rate_review_model.dart';
 import 'package:godelivery_user/features/review/screens/rate_review_screen.dart';
 import 'package:godelivery_user/features/review/screens/review_screen.dart';
@@ -109,6 +110,7 @@ class RouteHelper {
   static const String resetPassword = '/reset-password';
   static const String search = '/search';
   static const String restaurant = '/restaurant';
+  static const String restaurantDetails = '/restaurant-details';
   static const String orderDetails = '/order-details';
   static const String profile = '/profile';
   static const String updateProfile = '/update-profile';
@@ -230,6 +232,10 @@ class RouteHelper {
       meta.keywords(keywords: 'Flutter, Dart, SEO, Meta, Web');
     }
     return '$restaurant?id=$id&from_dine_in=$fromDinIn';
+  }
+  static String getRestaurantDetailsRoute(Restaurant restaurant) {
+    String data = base64Url.encode(utf8.encode(jsonEncode(restaurant.toJson())));
+    return '$restaurantDetails?restaurant=$data';
   }
   static String getOrderDetailsRoute(int? orderID, {bool? fromOffline, String? contactNumber, bool fromGuestTrack = false, bool fromNotification = false, bool? fromDineIn}) {
     return '$orderDetails?id=$orderID&from_offline=$fromOffline&contact=$contactNumber&from_guest_track=$fromGuestTrack&from_notification=$fromNotification&from_dine_in=$fromDineIn';
@@ -420,6 +426,9 @@ class RouteHelper {
         slug: Get.parameters['slug'] ?? '', fromDineIn: Get.parameters['from_dine_in'] == 'true',
       ), byPuss: Get.parameters['slug']?.isNotEmpty ?? false);
     }),
+    GetPage(name: restaurantDetails, page: () => getRoute(RestaurantDetailsScreen(
+      restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
+    ))),
     GetPage(name: orderDetails, page: () {
       return getRoute(Get.arguments ?? OrderDetailsScreen(
         orderId: int.parse(Get.parameters['id'] ?? '0'),

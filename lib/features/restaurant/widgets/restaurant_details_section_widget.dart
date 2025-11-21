@@ -163,6 +163,23 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: Dimensions.paddingSizeSmall),
 
+                      // Details Button
+                      InkWell(
+                        onTap: () {
+                          Get.toNamed(RouteHelper.getRestaurantDetailsRoute(restaurant));
+                        },
+                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                          ),
+                          child: Icon(Icons.info_outline, color: Theme.of(context).primaryColor, size: 24),
+                        ),
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
+
                       // Share Button
                       Container(
                         padding: const EdgeInsets.all(12),
