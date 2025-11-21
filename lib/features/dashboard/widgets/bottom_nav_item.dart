@@ -85,7 +85,7 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                               colorFilter: ColorFilter.mode(
                                 widget.isSelected
                                     ? Theme.of(context).primaryColor
-                                    : Theme.of(context).disabledColor.withOpacity(0.3),
+                                    : Theme.of(context).hintColor.withValues(alpha: 0.4),
                                 BlendMode.srcIn,
                               ),
                               child: Image.asset(
@@ -98,7 +98,7 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                               widget.iconData!,
                               color: widget.isSelected
                                   ? Theme.of(context).primaryColor
-                                  : Theme.of(context).disabledColor.withOpacity(0.3),
+                                  : Theme.of(context).hintColor.withValues(alpha: 0.4),
                               size: 28.8,
                             ),
                     ),
@@ -111,7 +111,10 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                   widget.label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                    fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: widget.isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).hintColor.withValues(alpha: 0.45),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
