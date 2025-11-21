@@ -366,6 +366,8 @@ class RestaurantController extends GetxController implements GetxService {
 
   void makeEmptyRestaurant({bool willUpdate = true}) {
     _restaurant = null;
+    _restaurantProducts = null;
+    _categoryList = null;
     if(willUpdate) {
       update();
     }

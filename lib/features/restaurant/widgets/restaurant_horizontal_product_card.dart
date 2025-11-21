@@ -22,15 +22,31 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
 
     return CustomInkWellWidget(
       onTap: () {
-        ResponsiveHelper.isMobile(context)
-            ? Get.bottomSheet(
-                ProductBottomSheetWidget(product: product, inRestaurantPage: true),
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-              )
-            : Get.dialog(
-                Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
-              );
+        if (ResponsiveHelper.isMobile(context)) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            useRootNavigator: true,
+            builder: (context) => TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.95, end: 1.0),
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.bottomCenter,
+                  child: child,
+                );
+              },
+              child: ProductBottomSheetWidget(product: product, inRestaurantPage: true),
+            ),
+          );
+        } else {
+          Get.dialog(
+            Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
+          );
+        }
       },
       radius: Dimensions.radiusDefault,
       padding: EdgeInsets.zero,
@@ -39,12 +55,18 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(0, 1),
+              color: Color.fromRGBO(0, 0, 0, 0.1),
+              blurRadius: 6,
+              spreadRadius: -1,
+              offset: Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.06),
+              blurRadius: 4,
+              spreadRadius: -1,
+              offset: Offset(0, 2),
             )
           ],
         ),
@@ -69,11 +91,14 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   // Likes & Price Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,6 +138,7 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           ],
         ),
       ),

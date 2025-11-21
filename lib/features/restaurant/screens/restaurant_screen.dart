@@ -121,6 +121,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     scrollController.dispose();
     _bounceController.dispose();
     _pressController.dispose();
+    Get.find<RestaurantController>().makeEmptyRestaurant(willUpdate: false);
     super.dispose();
   }
 
@@ -391,49 +392,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   }
 
   List<Widget> _buildMenuShimmer() {
-    return List.generate(3, (categoryIndex) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraLarge),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Category title shimmer
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-              child: Container(
-                height: 20,
-                width: 150,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                ),
-              ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
-            // Product cards shimmer
-            SizedBox(
-              height: 250,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                itemCount: 3,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 180,
-                    margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+    return [
+      SizedBox(
+        height: 220,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).hintColor,
+          ),
         ),
-      );
-    });
+      ),
+    ];
   }
 
   @override
