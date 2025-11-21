@@ -141,7 +141,7 @@ class CategoryProductScreenState extends State<CategoryProductScreen> with Ticke
               ),
 
               IconButton(
-                onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+                onPressed: () => RouteHelper.showCartModal(context),
                 icon: CartWidget(color: Theme.of(context).primaryColor, size: 25),
               ),
 

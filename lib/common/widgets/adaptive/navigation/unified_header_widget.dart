@@ -7,6 +7,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/cart/cart_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/features/cart/screens/cart_screen.dart';
 
 class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -83,7 +84,22 @@ class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget
         actions: [
           if (showCart)
             IconButton(
-              onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  useSafeArea: true,
+                  builder: (context) => Container(
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    child: const CartScreen(fromNav: false),
+                  ),
+                );
+              },
               icon: CartWidget(
                 color: Theme.of(context).primaryColor,
                 size: 24,

@@ -18,7 +18,7 @@ void showCartSnackBarWidget() {
     duration: const Duration(seconds: 3),
     backgroundColor: Colors.green,
     action: SnackBarAction(label: 'view_cart'.tr, textColor: Colors.white, onPressed: () {
-      Get.toNamed(RouteHelper.getCartRoute());
+      RouteHelper.showCartModal(Get.context!);
     }),
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),

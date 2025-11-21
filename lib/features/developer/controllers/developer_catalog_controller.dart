@@ -142,7 +142,7 @@ class DeveloperCatalogController extends GetxController {
 
       // Cart screen
       case 'lib/features/cart/screens/cart_screen.dart':
-        Get.toNamed(RouteHelper.getCartRoute());
+        RouteHelper.showCartModal(Get.context!);
         break;
 
       // Category screens

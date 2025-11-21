@@ -66,7 +66,7 @@ class NotificationHelper {
       if(message.data['type'] == AppConstants.demoResetTopic) {
         Get.dialog(const DemoResetDialogWidget(), barrierDismissible: false);
       }else if(message.data['type'] == 'maintenance'){
-        Get.find<SplashController>().getConfigData(handleMaintenanceMode: true);
+        Get.find<SplashController>().getConfigData(handleMaintenanceMode: true, shouldNavigate: false);
       }
       if(message.data['type'] == 'message' && Get.currentRoute.startsWith(RouteHelper.messages)) {
         if(Get.find<AuthController>().isLoggedIn()) {

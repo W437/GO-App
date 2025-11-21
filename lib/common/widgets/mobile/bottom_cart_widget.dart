@@ -60,12 +60,8 @@ class BottomCartWidget extends StatelessWidget {
                   children: [
                 // Floating button
                 InkWell(
-                  onTap: () async {
-                    await Get.toNamed(RouteHelper.getCartRoute(fromDineIn: fromDineIn));
-                    Get.find<RestaurantController>().makeEmptyRestaurant();
-                    if(restaurantId != null) {
-                      Get.find<RestaurantController>().getRestaurantDetails(Restaurant(id: restaurantId));
-                    }
+                  onTap: () {
+                    RouteHelper.showCartModal(context);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

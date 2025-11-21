@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/images/image_viewer_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_found_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
@@ -159,6 +160,25 @@ class RouteHelper {
   static const String storyViewer = '/story-viewer';
 
   static String getInitialRoute({bool fromSplash = false}) => '$initial?from-splash=$fromSplash';
+
+  /// Show cart as a full-screen modal bottom sheet
+  static void showCartModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: const CartScreen(fromNav: false),
+      ),
+    );
+  }
+
   static String getSplashRoute(NotificationBodyModel? body, DeepLinkBody? linkBody) {
     String data = 'null';
     String linkData = 'null';
@@ -317,7 +337,7 @@ class RouteHelper {
   static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
 
   static List<GetPage> routes = [
-    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true')))),
+    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 1, fromSplash: (Get.parameters['from-splash'] == 'true')))),
     GetPage(name: splash, page: () {
       NotificationBodyModel? data;
       DeepLinkBody? linkData;
@@ -377,9 +397,9 @@ class RouteHelper {
     }),
     GetPage(name: interest, page: () => const InterestScreen()),
     GetPage(name: main, page: () => getRoute(DashboardScreen(
-      pageIndex: Get.parameters['page'] == 'home' ? 2 : Get.parameters['page'] == 'favourite' ? 0
+      pageIndex: Get.parameters['page'] == 'home' ? 1 : Get.parameters['page'] == 'favourite' ? 0
           : Get.parameters['page'] == 'explore' ? 0
-          : Get.parameters['page'] == 'cart' ? 1 : Get.parameters['page'] == 'order' ? 3 : Get.parameters['page'] == 'menu' ? 4 : 2,
+          : Get.parameters['page'] == 'order' ? 2 : Get.parameters['page'] == 'menu' ? 3 : 1,
     ))),
     GetPage(name: forgotPassword, page: () => ForgetPassScreen()),
     /*GetPage(name: resetPassword, page: () => NewPassScreen(

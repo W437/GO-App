@@ -33,6 +33,39 @@ class CartDetailsWidget extends StatefulWidget {
 
 class _CartDetailsWidgetState extends State<CartDetailsWidget> {
   final ScrollController scrollController = ScrollController();
+  GlobalKey<ExpandableBottomSheetState> key = GlobalKey();
+  final GlobalKey _widgetKey = GlobalKey();
+  double _height = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Removed auto-expand/contract animation to prevent navigation loop
+  }
+
+  void _getExpandedBottomSheetHeight() {
+    if (_widgetKey.currentContext != null && mounted) {
+      final RenderBox renderBox = _widgetKey.currentContext!.findRenderObject() as RenderBox;
+      final size = renderBox.size;
+      setState(() {
+        _height = size.height;
+      });
+    }
+  }
+
+  void _onExpanded() {
+    if (mounted) {
+      _getExpandedBottomSheetHeight();
+    }
+  }
+
+  void _onContracted() {
+    if (mounted) {
+      setState(() {
+        _height = 0;
+      });
+    }
+  }
 
   @override
   void dispose() {

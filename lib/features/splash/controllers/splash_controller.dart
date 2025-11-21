@@ -96,7 +96,7 @@ class SplashController extends GetxController implements GetxService {
   //   }
   // }
 
-  Future<void> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local, NotificationBodyModel? notificationBody, bool fromMainFunction = false, bool fromDemoReset = false}) async {
+  Future<void> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local, NotificationBodyModel? notificationBody, bool fromMainFunction = false, bool fromDemoReset = false, bool shouldNavigate = true}) async {
     _hasConnection = true;
     _savedCookiesData = getCookiesData();
     Response response;
@@ -104,22 +104,22 @@ class SplashController extends GetxController implements GetxService {
       response = await splashServiceInterface.getConfigData(source: DataSourceEnum.local);
       // If local cache exists, handle it and fetch fresh data in background
       if(response.statusCode == 200) {
-        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
-        // Refresh in background without blocking
-        getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client);
+        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, shouldNavigate: shouldNavigate, notificationBody: notificationBody, linkBody: null);
+        // Refresh in background without blocking (but don't navigate again!)
+        getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client, shouldNavigate: false);
       } else {
         // No cache - must wait for API response
         response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
-        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
+        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, shouldNavigate: shouldNavigate, notificationBody: notificationBody, linkBody: null);
       }
     } else {
       response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
-      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
+      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, shouldNavigate: shouldNavigate, notificationBody: notificationBody, linkBody: null);
     }
 
   }
 
-  void _handleConfigResponse(Response response, bool handleMaintenanceMode, bool fromMainFunction, bool fromDemoReset, {required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
+  void _handleConfigResponse(Response response, bool handleMaintenanceMode, bool fromMainFunction, bool fromDemoReset, {required bool shouldNavigate, required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
     if(response.statusCode == 200) {
       _configModel = splashServiceInterface.prepareConfigData(response);
       if(_configModel != null) {
@@ -140,22 +140,27 @@ class SplashController extends GetxController implements GetxService {
         }
         print('═══════════════════════════════════════════════════════════');
 
-        if(!GetPlatform.isWeb){
-          bool isMaintenanceMode = _configModel!.maintenanceMode!;
-          bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
+        // Only navigate if this is the initial load, not background refresh
+        print('🚦 [NAVIGATION CHECK] shouldNavigate: $shouldNavigate');
+        if(shouldNavigate) {
+          print('✅ [NAVIGATION] Proceeding with navigation');
+          if(!GetPlatform.isWeb){
+            bool isMaintenanceMode = _configModel!.maintenanceMode!;
+            bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
 
-          if (isInMaintenance && handleMaintenanceMode) {
-            Get.offNamed(RouteHelper.getUpdateRoute(false));
-          } else if (handleMaintenanceMode && ((Get.currentRoute.contains(RouteHelper.update) && !isMaintenanceMode) || !isInMaintenance)) {
-            Get.offNamed(RouteHelper.getInitialRoute());
+            if (isInMaintenance && handleMaintenanceMode) {
+              Get.offNamed(RouteHelper.getUpdateRoute(false));
+            } else if (handleMaintenanceMode && ((Get.currentRoute.contains(RouteHelper.update) && !isMaintenanceMode) || !isInMaintenance)) {
+              Get.offNamed(RouteHelper.getInitialRoute());
+            }
           }
-        }
-        if(fromMainFunction) {
-          _mainConfigRouting();
-        } else if (fromDemoReset) {
-          Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
-        } else {
-          route(notificationBody: notificationBody, linkBody: linkBody);
+          if(fromMainFunction) {
+            _mainConfigRouting();
+          } else if (fromDemoReset) {
+            Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
+          } else {
+            route(notificationBody: notificationBody, linkBody: linkBody);
+          }
         }
         _onRemoveLoader();
       }

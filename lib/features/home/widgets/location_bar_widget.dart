@@ -247,7 +247,7 @@ class _CartButton extends StatelessWidget {
           children: [
             RoundedIconButtonWidget(
               icon: Icons.shopping_bag_outlined,
-              onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+              onPressed: () => RouteHelper.showCartModal(context),
               size: 44,
               iconSize: 22,
               backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.08),

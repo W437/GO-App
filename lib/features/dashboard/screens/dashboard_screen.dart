@@ -85,7 +85,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
 
     _pageController = PageController(initialPage: widget.pageIndex);
 
-    _screenKeys = List.generate(5, (_) => GlobalKey());
+    _screenKeys = List.generate(4, (_) => GlobalKey());
 
     _screens = [
       KeyedSubtree(
@@ -94,25 +94,19 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       ),
       KeyedSubtree(
         key: _screenKeys[1],
-        child: const CartScreen(fromNav: true, key: PageStorageKey('cart')),
-      ),
-      KeyedSubtree(
-        key: _screenKeys[2],
         child: const HomeScreen(key: PageStorageKey('home')),
       ),
       KeyedSubtree(
-        key: _screenKeys[3],
+        key: _screenKeys[2],
         child: const OrderScreen(key: PageStorageKey('orders')),
       ),
       KeyedSubtree(
-        key: _screenKeys[4],
+        key: _screenKeys[3],
         child: const MenuScreen(key: PageStorageKey('menu')),
       ),
     ];
 
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {});
-    });
+    // Removed useless 1-second timer that was causing modal to close
 
     _navigationCallback = _onExternalPageRequest;
     Get.find<DashboardController>().registerNavigationCallback(_navigationCallback);
@@ -160,8 +154,8 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       canPop: Navigator.canPop(context),
       onPopInvokedWithResult: (didPop, result) async{
         debugPrint('$_canExit');
-        if (_pageIndex != 2) {
-          _setPage(2);
+        if (_pageIndex != 1) {
+          _setPage(1);
         } else {
           if(_canExit) {
             if (GetPlatform.isAndroid) {
@@ -227,28 +221,22 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
                     onTap: (details) => _setPage(0, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconPath: 'assets/image/ui/cart_icon.png',
-                    label: 'Cart',
+                    iconPath: 'assets/image/ui/home_icon.png',
+                    label: 'Home',
                     isSelected: _pageIndex == 1,
                     onTap: (details) => _setPage(1, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconPath: 'assets/image/ui/home_icon.png',
-                    label: 'Home',
+                    iconPath: 'assets/image/ui/orders_icon.png',
+                    label: 'Orders',
                     isSelected: _pageIndex == 2,
                     onTap: (details) => _setPage(2, details.globalPosition),
                   ),
                   BottomNavItem(
-                    iconPath: 'assets/image/ui/orders_icon.png',
-                    label: 'Orders',
-                    isSelected: _pageIndex == 3,
-                    onTap: (details) => _setPage(3, details.globalPosition),
-                  ),
-                  BottomNavItem(
                     iconPath: 'assets/image/ui/profile_icon.png',
                     label: 'Menu',
-                    isSelected: _pageIndex == 4,
-                    onTap: (details) => _setPage(4, details.globalPosition),
+                    isSelected: _pageIndex == 3,
+                    onTap: (details) => _setPage(3, details.globalPosition),
                   ),
                 ],
                       ),
