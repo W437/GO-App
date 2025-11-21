@@ -1,0 +1,155 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
+
+class CartSummaryCard extends StatelessWidget {
+  final String restaurantName;
+  final String restaurantLogo;
+  final String? deliveryTime;
+  final double subtotal;
+  final List<String> itemImages; // Or item names if images not available
+  final VoidCallback onViewCart;
+  final String buttonText;
+  final bool isOffline;
+
+  const CartSummaryCard({
+    super.key,
+    required this.restaurantName,
+    required this.restaurantLogo,
+    this.deliveryTime,
+    required this.subtotal,
+    required this.itemImages,
+    required this.onViewCart,
+    this.buttonText = 'View cart',
+    this.isOffline = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  child: CustomImageWidget(
+                    image: restaurantLogo,
+                    height: 50,
+                    width: 50,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        restaurantName,
+                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isOffline ? 'Temporarily offline' : 'Delivery in $deliveryTime',
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeSmall,
+                          color: isOffline ? Theme.of(context).disabledColor : Theme.of(context).hintColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.more_horiz, color: Theme.of(context).primaryColor), // Menu icon placeholder
+              ],
+            ),
+          ),
+
+          const Divider(height: 1, thickness: 1),
+
+          // Items Preview
+          if (itemImages.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: SizedBox(
+                height: 60,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: itemImages.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: Dimensions.paddingSizeSmall),
+                  itemBuilder: (context, index) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                      child: CustomImageWidget(
+                        image: itemImages[index],
+                        height: 60,
+                        width: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+          // Subtotal
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+            child: Row(
+              children: [
+                Text(
+                  'Item subtotal: ',
+                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                ),
+                Text(
+                  PriceConverter.convertPrice(subtotal),
+                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: Dimensions.paddingSizeDefault),
+
+          // Action Button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault, 0, Dimensions.paddingSizeDefault, Dimensions.paddingSizeDefault),
+            child: CustomButtonWidget(
+              buttonText: buttonText,
+              onPressed: onViewCart,
+              height: 45,
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              textColor: Theme.of(context).primaryColor,
+              radius: Dimensions.radiusDefault,
+              isBold: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
