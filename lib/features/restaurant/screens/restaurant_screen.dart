@@ -132,12 +132,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
     _cartBounceAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.01)
+        tween: Tween<double>(begin: 1.0, end: 1.015)
             .chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 30,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.01, end: 0.995)
+        tween: Tween<double>(begin: 1.015, end: 0.995)
             .chain(CurveTween(curve: Curves.easeInOutCubic)),
         weight: 25,
       ),
@@ -636,12 +636,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                 setState(() {
                   _showCartWidget = true;
                 });
-                // Trigger bounce after slide animation completes (500ms)
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (mounted) {
-                    _cartBounceController.forward(from: 0.0);
-                  }
-                });
+                // Trigger bounce immediately (runs simultaneously with slide)
+                _cartBounceController.forward(from: 0.0);
               }
             });
           } else if (currentCartCount == 0 && _previousCartCount > 0) {

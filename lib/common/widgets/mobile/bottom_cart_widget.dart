@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
@@ -11,15 +12,84 @@ import 'package:get/get.dart';
 /// Bottom cart widget displaying cart summary and checkout button
 /// Shows cart item count, total price, and navigation to cart screen
 
-class BottomCartWidget extends StatelessWidget {
+class BottomCartWidget extends StatefulWidget {
   final int? restaurantId;
   final bool fromDineIn;
   const BottomCartWidget({super.key, this.restaurantId, this.fromDineIn = false});
 
   @override
+  State<BottomCartWidget> createState() => _BottomCartWidgetState();
+}
+
+class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _iconBounceController;
+  late Animation<double> _iconBounceAnimation;
+  Timer? _updateBounceTimer;
+  int _previousCartCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize icon bounce animation (subtle bounce for updates)
+    _iconBounceController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _iconBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.08)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.08, end: 0.98)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.02)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 20,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
+      ),
+    ]).animate(_iconBounceController);
+
+    // Initialize previous cart count
+    final cartController = Get.find<CartController>();
+    _previousCartCount = cartController.cartList.length;
+  }
+
+  @override
+  void dispose() {
+    _iconBounceController.dispose();
+    _updateBounceTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GetBuilder<CartController>(builder: (cartController) {
         double deliveryCharge = Get.find<RestaurantController>().restaurant?.deliveryFee ?? 0;
+        final currentCartCount = cartController.cartList.length;
+
+        // Detect cart updates (count changed and cart is not empty)
+        if (currentCartCount > 0 && _previousCartCount > 0 && currentCartCount != _previousCartCount) {
+          // Cart was updated (item added or removed)
+          _updateBounceTimer?.cancel();
+          _updateBounceTimer = Timer(const Duration(milliseconds: 1500), () {
+            if (mounted) {
+              _iconBounceController.forward(from: 0.0);
+            }
+          });
+        }
+
+        _previousCartCount = currentCartCount;
 
         return Stack(
           children: [
@@ -92,42 +162,51 @@ class BottomCartWidget extends StatelessWidget {
                                 ),
                                 child: Row(
                                   children: [
-                                    // Shopping bag icon with badge
-                                    SizedBox(
-                                      width: 32,
-                                      height: 32,
-                                      child: Stack(
-                                        clipBehavior: Clip.none,
-                                        children: [
-                                          // Bag icon - centered
-                                          Center(
-                                            child: Icon(
-                                              Icons.shopping_bag,
-                                              color: Colors.white,
-                                              size: 26,
-                                            ),
-                                          ),
-                                          // Badge with count
-                                          Positioned(
-                                            right: -4,
-                                            top: -4,
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context).primaryColor,
-                                                shape: BoxShape.circle,
+                                    // Shopping bag icon with badge - animated
+                                    AnimatedBuilder(
+                                      animation: _iconBounceAnimation,
+                                      builder: (context, child) {
+                                        return Transform.scale(
+                                          scale: _iconBounceAnimation.value,
+                                          child: child,
+                                        );
+                                      },
+                                      child: SizedBox(
+                                        width: 32,
+                                        height: 32,
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            // Bag icon - centered
+                                            Center(
+                                              child: Icon(
+                                                Icons.shopping_bag,
+                                                color: Colors.white,
+                                                size: 26,
                                               ),
-                                              child: Text(
-                                                '${cartController.cartList.length}',
-                                                style: robotoBold.copyWith(
-                                                  fontSize: 9,
-                                                  color: Colors.white,
-                                                  height: 1,
+                                            ),
+                                            // Badge with count
+                                            Positioned(
+                                              right: -4,
+                                              top: -4,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).primaryColor,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Text(
+                                                  '${cartController.cartList.length}',
+                                                  style: robotoBold.copyWith(
+                                                    fontSize: 9,
+                                                    color: Colors.white,
+                                                    height: 1,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
 

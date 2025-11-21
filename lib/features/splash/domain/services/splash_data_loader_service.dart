@@ -72,55 +72,40 @@ class SplashDataLoaderService {
 
       print('🚀 [SPLASH DATA LOADER] Starting comprehensive data load...');
 
-      // Show initial progress immediately
-      onProgress(1.0, 'Waking up the kitchen...');
-      await Future.delayed(const Duration(milliseconds: 50));
+      // Message 1: Start
+      onProgress(5.0, 'Waking up the kitchen...');
 
-      // Step 1: Config (required first) - already loaded in splash, just verify
-      _updateProgress('config', 'Getting everything ready...', onProgress);
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // Config should already be loaded, but we'll verify
+      // Config verification (no message)
       if (Get.find<SplashController>().configModel == null) {
         print('❌ [SPLASH DATA LOADER] Config not available!');
         onError('Failed to load configuration');
         return false;
       }
 
-      // Step 2: User Data (if logged in)
+      // Load user data silently (if logged in)
       if (Get.find<AuthController>().isLoggedIn()) {
         await _loadUserData(onProgress, onError, useCache);
-      } else {
-        // Guest user - skip to appropriate progress
-        _updateProgress('profile', 'Preparing your experience...', onProgress);
-        await Future.delayed(const Duration(milliseconds: 50));
       }
 
-      // Step 3: Core Data (parallel)
+      // Message 2: Loading core data
+      onProgress(20.0, 'Finding delicious options...');
       await _loadCoreData(onProgress, onError, useCache);
 
-      // Step 4: Conditional Data (config-dependent)
+      // Message 3: Loading restaurants
+      onProgress(50.0, 'Hunting down the best spots...');
       await _loadConditionalData(onProgress, onError, useCache);
 
-      // Step 5: Auth-dependent Data (if logged in)
+      // Load auth data silently (if logged in)
       if (Get.find<AuthController>().isLoggedIn()) {
         await _loadAuthData(onProgress, onError, useCache);
-      } else {
-        // Guest user - smoothly progress to 100%
-        final guestMessages = [
-          'Almost there...',
-          'Plating your favorites...',
-          'Setting the table...',
-          'Adding final touches...',
-          'Taste testing everything...',
-        ];
-        for (var i = 0; i < 5; i++) {
-          await Future.delayed(const Duration(milliseconds: 100));
-          _updateProgress(['recently_viewed', 'order_again', 'notifications', 'orders', 'addresses'][i], guestMessages[i], onProgress);
-        }
       }
 
-      _updateProgress('cashback', 'Bon appétit!', onProgress);
+      // Message 4: Almost done
+      onProgress(85.0, 'Almost there...');
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // Message 5: Complete
+      onProgress(100.0, 'Bon appétit!');
       print('✅ [SPLASH DATA LOADER] All data loaded successfully');
 
       return true;
