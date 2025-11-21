@@ -63,7 +63,7 @@ class CustomPageTransition extends CustomTransition {
             builder: (context, child) {
               // Custom Curves
               // Use a very smooth, natural curve for both open and close.
-              final double curvedValue = Curves.easeOutQuart.transform(animation.value);
+              final double curvedValue = Curves.easeInOutExpo.transform(animation.value);
 
               // Spring for scale
               // We use a custom Cubic with a higher overshoot value (1.5) to make the bounce visible
