@@ -75,7 +75,7 @@ class CustomPageTransition extends CustomTransition {
               final width = size.width;
 
               // --- Parameters ---
-              const double startTranslateXRatio = 0.35; // Starts 35% to the right
+              const double startTranslateXRatio = 1.1; // Starts fully off-screen to the right (1.1 to be safe)
               const double startScale = 0.92;
               const double startYAngle = 8.0 * pi / 180; // 8 degrees
               const double startZAngle = 1.5 * pi / 180; // 1.5 degrees
@@ -83,47 +83,22 @@ class CustomPageTransition extends CustomTransition {
 
               // --- Logic ---
               
-              // 1) Slide & Un-tilt (0 -> 0.7)
-              // We map p=[0, 0.7] to linear=[0, 1]
-              final double linear = (p / 0.7).clamp(0.0, 1.0);
+              // Use standard curves for smoother motion
+              // easeOutQuad for translation/rotation (slower start than Cubic, less "jumpy")
+              final double smoothP = Curves.easeOutQuad.transform(p);
               
-              final double translateX = width * startTranslateXRatio * (1.0 - linear);
-              final double yAngle = startYAngle * (1.0 - linear);
-              final double zAngle = startZAngle * (1.0 - linear);
+              // easeOutBack for scale (spring overshoot)
+              final double scaleP = Curves.easeOutBack.transform(p);
 
-              // 2) Overshoot Scale (0.7 -> 1.0)
-              // We map p=[0.7, 1.0] to overshootPhase=[0, 1]
-              final double overshootPhase = ((p - 0.7) / 0.3).clamp(0.0, 1.0);
-              
-              // Base scale goes from startScale -> 1.0 linearly over the whole 0->1? 
-              // Or does it reach 1.0 at 0.7 and then bulge?
-              // User spec: "Scale goes from ~0.92 -> overshoot 1.03 -> settle at 1.0"
-              // Let's model it:
-              // At p=0: 0.92
-              // At p=0.7: 1.0 (approx)
-              // At p=0.85: 1.03
-              // At p=1.0: 1.0
-              
-              double currentScale;
-              if (p <= 0.7) {
-                // 0.92 -> 1.0
-                currentScale = lerpDouble(startScale, 1.0, linear)!;
-              } else {
-                // 1.0 -> 1.03 -> 1.0
-                // Sine wave for the bump
-                // sin(0) = 0, sin(pi) = 0. 
-                // We want sin(phase * pi).
-                final bump = sin(overshootPhase * pi); 
-                // But we want it to go up to 1.03.
-                // Actually user formula: lerp(1.0, overshootScale, sin(overshootPhase * pi * 0.5)) ?
-                // No, sin(pi*0.5) is 1 (peak). 
-                // If we want peak at middle of 0.7->1.0, we use sin(phase * pi).
-                currentScale = 1.0 + (overshootScale - 1.0) * sin(overshootPhase * pi);
-              }
+              final double translateX = width * startTranslateXRatio * (1.0 - smoothP);
+              final double yAngle = startYAngle * (1.0 - smoothP);
+              final double zAngle = startZAngle * (1.0 - smoothP);
+
+              // Scale: 0.92 -> 1.0 (with overshoot via easeOutBack)
+              final double currentScale = startScale + (1.0 - startScale) * scaleP;
 
               // Corner Radius: 24 -> 0
-              // Should probably vanish around p=0.8 or 1.0
-              final double cornerRadius = 24.0 * (1.0 - p);
+              final double cornerRadius = 24.0 * (1.0 - smoothP);
 
               // --- Matrix Construction ---
               // Order: Perspective * Translate * Scale * Rotate
