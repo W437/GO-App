@@ -22,12 +22,42 @@ class BottomCartWidget extends StatelessWidget {
     return GetBuilder<CartController>(builder: (cartController) {
         double deliveryCharge = Get.find<RestaurantController>().restaurant?.deliveryFee ?? 0;
 
-        return Container(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+        return Stack(
+          children: [
+            // Fade overlay gradient
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 150,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.5, 1.0],
+                    colors: [
+                      Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0),
+                      Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.7),
+                      Theme.of(context).scaffoldBackgroundColor,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Cart button and content
+            Container(
+              padding: const EdgeInsets.only(
+                left: Dimensions.paddingSizeDefault,
+                right: Dimensions.paddingSizeDefault,
+                top: Dimensions.paddingSizeDefault,
+                bottom: Dimensions.paddingSizeExtraSmall,
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                 // Floating button
                 InkWell(
                   onTap: () async {
@@ -114,11 +144,13 @@ class BottomCartWidget extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        );
-      });
+        ],
+      );
+    });
   }
 }
