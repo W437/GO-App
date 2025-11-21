@@ -139,9 +139,12 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                               children: [
                                 Icon(Icons.pedal_bike, color: Theme.of(context).primaryColor, size: 20),
                                 const SizedBox(width: 8),
-                                Text(
-                                  'Delivery ${restaurant.deliveryTime ?? '30-40'} min',
-                                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
+                                Flexible(
+                                  child: Text(
+                                    'Delivery ${restaurant.deliveryTime ?? '30-40 min'}',
+                                    style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Icon(Icons.keyboard_arrow_down, color: Theme.of(context).primaryColor, size: 16),
