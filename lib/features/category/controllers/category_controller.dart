@@ -62,9 +62,22 @@ class CategoryController extends GetxController implements GetxService {
       }
       update();
     }
-    List<CategoryModel>? categoryList = await categoryServiceInterface.getCategoryList(source: DataSourceEnum.client);
-    print('🔍 Category API returned: ${categoryList?.length} categories');
-    _prepareCategoryList(categoryList);
+
+    List<CategoryModel>? categoryList;
+
+    if(dataSource == DataSourceEnum.local) {
+      // Load from cache first (instant)
+      categoryList = await categoryServiceInterface.getCategoryList(source: DataSourceEnum.local);
+      print('🔍 Category cache returned: ${categoryList?.length} categories');
+      _prepareCategoryList(categoryList);
+      // Refresh in background
+      getCategoryList(false, dataSource: DataSourceEnum.client, fromRecall: true);
+    } else {
+      // Network call
+      categoryList = await categoryServiceInterface.getCategoryList(source: DataSourceEnum.client);
+      print('🔍 Category API returned: ${categoryList?.length} categories');
+      _prepareCategoryList(categoryList);
+    }
   }
 
   _prepareCategoryList(List<CategoryModel>? categoryList) {
