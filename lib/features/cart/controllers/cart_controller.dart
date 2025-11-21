@@ -240,7 +240,7 @@ class CartController extends GetxController implements GetxService {
     return response.statusCode;
   }
 
-  Future<void> updateCartOnline(OnlineCart onlineCart, {CartModel? existCartData}) async {
+  Future<void> updateCartOnline(OnlineCart onlineCart, {CartModel? existCartData, bool fromDirectlyAdd = false}) async {
     _isLoading = true;
     update();
     Response response = await cartServiceInterface.updateCartOnline(onlineCart, AuthHelper.isLoggedIn() ? null : int.parse(AuthHelper.getGuestId()));
@@ -250,7 +250,9 @@ class CartController extends GetxController implements GetxService {
       _cartList = [];
       _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
       calculationCart();
-      Get.back();
+      if(!fromDirectlyAdd) {
+        Get.back();
+      }
       if(!Get.currentRoute.contains(RouteHelper.restaurant)) {
         showCartSnackBarWidget();
       }

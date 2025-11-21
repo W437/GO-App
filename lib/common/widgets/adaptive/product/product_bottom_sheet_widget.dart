@@ -669,7 +669,8 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
           Get.back();
           cartController.clearCartOnline().then((success) async {
             if(success) {
-              await cartController.addToCartOnline(onlineCart, existCartData: widget.cart);
+              await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
+              Get.back();
             }
           });
 
@@ -677,10 +678,11 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
       ), barrierDismissible: false);
     } else {
       if(widget.cart != null || productController.cartIndex != -1) {
-        await cartController.updateCartOnline(onlineCart, existCartData: widget.cart);
+        await cartController.updateCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
       } else {
-        await cartController.addToCartOnline(onlineCart, existCartData: widget.cart);
+        await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
       }
+      Get.back();
     }
   }
 
