@@ -1,7 +1,7 @@
 /// Product bottom sheet widget for detailed product view and cart interactions
 /// Displays product details, variations, add-ons, and add to cart functionality
 
-import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
@@ -330,10 +330,10 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                               },
                               isIncrement: false,
                             ),
-                            AnimatedFlipCounter(
-                              duration: const Duration(milliseconds: 500),
-                              value: productController.quantity!.toDouble(),
-                              textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                            AnimatedTextTransition(
+                              value: productController.quantity!,
+                              duration: const Duration(milliseconds: 320),
+                              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
                             ),
                             QuantityButton(
                               onTap: () => productController.setQuantity(true, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign),
