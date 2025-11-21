@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/features/category/domain/models/category_model.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -34,7 +35,11 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
   @override
   void didUpdateWidget(covariant RestaurantStickyHeaderWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.restController.categoryList?.length != _itemKeys.length) {
+    final categories = widget.restController.categoryList ?? [];
+    final hasAllCategory = categories.any((cat) => cat.id == 0);
+    final expectedKeys = hasAllCategory ? categories.length : categories.length + 1;
+
+    if (expectedKeys != _itemKeys.length) {
       _initializeKeys();
     }
     if (widget.activeCategoryId != oldWidget.activeCategoryId) {
@@ -45,15 +50,31 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
   void _initializeKeys() {
     final categories = widget.restController.categoryList ?? [];
     _itemKeys.clear();
-    for (var i = 0; i < categories.length; i++) {
+    // Check if "All" already exists
+    final hasAllCategory = categories.any((cat) => cat.id == 0);
+    // Add keys: +1 only if we need to add "All" category
+    final totalItems = hasAllCategory ? categories.length : categories.length + 1;
+    for (var i = 0; i < totalItems; i++) {
       _itemKeys.add(GlobalKey());
     }
   }
 
   void _scrollToActiveCategory() {
     final categories = widget.restController.categoryList ?? [];
-    final index = categories.indexWhere((c) => c.id == widget.activeCategoryId);
-    
+    final hasAllCategory = categories.any((cat) => cat.id == 0);
+
+    // Find the index in the displayed list
+    int index;
+    if (widget.activeCategoryId == 0) {
+      index = 0; // "All" is always at the first position
+    } else {
+      index = categories.indexWhere((c) => c.id == widget.activeCategoryId);
+      if (index != -1 && !hasAllCategory) {
+        // Only offset by 1 if we added "All" (it doesn't exist in backend data)
+        index = index + 1;
+      }
+    }
+
     if (index == -1 || index >= _itemKeys.length || !_scrollController.hasClients) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -64,9 +85,17 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
       final RenderBox listBox = listContext.findRenderObject() as RenderBox;
       final RenderBox itemBox = itemContext.findRenderObject() as RenderBox;
 
-      final Offset itemOffset = itemBox.localToGlobal(Offset.zero, ancestor: listBox);
-      final double itemCenter = itemOffset.dx + itemBox.size.width / 2;
-      final double targetOffset = itemCenter - listBox.size.width / 2;
+      // Get the item's global position and the list's global position
+      final Offset itemGlobalPosition = itemBox.localToGlobal(Offset.zero);
+      final Offset listGlobalPosition = listBox.localToGlobal(Offset.zero);
+
+      // Calculate the item's position relative to the list's scroll position
+      final double itemRelativePosition = itemGlobalPosition.dx - listGlobalPosition.dx;
+      final double itemCenterInList = itemRelativePosition + (itemBox.size.width / 2);
+
+      // Calculate the target scroll offset to center the item
+      final double listCenter = listBox.size.width / 2;
+      final double targetOffset = _scrollController.offset + itemCenterInList - listCenter;
       final double clampedOffset = targetOffset
           .clamp(_scrollController.position.minScrollExtent, _scrollController.position.maxScrollExtent)
           .toDouble();
@@ -88,6 +117,15 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
   @override
   Widget build(BuildContext context) {
     final categories = widget.restController.categoryList ?? [];
+
+    // Check if "All" category already exists (id: 0)
+    final hasAllCategory = categories.any((cat) => cat.id == 0);
+
+    // Only add "All" category if it doesn't exist
+    final categoriesWithAll = hasAllCategory
+        ? categories
+        : [CategoryModel(id: 0, name: 'All'), ...categories];
+
     return ListView.separated(
       key: _listKey,
       controller: _scrollController,
@@ -97,10 +135,10 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
         horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeDefault,
         vertical: 2,
       ),
-      itemCount: categories.length,
+      itemCount: categoriesWithAll.length,
       separatorBuilder: (_, __) => const SizedBox(width: Dimensions.paddingSizeSmall),
       itemBuilder: (context, index) {
-        final category = categories[index];
+        final category = categoriesWithAll[index];
         final bool isActive = category.id != null && category.id == widget.activeCategoryId;
         return Center(
           child: KeyedSubtree(
@@ -111,8 +149,8 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Dimensions.paddingSizeDefault,
-                  vertical: 7,
+                  horizontal: Dimensions.paddingSizeLarge,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(50),
@@ -123,7 +161,7 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
                 child: Text(
                     category.name ?? '',
                     style: robotoMedium.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
+                      fontSize: Dimensions.fontSizeDefault,
                       color: isActive ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),

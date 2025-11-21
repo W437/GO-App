@@ -141,6 +141,9 @@ class CheckoutController extends GetxController implements GetxService {
   int? _selectedTimeSlot = 0;
   int? get selectedTimeSlot => _selectedTimeSlot;
 
+  DateTime? _preselectedScheduleAt;
+  DateTime? get preselectedScheduleAt => _preselectedScheduleAt;
+
   AddressModel? _guestAddress;
   AddressModel? get guestAddress => _guestAddress;
 
@@ -412,6 +415,13 @@ class CheckoutController extends GetxController implements GetxService {
 
   void setOrderType(String type, {bool notify = true}) {
     _orderType = type;
+    if(notify) {
+      update();
+    }
+  }
+
+  void setPreselectedScheduleAt(DateTime? value, {bool notify = true}) {
+    _preselectedScheduleAt = value;
     if(notify) {
       update();
     }
@@ -690,6 +700,7 @@ class CheckoutController extends GetxController implements GetxService {
     _paymentMethodIndex = -1;
     _selectedDateSlot = 0;
     _selectedTimeSlot = 0;
+    _preselectedScheduleAt = null;
     _subscriptionOrder = false;
     _selectedDays = [null];
     _subscriptionType = 'daily';

@@ -255,7 +255,7 @@ class RouteHelper {
   }
   static String getUpdateRoute(bool isUpdate) => '$update?update=${isUpdate.toString()}';
   static String getCartRoute({bool fromReorder = false, bool fromDineIn = false}) => '$cart?from_reorder=$fromReorder&from_dine_in=$fromDineIn';
-  static String getAddAddressRoute(bool fromCheckout, int? zoneId) => '$addAddress?page=${fromCheckout ? 'checkout' : 'address'}&zone_id=$zoneId';
+  static String getAddAddressRoute(bool fromCheckout, int? zoneId) => '$addAddress?page=${fromCheckout ? 'checkout' : 'address'}&zone_id=${zoneId ?? ''}';
   static String getEditAddressRoute(AddressModel? address, {bool fromGuest = false}) {
     String data = 'null';
     if(address != null) {
@@ -494,7 +494,21 @@ class RouteHelper {
     GetPage(name: support, page: () => getRoute(byPuss: true, const SupportScreen())),
     GetPage(name: update, page: () => UpdateScreen(isUpdate: Get.parameters['update'] == 'true')),
     GetPage(name: cart, page: () => getRoute(CartScreen(fromNav: false, fromReorder: Get.parameters['from_reorder'] == 'true', fromDineIn: Get.parameters['from_dine_in'] == 'true'))),
-    GetPage(name: addAddress, page: () => getRoute(AddAddressScreen(fromCheckout: Get.parameters['page'] == 'checkout', zoneId: int.parse(Get.parameters['zone_id']!)))),
+    GetPage(
+      name: addAddress,
+      page: () {
+        final zoneParam = Get.parameters['zone_id'];
+        final zoneId = (zoneParam != null && zoneParam.isNotEmpty && zoneParam != 'null')
+            ? int.tryParse(zoneParam)
+            : null;
+        return getRoute(
+          AddAddressScreen(
+            fromCheckout: Get.parameters['page'] == 'checkout',
+            zoneId: zoneId,
+          ),
+        );
+      },
+    ),
     GetPage(name: editAddress, page: () {
       AddressModel? data;
       if(Get.parameters['data'] != 'null') {

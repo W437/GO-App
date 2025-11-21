@@ -8,6 +8,10 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
+import 'package:godelivery_user/features/restaurant/widgets/order_details_bottom_sheet.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 
 class RestaurantDetailsSectionWidget extends StatelessWidget {
   final Restaurant restaurant;
@@ -102,24 +106,46 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                       // Delivery Time Button
                       Expanded(
                         flex: 2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.pedal_bike, color: Theme.of(context).primaryColor, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Delivery ${restaurant.deliveryTime ?? '30-40'} min',
-                                style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(Icons.keyboard_arrow_down, color: Theme.of(context).primaryColor, size: 16),
-                            ],
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                          onTap: () async {
+                            final authController = Get.find<AuthController>();
+                            // If no session, redirect to sign-in before showing scheduling UI
+                            if (!authController.isLoggedIn() && !authController.isGuestLoggedIn()) {
+                              Get.toNamed(RouteHelper.getSignInRoute('restaurant'));
+                              return;
+                            }
+
+                            // Reset any previous schedule preference before opening
+                            Get.find<CheckoutController>().setPreselectedScheduleAt(null, notify: false);
+                            if (context.mounted) {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) => OrderDetailsBottomSheet(restaurant: restaurant),
+                              );
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.pedal_bike, color: Theme.of(context).primaryColor, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Delivery ${restaurant.deliveryTime ?? '30-40'} min',
+                                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.keyboard_arrow_down, color: Theme.of(context).primaryColor, size: 16),
+                              ],
+                            ),
                           ),
                         ),
                       ),

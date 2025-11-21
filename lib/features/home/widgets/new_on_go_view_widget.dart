@@ -1,5 +1,6 @@
 import 'package:godelivery_user/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/restaurants_card_widget.dart';
+import 'package:godelivery_user/features/home/widgets/compact_restaurant_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -21,7 +22,7 @@ class NewOnGOViewWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeLarge),
           child: Container(
             width: Dimensions.webMaxWidth,
-            height: 210,
+            height: 260,
             color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +34,7 @@ class NewOnGOViewWidget extends StatelessWidget {
 
 
                 restController.latestRestaurantList != null ? SizedBox(
-                  height: 130,
+                  height: 190,
                   child: ListView.builder(
                     padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault),
                     itemCount: restController.latestRestaurantList!.length,
@@ -43,22 +44,13 @@ class NewOnGOViewWidget extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                          child: InkWell(
-                            onTap: () {
-                              Get.toNamed(
-                                RouteHelper.getRestaurantRoute(restController.latestRestaurantList![index].id),
-                                arguments: RestaurantScreen(restaurant: restController.latestRestaurantList![index]),
-                              );
-                            },
-                            child: RestaurantsCardWidget(
-                              isNewOnGO: true,
-                              restaurant: restController.latestRestaurantList![index],
-                            ),
+                          child: CompactRestaurantWidget(
+                            restaurant: restController.latestRestaurantList![index],
                           ),
                         );
                       },
                   ),
-                ) : const RestaurantsCardShimmer(isNewOnGO: false),
+                ) : const SizedBox(),
              ],
             ),
 

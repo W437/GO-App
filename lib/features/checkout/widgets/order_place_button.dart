@@ -351,9 +351,15 @@ class OrderPlaceButton extends StatelessWidget {
     return PlaceOrderBodyModel(
       cart: carts, couponDiscountAmount: Get.find<CouponController>().discount, distance: checkoutController.distance,
       couponDiscountTitle: Get.find<CouponController>().discount! > 0 ? Get.find<CouponController>().coupon!.title : null,
-      scheduleAt: checkoutController.orderType == 'dine_in' ? checkoutController.orderPlaceDineInDateTime.toString()
-          : !checkoutController.restaurant!.scheduleOrder! ? null : (checkoutController.selectedDateSlot == 0
-          && checkoutController.selectedTimeSlot == 0) ? null : DateConverter.dateToDateAndTime(scheduleStartDate),
+      scheduleAt: checkoutController.orderType == 'dine_in'
+          ? checkoutController.orderPlaceDineInDateTime.toString()
+          : checkoutController.preselectedScheduleAt != null
+              ? DateConverter.dateToDateAndTime(checkoutController.preselectedScheduleAt!)
+              : !checkoutController.restaurant!.scheduleOrder!
+                  ? null
+                  : (checkoutController.selectedDateSlot == 0 && checkoutController.selectedTimeSlot == 0)
+                      ? null
+                      : DateConverter.dateToDateAndTime(scheduleStartDate),
       orderAmount: total, orderNote: checkoutController.noteController.text, orderType: checkoutController.orderType,
       paymentMethod: checkoutController.paymentMethodIndex == 0 ? 'cash_on_delivery'
           : checkoutController.paymentMethodIndex == 1 ? 'wallet'

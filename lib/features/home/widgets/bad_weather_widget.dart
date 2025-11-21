@@ -81,8 +81,12 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
   Widget _buildAlertWidget(BuildContext context, String message) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-        color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+          width: 2.0,
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
       margin: EdgeInsets.symmetric(
@@ -96,8 +100,11 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
 
         Expanded(
           child: Text(
-            message,
-            style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.white),
+            "Weather's rough out there! Delivery fees are up 25% to support our amazing delivery partners. All proceeds go directly to them. 💙",
+            style: robotoMedium.copyWith(
+              fontSize: Dimensions.fontSizeDefault,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
           ),
         ),
 
