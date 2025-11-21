@@ -64,8 +64,10 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
   }
   
   Future<void> _initCall() async {
-    if(widget.fromReview!) {
+    if(widget.fromReview! || widget.inRestaurantPage) {
+      // Use the product data directly without fetching
       product = widget.product!;
+      Get.find<ProductController>().initializeProductData(product!, cart: widget.cart);
     } else {
       await Get.find<ProductController>().getProductDetails(widget.product!.id!, widget.cart, isCampaign: widget.isCampaign);
       product = Get.find<ProductController>().product;

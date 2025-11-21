@@ -48,17 +48,18 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
             )
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Product Image
-              SizedBox(
-                height: 100,
-                width: 100,
+        child: Column(
+          children: [
+            // Product Image - fills the top section
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                width: double.infinity,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(Dimensions.radiusDefault),
+                    topRight: Radius.circular(Dimensions.radiusDefault),
+                  ),
                   child: BlurhashImageWidget(
                     imageUrl: product.imageFullUrl ?? '',
                     blurhash: product.imageBlurhash,
@@ -66,61 +67,53 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
+            ),
 
-              // Likes & Price Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Likes & Price Row
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.favorite, color: Colors.orange, size: 14),
-                      const SizedBox(width: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.favorite, color: Colors.orange, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${product.likeCount ?? 0}',
+                            style: robotoRegular.copyWith(
+                              fontSize: Dimensions.fontSizeSmall,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                        ],
+                      ),
                       Text(
-                        '${product.likeCount ?? 0}',
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeSmall,
-                          color: Theme.of(context).hintColor,
+                        PriceConverter.convertPrice(discountPrice),
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 4),
+
+                  // Name
                   Text(
-                    PriceConverter.convertPrice(discountPrice),
-                    style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
+                    product.name ?? '',
+                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-
-              // Name
-              Text(
-                product.name ?? '',
-                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-              
-              // Description (if available)
-              if (product.description != null && product.description!.isNotEmpty) ...[
-                 const SizedBox(height: 4),
-                 Text(
-                  product.description!,
-                  style: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeSmall,
-                    color: Theme.of(context).hintColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
