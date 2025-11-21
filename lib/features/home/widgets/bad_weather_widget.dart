@@ -32,10 +32,17 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
       return null;
     }
 
-    await _locationController.getZone(address.latitude, address.longitude, false);
+    // Check if zones already loaded (from splash or elsewhere)
+    if (_locationController.zoneList == null || _locationController.zoneList!.isEmpty) {
+      print('   ⚠️ Zones not loaded, fetching...');
+      await _locationController.getZone(address.latitude, address.longitude, false);
+    } else {
+      print('   ✅ Using already-loaded zone data');
+    }
+
     print('   Zone ID: ${address.zoneId}');
 
-    // Use fresh zone data from controller, not stale cached data from address
+    // Use zone data from controller
     final zoneData = _locationController.zoneList?.firstWhereOrNull(
       (data) => data.id == address.zoneId &&
       data.increasedDeliveryFeeStatus == 1 &&
