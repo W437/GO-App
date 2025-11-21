@@ -183,12 +183,14 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _route() async {
-    print('🚀 [SPLASH] _route() called - loading config');
+    print('🚀 [SPLASH] _route() called - loading config and data');
+
+    final splashController = Get.find<SplashController>();
 
     // 1. Load config data (no navigation)
-    final success = await Get.find<SplashController>().loadConfig();
+    final configSuccess = await splashController.loadConfig();
 
-    if (!success) {
+    if (!configSuccess) {
       print('❌ [SPLASH] Config load failed - showing no internet screen');
       // Config load failed - navigate to no internet screen
       Get.off(() => NoInternetScreen(
@@ -201,9 +203,27 @@ class SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    print('✅ [SPLASH] Config loaded successfully - navigating');
+    print('✅ [SPLASH] Config loaded successfully - loading all data');
 
-    // 2. Navigate based on app state (explicit, separate)
+    // 2. Load all application data with progress tracking
+    final dataSuccess = await splashController.loadAllData(useCache: true);
+
+    if (!dataSuccess) {
+      print('❌ [SPLASH] Data load failed - showing no internet screen');
+      // Data load failed - navigate to no internet screen with retry
+      Get.off(() => NoInternetScreen(
+        child: SplashScreen(
+          notificationBody: widget.notificationBody,
+          linkBody: widget.linkBody,
+          muteVideo: widget.muteVideo,
+        ),
+      ));
+      return;
+    }
+
+    print('✅ [SPLASH] All data loaded successfully - navigating to app');
+
+    // 3. Navigate based on app state (explicit, separate)
     await AppNavigator.navigateOnAppLaunch(
       notification: widget.notificationBody,
       linkBody: widget.linkBody,
@@ -258,6 +278,69 @@ class SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ),
+
+            // Progress indicator for data loading
+            GetBuilder<SplashController>(
+              builder: (splashController) {
+                // Only show progress after video completes and we're loading data
+                if (_videoCompleted && splashController.loadingProgress > 0) {
+                  return Positioned(
+                    bottom: 80,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Progress bar
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: splashController.loadingProgress / 100,
+                                minHeight: 6,
+                                backgroundColor: Colors.grey.shade200,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).primaryColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: Dimensions.paddingSizeSmall),
+                            // Loading message and percentage
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    splashController.loadingMessage,
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  '${splashController.loadingProgress.toStringAsFixed(0)}%',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
 
             // Skip button at the bottom
             Positioned(

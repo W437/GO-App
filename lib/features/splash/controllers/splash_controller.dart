@@ -14,6 +14,7 @@ import 'package:godelivery_user/features/splash/domain/models/config_model.dart'
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
 import 'package:godelivery_user/features/splash/domain/services/config_service.dart';
+import 'package:godelivery_user/features/splash/domain/services/splash_data_loader_service.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/utilities/maintance_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -27,9 +28,11 @@ import 'package:universal_html/html.dart' as html;
 class SplashController extends GetxController implements GetxService {
   final SplashServiceInterface splashServiceInterface;
   late final ConfigService _configService;
+  late final SplashDataLoaderService _dataLoaderService;
 
   SplashController({required this.splashServiceInterface}) {
     _configService = ConfigService(splashServiceInterface);
+    _dataLoaderService = SplashDataLoaderService();
   }
 
   ConfigModel? _configModel;
@@ -52,6 +55,22 @@ class SplashController extends GetxController implements GetxService {
 
   bool _showReferBottomSheet = false;
   bool get showReferBottomSheet => _showReferBottomSheet;
+
+  // Progress tracking for splash data loading
+  double _loadingProgress = 0.0;
+  double get loadingProgress => _loadingProgress;
+
+  String _loadingMessage = '';
+  String get loadingMessage => _loadingMessage;
+
+  bool _dataLoadingComplete = false;
+  bool get dataLoadingComplete => _dataLoadingComplete;
+
+  bool _dataLoadingFailed = false;
+  bool get dataLoadingFailed => _dataLoadingFailed;
+
+  String _dataLoadingError = '';
+  String get dataLoadingError => _dataLoadingError;
 
   DateTime get currentTime => DateTime.now();
 
@@ -167,6 +186,81 @@ class SplashController extends GetxController implements GetxService {
       print('⚠️ [CONFIG] Background refresh failed: $e');
       // Silent fail - don't disrupt user experience
     }
+  }
+
+  /// Load all application data during splash screen
+  /// Returns true if successful, false if failed
+  Future<bool> loadAllData({bool useCache = true}) async {
+    try {
+      print('🚀 [SPLASH] Starting comprehensive data load...');
+
+      _dataLoadingComplete = false;
+      _dataLoadingFailed = false;
+      _loadingProgress = 0.0;
+      _loadingMessage = 'Initializing...';
+      update();
+
+      // Config must be loaded first
+      if (_configModel == null) {
+        print('⚠️ [SPLASH] Config not loaded, loading now...');
+        final configLoaded = await loadConfig();
+        if (!configLoaded) {
+          _dataLoadingFailed = true;
+          _dataLoadingError = 'Failed to load configuration';
+          update();
+          return false;
+        }
+      }
+
+      // Load all data using the data loader service
+      final success = await _dataLoaderService.loadAllData(
+        onProgress: (progress, message) {
+          _loadingProgress = progress;
+          _loadingMessage = message;
+          update();
+          print('📊 [SPLASH] Progress: ${progress.toStringAsFixed(0)}% - $message');
+        },
+        onError: (error) {
+          _dataLoadingFailed = true;
+          _dataLoadingError = error;
+          print('❌ [SPLASH] Data loading error: $error');
+        },
+        useCache: useCache,
+      );
+
+      if (success) {
+        _dataLoadingComplete = true;
+        _loadingProgress = 100.0;
+        _loadingMessage = 'Ready!';
+        print('✅ [SPLASH] All data loaded successfully');
+      } else {
+        _dataLoadingFailed = true;
+        if (_dataLoadingError.isEmpty) {
+          _dataLoadingError = 'Failed to load application data';
+        }
+        print('❌ [SPLASH] Data loading failed');
+      }
+
+      update();
+      return success;
+    } catch (e) {
+      print('❌ [SPLASH] Fatal error during data loading: $e');
+      _dataLoadingFailed = true;
+      _dataLoadingError = e.toString();
+      update();
+      return false;
+    }
+  }
+
+  /// Reset data loading state (for retry)
+  void resetDataLoading() {
+    _loadingProgress = 0.0;
+    _loadingMessage = '';
+    _dataLoadingComplete = false;
+    _dataLoadingFailed = false;
+    _dataLoadingError = '';
+    _dataLoaderService.reset();
+    update();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

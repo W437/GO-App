@@ -75,9 +75,24 @@ class HomeScreen extends StatefulWidget {
 
 
   static Future<void> loadData(bool reload) async {
-    // Always refresh config so promotional banners and other remote settings stay current
-    // This is a force refresh from API to get latest promotional content
-    await Get.find<SplashController>().refreshConfig();
+    print('🏠 [HOME] loadData called - reload: $reload');
+
+    final splashController = Get.find<SplashController>();
+
+    // Check if data was already loaded in splash screen
+    if (!reload && splashController.dataLoadingComplete) {
+      print('✅ [HOME] Data already loaded in splash - skipping load');
+      // Data already loaded in splash, just verify and refresh stories/config in background
+      splashController.refreshConfig(); // No await - background refresh
+      Get.find<StoryController>().getStories(reload: false); // Background refresh
+      return;
+    }
+
+    // User manually pulled to refresh OR data wasn't loaded in splash
+    print('🔄 [HOME] Loading data - reload requested or splash data incomplete');
+
+    // Refresh config (no await for faster perceived load)
+    splashController.refreshConfig();
 
     Get.find<HomeController>().getBannerList(reload);
     Get.find<CategoryController>().getCategoryList(reload);
@@ -86,17 +101,17 @@ class HomeScreen extends StatefulWidget {
     Get.find<DineInController>().getDineInRestaurantList(1, reload);
     Get.find<StoryController>().getStories(reload: true); // Always fetch fresh stories from API
     Get.find<LocationController>().getZoneList();
-    if(Get.find<SplashController>().configModel!.popularRestaurant == 1) {
+    if(splashController.configModel!.popularRestaurant == 1) {
       Get.find<RestaurantController>().getPopularRestaurantList(reload, 'all', false);
     }
     Get.find<CampaignController>().getItemCampaignList(reload);
-    if(Get.find<SplashController>().configModel!.popularFood == 1) {
+    if(splashController.configModel!.popularFood == 1) {
       Get.find<ProductController>().getPopularProductList(reload, 'all', false);
     }
-    if(Get.find<SplashController>().configModel!.newRestaurant == 1) {
+    if(splashController.configModel!.newRestaurant == 1) {
       Get.find<RestaurantController>().getLatestRestaurantList(reload, 'all', false);
     }
-    if(Get.find<SplashController>().configModel!.mostReviewedFoods == 1) {
+    if(splashController.configModel!.mostReviewedFoods == 1) {
       Get.find<ReviewController>().getReviewedProductList(reload, 'all', false);
     }
     Get.find<RestaurantController>().getRestaurantList(1, reload);
