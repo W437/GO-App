@@ -6,6 +6,7 @@ import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,9 +22,11 @@ class BottomCartWidget extends StatefulWidget {
   State<BottomCartWidget> createState() => _BottomCartWidgetState();
 }
 
-class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerProviderStateMixin {
+class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProviderStateMixin {
   late AnimationController _iconBounceController;
+  late AnimationController _priceBounceController;
   late Animation<double> _iconBounceAnimation;
+  late Animation<double> _priceBounceAnimation;
   Timer? _updateBounceTimer;
   int _previousCartCount = 0;
 
@@ -31,7 +34,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerPr
   void initState() {
     super.initState();
 
-    // Initialize icon bounce animation (subtle bounce for updates)
+    // Initialize icon bounce animation
     _iconBounceController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -60,6 +63,35 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerPr
       ),
     ]).animate(_iconBounceController);
 
+    // Initialize price bounce animation (same as icon)
+    _priceBounceController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _priceBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.08)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.08, end: 0.98)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.02)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 20,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
+      ),
+    ]).animate(_priceBounceController);
+
     // Initialize previous cart count
     final cartController = Get.find<CartController>();
     _previousCartCount = cartController.cartList.length;
@@ -68,6 +100,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerPr
   @override
   void dispose() {
     _iconBounceController.dispose();
+    _priceBounceController.dispose();
     _updateBounceTimer?.cancel();
     super.dispose();
   }
@@ -84,7 +117,9 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerPr
           _updateBounceTimer?.cancel();
           _updateBounceTimer = Timer(const Duration(milliseconds: 1500), () {
             if (mounted) {
+              // Trigger both animations in parallel
               _iconBounceController.forward(from: 0.0);
+              _priceBounceController.forward(from: 0.0);
             }
           });
         }
@@ -195,8 +230,9 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerPr
                                                   color: Theme.of(context).primaryColor,
                                                   shape: BoxShape.circle,
                                                 ),
-                                                child: Text(
-                                                  '${cartController.cartList.length}',
+                                                child: AnimatedTextTransition(
+                                                  value: cartController.cartList.length,
+                                                  delay: const Duration(milliseconds: 1500),
                                                   style: robotoBold.copyWith(
                                                     fontSize: 9,
                                                     color: Colors.white,
@@ -212,12 +248,22 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with SingleTickerPr
 
                                     const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                                    // Total price
-                                    Text(
-                                      PriceConverter.convertPrice(cartController.calculationCart()),
-                                      style: robotoBold.copyWith(
-                                        fontSize: Dimensions.fontSizeLarge,
-                                        color: Colors.white,
+                                    // Total price - animated with bounce
+                                    AnimatedBuilder(
+                                      animation: _priceBounceAnimation,
+                                      builder: (context, child) {
+                                        return Transform.scale(
+                                          scale: _priceBounceAnimation.value,
+                                          child: child,
+                                        );
+                                      },
+                                      child: AnimatedTextTransition(
+                                        value: PriceConverter.convertPrice(cartController.calculationCart()),
+                                        delay: const Duration(milliseconds: 1500),
+                                        style: robotoBold.copyWith(
+                                          fontSize: Dimensions.fontSizeLarge,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
 

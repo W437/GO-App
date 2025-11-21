@@ -124,7 +124,7 @@ class SplashScreenState extends State<SplashScreen> {
 
   void _initializeVideo() {
     print('🎥 [SPLASH] Starting video initialization...');
-    _videoController = VideoPlayerController.asset('assets/video/notbad.mp4');
+    _videoController = VideoPlayerController.asset('assets/video/hopa_intro.mp4');
     _videoInitializationFuture = _videoController.initialize().then((_) async {
       print('🎥 [SPLASH] Video initialized successfully');
       print('🎥 [SPLASH] Video duration: ${_videoController.value.duration}');

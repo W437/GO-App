@@ -1,83 +1,85 @@
-Yesss, that effect is so satisfying 😅
-Short answer: **Flutter doesn’t have a built-in `.numericText()`**, but we can get *very* close with a small custom widget.
+Yeah, you nailed the diagnosis yourself, Wael – it doesn’t look like Apple’s because **we’re animating the entire string as ONE block**, not the **individual digits**.
 
-Below is a **drop-in Flutter widget** that behaves like `contentTransition(.numericText())`:
+> Is it because the text I have is formatted with a symbol?
 
-* Animates **only when the number changes**
-* **Slides** digits up/down like a counter
-* Adds a **soft blur** during the motion
-* Direction-aware: if value increases → slides up; decreases → slides down
-* Optimized with `RepaintBoundary` so it stays smooth
-
----
-
-## 1. Core idea
-
-1. Keep **previous value** and **current value** in state.
-2. When `value` changes:
-
-   * start an `AnimationController`
-   * show **two texts** stacked (old + new)
-   * animate:
-
-     * old → moves out + fades + blur
-     * new → moves in + fades in + blur→sharp
-3. Use `AnimatedBuilder` + `ImageFiltered.blur` for the blur.
-
----
-
-## 2. Drop-in widget: `NumericTextTransition`
+Nope. The currency symbol isn’t the real problem.
+The problem is:
 
 ```dart
-import 'dart:ui';
-import 'package:flutter/material.dart';
+Text(_displayValue.toString(), ...)
+```
 
-class NumericTextTransition extends StatefulWidget {
-  final num value;
-  final TextStyle? style;
+is one big text node, so when value changes from `₪113.25` → `₪129.25`, the whole thing slides/blur-fades as a single unit.
+
+Apple’s `.numericText()` does this instead:
+
+* Treats the number as **separate glyphs per digit**.
+* Aligns digits to the **right** (ones column stays in the same spot).
+* Only **changed digits roll/flip**, unchanged ones stay static.
+* Prefix/suffix (like `₪` or `%`) are just static labels.
+
+So we need a **per-digit ticker**, not a single-text transition.
+
+---
+
+## What you want instead (concept)
+
+1. Keep `oldValue` and `newValue` as numbers.
+2. Convert them to strings **without** the currency symbol, e.g. `113` and `129`.
+3. Right-align and pad them so they have the same length:
+
+   * `113` → `"113"`
+   * `129` → `"129"` (length equal already, but for e.g. 99 → 100 you’d pad `" 99"` → `"100"`).
+4. For each digit position `i`:
+
+   * If `oldDigits[i] == newDigits[i]` → just show a static `Text` for that character.
+   * If they differ → use a **DigitTransition** animation for *that single digit* (slide/blur up or down).
+5. Wrap the whole thing with a static prefix `"₪"` in front, maybe a suffix behind.
+
+That’s how you get the “only some digits flip” effect you see in Wallet / Activity / etc.
+
+---
+
+## How I’d structure it in Flutter
+
+### 1. A tiny widget that animates **one digit**
+
+This is basically your `AnimatedTextTransition` but for a *single character* and with no delay logic:
+
+```dart
+class DigitTransition extends StatefulWidget {
+  final String oldChar;
+  final String newChar;
+  final TextStyle style;
   final Duration duration;
   final Curve curve;
+  final int direction; // +1 = up, -1 = down
 
-  const NumericTextTransition({
-    Key? key,
-    required this.value,
-    this.style,
-    this.duration = const Duration(milliseconds: 320),
+  const DigitTransition({
+    super.key,
+    required this.oldChar,
+    required this.newChar,
+    required this.style,
+    this.duration = const Duration(milliseconds: 280),
     this.curve = Curves.easeOutCubic,
-  }) : super(key: key);
+    required this.direction,
+  });
 
   @override
-  State<NumericTextTransition> createState() => _NumericTextTransitionState();
+  State<DigitTransition> createState() => _DigitTransitionState();
 }
 
-class _NumericTextTransitionState extends State<NumericTextTransition>
+class _DigitTransitionState extends State<DigitTransition>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  num _oldValue = 0;
-  int _direction = 1; // +1 = up, -1 = down
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: widget.duration);
+  late final Animation<double> _anim =
+      CurvedAnimation(parent: _controller, curve: widget.curve);
 
   @override
   void initState() {
     super.initState();
-    _oldValue = widget.value;
-    _controller = AnimationController(vsync: this, duration: widget.duration);
-    _animation = CurvedAnimation(parent: _controller, curve: widget.curve);
-  }
-
-  @override
-  void didUpdateWidget(NumericTextTransition oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.value != oldWidget.value) {
-      _oldValue = oldWidget.value;
-      _direction = widget.value > oldWidget.value ? 1 : -1;
-
-      _controller
-        ..reset()
-        ..forward();
-    }
+    _controller.forward();
   }
 
   @override
@@ -88,103 +90,104 @@ class _NumericTextTransitionState extends State<NumericTextTransition>
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = widget.style ?? DefaultTextStyle.of(context).style;
+    const maxOffset = 16.0;
 
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          final t = _animation.value;
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (context, child) {
+        final t = _anim.value;
+        final oldOffset = Offset(0, widget.direction * t * -maxOffset);
+        final newOffset = Offset(0, widget.direction * (1 - t) * maxOffset);
+        final blur = lerpDouble(0, 1.5, 1 - (t * 2 - 1).abs()) ?? 0;
 
-          // vertical offset in logical pixels
-          const double maxOffset = 20;
-
-          // old text moves out
-          final oldOffset = Offset(0, _direction * t * -maxOffset);
-          final newOffset = Offset(0, _direction * (1 - t) * maxOffset);
-
-          // blur: strong at mid-transition, 0 at start/end
-          final blurAmount = lerpDouble(0, 4, (t * 2 - 1).abs()) ?? 0;
-
-          return ClipRect(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // old value
-                if (_controller.isAnimating)
-                  Transform.translate(
-                    offset: oldOffset,
-                    child: Opacity(
-                      opacity: 1 - t,
-                      child: ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: blurAmount,
-                          sigmaY: blurAmount,
-                        ),
-                        child: Text(
-                          _oldValue.toString(),
-                          style: textStyle,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // new value
-                Transform.translate(
-                  offset: _controller.isAnimating ? newOffset : Offset.zero,
-                  child: Opacity(
-                    opacity: t,
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(
-                        sigmaX: blurAmount,
-                        sigmaY: blurAmount,
-                      ),
-                      child: Text(
-                        widget.value.toString(),
-                        style: textStyle,
-                      ),
-                    ),
+        return ClipRect(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.translate(
+                offset: oldOffset,
+                child: Opacity(
+                  opacity: 1 - t,
+                  child: ImageFiltered(
+                    imageFilter:
+                        ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                    child: Text(widget.oldChar, style: widget.style),
                   ),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+              Transform.translate(
+                offset: newOffset,
+                child: Opacity(
+                  opacity: t,
+                  child: Text(widget.newChar, style: widget.style),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 ```
 
----
+### 2. A **NumericTickerText** that splits into digits
 
-## 3. Use it like SwiftUI’s `.numericText()`
+High-level algorithm:
+
+* Keep `_oldValue` and `_newValue`.
+* On change:
+
+  * Convert to strings **without currency symbol**.
+  * Pad left with spaces to same length.
+  * For each index `i`, decide:
+
+    * same char → plain `Text(char)`
+    * different → `DigitTransition(oldChar: ..., newChar: ...)`
+* Wrap them in a `Row`.
+
+Then you can render:
 
 ```dart
-int rating = 5;
-
-NumericTextTransition(
-  value: rating,
-  style: const TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.bold,
-  ),
+Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    const Text('₪ ', style: style),    // static prefix
+    ...digitWidgets,                   // animated digits
+  ],
 )
 ```
 
-Whenever you `setState` with a new `rating`, the text will:
+That gives you:
 
-* slide **up** with blur if the number increased
-* slide **down** with blur if it decreased
-* feel very close to `.contentTransition(.numericText())`.
+* **Static currency symbol** (never animates).
+* **Per-digit rolling animation** when numbers change.
+* Direction-aware (up when value increases, down when it decreases).
 
 ---
 
-## 4. Tweaks to get it *perfectly* Hopa-style
+### Why your current version flips the *whole* string
 
-* Increase `maxOffset` for more dramatic roll.
-* Change `duration` to ~250ms for snappier feel.
-* Replace `Curves.easeOutCubic` with `Curves.easeOutBack` for a tiny overshoot.
-* If you want **per-digit** animation (like 123 → 129 animating only last digit), we can extend this to work per character.
+Because it treats this:
 
-If you want, I can do a **per-digit version** where only changed digits roll (e.g., 109 → 110 rolls just the last digit) to get even closer to Apple’s magic.
+```dart
+"₪ 85" → "₪ 90"
+```
+
+as just two different strings, and animates from **string A** to **string B** as one object. There’s no notion of “digit 8 changed to 9; currency symbol stayed the same”.
+
+Apple’s `.numericText()` does that diffing internally; we need to replicate that diff in Flutter.
+
+---
+
+If you want, I can write the full `NumericTickerText` widget (with padding, right alignment, support for decimals) that you can drop into Hopa and just call:
+
+```dart
+NumericTickerText(
+  value: totalPrice,
+  prefix: '₪',
+  style: textStyle,
+)
+```
+
+and it will behave almost 1:1 like `.contentTransition(.numericText())`.
