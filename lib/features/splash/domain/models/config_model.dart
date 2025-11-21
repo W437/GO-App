@@ -19,7 +19,6 @@ class ConfigModel {
   String? currencySymbolDirection;
   double? appMinimumVersionAndroid;
   double? appMinimumVersionIos;
-  bool? demo;
   bool? maintenanceMode;
   int? popularFood;
   int? popularRestaurant;
@@ -119,7 +118,6 @@ class ConfigModel {
     this.currencySymbolDirection,
     this.appMinimumVersionAndroid,
     this.appMinimumVersionIos,
-    this.demo,
     this.maintenanceMode,
     this.popularFood,
     this.popularRestaurant,
@@ -220,7 +218,6 @@ class ConfigModel {
     currencySymbolDirection = json['currency_symbol_direction'];
     appMinimumVersionAndroid = json['app_minimum_version_android'] != null ? json['app_minimum_version_android'].toDouble() : 0.0;
     appMinimumVersionIos = json['app_minimum_version_ios'] != null ? json['app_minimum_version_ios'].toDouble() : 0.0;
-    demo = json['demo'];
     maintenanceMode = json['maintenance_mode'];
     popularFood = json['popular_food'];
     popularRestaurant = json['popular_restaurant'];
@@ -349,7 +346,6 @@ class ConfigModel {
     data['currency_symbol_direction'] = currencySymbolDirection;
     data['app_minimum_version_android'] = appMinimumVersionAndroid;
     data['app_minimum_version_ios'] = appMinimumVersionIos;
-    data['demo'] = demo;
     data['maintenance_mode'] = maintenanceMode;
     data['popular_food'] = popularFood;
     data['popular_restaurant'] = popularRestaurant;

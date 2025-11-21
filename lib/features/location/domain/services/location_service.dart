@@ -44,11 +44,6 @@ class LocationService implements LocationServiceInterface{
   @override
   void handleTopicSubscription(AddressModel? savedAddress, AddressModel? address) {
     if(!GetPlatform.isWeb) {
-      if(Get.find<SplashController>().configModel!.demo!) {
-        FirebaseMessaging.instance.subscribeToTopic(AppConstants.demoResetTopic);
-      } else {
-        FirebaseMessaging.instance.unsubscribeFromTopic(AppConstants.demoResetTopic);
-      }
       if (savedAddress != null) {
         if(savedAddress.zoneIds != null) {
           for(int zoneID in savedAddress.zoneIds!) {

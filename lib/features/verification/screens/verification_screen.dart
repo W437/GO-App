@@ -162,9 +162,7 @@ class VerificationScreenState extends State<VerificationScreen> {
               const SizedBox(height: Dimensions.paddingSizeDefault),
 
               // Subtitle text
-              Get.find<SplashController>().configModel!.demo! ? Text(
-                'for_demo_purpose'.tr, style: robotoMedium,
-              ) : SizedBox(
+              SizedBox(
                 width: context.width > 700 ? 400 : context.width * 0.8,
                 child: Text(
                   _email != null

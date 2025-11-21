@@ -185,7 +185,6 @@ class AppConstants {
   static const String referBottomSheet = 'go_reffer_bottomsheet_show';
   static const String storySeenPrefix = 'go_story_seen';
   static const String maintenanceModeTopic = 'maintenance_mode_user_app';
-  static const String demoResetTopic = 'go_demo_reset';
   static const String configCacheKey = 'go_config_cache';
 
   // Explore Filter Preferences

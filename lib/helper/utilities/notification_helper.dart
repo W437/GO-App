@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:godelivery_user/common/widgets/adaptive/dialogs/demo_reset_dialog_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/chat/controllers/chat_controller.dart';
 import 'package:godelivery_user/features/dashboard/screens/dashboard_screen.dart';
@@ -64,9 +63,7 @@ class NotificationHelper {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       debugPrint("onMessage: ${message.data}, type: ${message.data['type']}");
 
-      if(message.data['type'] == AppConstants.demoResetTopic) {
-        Get.dialog(const DemoResetDialogWidget(), barrierDismissible: false);
-      }else if(message.data['type'] == 'maintenance'){
+      if(message.data['type'] == 'maintenance'){
         // Refresh config to get latest maintenance status
         await Get.find<SplashController>().loadConfig(forceRefresh: true);
         // Navigate to maintenance if enabled
@@ -98,8 +95,6 @@ class NotificationHelper {
           Get.find<ProfileController>().getUserInfo();
           Get.find<WalletController>().getWalletTransactionList('1', false, 'all');
         }
-      }else if(message.data['type'] == 'maintenance'){
-      }else if(message.data['type'] == AppConstants.demoResetTopic){
       }else {
         NotificationHelper.showNotification(message, flutterLocalNotificationsPlugin);
         if(Get.find<AuthController>().isLoggedIn()) {

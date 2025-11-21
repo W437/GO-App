@@ -20,19 +20,13 @@ class ConfigService {
   /// Fetch config from API (always fresh)
   /// Returns null if fetch fails or status != 200
   Future<ConfigModel?> fetchConfig() async {
-    print('🔍 [ConfigService] fetchConfig() called');
     final response = await _service.getConfigData(
       source: DataSourceEnum.client,
     );
 
-    print('🔍 [ConfigService] API response - status: ${response.statusCode}, body: ${response.body != null ? "present" : "null"}');
-
     if (response.statusCode == 200) {
-      final config = _service.prepareConfigData(response);
-      print('🔍 [ConfigService] Config parsed - success: ${config != null}');
-      return config;
+      return _service.prepareConfigData(response);
     }
-    print('❌ [ConfigService] API call failed - status: ${response.statusCode}, statusText: ${response.statusText}');
     return null;
   }
 
@@ -45,18 +39,13 @@ class ConfigService {
   ///
   /// This provides instant app startup while keeping data fresh.
   Future<ConfigModel?> fetchConfigCached() async {
-    print('🔍 [ConfigService] fetchConfigCached() called');
-
     // Try cache first
     final cacheResponse = await _service.getConfigData(
       source: DataSourceEnum.local,
     );
 
-    print('🔍 [ConfigService] Cache response - status: ${cacheResponse.statusCode}');
-
     if (cacheResponse.statusCode == 200) {
       final cachedConfig = _service.prepareConfigData(cacheResponse);
-      print('✅ [ConfigService] Using cached config, refreshing in background');
 
       // Refresh in background (fire and forget - no await)
       // This keeps cache fresh for next app launch
@@ -66,7 +55,6 @@ class ConfigService {
     }
 
     // No cache - fetch from API
-    print('⚠️ [ConfigService] No cache found, fetching from API');
     return await fetchConfig();
   }
 
