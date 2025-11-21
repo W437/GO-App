@@ -22,24 +22,16 @@ class CustomPageTransition extends CustomTransition {
   ) {
     return Stack(
       children: [
-        // 1. Background Effect (Applied to the PREVIOUS route when THIS route is pushing/popping)
-        // Note: In GetX CustomTransition, we only control the 'child' (the new page).
-        // We cannot directly transform the previous page here. 
-        // However, 'secondaryAnimation' controls how THIS page behaves when ANOTHER page is pushed on top.
-        // So this logic handles THIS page becoming the background.
+        // 1. Background Effect
         if (secondaryAnimation.status != AnimationStatus.dismissed)
           AnimatedBuilder(
             animation: secondaryAnimation,
             builder: (context, child) {
               final p = secondaryAnimation.value;
-              // Scale: 1.0 -> 0.96
               final scale = lerpDouble(1.0, 0.96, p)!;
-              // Radius: 0 -> 16 (approx)
               final radius = lerpDouble(0.0, 16.0, p)!;
-              // Dim: 0 -> 0.25
-              final dimAlpha = lerpDouble(0.0, 0.25, p)!;
+              final dimAlpha = lerpDouble(0.0, 0.4, p)!; // Increased dimming for better contrast
 
-              // Apply perspective to background too for consistency
               final Matrix4 matrix = Matrix4.identity()
                 ..setEntry(3, 2, 0.001)
                 ..scale(scale, scale, 1.0);
@@ -54,7 +46,6 @@ class CustomPageTransition extends CustomTransition {
                       child: child,
                     ),
                   ),
-                  // Dim overlay
                   IgnorePointer(
                     child: Container(
                       color: Colors.black.withOpacity(dimAlpha),
@@ -66,65 +57,93 @@ class CustomPageTransition extends CustomTransition {
             child: child,
           )
         else
-          // 2. Foreground Effect (Entrance/Exit of THIS page)
+          // 2. Foreground Effect
           AnimatedBuilder(
             animation: animation,
             builder: (context, child) {
-              final p = animation.value;
+              // Custom Curves
+              // Use a very smooth, natural curve for both open and close.
+              final double curvedValue = Curves.easeOutQuart.transform(animation.value);
+
+              // Spring for scale
+              // We use a custom Cubic with a higher overshoot value (1.5) to make the bounce visible
+              // since we are only scaling from 0.92 to 1.0 (a small delta).
+              // Standard easeOutBack (1.275) only gives ~0.8% overshoot on this delta.
+              // This custom curve gives ~4% overshoot (1.04).
+              final double scaleValue = animation.status == AnimationStatus.reverse
+                  ? curvedValue // No overshoot on close
+                  : const Cubic(0.175, 0.885, 0.32, 1.5).transform(animation.value);
+
               final size = MediaQuery.of(context).size;
               final width = size.width;
 
               // --- Parameters ---
-              const double startTranslateXRatio = 1.1; // Starts fully off-screen to the right (1.1 to be safe)
+              const double startTranslateXRatio = 1.1;
               const double startScale = 0.92;
-              const double startYAngle = 8.0 * pi / 180; // 8 degrees
-              const double startZAngle = 1.5 * pi / 180; // 1.5 degrees
-              const double overshootScale = 1.03;
+              const double startYAngle = 8.0 * pi / 180;
+              const double startZAngle = 1.5 * pi / 180;
 
               // --- Logic ---
-              
-              // Use standard curves for smoother motion
-              // easeOutQuad for translation/rotation (slower start than Cubic, less "jumpy")
-              final double smoothP = Curves.easeOutQuad.transform(p);
-              
-              // easeOutBack for scale (spring overshoot)
-              final double scaleP = Curves.easeOutBack.transform(p);
+              final double translateX = width * startTranslateXRatio * (1.0 - curvedValue);
+              final double yAngle = startYAngle * (1.0 - curvedValue);
+              final double zAngle = startZAngle * (1.0 - curvedValue);
 
-              final double translateX = width * startTranslateXRatio * (1.0 - smoothP);
-              final double yAngle = startYAngle * (1.0 - smoothP);
-              final double zAngle = startZAngle * (1.0 - smoothP);
+              // Scale logic
+              final double currentScale = startScale + (1.0 - startScale) * scaleValue;
 
-              // Scale: 0.92 -> 1.0 (with overshoot via easeOutBack)
-              final double currentScale = startScale + (1.0 - startScale) * scaleP;
+              // Corner Radius
+              final double cornerRadius = 24.0 * (1.0 - curvedValue);
 
-              // Corner Radius: 24 -> 0
-              final double cornerRadius = 24.0 * (1.0 - smoothP);
+              // Shadow Opacity (fade in/out)
+              final double shadowOpacity = (curvedValue * 0.5).clamp(0.0, 0.3);
 
-              // --- Matrix Construction ---
-              // Order: Perspective * Translate * Scale * Rotate
+              // --- Matrix ---
               final Matrix4 matrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.001); // Perspective
+                ..setEntry(3, 2, 0.001)
+                ..translate(translateX, 0.0, 0.0)
+                ..scale(currentScale, currentScale, 1.0)
+                ..rotateY(yAngle)
+                ..rotateZ(zAngle);
 
-              // Translate
-              matrix.translate(translateX, 0.0, 0.0);
+              Widget transformedChild = child ?? const SizedBox();
 
-              // Scale
-              matrix.scale(currentScale, currentScale, 1.0);
+              // Apply ClipRRect if needed
+              if (cornerRadius > 0.5) {
+                transformedChild = ClipRRect(
+                  borderRadius: BorderRadius.circular(cornerRadius),
+                  child: transformedChild,
+                );
+              }
 
-              // Rotate (Y then Z)
-              matrix.rotateY(yAngle); // Positive Y moves right side away (in Flutter's coord system with perspective)
-              matrix.rotateZ(zAngle);
-
+              // Wrap in Container for Shadow
+              // We apply the shadow *outside* the clip if possible, or to a container wrapping the clip.
+              // Since the clip clips the child, we need the shadow on the container *before* clipping? 
+              // No, shadow is usually on the "card" shape.
+              // If we clip the child, we lose the shadow if it's drawn by the child.
+              // So we wrap the clipped child in a container that has the shadow? 
+              // But the container needs to match the clip shape.
+              // Actually, physical model or DecoratedBox with borderRadius matches.
+              
               return Transform(
                 transform: matrix,
-                alignment: Alignment.center, // Rotate around center
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(cornerRadius),
-                  child: child,
+                alignment: Alignment.center,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(cornerRadius),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(shadowOpacity),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                        offset: const Offset(-10, 10), // Shadow to the left/bottom
+                      ),
+                    ],
+                  ),
+                  child: transformedChild,
                 ),
               );
             },
-            child: child,
+            child: RepaintBoundary(child: child),
           ),
       ],
     );

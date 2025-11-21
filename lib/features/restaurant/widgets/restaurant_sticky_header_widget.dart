@@ -144,7 +144,7 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
           child: KeyedSubtree(
             key: _itemKeys.length > index ? _itemKeys[index] : null,
             child: CustomInkWellWidget(
-              radius: 18,
+              radius: Dimensions.radiusDefault,
               onTap: category.id == null ? () {} : () => widget.onCategorySelected(category.id!),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -153,16 +153,14 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: isActive
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                 ),
                 child: Text(
                     category.name ?? '',
-                    style: robotoMedium.copyWith(
+                    style: (isActive ? robotoBold : robotoMedium).copyWith(
                       fontSize: Dimensions.fontSizeDefault,
-                      color: isActive ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                 ),
