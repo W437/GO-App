@@ -43,6 +43,9 @@ class OrderController extends GetxController implements GetxService {
   List<OrderModel>? _historyOrderList;
   List<OrderModel>? get historyOrderList => _historyOrderList;
 
+  bool _historyUnauthorized = false;
+  bool get historyUnauthorized => _historyUnauthorized;
+
   List<OrderDetailsModel>? _orderDetails;
   List<OrderDetailsModel>? get orderDetails => _orderDetails;
 
@@ -189,6 +192,7 @@ class OrderController extends GetxController implements GetxService {
     if(offset == 1) {
       _historyOffsetList = [];
       _historyOrderList = null;
+      _historyUnauthorized = false;
       if(notify) {
         update();
       }
@@ -204,6 +208,14 @@ class OrderController extends GetxController implements GetxService {
         _historyOrderList!.addAll(paginatedOrderModel.orders!);
         _historyPageSize = paginatedOrderModel.totalSize;
         _historyPaginate = false;
+        _historyUnauthorized = false;
+        update();
+      } else {
+        // API failed - check if it's because user is a guest (unauthorized)
+        if (!AuthHelper.isLoggedIn()) {
+          _historyUnauthorized = true;
+          _historyOrderList = []; // Set to empty list to stop loading spinner
+        }
         update();
       }
     } else {

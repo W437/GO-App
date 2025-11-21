@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_summary_card.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -11,21 +14,88 @@ class OrderAgainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<OrderController>(builder: (orderController) {
+      final isGuest = Get.find<AuthController>().isGuestLoggedIn();
+
+      // Still loading
       if (orderController.historyOrderList == null) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (orderController.historyOrderList!.isEmpty) {
-         return Center(
+      // Guest user - show login prompt
+      if (orderController.historyUnauthorized && isGuest) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.history, size: 50, color: Theme.of(context).disabledColor),
+                Icon(
+                  Icons.lock_outline,
+                  size: 64,
+                  color: Theme.of(context).disabledColor,
+                ),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+                Text(
+                  'Login to see your orders',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeLarge,
+                    color: Theme.of(context).textTheme.bodyLarge!.color,
+                  ),
+                ),
                 const SizedBox(height: Dimensions.paddingSizeSmall),
-                Text('No past orders', style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
+                Text(
+                  'Sign in to view your order history',
+                  style: robotoRegular.copyWith(
+                    color: Theme.of(context).disabledColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: Dimensions.paddingSizeLarge),
+                SizedBox(
+                  width: 200,
+                  child: CustomButtonWidget(
+                    buttonText: 'Login',
+                    onPressed: () {
+                      Get.back(); // Close cart modal
+                      Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.main));
+                    },
+                  ),
+                ),
               ],
             ),
-          );
+          ),
+        );
+      }
+
+      // Logged-in user with no orders - simple empty state
+      if (orderController.historyOrderList!.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.receipt_long_outlined,
+                size: 64,
+                color: Theme.of(context).disabledColor,
+              ),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              Text(
+                'No past orders',
+                style: robotoBold.copyWith(
+                  fontSize: Dimensions.fontSizeLarge,
+                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
+              Text(
+                'Your order history will appear here',
+                style: robotoRegular.copyWith(
+                  color: Theme.of(context).disabledColor,
+                ),
+              ),
+            ],
+          ),
+        );
       }
 
       return ListView.builder(
