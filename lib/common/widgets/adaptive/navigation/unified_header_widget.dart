@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/cart/cart_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/sheets/custom_bottom_sheet.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/cart/screens/shopping_cart_sheet.dart';
 
@@ -86,7 +86,7 @@ class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget
           if (showCart)
             IconButton(
               onPressed: () {
-                CustomBottomSheet.show(
+                CustomFullSheet.show(
                   context: context,
                   child: const ShoppingCartSheet(fromNav: false),
                   isFullScreen: true,

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/sheets/custom_bottom_sheet.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/order_details_sheet.dart';
 import 'package:godelivery_user/features/cart/widgets/order_again_view.dart';
@@ -168,7 +168,7 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                   // Shopping Carts View
                   ShoppingCartsView(onViewCart: () {
                     // Open OrderDetailsSheet using custom bottom sheet
-                    CustomBottomSheet.show(
+                    CustomFullSheet.show(
                       context: context,
                       child: const OrderDetailsSheet(),
                       isFullScreen: true,

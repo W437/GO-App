@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
-/// Reusable custom bottom sheet with smooth animations and swipe-to-dismiss
-/// Usage: CustomBottomSheet.show(context, child: YourWidget())
-class CustomBottomSheet extends StatefulWidget {
+/// Reusable custom full sheet with smooth animations and swipe-to-dismiss
+/// Usage: CustomFullSheet.show(context, child: YourWidget())
+class CustomFullSheet extends StatefulWidget {
   final Widget child;
   final double? height;
   final bool isFullScreen;
   final bool showDragHandle;
   final BorderRadius? borderRadius;
 
-  const CustomBottomSheet({
+  const CustomFullSheet({
     super.key,
     required this.child,
     this.height,
@@ -22,9 +22,9 @@ class CustomBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<CustomBottomSheet> createState() => _CustomBottomSheetState();
+  State<CustomFullSheet> createState() => _CustomFullSheetState();
 
-  /// Show the bottom sheet with custom slide-up + scale bounce animation
+  /// Show the full sheet with custom slide-up + scale bounce animation
   static Future<T?> show<T>({
     required BuildContext context,
     required Widget child,
@@ -95,7 +95,7 @@ class CustomBottomSheet extends StatefulWidget {
           builder: (context, child) {
             // Motion blur - peaks at middle of animation (fastest motion)
             final t = animation.value;
-            final blurAmount = lerpDouble(0, 4, 1 - (t * 2 - 1).abs()) ?? 0;
+            final blurAmount = lerpDouble(0, 2, 1 - (t * 2 - 1).abs()) ?? 0;
 
             // Create 3D perspective transformation with top tilted forward + horizontal squeeze
             final transform = Matrix4.identity()
@@ -126,7 +126,7 @@ class CustomBottomSheet extends StatefulWidget {
         );
       },
       pageBuilder: (context, animation, secondaryAnimation) {
-        return CustomBottomSheet(
+        return CustomFullSheet(
           height: height,
           isFullScreen: isFullScreen,
           showDragHandle: showDragHandle,
@@ -138,7 +138,7 @@ class CustomBottomSheet extends StatefulWidget {
   }
 }
 
-class _CustomBottomSheetState extends State<CustomBottomSheet> with TickerProviderStateMixin {
+class _CustomFullSheetState extends State<CustomFullSheet> with TickerProviderStateMixin {
   double _dragOffset = 0.0;
   bool _isDragging = false;
   late AnimationController _dismissController;
