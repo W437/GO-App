@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
 import 'package:godelivery_user/features/business/screens/subscription_payment_screen.dart';
 import 'package:godelivery_user/features/business/screens/subscription_success_or_failed_screen.dart';
-import 'package:godelivery_user/features/cart/screens/cart_screen.dart';
+import 'package:godelivery_user/features/cart/screens/shopping_cart_sheet.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:godelivery_user/features/checkout/domain/models/pricing_view_model.dart';
 import 'package:godelivery_user/features/checkout/screens/checkout_screen.dart';
@@ -178,7 +178,7 @@ class RouteHelper {
           color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: const CartScreen(fromNav: false),
+        child: const ShoppingCartSheet(fromNav: false),
       ),
     );
   }
@@ -526,7 +526,7 @@ class RouteHelper {
     GetPage(name: itemCampaign, page: () => getRoute(const ItemCampaignScreen())),
     GetPage(name: support, page: () => getRoute(byPuss: true, const SupportScreen())),
     GetPage(name: update, page: () => UpdateScreen(isUpdate: Get.parameters['update'] == 'true')),
-    GetPage(name: cart, page: () => getRoute(CartScreen(fromNav: false, fromReorder: Get.parameters['from_reorder'] == 'true', fromDineIn: Get.parameters['from_dine_in'] == 'true'))),
+    GetPage(name: cart, page: () => getRoute(ShoppingCartSheet(fromNav: false, fromReorder: Get.parameters['from_reorder'] == 'true', fromDineIn: Get.parameters['from_dine_in'] == 'true'))),
     GetPage(
       name: addAddress,
       page: () {

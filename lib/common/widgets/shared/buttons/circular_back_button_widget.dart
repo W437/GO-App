@@ -8,6 +8,7 @@ class CircularBackButtonWidget extends StatefulWidget {
   final Color? iconColor;
   final Color? backgroundColor;
   final bool showText;
+  final IconData? icon; // Custom icon (defaults to back arrow)
 
   const CircularBackButtonWidget({
     super.key,
@@ -15,6 +16,7 @@ class CircularBackButtonWidget extends StatefulWidget {
     this.iconColor,
     this.backgroundColor,
     this.showText = false,
+    this.icon,
   });
 
   @override
@@ -44,7 +46,7 @@ class _CircularBackButtonWidgetState extends State<CircularBackButtonWidget> {
             ),
             child: Center(
               child: Icon(
-                Icons.arrow_back_ios_rounded,
+                widget.icon ?? Icons.arrow_back_ios_rounded,
                 size: 24,
                 color: widget.iconColor ?? Theme.of(context).textTheme.bodyLarge!.color,
               ),
@@ -73,7 +75,7 @@ class _CircularBackButtonWidgetState extends State<CircularBackButtonWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.arrow_back_ios_rounded,
+                widget.icon ?? Icons.arrow_back_ios_rounded,
                 size: 20,
                 color: widget.iconColor ?? Theme.of(context).textTheme.bodyLarge!.color,
               ),

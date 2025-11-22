@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
-import 'package:godelivery_user/features/cart/widgets/cart_details_widget.dart';
+import 'package:godelivery_user/features/cart/widgets/order_details_sheet.dart';
 import 'package:godelivery_user/features/cart/widgets/order_again_view.dart';
 import 'package:godelivery_user/features/cart/widgets/shopping_carts_view.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
@@ -14,17 +15,17 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
-class CartScreen extends StatefulWidget {
+class ShoppingCartSheet extends StatefulWidget {
   final bool fromNav;
   final bool fromReorder;
   final bool fromDineIn;
-  const CartScreen({super.key, required this.fromNav, this.fromReorder = false, this.fromDineIn = false});
+  const ShoppingCartSheet({super.key, required this.fromNav, this.fromReorder = false, this.fromDineIn = false});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
+  State<ShoppingCartSheet> createState() => _ShoppingCartSheetState();
 }
 
-class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateMixin {
+class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showDetails = false;
 
@@ -79,7 +80,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
             });
           }
         ),
-        body: CartDetailsWidget(fromReorder: widget.fromReorder, fromDineIn: widget.fromDineIn),
+        body: OrderDetailsSheet(fromReorder: widget.fromReorder, fromDineIn: widget.fromDineIn),
       );
     }
 
@@ -96,9 +97,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Placeholder for back button if needed, or just empty
-                  widget.fromNav ? const SizedBox(width: 40) : IconButton(
-                    icon: const Icon(Icons.arrow_back),
+                  // Back button with down arrow to close sheet
+                  widget.fromNav ? const SizedBox(width: 44) : CircularBackButtonWidget(
+                    icon: Icons.keyboard_arrow_down_rounded,
                     onPressed: () => Get.back(),
                   ),
                   Text(

@@ -22,16 +22,16 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
-class CartDetailsWidget extends StatefulWidget {
+class OrderDetailsSheet extends StatefulWidget {
   final bool fromReorder;
   final bool fromDineIn;
-  const CartDetailsWidget({super.key, this.fromReorder = false, this.fromDineIn = false});
+  const OrderDetailsSheet({super.key, this.fromReorder = false, this.fromDineIn = false});
 
   @override
-  State<CartDetailsWidget> createState() => _CartDetailsWidgetState();
+  State<OrderDetailsSheet> createState() => _OrderDetailsSheetState();
 }
 
-class _CartDetailsWidgetState extends State<CartDetailsWidget> {
+class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   final ScrollController scrollController = ScrollController();
   GlobalKey<ExpandableBottomSheetState> key = GlobalKey();
   final GlobalKey _widgetKey = GlobalKey();

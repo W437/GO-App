@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/services.dart';
-import 'package:godelivery_user/features/cart/screens/cart_screen.dart';
+import 'package:godelivery_user/features/cart/screens/shopping_cart_sheet.dart';
 import 'package:godelivery_user/features/checkout/widgets/congratulation_dialogue.dart';
 import 'package:godelivery_user/features/dashboard/widgets/registration_success_bottom_sheet.dart';
 import 'package:godelivery_user/features/home/screens/home_screen.dart';

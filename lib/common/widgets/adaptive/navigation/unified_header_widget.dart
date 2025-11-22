@@ -7,7 +7,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/cart/cart_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
-import 'package:godelivery_user/features/cart/screens/cart_screen.dart';
+import 'package:godelivery_user/features/cart/screens/shopping_cart_sheet.dart';
 
 class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -96,7 +96,7 @@ class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     ),
-                    child: const CartScreen(fromNav: false),
+                    child: const ShoppingCartSheet(fromNav: false),
                   ),
                 );
               },
