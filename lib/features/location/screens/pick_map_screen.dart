@@ -259,26 +259,39 @@ class _PickMapScreenState extends State<PickMapScreen> {
                               Dimensions.paddingSizeExtraLarge,
                               Dimensions.paddingSizeDefault,
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Row(
                               children: [
-                                CustomButtonWidget(
-                                  buttonText: 'select_zone'.tr,
-                                  icon: Icons.list_alt,
-                                  color: Theme.of(context).cardColor,
-                                  textColor: Theme.of(context).textTheme.bodyLarge!.color,
-                                  iconColor: Colors.black,
-                                  onPressed: () => _showZoneSelectionActionSheet(context),
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.list_alt),
+                                    color: Theme.of(context).textTheme.bodyLarge!.color,
+                                    onPressed: () => _showZoneSelectionActionSheet(context),
+                                  ),
                                 ),
-                                const SizedBox(height: Dimensions.paddingSizeSmall),
-                                CustomButtonWidget(
-                                  buttonText: locationController.inZone
-                                      ? (widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr)
-                                      : 'service_not_available_in_this_area'.tr,
-                                  isLoading: locationController.isLoading,
-                                  onPressed: (locationController.buttonDisabled || locationController.loading)
-                                      ? null
-                                      : () => _onPickAddressButtonPressed(locationController),
+                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                                Expanded(
+                                  child: CustomButtonWidget(
+                                    buttonText: locationController.inZone
+                                        ? (widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr)
+                                        : 'service_not_available_in_this_area'.tr,
+                                    isLoading: locationController.isLoading,
+                                    onPressed: (locationController.buttonDisabled || locationController.loading)
+                                        ? null
+                                        : () => _onPickAddressButtonPressed(locationController),
+                                  ),
                                 ),
                               ],
                             ),

@@ -112,9 +112,11 @@ class ZonePolygonHelper {
 
     for (int i = 0; i < polygon.length; i++) {
       if ((polygon[i].latitude > point.latitude) != (polygon[j].latitude > point.latitude)) {
-        double slope = (point.longitude - polygon[i].longitude) * (polygon[j].latitude - polygon[i].latitude) /
-            (polygon[j].longitude - polygon[i].longitude) + polygon[i].latitude;
-        if (point.latitude < slope) {
+        // Calculate the x-coordinate (longitude) where the ray crosses the polygon edge
+        double xIntersection = (point.latitude - polygon[i].latitude) *
+            (polygon[j].longitude - polygon[i].longitude) /
+            (polygon[j].latitude - polygon[i].latitude) + polygon[i].longitude;
+        if (point.longitude < xIntersection) {
           intersections++;
         }
       }
