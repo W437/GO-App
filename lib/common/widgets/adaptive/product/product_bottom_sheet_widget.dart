@@ -34,6 +34,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -165,16 +166,13 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
             Positioned(
               top: Dimensions.paddingSizeDefault,
               left: Dimensions.paddingSizeDefault,
-              child: InkWell(
-                onTap: () => Get.back(),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.close, size: 20, color: Colors.black),
-                ),
+              child: CircularBackButtonWidget(
+                icon: Icons.keyboard_arrow_down,
+                backgroundColor: Colors.white.withValues(alpha: 0.6),
+                iconColor: Colors.black,
+                size: 36,
+                iconSize: 20,
+                onPressed: () => Get.back(),
               ),
             ),
 

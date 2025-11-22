@@ -433,13 +433,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                 height: 250,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];
 
                     return Padding(
-                      padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: 5),
+                      padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, top: 8, bottom: 8),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         decoration: BoxDecoration(

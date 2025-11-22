@@ -16,7 +16,8 @@ import 'package:get/get.dart';
 class BottomCartWidget extends StatefulWidget {
   final int? restaurantId;
   final bool fromDineIn;
-  const BottomCartWidget({super.key, this.restaurantId, this.fromDineIn = false});
+  final VoidCallback? onTap;
+  const BottomCartWidget({super.key, this.restaurantId, this.fromDineIn = false, this.onTap});
 
   @override
   State<BottomCartWidget> createState() => _BottomCartWidgetState();
@@ -27,6 +28,13 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
   late AnimationController _priceBounceController;
   late Animation<double> _iconBounceAnimation;
   late Animation<double> _priceBounceAnimation;
+
+  // Widget-level press and bounce animations
+  late AnimationController _pressController;
+  late Animation<double> _pressAnimation;
+  late AnimationController _widgetBounceController;
+  late Animation<double> _widgetBounceAnimation;
+
   Timer? _updateBounceTimer;
   int _previousCartCount = 0;
 
@@ -92,6 +100,51 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
       ),
     ]).animate(_priceBounceController);
 
+    // Initialize press animation for widget tap
+    _pressController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+
+    _pressAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    // Initialize bounce animation for widget tap
+    _widgetBounceController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _widgetBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.05)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.05, end: 0.98)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.02)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 20,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
+      ),
+    ]).animate(_widgetBounceController);
+
     // Initialize previous cart count
     final cartController = Get.find<CartController>();
     _previousCartCount = cartController.cartList.length;
@@ -101,6 +154,8 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
   void dispose() {
     _iconBounceController.dispose();
     _priceBounceController.dispose();
+    _pressController.dispose();
+    _widgetBounceController.dispose();
     _updateBounceTimer?.cancel();
     super.dispose();
   }
@@ -170,30 +225,49 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Main cart container with blur
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusLarge), // Rounded rect shape
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4), // Match search bar opacity
-                            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color.fromRGBO(0, 0, 0, 0.1),
-                                blurRadius: 6,
-                                spreadRadius: -1,
-                                offset: Offset(0, 4),
-                              ),
-                              BoxShadow(
-                                color: Color.fromRGBO(0, 0, 0, 0.06),
-                                blurRadius: 4,
-                                spreadRadius: -1,
-                                offset: Offset(0, 2),
-                              )
-                            ],
-                          ),
-                          child: Column(
+                    GestureDetector(
+                      onTapDown: (_) => _pressController.forward(),
+                      onTapUp: (_) {
+                        _pressController.reverse();
+                        // Only trigger bounce if not already animating
+                        if (!_widgetBounceController.isAnimating) {
+                          _widgetBounceController.forward(from: 0.0);
+                        }
+                      },
+                      onTapCancel: () => _pressController.reverse(),
+                      onTap: widget.onTap,
+                      child: AnimatedBuilder(
+                        animation: Listenable.merge([_pressAnimation, _widgetBounceAnimation]),
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _pressAnimation.value * _widgetBounceAnimation.value,
+                            child: child,
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge), // Rounded rect shape
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.4), // Match search bar opacity
+                              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromRGBO(0, 0, 0, 0.1),
+                                  blurRadius: 6,
+                                  spreadRadius: -1,
+                                  offset: Offset(0, 4),
+                                ),
+                                BoxShadow(
+                                  color: Color.fromRGBO(0, 0, 0, 0.06),
+                                  blurRadius: 4,
+                                  spreadRadius: -1,
+                                  offset: Offset(0, 2),
+                                )
+                              ],
+                            ),
+                            child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               // Top section: Cart info and button
@@ -320,6 +394,8 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                               ],
                             ],
                           ),
+                        ),
+                      ),
                         ),
                       ),
                     ),

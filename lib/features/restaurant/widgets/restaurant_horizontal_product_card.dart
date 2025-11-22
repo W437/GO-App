@@ -5,6 +5,7 @@ import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_s
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/features/restaurant/widgets/compact_expandable_cart_badge.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -58,129 +59,116 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.16),
-              blurRadius: 4,
+              color: Color.fromRGBO(6, 24, 44, 0.1),
+              blurRadius: 0,
+              spreadRadius: 2,
+              offset: Offset(0, 0),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(6, 24, 44, 0.3),
+              blurRadius: 6,
+              spreadRadius: -1,
+              offset: Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(255, 255, 255, 0.08),
+              blurRadius: 0,
               spreadRadius: 0,
               offset: Offset(0, 1),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.3),
+              blurRadius: 0,
+              spreadRadius: 0,
+              offset: Offset(0, 0),
             ),
           ],
         ),
         child: Stack(
           children: [
-            Column(
-              children: [
-                // Product Image - fills the top section
-                Expanded(
-                  flex: 3,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(Dimensions.radiusDefault),
-                        topRight: Radius.circular(Dimensions.radiusDefault),
-                      ),
-                      child: BlurhashImageWidget(
-                        imageUrl: product.imageFullUrl ?? '',
-                        blurhash: product.imageBlurhash,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+            // Product Image - takes up top 70% of card
+            Align(
+              alignment: Alignment.topCenter,
+              child: FractionallySizedBox(
+                heightFactor: 0.7,
+                widthFactor: 1.0,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(Dimensions.radiusDefault),
+                    topRight: Radius.circular(Dimensions.radiusDefault),
                   ),
-                ),
-
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                      // Likes & Price Row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.favorite, color: Colors.orange, size: 14),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${product.likeCount ?? 0}',
-                                style: robotoRegular.copyWith(
-                                  fontSize: Dimensions.fontSizeSmall,
-                                  color: Theme.of(context).hintColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            PriceConverter.convertPrice(discountPrice),
-                            style: robotoBold.copyWith(
-                              fontSize: Dimensions.fontSizeDefault,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
-                      // Name
-                      Text(
-                        product.name ?? '',
-                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                  child: BlurhashImageWidget(
+                    imageUrl: product.imageFullUrl ?? '',
+                    blurhash: product.imageBlurhash,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
 
-            // Cart Quantity Badge - Top Right
-            GetBuilder<CartController>(
-              builder: (cartController) {
-                // Calculate total quantity of this product in cart
-                int totalQuantity = 0;
-                for (var cartItem in cartController.cartList) {
-                  if (cartItem.product?.id == product.id) {
-                    totalQuantity += cartItem.quantity ?? 0;
-                  }
-                }
-
-                if (totalQuantity == 0) return const SizedBox();
-
-                return Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+            // Bottom info section - overlays bottom of image
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor.withValues(alpha: 0.95),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                ),
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Likes & Price Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.favorite, color: Colors.orange, size: 14),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${product.likeCount ?? 0}',
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          PriceConverter.convertPrice(discountPrice),
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
                         ),
                       ],
                     ),
-                    child: Text(
-                      '$totalQuantity',
-                      style: robotoBold.copyWith(
-                        color: Colors.white,
-                        fontSize: Dimensions.fontSizeSmall,
-                      ),
+                    const SizedBox(height: 4),
+
+                    // Name
+                    Text(
+                      product.name ?? '',
+                      style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
+            ),
+
+            // Expandable Cart Badge - Top Right Corner
+            Positioned(
+              top: 0,
+              right: 0,
+              child: CompactExpandableCartBadge(
+                productId: product.id!,
+              ),
             ),
           ],
         ),
