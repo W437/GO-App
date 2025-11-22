@@ -11,6 +11,37 @@ import 'package:godelivery_user/helper/utilities/db_helper.dart';
 
 class LocalClient {
 
+  /// Check if cached data is expired based on TTL (Time-To-Live) in seconds
+  /// Returns true if cache is expired or doesn't exist
+  static Future<bool> isCacheExpired(String cacheId, int ttlSeconds) async {
+    try {
+      if (GetPlatform.isWeb) {
+        SharedPreferences sharedPreferences = Get.find();
+        String? timestampStr = sharedPreferences.getString('${cacheId}_timestamp');
+        if (timestampStr == null) return true;
+
+        DateTime cachedAt = DateTime.parse(timestampStr);
+        DateTime now = DateTime.now();
+        int ageInSeconds = now.difference(cachedAt).inSeconds;
+
+        return ageInSeconds > ttlSeconds;
+      } else {
+        final CacheResponseData? cacheData = await database.getCacheResponseById(cacheId);
+        if (cacheData == null || cacheData.createdAt == null) return true;
+
+        DateTime now = DateTime.now();
+        int ageInSeconds = now.difference(cacheData.createdAt!).inSeconds;
+
+        return ageInSeconds > ttlSeconds;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('=====error checking cache expiry: $e');
+      }
+      return true; // Treat errors as expired
+    }
+  }
+
   static Future<String?> organize(DataSourceEnum source, String cacheId, String? responseBody, Map<String, String>? header) async {
     SharedPreferences sharedPreferences = Get.find();
     switch(source) {
@@ -18,6 +49,7 @@ class LocalClient {
         try{
           if(GetPlatform.isWeb) {
             await sharedPreferences.setString(cacheId, responseBody??'');
+            await sharedPreferences.setString('${cacheId}_timestamp', DateTime.now().toIso8601String());
           } else {
             DbHelper.insertOrUpdate(
               id: cacheId,

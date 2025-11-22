@@ -46,9 +46,16 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   late AnimationController _dragAnimationController;
   late Animation<double> _dragAnimation;
 
+  // Track which stories have been marked as viewed (opened)
+  final Set<int> _viewedStoryIds = {};
+
+  // Track when viewer was opened to prevent premature close
+  late DateTime _viewerOpenedAt;
+
   @override
   void initState() {
     super.initState();
+    _viewerOpenedAt = DateTime.now();
     _currentRestaurantIndex = widget.initialIndex;
     _restaurantPageController = PageController(initialPage: widget.initialIndex);
 
@@ -96,25 +103,49 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   void _loadMedia() {
     final collection = widget.collections[_currentRestaurantIndex];
+    print('📖 [STORY LOAD] Loading media for restaurant ${collection.restaurant?.name}');
+    print('   Stories count: ${collection.stories?.length ?? 0}');
+
     if (collection.stories == null || collection.stories!.isEmpty) {
+      print('   ❌ No stories in collection - going to next restaurant');
       _goToNextRestaurant();
       return;
     }
 
     // Ensure story index is valid
     if (_currentStoryIndex >= collection.stories!.length) {
+      print('   ❌ Story index $_currentStoryIndex out of range - going to next restaurant');
       _goToNextRestaurant();
       return;
     }
 
     final story = collection.stories![_currentStoryIndex];
+    print('   Story ${story.id}: ${story.title ?? "Untitled"}');
+    print('   Media count: ${story.media?.length ?? 0}');
+
+    // Track story view when first opened (not completed yet)
+    if (story.id != null && !_viewedStoryIds.contains(story.id!)) {
+      _viewedStoryIds.add(story.id!);
+      // Mark as viewed but NOT completed
+      Get.find<StoryController>().markStoryViewed(story.id!, false);
+      print('📖 [STORY VIEW] Opened story ${story.id} - marking as viewed (not completed)');
+    }
+
+    // If story has no media, show "No media available" and play progress for 5 seconds
     if (story.media == null || story.media!.isEmpty) {
-      _goToNextStory();
+      print('   ⚠️  Story has no media - displaying "No media available" for 5 seconds');
+      setState(() {
+        _isMediaLoaded = true;
+      });
+      // Start progress animation with default duration
+      _animationController.duration = const Duration(seconds: 5);
+      _animationController.forward(from: 0);
       return;
     }
 
     // Ensure media index is valid
     if (_currentMediaIndex >= story.media!.length) {
+      print('   ❌ Media index out of range - going to next story');
       _goToNextStory();
       return;
     }
@@ -186,6 +217,12 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       _animationController.reset();
       _loadMedia();
     } else {
+      // Finished last media of this story - mark story as completed
+      if (currentStory?.id != null) {
+        Get.find<StoryController>().markStoryViewed(currentStory!.id!, true);
+        print('📖 [STORY VIEW] Completed story ${currentStory.id} - marking as completed');
+      }
+
       // No more media in current story, try next story
       _goToNextStory();
     }
@@ -221,7 +258,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     for (var story in collection.stories!) {
       total += story.media?.length ?? 0;
     }
-    return total;
+
+    // Return at least the story count if no media (so progress bars still show)
+    return total > 0 ? total : collection.stories!.length;
   }
 
   /// Calculate global media index across all stories
@@ -287,7 +326,19 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.of(context).pop();
+      // Add minimum display time guard to prevent premature close
+      final timeSinceOpen = DateTime.now().difference(_viewerOpenedAt).inMilliseconds;
+      if (timeSinceOpen < 500) {
+        print('📖 [STORY VIEW] Preventing early close (viewer open for ${timeSinceOpen}ms)');
+        // Delay closing to allow reveal animation to complete
+        Future.delayed(Duration(milliseconds: 500 - timeSinceOpen), () {
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        });
+      } else {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -298,7 +349,19 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.of(context).pop();
+      // Add minimum display time guard to prevent premature close
+      final timeSinceOpen = DateTime.now().difference(_viewerOpenedAt).inMilliseconds;
+      if (timeSinceOpen < 500) {
+        print('📖 [STORY VIEW] Preventing early close (viewer open for ${timeSinceOpen}ms)');
+        // Delay closing to allow reveal animation to complete
+        Future.delayed(Duration(milliseconds: 500 - timeSinceOpen), () {
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        });
+      } else {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -309,14 +372,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
           .markRestaurantStorySeen(collection.restaurant!.id!);
     }
 
-    // Mark all stories in this restaurant as viewed on backend
-    if (collection.stories != null && collection.stories!.isNotEmpty) {
-      for (var story in collection.stories!) {
-        if (story.id != null) {
-          Get.find<StoryController>().markStoryViewed(story.id!, true);
-        }
-      }
-    }
+    // Note: Individual story completion is now tracked in _goToNextMedia()
+    // when each story's last media finishes, not here in bulk
+    print('📖 [STORY VIEW] Finished viewing restaurant ${collection.restaurant?.name}');
   }
 
   /// Format time elapsed since story was published (e.g., "5h", "23m", "2d")
@@ -419,32 +477,20 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                 : null;
             final mediaList = story?.media ?? [];
 
-            if (mediaList.isEmpty) {
-              return CubePageTransformer(
-                controller: _restaurantPageController,
-                pageIndex: restaurantIndex,
-                child: const Center(
-                  child: Text(
-                    'No media available',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              );
-            }
-
-            final currentMedia = mediaList[_currentMediaIndex];
+            final currentMedia = mediaList.isNotEmpty ? mediaList[_currentMediaIndex] : null;
 
             return CubePageTransformer(
               controller: _restaurantPageController,
               pageIndex: restaurantIndex,
               child: Stack(
               children: [
-                // Media content
+                // Media content or empty state
                 Positioned.fill(
-                  child: StoryContentWidget(
-                    // Only use GlobalKey for the current restaurant to avoid conflicts
-                    key: restaurantIndex == _currentRestaurantIndex ? _contentKey : null,
-                    media: currentMedia,
+                  child: currentMedia != null
+                      ? StoryContentWidget(
+                          // Only use GlobalKey for the current restaurant to avoid conflicts
+                          key: restaurantIndex == _currentRestaurantIndex ? _contentKey : null,
+                          media: currentMedia,
                     onImageLoaded: restaurantIndex == _currentRestaurantIndex ? _onImageLoaded : null,
                     onVideoReady: restaurantIndex == _currentRestaurantIndex
                         ? () {
@@ -477,9 +523,18 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                             // You can sync progress with video playback if needed
                           }
                         : null,
-                  ),
+                        )
+                      : Center(
+                          child: Text(
+                            'No media available',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: Dimensions.fontSizeLarge,
+                            ),
+                          ),
+                        ),
                 ),
-                if ((currentMedia.overlays?.isNotEmpty ?? false))
+                if (currentMedia != null && (currentMedia.overlays?.isNotEmpty ?? false))
                   Positioned.fill(
                     child: IgnorePointer(
                       child: StoryOverlaysLayer(
@@ -610,8 +665,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                 ),
 
                 // Bottom caption and CTA
-                if (currentMedia.caption != null ||
-                    currentMedia.ctaLabel != null)
+                if (currentMedia != null && (currentMedia.caption != null || currentMedia.ctaLabel != null))
                   Positioned(
                     bottom: 0,
                     left: 0,

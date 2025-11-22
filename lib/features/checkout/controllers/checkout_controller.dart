@@ -28,6 +28,7 @@ import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/forms/custom_dropdown_widget.dart';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -601,14 +602,45 @@ class CheckoutController extends GetxController implements GetxService {
   Future<double?> getDistanceInKM(LatLng originLatLng, LatLng destinationLatLng, {bool isDuration = false, bool isRiding = false, bool fromDashboard = false}) async {
     _isDistanceLoading = true;
     update();
-    _distance = await checkoutServiceInterface.getDistanceInKM(originLatLng, destinationLatLng, isDuration: isDuration);
 
-    if(!fromDashboard) {
+    try {
+      _distance = await checkoutServiceInterface.getDistanceInKM(originLatLng, destinationLatLng, isDuration: isDuration);
+    } catch (e) {
+      // Distance API failed (e.g., Google Maps 403 error)
+      // Calculate fallback distance using Haversine formula
+      if (kDebugMode) {
+        print('Distance API error: $e');
+        print('Using fallback distance calculation');
+      }
+      _distance = _calculateHaversineDistance(originLatLng, destinationLatLng);
+    }
+
+    if(!fromDashboard && _distance != null) {
       await getExtraCharge(_distance);
     }
     _isDistanceLoading = false;
     update();
     return _distance;
+  }
+
+  /// Calculate distance using Haversine formula as fallback
+  double _calculateHaversineDistance(LatLng origin, LatLng destination) {
+    const double earthRadiusKm = 6371.0;
+
+    double dLat = _degreesToRadians(destination.latitude - origin.latitude);
+    double dLon = _degreesToRadians(destination.longitude - origin.longitude);
+
+    double a = (sin(dLat / 2) * sin(dLat / 2)) +
+        cos(_degreesToRadians(origin.latitude)) *
+        cos(_degreesToRadians(destination.latitude)) *
+        (sin(dLon / 2) * sin(dLon / 2));
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return earthRadiusKm * c;
+  }
+
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180.0;
   }
 
   Future<String> placeOrder(PlaceOrderBodyModel placeOrderBody, int? zoneID, double amount, double? maximumCodOrderAmount, bool fromCart,

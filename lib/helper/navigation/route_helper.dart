@@ -338,7 +338,7 @@ class RouteHelper {
   static String getMartRoute() => mart;
 
   static List<GetPage> routes = [
-    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true')))),
+    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true'))), popGesture: false),
     GetPage(name: splash, page: () {
       NotificationBodyModel? data;
       DeepLinkBody? linkData;
@@ -353,8 +353,8 @@ class RouteHelper {
       return SplashScreen(notificationBody: data, linkBody: linkData);
     }),
     GetPage(name: language, page: () => LanguageScreen(fromMenu: Get.parameters['page'] == 'menu')),
-    GetPage(name: welcome, page: () => const WelcomeScreen()),
-    GetPage(name: onBoarding, page: () => OnBoardingScreen()),
+    GetPage(name: welcome, page: () => const WelcomeScreen(), popGesture: false),
+    GetPage(name: onBoarding, page: () => OnBoardingScreen(), popGesture: false),
     GetPage(name: unifiedOnboarding, page: () => const UnifiedOnboardingScreen()),
     GetPage(name: signIn, page: () => SignInScreen(
       exitFromApp: Get.parameters['page'] == signUp || Get.parameters['page'] == splash || Get.parameters['page'] == onBoarding,

@@ -156,34 +156,10 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   Widget build(BuildContext context) {
     bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
     return PopScope(
-      canPop: Navigator.canPop(context),
+      canPop: false, // Completely disable back navigation (button and gesture)
       onPopInvokedWithResult: (didPop, result) async{
-        debugPrint('$_canExit');
-        if (_pageIndex != 2) {
-          _setPage(2);
-        } else {
-          if(_canExit) {
-            if (GetPlatform.isAndroid) {
-              SystemNavigator.pop();
-            } else if (GetPlatform.isIOS) {
-              exit(0);
-            }
-          }
-          if(!ResponsiveHelper.isDesktop(context)) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('back_press_again_to_exit'.tr, style: const TextStyle(color: Colors.white)),
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-              margin: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-            ));
-          }
-          _canExit = true;
-
-          Timer(const Duration(seconds: 2), () {
-            _canExit = false;
-          });
-        }
+        // Completely ignore all back events (swipe gesture and back button)
+        return;
       },
       child: Scaffold(
         key: _scaffoldKey,

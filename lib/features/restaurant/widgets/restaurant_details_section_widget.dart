@@ -73,7 +73,9 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                       Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
                       const SizedBox(width: 8),
                       Text(
-                        'Closes at ${restaurant.schedules != null && restaurant.schedules!.isNotEmpty ? restaurant.schedules![0].closingTime : 'N/A'}', // Simplified logic
+                        restaurant.schedules != null && restaurant.schedules!.isNotEmpty
+                          ? 'Closes at ${restaurant.schedules![0].closingTime}'
+                          : 'Loading hours...', // Show loading state instead of N/A
                         style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
                       ),
                       const SizedBox(width: 8),

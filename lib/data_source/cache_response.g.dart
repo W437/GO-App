@@ -37,8 +37,17 @@ class $CacheResponseTable extends CacheResponse
   late final GeneratedColumn<String> response = GeneratedColumn<String>(
       'response', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  List<GeneratedColumn> get $columns => [id, endPoint, header, response];
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, endPoint, header, response, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -70,6 +79,10 @@ class $CacheResponseTable extends CacheResponse
     } else if (isInserting) {
       context.missing(_responseMeta);
     }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
     return context;
   }
 
@@ -87,6 +100,8 @@ class $CacheResponseTable extends CacheResponse
           .read(DriftSqlType.string, data['${effectivePrefix}header'])!,
       response: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}response'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
   }
 
@@ -102,11 +117,13 @@ class CacheResponseData extends DataClass
   final String endPoint;
   final String header;
   final String response;
+  final DateTime createdAt;
   const CacheResponseData(
       {required this.id,
       required this.endPoint,
       required this.header,
-      required this.response});
+      required this.response,
+      required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -114,6 +131,7 @@ class CacheResponseData extends DataClass
     map['end_point'] = Variable<String>(endPoint);
     map['header'] = Variable<String>(header);
     map['response'] = Variable<String>(response);
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
@@ -123,6 +141,7 @@ class CacheResponseData extends DataClass
       endPoint: Value(endPoint),
       header: Value(header),
       response: Value(response),
+      createdAt: Value(createdAt),
     );
   }
 
@@ -134,6 +153,7 @@ class CacheResponseData extends DataClass
       endPoint: serializer.fromJson<String>(json['endPoint']),
       header: serializer.fromJson<String>(json['header']),
       response: serializer.fromJson<String>(json['response']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -144,16 +164,22 @@ class CacheResponseData extends DataClass
       'endPoint': serializer.toJson<String>(endPoint),
       'header': serializer.toJson<String>(header),
       'response': serializer.toJson<String>(response),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
   CacheResponseData copyWith(
-          {int? id, String? endPoint, String? header, String? response}) =>
+          {int? id,
+          String? endPoint,
+          String? header,
+          String? response,
+          DateTime? createdAt}) =>
       CacheResponseData(
         id: id ?? this.id,
         endPoint: endPoint ?? this.endPoint,
         header: header ?? this.header,
         response: response ?? this.response,
+        createdAt: createdAt ?? this.createdAt,
       );
   CacheResponseData copyWithCompanion(CacheResponseCompanion data) {
     return CacheResponseData(
@@ -161,6 +187,7 @@ class CacheResponseData extends DataClass
       endPoint: data.endPoint.present ? data.endPoint.value : this.endPoint,
       header: data.header.present ? data.header.value : this.header,
       response: data.response.present ? data.response.value : this.response,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -170,13 +197,14 @@ class CacheResponseData extends DataClass
           ..write('id: $id, ')
           ..write('endPoint: $endPoint, ')
           ..write('header: $header, ')
-          ..write('response: $response')
+          ..write('response: $response, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, endPoint, header, response);
+  int get hashCode => Object.hash(id, endPoint, header, response, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -184,7 +212,8 @@ class CacheResponseData extends DataClass
           other.id == this.id &&
           other.endPoint == this.endPoint &&
           other.header == this.header &&
-          other.response == this.response);
+          other.response == this.response &&
+          other.createdAt == this.createdAt);
 }
 
 class CacheResponseCompanion extends UpdateCompanion<CacheResponseData> {
@@ -192,17 +221,20 @@ class CacheResponseCompanion extends UpdateCompanion<CacheResponseData> {
   final Value<String> endPoint;
   final Value<String> header;
   final Value<String> response;
+  final Value<DateTime> createdAt;
   const CacheResponseCompanion({
     this.id = const Value.absent(),
     this.endPoint = const Value.absent(),
     this.header = const Value.absent(),
     this.response = const Value.absent(),
+    this.createdAt = const Value.absent(),
   });
   CacheResponseCompanion.insert({
     this.id = const Value.absent(),
     required String endPoint,
     required String header,
     required String response,
+    this.createdAt = const Value.absent(),
   })  : endPoint = Value(endPoint),
         header = Value(header),
         response = Value(response);
@@ -211,12 +243,14 @@ class CacheResponseCompanion extends UpdateCompanion<CacheResponseData> {
     Expression<String>? endPoint,
     Expression<String>? header,
     Expression<String>? response,
+    Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (endPoint != null) 'end_point': endPoint,
       if (header != null) 'header': header,
       if (response != null) 'response': response,
+      if (createdAt != null) 'created_at': createdAt,
     });
   }
 
@@ -224,12 +258,14 @@ class CacheResponseCompanion extends UpdateCompanion<CacheResponseData> {
       {Value<int>? id,
       Value<String>? endPoint,
       Value<String>? header,
-      Value<String>? response}) {
+      Value<String>? response,
+      Value<DateTime>? createdAt}) {
     return CacheResponseCompanion(
       id: id ?? this.id,
       endPoint: endPoint ?? this.endPoint,
       header: header ?? this.header,
       response: response ?? this.response,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -248,6 +284,9 @@ class CacheResponseCompanion extends UpdateCompanion<CacheResponseData> {
     if (response.present) {
       map['response'] = Variable<String>(response.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
     return map;
   }
 
@@ -257,7 +296,8 @@ class CacheResponseCompanion extends UpdateCompanion<CacheResponseData> {
           ..write('id: $id, ')
           ..write('endPoint: $endPoint, ')
           ..write('header: $header, ')
-          ..write('response: $response')
+          ..write('response: $response, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
@@ -280,6 +320,7 @@ typedef $$CacheResponseTableCreateCompanionBuilder = CacheResponseCompanion
   required String endPoint,
   required String header,
   required String response,
+  Value<DateTime> createdAt,
 });
 typedef $$CacheResponseTableUpdateCompanionBuilder = CacheResponseCompanion
     Function({
@@ -287,6 +328,7 @@ typedef $$CacheResponseTableUpdateCompanionBuilder = CacheResponseCompanion
   Value<String> endPoint,
   Value<String> header,
   Value<String> response,
+  Value<DateTime> createdAt,
 });
 
 class $$CacheResponseTableFilterComposer
@@ -309,6 +351,9 @@ class $$CacheResponseTableFilterComposer
 
   ColumnFilters<String> get response => $composableBuilder(
       column: $table.response, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$CacheResponseTableOrderingComposer
@@ -331,6 +376,9 @@ class $$CacheResponseTableOrderingComposer
 
   ColumnOrderings<String> get response => $composableBuilder(
       column: $table.response, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$CacheResponseTableAnnotationComposer
@@ -353,6 +401,9 @@ class $$CacheResponseTableAnnotationComposer
 
   GeneratedColumn<String> get response =>
       $composableBuilder(column: $table.response, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$CacheResponseTableTableManager extends RootTableManager<
@@ -385,24 +436,28 @@ class $$CacheResponseTableTableManager extends RootTableManager<
             Value<String> endPoint = const Value.absent(),
             Value<String> header = const Value.absent(),
             Value<String> response = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
           }) =>
               CacheResponseCompanion(
             id: id,
             endPoint: endPoint,
             header: header,
             response: response,
+            createdAt: createdAt,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String endPoint,
             required String header,
             required String response,
+            Value<DateTime> createdAt = const Value.absent(),
           }) =>
               CacheResponseCompanion.insert(
             id: id,
             endPoint: endPoint,
             header: header,
             response: response,
+            createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

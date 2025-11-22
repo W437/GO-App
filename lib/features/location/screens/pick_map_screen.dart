@@ -18,6 +18,8 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/web/web_menu_bar.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -154,6 +156,13 @@ class _PickMapScreenState extends State<PickMapScreen> {
                         style: Get.isDarkMode
                             ? Get.find<ThemeController>().darkMap
                             : Get.find<ThemeController>().lightMap,
+                        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                          Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
+                          Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
+                          Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer()),
+                          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+                          Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+                        },
                       ),
                       Positioned(
                         top: 0,
@@ -177,18 +186,26 @@ class _PickMapScreenState extends State<PickMapScreen> {
                           ),
                         ),
                       ),
-                      Center(
-                        child: locationController.loading
-                            ? const CircularProgressIndicator()
-                            : Padding(
-                                padding: const EdgeInsets.only(bottom: 20.0),
-                                child: Image.asset(
-                                  Images.pickLocationMapPin,
-                                  height: 72,
-                                  width: 72,
-                                  fit: BoxFit.contain,
+                      IgnorePointer(
+                        child: Center(
+                          child: locationController.loading
+                              ? const CircularProgressIndicator()
+                              : Padding(
+                                  padding: const EdgeInsets.only(bottom: 36.0),
+                                  child: Icon(
+                                    Icons.location_on,
+                                    size: 48,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                        ),
                       ),
                       if (!widget.fromSplash)
                         Positioned(

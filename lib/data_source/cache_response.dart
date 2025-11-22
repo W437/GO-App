@@ -7,6 +7,7 @@ class CacheResponse extends Table {
   TextColumn get endPoint => text().unique()();
   TextColumn get header => text()();
   TextColumn get response => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
 @DriftDatabase(tables: [CacheResponse])
@@ -14,7 +15,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'cache_response_new_db');

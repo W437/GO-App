@@ -145,20 +145,35 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     // Check if we already have cached data for this restaurant
     final bool isSameRestaurant = restController.restaurant?.id == widget.restaurant!.id;
     final bool hasProducts = restController.restaurantProducts != null;
+    final bool hasRestaurantDetails = restController.restaurant != null &&
+                                     restController.restaurant!.schedules != null;
 
-    // Always get restaurant details (lightweight)
-    await restController.getRestaurantDetails(Restaurant(id: widget.restaurant!.id), slug: widget.slug);
+    // Parallel loading strategy: Only fetch what's needed
+    List<Future> parallelCalls = [];
+
+    // Only fetch restaurant details if it's a different restaurant or we don't have full details
+    if (!isSameRestaurant || !hasRestaurantDetails) {
+      parallelCalls.add(
+        restController.getRestaurantDetails(Restaurant(id: widget.restaurant!.id), slug: widget.slug)
+      );
+    }
 
     // Only fetch categories if not loaded
     if(categoryController.categoryList == null) {
-      categoryController.getCategoryList(true);
+      parallelCalls.add(categoryController.getCategoryList(true));
     }
 
-    // Only fetch data if we don't have cached data for this restaurant
+    // Only fetch products/coupons/recommended if different restaurant or no products
     if (!isSameRestaurant || !hasProducts) {
-      couponController.getRestaurantCouponList(restaurantId: widget.restaurant!.id ?? restController.restaurant!.id!);
-      restController.getRestaurantRecommendedItemList(widget.restaurant!.id ?? restController.restaurant!.id!, false);
-      await restController.getRestaurantProductList(widget.restaurant!.id ?? restController.restaurant!.id!, 1, 'all', false);
+      final restaurantId = widget.restaurant!.id ?? restController.restaurant!.id!;
+      parallelCalls.add(restController.getRestaurantProductList(restaurantId, 1, 'all', false));
+      parallelCalls.add(couponController.getRestaurantCouponList(restaurantId: restaurantId));
+      parallelCalls.add(restController.getRestaurantRecommendedItemList(restaurantId, false));
+    }
+
+    // Execute all calls in parallel
+    if (parallelCalls.isNotEmpty) {
+      await Future.wait(parallelCalls);
     }
 
     // Scroll to product if specified
