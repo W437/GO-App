@@ -1,10 +1,8 @@
-/// Not logged in screen widget for prompting user authentication
-/// Displays login prompt when user tries to access protected features
-
 import 'package:godelivery_user/features/auth/widgets/auth_dialog_widget.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/util/app_colors.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
@@ -34,30 +32,44 @@ class NotLoggedInScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-                    // Icon with circular background
+                    // Icon with gradient background
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 140,
+                      height: 140,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.brandPrimary.withValues(alpha: 0.1),
+                            AppColors.brandPrimary.withValues(alpha: 0.05),
+                          ],
+                        ),
+                        border: Border.all(
+                          color: AppColors.brandPrimary.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.lock_outline_rounded,
-                        size: 60,
-                        color: Theme.of(context).primaryColor,
+                      child: Center(
+                        child: Icon(
+                          Icons.lock_outline_rounded,
+                          size: 70,
+                          color: AppColors.brandPrimary,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
                     // Title
                     Text(
                       'welcome_back'.tr,
                       style: robotoBold.copyWith(
                         fontSize: Dimensions.fontSizeOverLarge,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        color: AppColors.brandSecondary,
+                        letterSpacing: -0.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -65,29 +77,32 @@ class NotLoggedInScreen extends StatelessWidget {
 
                     // Description
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                       child: Text(
                         'sign_in_to_access_features'.tr,
                         style: robotoRegular.copyWith(
                           fontSize: Dimensions.fontSizeDefault,
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                          height: 1.5,
+                          color: AppColors.textSecondary,
+                          height: 1.6,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 3,
                       ),
                     ),
-                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                    const SizedBox(height: 40),
 
                     // Login Button
                     SizedBox(
-                      width: ResponsiveHelper.isDesktop(context) ? 280 : double.infinity,
+                      width: ResponsiveHelper.isDesktop(context) ? 300 : double.infinity,
                       child: Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeDefault,
                         ),
                         child: CustomButtonWidget(
                           buttonText: 'login_to_continue'.tr,
+                          height: 50,
+                          radius: Dimensions.radiusDefault,
+                          isBold: true,
                           onPressed: () async {
                             if (!ResponsiveHelper.isDesktop(context)) {
                               await Get.toNamed(RouteHelper.getSignInRoute(Get.currentRoute));
@@ -107,7 +122,7 @@ class NotLoggedInScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
                   ],
                 ),
               ),
