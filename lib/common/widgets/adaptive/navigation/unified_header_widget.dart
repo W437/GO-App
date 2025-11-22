@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/cart/cart_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_bottom_sheet.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/cart/screens/shopping_cart_sheet.dart';
 
@@ -85,19 +86,10 @@ class UnifiedHeaderWidget extends StatelessWidget implements PreferredSizeWidget
           if (showCart)
             IconButton(
               onPressed: () {
-                showModalBottomSheet(
+                CustomBottomSheet.show(
                   context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  useSafeArea: true,
-                  builder: (context) => Container(
-                    height: MediaQuery.of(context).size.height,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    child: const ShoppingCartSheet(fromNav: false),
-                  ),
+                  child: const ShoppingCartSheet(fromNav: false),
+                  isFullScreen: true,
                 );
               },
               icon: CartWidget(

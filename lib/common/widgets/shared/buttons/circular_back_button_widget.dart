@@ -29,7 +29,9 @@ class _CircularBackButtonWidgetState extends State<CircularBackButtonWidget> {
   @override
   Widget build(BuildContext context) {
     if (!widget.showText) {
-      final baseColor = widget.backgroundColor ?? Theme.of(context).disabledColor.withOpacity(0.1);
+      // Default to "clicked" state color (darker)
+      final baseColor = widget.backgroundColor ??
+          Color.lerp(Theme.of(context).disabledColor.withOpacity(0.1), Colors.black, 0.1)!;
       return Center(
         child: GestureDetector(
           onTapDown: (_) => setState(() => _isPressed = true),
@@ -56,7 +58,9 @@ class _CircularBackButtonWidgetState extends State<CircularBackButtonWidget> {
       );
     }
 
-    final baseColor = widget.backgroundColor ?? Theme.of(context).disabledColor.withOpacity(0.1);
+    // Default to "clicked" state color (darker)
+    final baseColor = widget.backgroundColor ??
+        Color.lerp(Theme.of(context).disabledColor.withOpacity(0.1), Colors.black, 0.1)!;
     return Center(
       child: GestureDetector(
         onTapDown: (_) => setState(() => _isPressed = true),

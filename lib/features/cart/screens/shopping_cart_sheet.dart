@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_bottom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/order_details_sheet.dart';
 import 'package:godelivery_user/features/cart/widgets/order_again_view.dart';
@@ -91,12 +92,16 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: isDesktop ? CustomAppBarWidget(title: 'my_cart'.tr, isBackButtonExist: true) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-      body: SafeArea(
-        child: Column(
+      body: Column(
           children: [
-            // Header
+            // Header - with safe area padding for status bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+              padding: EdgeInsets.only(
+                left: Dimensions.paddingSizeDefault,
+                right: Dimensions.paddingSizeDefault,
+                top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeSmall,
+                bottom: Dimensions.paddingSizeSmall,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -162,22 +167,11 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                 children: [
                   // Shopping Carts View
                   ShoppingCartsView(onViewCart: () {
-                    // Open OrderDetailsSheet as a separate sheet on top
-                    showModalBottomSheet(
+                    // Open OrderDetailsSheet using custom bottom sheet
+                    CustomBottomSheet.show(
                       context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      useSafeArea: true,
-                      builder: (context) => Container(
-                        height: MediaQuery.of(context).size.height,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                        ),
-                        child: const OrderDetailsSheet(),
-                      ),
+                      child: const OrderDetailsSheet(),
+                      isFullScreen: true,
                     );
                   }),
                   
@@ -186,7 +180,6 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
               ),
             ),
           ],
-        ),
       ),
     );
   }

@@ -80,7 +80,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                             Text(
                               restaurantName,
                               style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeOverLarge,
+                                fontSize: Dimensions.fontSizeExtraLarge,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,

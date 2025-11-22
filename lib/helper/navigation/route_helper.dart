@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/images/image_viewer_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_found_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_bottom_sheet.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
 import 'package:godelivery_user/features/business/screens/subscription_payment_screen.dart';
@@ -167,19 +168,10 @@ class RouteHelper {
 
   /// Show cart as a full-screen modal bottom sheet
   static void showCartModal(BuildContext context) {
-    showModalBottomSheet(
+    CustomBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useSafeArea: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: const ShoppingCartSheet(fromNav: false),
-      ),
+      child: const ShoppingCartSheet(fromNav: false),
+      isFullScreen: true,
     );
   }
 
