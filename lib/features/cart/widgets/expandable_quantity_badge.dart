@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -87,20 +88,16 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
               height: _badgeHeight,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: _isExpanded
-                    ? theme.primaryColor.withValues(alpha: 0.12)
-                    : theme.cardColor,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(
                   _isExpanded
                       ? _borderRadiusExpanded
                       : _borderRadiusCollapsed,
                 ),
-                border: _isExpanded
-                    ? null
-                    : Border.all(
-                        color: theme.disabledColor.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
+                border: Border.all(
+                  color: theme.disabledColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
               child: ClipRect(
                 child: Row(
@@ -134,8 +131,8 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
                     ),
 
                     // Quantity (stays centered visually)
-                    Text(
-                      '$quantity',
+                    AnimatedTextTransition(
+                      value: quantity,
                       style: robotoBold.copyWith(
                         fontSize: Dimensions.fontSizeDefault,
                         color: theme.primaryColor,
@@ -191,7 +188,7 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
         width: _buttonSize,
         height: _buttonSize,
         decoration: BoxDecoration(
-          color: baseColor.withValues(alpha: 0.12),
+          color: baseColor.withValues(alpha: 0.2),
           shape: BoxShape.circle,
         ),
         child: Icon(

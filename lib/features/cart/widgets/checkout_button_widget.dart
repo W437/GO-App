@@ -1,5 +1,6 @@
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
@@ -66,13 +67,34 @@ class CheckoutButtonWidget extends StatelessWidget {
             ) : const SizedBox(),
 
 
-            !isDesktop ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+            !isDesktop ? Container(
+              margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  width: 1,
+                ),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('subtotal'.tr, style: robotoMedium.copyWith(color: Theme.of(context).primaryColor)),
-                  PriceConverter.convertAnimationPrice(cartController.subTotal, textStyle: robotoRegular.copyWith(color: Theme.of(context).primaryColor)),
+                  Text(
+                    'subtotal'.tr,
+                    style: robotoBold.copyWith(
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                      fontSize: Dimensions.fontSizeLarge,
+                    ),
+                  ),
+                  AnimatedTextTransition(
+                    value: PriceConverter.convertPrice(cartController.subTotal),
+                    style: robotoBold.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: Dimensions.fontSizeExtraLarge,
+                    ),
+                  ),
                 ],
               ),
             ) : const SizedBox(),
@@ -80,8 +102,9 @@ class CheckoutButtonWidget extends StatelessWidget {
             GetBuilder<CartController>(
               builder: (cartController) {
                 return CustomButtonWidget(
-                  radius: 10,
+                  radius: Dimensions.radiusDefault,
                   buttonText: 'confirm_delivery_details'.tr,
+                  height: 56,
                   onPressed: cartController.isLoading || restaurantController.restaurant == null ? null : () {
                     Get.find<CheckoutController>().updateFirstTime();
                     _processToCheckoutButtonPressed(restaurantController);

@@ -58,107 +58,131 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: SafeArea(
-            child: Column(
+            child: Stack(
               children: [
-                // ============================================================
-                // HEADER: Back button + Restaurant name + Subtitle
-                // ============================================================
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Dimensions.paddingSizeDefault,
-                    vertical: Dimensions.paddingSizeDefault,
-                  ),
-                  child: Row(
-                    children: [
-                      // Circular back button with down arrow
-                      CircularBackButtonWidget(
-                        icon: Icons.keyboard_arrow_down_rounded,
-                        onPressed: () => Get.back(),
+                Column(
+                  children: [
+                    // ============================================================
+                    // HEADER: Back button + Restaurant name + Subtitle
+                    // ============================================================
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Dimensions.paddingSizeDefault,
+                        vertical: Dimensions.paddingSizeDefault,
                       ),
-                      Expanded(
+                      child: Row(
+                        children: [
+                          // Circular back button with down arrow
+                          CircularBackButtonWidget(
+                            icon: Icons.keyboard_arrow_down_rounded,
+                            onPressed: () => Get.back(),
+                          ),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text(
+                                  restaurantName,
+                                  style: robotoBold.copyWith(
+                                    fontSize: Dimensions.fontSizeExtraLarge,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Your order',
+                                  style: robotoRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeDefault,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 44), // Balance for back button
+                        ],
+                      ),
+                    ),
+
+                    // ============================================================
+                    // CONTENT
+                    // ============================================================
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              restaurantName,
-                              style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeExtraLarge,
+                            // MESSAGE TO RESTAURANT SECTION
+                            _buildMessageToRestaurantSection(context, cartController),
+
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                            // RESTAURANT UNAVAILABLE NOTICE
+                            if (!isRestaurantOpen && restaurantController.restaurant != null)
+                              _buildRestaurantUnavailableNotice(
+                                context,
+                                restaurantController,
+                                cartController,
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+
+                            // Spacing before Order Items
+                            if (!isRestaurantOpen && restaurantController.restaurant != null)
+                              const SizedBox(height: Dimensions.paddingSizeLarge),
+
+                            // ORDER ITEMS SECTION
+                            _buildOrderItemsSection(
+                              context,
+                              cartController,
+                              isRestaurantOpen,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Your order',
-                              style: robotoRegular.copyWith(
-                                fontSize: Dimensions.fontSizeDefault,
-                                color: Theme.of(context).hintColor,
+
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                            // RECOMMENDED ITEMS
+                            if (!isDesktop)
+                              CartSuggestedItemViewWidget(
+                                cartList: cartController.cartList,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
+
+                            const SizedBox(height: 180), // Space for floating bottom bar
                           ],
                         ),
                       ),
-                      const SizedBox(width: 44), // Balance for back button
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
 
                 // ============================================================
-                // CONTENT
+                // FLOATING BOTTOM CHECKOUT BAR WITH FADE OVERLAY
                 // ============================================================
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // MESSAGE TO RESTAURANT SECTION
-                        _buildMessageToRestaurantSection(context, cartController),
-
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                        // RESTAURANT UNAVAILABLE NOTICE
-                        if (!isRestaurantOpen && restaurantController.restaurant != null)
-                          _buildRestaurantUnavailableNotice(
-                            context,
-                            restaurantController,
-                            cartController,
-                          ),
-
-                        // Spacing before Order Items
-                        if (!isRestaurantOpen && restaurantController.restaurant != null)
-                          const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                        // ORDER ITEMS SECTION
-                        _buildOrderItemsSection(
-                          context,
-                          cartController,
-                          isRestaurantOpen,
-                        ),
-
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                        // RECOMMENDED ITEMS
-                        if (!isDesktop)
-                          CartSuggestedItemViewWidget(
-                            cartList: cartController.cartList,
-                          ),
-
-                        const SizedBox(height: 100), // Space for bottom bar
-                      ],
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.surface.withValues(alpha: 0.0),
+                          Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                          Theme.of(context).colorScheme.surface,
+                          Theme.of(context).colorScheme.surface,
+                        ],
+                        stops: const [0.0, 0.2, 0.5, 1.0],
+                      ),
+                    ),
+                    child: CheckoutButtonWidget(
+                      cartController: cartController,
+                      availableList: cartController.availableList,
+                      isRestaurantOpen: isRestaurantOpen,
+                      fromDineIn: widget.fromDineIn,
                     ),
                   ),
-                ),
-
-                // ============================================================
-                // BOTTOM CHECKOUT BAR
-                // ============================================================
-                CheckoutButtonWidget(
-                  cartController: cartController,
-                  availableList: cartController.availableList,
-                  isRestaurantOpen: isRestaurantOpen,
-                  fromDineIn: widget.fromDineIn,
                 ),
               ],
             ),
