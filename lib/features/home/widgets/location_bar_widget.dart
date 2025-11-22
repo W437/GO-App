@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/text/auto_scroll_text.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
@@ -206,7 +206,7 @@ class _NotificationButton extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            RoundedIconButtonWidget(
+            CircularBackButtonWidget(
               icon: Icons.notifications_outlined,
               onPressed: () => CustomFullSheet.show(
                 context: context,
@@ -235,13 +235,12 @@ class _NotificationButton extends StatelessWidget {
                           child: Row(
                             children: [
                               // Back Button
-                              RoundedIconButtonWidget(
+                              CircularBackButtonWidget(
                                 icon: Icons.arrow_back,
                                 onPressed: () => Get.back(),
                                 size: 36,
                                 iconSize: 20,
                                 backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
-                                pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
                                 iconColor: Theme.of(context).textTheme.bodyLarge!.color,
                               ),
                               const SizedBox(width: Dimensions.paddingSizeDefault),
@@ -269,7 +268,6 @@ class _NotificationButton extends StatelessWidget {
               size: 44,
               iconSize: 22,
               backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.08),
-              pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.2),
               iconColor: Theme.of(context).textTheme.bodyLarge!.color,
             ),
             if (notificationController.hasNotification)
@@ -304,13 +302,12 @@ class _CartButton extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            RoundedIconButtonWidget(
+            CircularBackButtonWidget(
               icon: Icons.shopping_bag_outlined,
               onPressed: () => RouteHelper.showCartModal(context),
               size: 44,
               iconSize: 22,
               backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.08),
-              pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.2),
               iconColor: Theme.of(context).textTheme.bodyLarge!.color,
             ),
             if (cartController.cartList.isNotEmpty)

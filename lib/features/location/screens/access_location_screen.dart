@@ -37,6 +37,7 @@ class AccessLocationScreen extends StatefulWidget {
 }
 
 class _AccessLocationScreenState extends State<AccessLocationScreen> {
+  bool _hasAutoNavigated = false;
 
   @override
   void initState() {
@@ -47,6 +48,17 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
       // Load zone list after build to avoid setState during build
       Get.find<LocationController>().getZoneList();
       _checkPermission();
+
+      // Auto-navigate if address already exists (only once)
+      if(!widget.fromHome && AddressHelper.getAddressFromSharedPref() != null && !_hasAutoNavigated) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (!mounted || _hasAutoNavigated) return; // Prevent if already navigated via permission flow
+          _hasAutoNavigated = true;
+          Get.find<LocationController>().autoNavigate(
+            AddressHelper.getAddressFromSharedPref()!, widget.fromSignUp, widget.route, widget.route != null, ResponsiveHelper.isDesktop(Get.context),
+          );
+        });
+      }
     });
   }
 
@@ -73,6 +85,9 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
   }
 
   Future<void> _getCurrentLocationAndRoute() async {
+    if (_hasAutoNavigated) return; // Prevent duplicate navigation
+    _hasAutoNavigated = true;
+
     AddressModel address = await Get.find<LocationController>().getCurrentLocation(true);
     ZoneResponseModel response = await Get.find<LocationController>().getZone(address.latitude, address.longitude, false);
     if(response.isSuccess) {
@@ -88,18 +103,12 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
       }
     } else {
       showCustomSnackBar('service_not_available_in_current_location'.tr);
+      _hasAutoNavigated = false; // Reset on error
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if(!widget.fromHome && AddressHelper.getAddressFromSharedPref() != null) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Get.find<LocationController>().autoNavigate(
-          AddressHelper.getAddressFromSharedPref()!, widget.fromSignUp, widget.route, widget.route != null, ResponsiveHelper.isDesktop(Get.context),
-        );
-      });
-    }
     bool isLoggedIn = Get.find<AuthController>().isLoggedIn();
     if(isLoggedIn) {
       Get.find<AddressController>().getAddressList();
