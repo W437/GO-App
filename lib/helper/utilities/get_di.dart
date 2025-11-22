@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:godelivery_user/common/cache/cache_manager.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo.dart';
 import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
@@ -187,6 +188,8 @@ Future<Map<String, Map<String, String>>> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   Get.lazyPut(() => sharedPreferences);
   Get.lazyPut(() => ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()));
+  Get.lazyPut(() => CacheManager());
+
 
   ///Interfaces
   LocationRepoInterface locationRepoInterface = LocationRepo(apiClient: Get.find());
@@ -221,7 +224,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => verificationRepoInterface);
   VerificationServiceInterface verificationServiceInterface = VerificationService(verificationRepoInterface: Get.find(), authRepoInterface: Get.find());
   Get.lazyPut(() => verificationServiceInterface);
-  CategoryRepositoryInterface categoryRepositoryInterface = CategoryRepository(apiClient: Get.find());
+  CategoryRepositoryInterface categoryRepositoryInterface = CategoryRepository(apiClient: Get.find(), cacheManager: Get.find());
   Get.lazyPut(() => categoryRepositoryInterface);
   CategoryServiceInterface categoryServiceInterface = CategoryService(categoryRepositoryInterface: Get.find());
   Get.lazyPut(() => categoryServiceInterface);
@@ -289,7 +292,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => profileRepositoryInterface);
   ProfileServiceInterface profileServiceInterface = ProfileService(profileRepositoryInterface: Get.find());
   Get.lazyPut(() => profileServiceInterface);
-  RestaurantRepositoryInterface restaurantRepositoryInterface = RestaurantRepository(apiClient: Get.find(), sharedPreferences: Get.find());
+  RestaurantRepositoryInterface restaurantRepositoryInterface = RestaurantRepository(apiClient: Get.find(), sharedPreferences: Get.find(), cacheManager: Get.find());
   Get.lazyPut(() => restaurantRepositoryInterface);
   RestaurantServiceInterface restaurantServiceInterface = RestaurantService(restaurantRepositoryInterface: Get.find());
   Get.lazyPut(() => restaurantServiceInterface);

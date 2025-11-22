@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:godelivery_user/api/local_client.dart';
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
@@ -14,7 +17,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RestaurantRepository implements RestaurantRepositoryInterface {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
-  RestaurantRepository({required this.apiClient, required this.sharedPreferences});
+  final CacheManager cacheManager;
+  RestaurantRepository({required this.apiClient, required this.sharedPreferences, required this.cacheManager});
 
   @override
   Future<RecommendedProductModel?> getRestaurantRecommendedItemList(int? restaurantId) async {
@@ -96,23 +100,32 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
 
   @override
   Future<RestaurantModel?> getList({int? offset, String? filterBy, int? topRated, int? discount, int? veg, int? nonVeg, bool fromMap = false, DataSourceEnum? source}) async {
-    RestaurantModel? restaurantModel;
-    String cacheId = AppConstants.restaurantUri;
+    final cacheKey = CacheKey(
+      endpoint: '${AppConstants.restaurantUri}/list',
+      params: {
+        'offset': offset,
+        'limit': fromMap ? 20 : 12,
+        'filter_data': filterBy,
+        'top_rated': topRated,
+        'discount': discount,
+        'veg': veg,
+        'non_veg': nonVeg,
+      },
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<RestaurantModel>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.restaurantUri}/all?offset=$offset&limit=${fromMap ? 20 : 12}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
-        if(response.statusCode == 200){
-          restaurantModel = RestaurantModel.fromJson(response.body);
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        if (response.statusCode == 200) {
+          return RestaurantModel.fromJson(response.body);
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          restaurantModel = RestaurantModel.fromJson(jsonDecode(cacheResponseData));
-        }
-    }
-    return restaurantModel;
+        return null;
+      },
+      ttl: CacheConfig.restaurantTTL,
+      deserializer: (json) => RestaurantModel.fromJson(jsonDecode(json)),
+    );
   }
 
   @override
@@ -130,108 +143,126 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
   }
 
   Future<List<Restaurant>?> _getLatestRestaurantList(String type, {DataSourceEnum? source}) async {
-    List<Restaurant>? latestRestaurantList;
-    String cacheId = AppConstants.latestRestaurantUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.latestRestaurantUri,
+      params: {'type': type},
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<Restaurant>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.latestRestaurantUri}?type=$type');
-        if(response.statusCode == 200){
-          latestRestaurantList = [];
+        if (response.statusCode == 200) {
+          List<Restaurant> latestRestaurantList = [];
           response.body.forEach((restaurant) {
-            latestRestaurantList!.add(Restaurant.fromJson(restaurant));
+            latestRestaurantList.add(Restaurant.fromJson(restaurant));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return latestRestaurantList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          latestRestaurantList = [];
-          jsonDecode(cacheResponseData).forEach((restaurant) {
-            latestRestaurantList!.add(Restaurant.fromJson(restaurant));
-          });
-        }
-    }
-    return latestRestaurantList;
+        return null;
+      },
+      ttl: CacheConfig.restaurantTTL,
+      deserializer: (json) {
+        List<Restaurant> list = [];
+        jsonDecode(json).forEach((restaurant) {
+          list.add(Restaurant.fromJson(restaurant));
+        });
+        return list;
+      },
+    );
   }
 
   Future<List<Restaurant>?> _getPopularRestaurantList(String type, {DataSourceEnum? source}) async {
-    List<Restaurant>? popularRestaurantList;
-    String cacheId = AppConstants.popularRestaurantUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.popularRestaurantUri,
+      params: {'type': type},
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<Restaurant>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.popularRestaurantUri}?type=$type');
-        if(response.statusCode == 200){
-          popularRestaurantList = [];
+        if (response.statusCode == 200) {
+          List<Restaurant> popularRestaurantList = [];
           response.body.forEach((restaurant) {
-            popularRestaurantList!.add(Restaurant.fromJson(restaurant));
+            popularRestaurantList.add(Restaurant.fromJson(restaurant));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return popularRestaurantList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          popularRestaurantList = [];
-          jsonDecode(cacheResponseData).forEach((restaurant) {
-            popularRestaurantList!.add(Restaurant.fromJson(restaurant));
-          });
-        }
-    }
-
-    return popularRestaurantList;
+        return null;
+      },
+      ttl: CacheConfig.restaurantTTL,
+      deserializer: (json) {
+        List<Restaurant> list = [];
+        jsonDecode(json).forEach((restaurant) {
+          list.add(Restaurant.fromJson(restaurant));
+        });
+        return list;
+      },
+    );
   }
 
   Future<List<Restaurant>?> _getRecentlyViewedRestaurantList(String type, {DataSourceEnum? source}) async {
-    List<Restaurant>? recentlyViewedRestaurantList;
-    String cacheId = AppConstants.recentlyViewedRestaurantUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.recentlyViewedRestaurantUri,
+      params: {'type': type},
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<Restaurant>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.recentlyViewedRestaurantUri}?type=$type');
-        if(response.statusCode == 200){
-          recentlyViewedRestaurantList = [];
+        if (response.statusCode == 200) {
+          List<Restaurant> recentlyViewedRestaurantList = [];
           response.body.forEach((restaurant) {
-            recentlyViewedRestaurantList!.add(Restaurant.fromJson(restaurant));
+            recentlyViewedRestaurantList.add(Restaurant.fromJson(restaurant));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return recentlyViewedRestaurantList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          recentlyViewedRestaurantList = [];
-          jsonDecode(cacheResponseData).forEach((restaurant) {
-            recentlyViewedRestaurantList!.add(Restaurant.fromJson(restaurant));
-          });
-        }
-    }
-    return recentlyViewedRestaurantList;
+        return null;
+      },
+      ttl: CacheConfig.restaurantTTL,
+      deserializer: (json) {
+        List<Restaurant> list = [];
+        jsonDecode(json).forEach((restaurant) {
+          list.add(Restaurant.fromJson(restaurant));
+        });
+        return list;
+      },
+    );
   }
 
   Future<List<Restaurant>?> _getOrderAgainRestaurantList({DataSourceEnum? source}) async {
-    List<Restaurant>? orderAgainRestaurantList;
-    String cacheId = AppConstants.orderAgainUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.orderAgainUri,
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<Restaurant>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData(AppConstants.orderAgainUri);
-        if(response.statusCode == 200){
-          orderAgainRestaurantList = [];
+        if (response.statusCode == 200) {
+          List<Restaurant> orderAgainRestaurantList = [];
           response.body.forEach((restaurant) {
-            orderAgainRestaurantList!.add(Restaurant.fromJson(restaurant));
+            orderAgainRestaurantList.add(Restaurant.fromJson(restaurant));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return orderAgainRestaurantList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          orderAgainRestaurantList = [];
-          jsonDecode(cacheResponseData).forEach((restaurant) {
-            orderAgainRestaurantList!.add(Restaurant.fromJson(restaurant));
-          });
-        }
-    }
-    return orderAgainRestaurantList;
+        return null;
+      },
+      ttl: CacheConfig.restaurantTTL,
+      deserializer: (json) {
+        List<Restaurant> list = [];
+        jsonDecode(json).forEach((restaurant) {
+          list.add(Restaurant.fromJson(restaurant));
+        });
+        return list;
+      },
+    );
   }
 
   @override

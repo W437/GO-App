@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:godelivery_user/api/local_client.dart';
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
@@ -11,8 +14,9 @@ import 'package:get/get.dart';
 
 class CategoryRepository implements CategoryRepositoryInterface {
   final ApiClient apiClient;
+  final CacheManager cacheManager;
 
-  CategoryRepository({required this.apiClient});
+  CategoryRepository({required this.apiClient, required this.cacheManager});
 
   @override
   Future add(value) {
@@ -31,31 +35,33 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   @override
   Future<List<CategoryModel>?> getList({int? offset, DataSourceEnum? source}) async {
-    List<CategoryModel>? categoryList;
-    String cacheId = AppConstants.categoryUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.categoryUri,
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<CategoryModel>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData(AppConstants.categoryUri);
-
-        if(response.statusCode == 200){
-          categoryList = [];
+        if (response.statusCode == 200) {
+          List<CategoryModel> categoryList = [];
           response.body.forEach((category) {
-            categoryList!.add(CategoryModel.fromJson(category));
+            categoryList.add(CategoryModel.fromJson(category));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return categoryList;
         }
-
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          categoryList = [];
-          jsonDecode(cacheResponseData).forEach((category) {
-            categoryList!.add(CategoryModel.fromJson(category));
-          });
-        }
-    }
-    return categoryList;
+        return null;
+      },
+      ttl: CacheConfig.categoryTTL,
+      deserializer: (json) {
+        List<CategoryModel> list = [];
+        jsonDecode(json).forEach((category) {
+          list.add(CategoryModel.fromJson(category));
+        });
+        return list;
+      },
+    );
   }
 
   @override
