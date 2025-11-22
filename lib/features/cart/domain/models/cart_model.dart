@@ -13,6 +13,7 @@ class CartModel {
   Product? _product;
   int? _quantityLimit;
   List<List<int?>>? _variationsStock;
+  String? _specialInstructions; // Phase 1: Per-item special instructions from backend
 
   CartModel(
       int? id,
@@ -26,7 +27,8 @@ class CartModel {
       Product? product,
       List<List<bool?>> variations,
       int? quantityLimit,
-      List<List<int?>> variationsStock) {
+      List<List<int?>> variationsStock,
+      {String? specialInstructions}) {
     _id = id;
     _price = price;
     _discountedPrice = discountedPrice;
@@ -39,6 +41,7 @@ class CartModel {
     _variations = variations;
     _quantityLimit = quantityLimit;
     _variationsStock = variationsStock;
+    _specialInstructions = specialInstructions;
   }
 
   int? get id => _id;
@@ -56,6 +59,7 @@ class CartModel {
   List<List<bool?>>? get variations => _variations;
   int? get quantityLimit => _quantityLimit;
   List<List<int?>>? get variationsStock => _variationsStock;
+  String? get specialInstructions => _specialInstructions;
 
   CartModel.fromJson(Map<String, dynamic> json) {
     _id = json['cart_id'];
@@ -100,6 +104,7 @@ class CartModel {
         }
       }
     }
+    _specialInstructions = json['special_instructions'];
   }
 
   Map<String, dynamic> toJson() {
@@ -118,6 +123,9 @@ class CartModel {
     data['product'] = _product!.toJson();
     data['variations'] = _variations;
     data['quantity_limit'] = _quantityLimit?.toString();
+    if(_specialInstructions != null) {
+      data['special_instructions'] = _specialInstructions;
+    }
     return data;
   }
 }

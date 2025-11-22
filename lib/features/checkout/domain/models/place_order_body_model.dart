@@ -41,6 +41,11 @@ class PlaceOrderBodyModel {
   String? _guestEmail;
   double? _extraPackagingAmount;
   double? _bringChangeAmount;
+  int? _leaveAtDoor;
+  int? _isGift;
+  String? _giftRecipientName;
+  String? _giftRecipientPhone;
+  String? _giftMessage;
 
   PlaceOrderBodyModel({
     required List<OnlineCart> cart,
@@ -81,6 +86,11 @@ class PlaceOrderBodyModel {
     String? guestEmail,
     double? extraPackagingAmount,
     double? bringChangeAmount,
+    int? leaveAtDoor,
+    int? isGift,
+    String? giftRecipientName,
+    String? giftRecipientPhone,
+    String? giftMessage,
   }) {
     _cart = cart;
     _couponDiscountAmount = couponDiscountAmount;
@@ -120,6 +130,11 @@ class PlaceOrderBodyModel {
     _guestEmail = guestEmail;
     _extraPackagingAmount = extraPackagingAmount;
     _bringChangeAmount = bringChangeAmount;
+    _leaveAtDoor = leaveAtDoor;
+    _isGift = isGift;
+    _giftRecipientName = giftRecipientName;
+    _giftRecipientPhone = giftRecipientPhone;
+    _giftMessage = giftMessage;
   }
 
   List<OnlineCart>? get cart => _cart;
@@ -159,6 +174,11 @@ class PlaceOrderBodyModel {
   String? get guestEmail => _guestEmail;
   double? get extraPackagingAmount => _extraPackagingAmount;
   double? get bringChangeAmount => _bringChangeAmount;
+  int? get leaveAtDoor => _leaveAtDoor;
+  int? get isGift => _isGift;
+  String? get giftRecipientName => _giftRecipientName;
+  String? get giftRecipientPhone => _giftRecipientPhone;
+  String? get giftMessage => _giftMessage;
 
   PlaceOrderBodyModel.fromJson(Map<String, dynamic> json) {
     if (json['cart'] != null) {
@@ -215,6 +235,11 @@ class PlaceOrderBodyModel {
     _guestEmail = json['contact_person_email'];
     _extraPackagingAmount = json['extra_packaging_amount'] != null ? double.parse(json['extra_packaging_amount'].toString()) : null;
     _bringChangeAmount = json['bring_change_amount'] != null ? double.parse(json['bring_change_amount'].toString()) : null;
+    _leaveAtDoor = json['leave_at_door'] != null ? int.parse(json['leave_at_door'].toString()) : null;
+    _isGift = json['is_gift'] != null ? int.parse(json['is_gift'].toString()) : null;
+    _giftRecipientName = json['gift_recipient_name'];
+    _giftRecipientPhone = json['gift_recipient_phone'];
+    _giftMessage = json['gift_message'];
   }
 
   Map<String, dynamic> toJson() {
@@ -268,6 +293,21 @@ class PlaceOrderBodyModel {
     data['extra_packaging_amount'] = _extraPackagingAmount.toString();
     if(_bringChangeAmount != null) {
       data['bring_change_amount'] = _bringChangeAmount.toString();
+    }
+    if(_leaveAtDoor != null) {
+      data['leave_at_door'] = _leaveAtDoor;
+    }
+    if(_isGift != null) {
+      data['is_gift'] = _isGift;
+    }
+    if(_giftRecipientName != null) {
+      data['gift_recipient_name'] = _giftRecipientName;
+    }
+    if(_giftRecipientPhone != null) {
+      data['gift_recipient_phone'] = _giftRecipientPhone;
+    }
+    if(_giftMessage != null) {
+      data['gift_message'] = _giftMessage;
     }
     return data;
   }
@@ -435,6 +475,7 @@ class OnlineCart {
   String? _model;
   String? _itemType;
   List<int?>? _variationOptionIds;
+  String? _specialInstructions; // Phase 1: Per-item special instructions
 
   OnlineCart(
       int? cartId,
@@ -450,6 +491,7 @@ class OnlineCart {
       {
         String? itemType,
         List<int?>? variationOptionIds,
+        String? specialInstructions,
       }
       ) {
     _cartId = cartId;
@@ -464,6 +506,7 @@ class OnlineCart {
     _model = model;
     _itemType = itemType;
     _variationOptionIds = variationOptionIds;
+    _specialInstructions = specialInstructions;
   }
 
   int? get cartId => _cartId;
@@ -478,6 +521,7 @@ class OnlineCart {
   String? get model => _model;
   String? get itemType => _itemType;
   List<int?>? get variationOptionIds => _variationOptionIds;
+  String? get specialInstructions => _specialInstructions;
 
   OnlineCart.fromJson(Map<String, dynamic> json) {
     _cartId = json['cart_id'];
@@ -504,6 +548,7 @@ class OnlineCart {
       _itemType = json['item_type'];
     }
     _variationOptionIds = json['variation_options'].cast<int>();
+    _specialInstructions = json['special_instructions'];
   }
 
   Map<String, dynamic> toJson() {
@@ -526,6 +571,9 @@ class OnlineCart {
       data['item_type'] = _itemType;
     }
     data['variation_options'] = _variationOptionIds;
+    if(_specialInstructions != null) {
+      data['special_instructions'] = _specialInstructions;
+    }
     return data;
   }
 }

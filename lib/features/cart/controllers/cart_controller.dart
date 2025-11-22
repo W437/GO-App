@@ -1,10 +1,12 @@
 import 'package:godelivery_user/api/api_checker.dart';
 import 'package:godelivery_user/common/models/online_cart_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/adaptive/cart/cart_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
+import 'package:godelivery_user/features/cart/domain/models/restaurant_cart_model.dart';
 import 'package:godelivery_user/features/cart/domain/services/cart_service_interface.dart';
 import 'package:godelivery_user/features/product/controllers/product_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -20,7 +22,19 @@ class CartController extends GetxController implements GetxService {
 
   CartController({required this.cartServiceInterface});
 
+  // PHASE 1: Multi-restaurant cart support
+  // New state for grouped carts (populated alongside _cartList for backward compatibility)
+  Map<int, RestaurantCart> _restaurantCarts = {};
+  List<RestaurantCart> get restaurantCarts => _restaurantCarts.values.toList();
+  int? _currentRestaurantId;
 
+  // Get cart for specific restaurant
+  RestaurantCart? getCartForRestaurant(int restaurantId) => _restaurantCarts[restaurantId];
+
+  // Get list of restaurant IDs with active carts
+  List<int> getActiveRestaurantIds() => _restaurantCarts.keys.toList();
+
+  // Existing single cart list (maintained for backward compatibility)
   List<CartModel> _cartList = [];
   List<CartModel> get cartList => _cartList;
 
@@ -284,6 +298,10 @@ class CartController extends GetxController implements GetxService {
     _cartList = [];
     _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
     calculationCart();
+
+    // PHASE 1: Group carts by restaurant after fetching
+    groupCartsByRestaurant();
+
     _isLoading = false;
     update();
   }
@@ -315,6 +333,163 @@ class CartController extends GetxController implements GetxService {
   void setExpanded(bool setExpand) {
     _isExpanded = setExpand;
     update();
+  }
+
+  // ============================================================================
+  // PHASE 1: Multi-Restaurant Cart Grouping Methods
+  // ============================================================================
+
+  /// Group cart items by restaurant ID
+  /// This method is called after fetching cart data to organize items by restaurant
+  void groupCartsByRestaurant() {
+    _restaurantCarts.clear();
+
+    if (_cartList.isEmpty) {
+      _currentRestaurantId = null;
+      return;
+    }
+
+    // Group items by restaurant ID
+    Map<int, List<CartModel>> groupedItems = {};
+    for (var cartItem in _cartList) {
+      int? restaurantId = cartItem.product?.restaurantId;
+      if (restaurantId != null) {
+        if (!groupedItems.containsKey(restaurantId)) {
+          groupedItems[restaurantId] = [];
+        }
+        groupedItems[restaurantId]!.add(cartItem);
+      }
+    }
+
+    // Create RestaurantCart objects for each restaurant
+    for (var entry in groupedItems.entries) {
+      int restaurantId = entry.key;
+      List<CartModel> items = entry.value;
+
+      // Get restaurant details from the first item's product
+      Restaurant? restaurant = items.first.product?.restaurantId != null
+          ? _getRestaurantFromCartItem(items.first)
+          : null;
+
+      if (restaurant != null) {
+        // Calculate subtotal for this restaurant's cart
+        double subtotal = _calculateSubtotalForItems(items);
+
+        _restaurantCarts[restaurantId] = RestaurantCart(
+          restaurantId: restaurantId,
+          restaurant: restaurant,
+          items: items,
+          subtotal: subtotal,
+          isActive: restaurant.active == true,
+        );
+      }
+    }
+
+    // Set current restaurant ID (for backward compatibility)
+    if (_restaurantCarts.isNotEmpty) {
+      _currentRestaurantId = _restaurantCarts.keys.first;
+    }
+  }
+
+  /// Helper method to get Restaurant object from cart item
+  /// In production, this should fetch from RestaurantController or API
+  Restaurant? _getRestaurantFromCartItem(CartModel cartItem) {
+    // Try to get from RestaurantController first
+    try {
+      var restaurantController = Get.find<RestaurantController>();
+      if (restaurantController.restaurant != null &&
+          restaurantController.restaurant!.id == cartItem.product?.restaurantId) {
+        return restaurantController.restaurant;
+      }
+    } catch (e) {
+      debugPrint('RestaurantController not found: $e');
+    }
+
+    // Fallback: Create minimal Restaurant object from product data
+    // Note: In Phase 3, we should fetch full restaurant data from API
+    if (cartItem.product?.restaurantId != null) {
+      return Restaurant(
+        id: cartItem.product!.restaurantId,
+        name: cartItem.product!.restaurantName ?? 'Restaurant',
+        logoFullUrl: cartItem.product!.imageFullUrl ?? '',
+        coverPhotoFullUrl: '',
+        address: '',
+        latitude: '',
+        longitude: '',
+        minimumOrder: 0,
+        avgRating: 0,
+        tax: 0,
+        active: true,
+        open: 1,
+        delivery: true,
+        takeAway: true,
+        deliveryTime: '30-40 min',
+      );
+    }
+
+    return null;
+  }
+
+  /// Calculate subtotal for a list of cart items
+  double _calculateSubtotalForItems(List<CartModel> items) {
+    double itemPrice = 0;
+    double itemDiscountPrice = 0;
+    double addOnsPrice = 0;
+    double variationPrice = 0;
+
+    for (var cartModel in items) {
+      double? discount = cartModel.product!.restaurantDiscount == 0
+          ? cartModel.product!.discount
+          : cartModel.product!.restaurantDiscount;
+      String? discountType = cartModel.product!.restaurantDiscount == 0
+          ? cartModel.product!.discountType
+          : 'percent';
+
+      List<AddOns> addOnList = cartServiceInterface.prepareAddonList(cartModel);
+      addOnsPrice = cartServiceInterface.calculateAddonsPrice(addOnList, addOnsPrice, cartModel);
+
+      double variationWithoutDiscountPrice = 0;
+      double currentVariationPrice = 0;
+      variationWithoutDiscountPrice = cartServiceInterface.calculateVariationWithoutDiscountPrice(
+        cartModel,
+        variationWithoutDiscountPrice,
+        discount,
+        discountType,
+      );
+      currentVariationPrice = cartServiceInterface.calculateVariationPrice(cartModel, currentVariationPrice);
+
+      double price = (cartModel.product!.price! * cartModel.quantity!);
+      double discountPrice = (price -
+          (PriceConverter.convertWithDiscount(cartModel.product!.price!, discount, discountType)! * cartModel.quantity!));
+
+      variationPrice += currentVariationPrice;
+      itemPrice += price;
+      itemDiscountPrice += discountPrice + (currentVariationPrice - variationWithoutDiscountPrice);
+    }
+
+    return (itemPrice - itemDiscountPrice) + addOnsPrice + variationPrice;
+  }
+
+  /// Set the current restaurant context (for backward compatibility with single-restaurant flow)
+  void setCurrentRestaurant(int restaurantId) {
+    _currentRestaurantId = restaurantId;
+    update();
+  }
+
+  /// Get cart items for a specific restaurant
+  List<CartModel> getCartItemsForRestaurant(int restaurantId) {
+    return _restaurantCarts[restaurantId]?.items ?? [];
+  }
+
+  /// Update special instructions for a restaurant's cart
+  /// Note: Currently stores in memory only. In Phase 2, this will sync with checkout session
+  void setCartSpecialInstructions(int restaurantId, String instructions) {
+    if (_restaurantCarts.containsKey(restaurantId)) {
+      _restaurantCarts[restaurantId] = _restaurantCarts[restaurantId]!.copyWith(
+        specialInstructions: instructions.isEmpty ? null : instructions,
+      );
+      update();
+    }
   }
 
 }

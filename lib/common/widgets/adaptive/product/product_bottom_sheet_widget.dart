@@ -330,10 +330,14 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                               },
                               isIncrement: false,
                             ),
-                            AnimatedTextTransition(
-                              value: productController.quantity!,
-                              duration: const Duration(milliseconds: 320),
-                              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                            SizedBox(
+                              width: 40,
+                              child: AnimatedTextTransition(
+                                value: productController.quantity!,
+                                duration: const Duration(milliseconds: 320),
+                                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             QuantityButton(
                               onTap: () => productController.setQuantity(true, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign),

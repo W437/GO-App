@@ -243,25 +243,21 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
 
                                     const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                                    // Total price - animated with bounce (fixed width to prevent layout shift)
-                                    SizedBox(
-                                      width: 120,
-                                      child: AnimatedBuilder(
-                                        animation: _priceBounceAnimation,
-                                        builder: (context, child) {
-                                          return Transform.scale(
-                                            scale: _priceBounceAnimation.value,
-                                            child: child,
-                                          );
-                                        },
-                                        child: AnimatedTextTransition(
-                                          value: PriceConverter.convertPrice(cartController.calculationCart()),
-                                          delay: const Duration(milliseconds: 1500),
-                                          style: robotoBold.copyWith(
-                                            fontSize: Dimensions.fontSizeLarge,
-                                            color: Colors.white,
-                                          ),
-                                          textAlign: TextAlign.right,
+                                    // Total price - animated with bounce
+                                    AnimatedBuilder(
+                                      animation: _priceBounceAnimation,
+                                      builder: (context, child) {
+                                        return Transform.scale(
+                                          scale: _priceBounceAnimation.value,
+                                          child: child,
+                                        );
+                                      },
+                                      child: AnimatedTextTransition(
+                                        value: PriceConverter.convertPrice(cartController.calculationCart()),
+                                        delay: const Duration(milliseconds: 1500),
+                                        style: robotoBold.copyWith(
+                                          fontSize: Dimensions.fontSizeLarge,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),

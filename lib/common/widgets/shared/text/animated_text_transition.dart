@@ -88,11 +88,12 @@ class _AnimatedTextTransitionState extends State<AnimatedTextTransition>
 
         Future.delayed(widget.delay!, () {
           if (mounted) {
+            // Start animation immediately, then update state
+            _controller.forward();
             setState(() {
               _isWaitingForDelay = false;
               _displayValue = widget.value;
             });
-            _controller.forward();
           }
         });
       } else {
@@ -134,37 +135,42 @@ class _AnimatedTextTransitionState extends State<AnimatedTextTransition>
 
   // Apple-style per-digit animation
   Widget _buildPerDigitAnimation(TextStyle textStyle) {
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        if (_prefix.isNotEmpty) Text(_prefix, style: textStyle),
+        ..._digitSlots.map((slot) {
+          if (!slot.changed) {
+            // Static digit (unchanged)
+            return Text(slot.newChar, style: textStyle);
+          } else {
+            // Animated digit
+            return _DigitTransition(
+              oldChar: slot.oldChar,
+              newChar: slot.newChar,
+              style: textStyle,
+              direction: _direction,
+              animation: _animation,
+            );
+          }
+        }),
+        if (_suffix.isNotEmpty) Text(_suffix, style: textStyle),
+      ],
+    );
+
+    // Center the row if textAlign is center
     return RepaintBoundary(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          if (_prefix.isNotEmpty) Text(_prefix, style: textStyle),
-          ..._digitSlots.map((slot) {
-            if (!slot.changed) {
-              // Static digit (unchanged)
-              return Text(slot.newChar, style: textStyle);
-            } else {
-              // Animated digit
-              return _DigitTransition(
-                oldChar: slot.oldChar,
-                newChar: slot.newChar,
-                style: textStyle,
-                direction: _direction,
-                animation: _animation,
-              );
-            }
-          }),
-          if (_suffix.isNotEmpty) Text(_suffix, style: textStyle),
-        ],
-      ),
+      child: widget.textAlign == TextAlign.center
+        ? Center(child: row)
+        : row,
     );
   }
 
   // Static display for per-digit mode (no animation)
   Widget _buildStaticPerDigit(TextStyle textStyle) {
-    return Row(
+    final row = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (_prefix.isNotEmpty) Text(_prefix, style: textStyle),
@@ -172,6 +178,8 @@ class _AnimatedTextTransitionState extends State<AnimatedTextTransition>
         if (_suffix.isNotEmpty) Text(_suffix, style: textStyle),
       ],
     );
+
+    return widget.textAlign == TextAlign.center ? Center(child: row) : row;
   }
 
   // Whole-string animation (fallback for non-numeric)
@@ -249,7 +257,7 @@ class _AnimatedTextTransitionState extends State<AnimatedTextTransition>
     print('🔢 [TEXT TRANSITION] Old: "$oldText" → New: "$newText"');
     print('   Old digits: $oldDigitCount, New digits: $newDigitCount, Diff: ${(oldDigitCount - newDigitCount).abs()}');
 
-    if ((oldDigitCount - newDigitCount).abs() > 3) {
+    if ((oldDigitCount - newDigitCount).abs() > 5) {
       print('   → Using WHOLE-STRING mode (digit diff too large)');
       return _DiffResult(usePerDigit: false);
     }
