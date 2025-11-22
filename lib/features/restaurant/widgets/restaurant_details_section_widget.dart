@@ -80,7 +80,7 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                       Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
                       const SizedBox(width: 8),
                       Text(
-                        'Min. order ${PriceConverter.convertPrice(restaurant.minimumOrder)}',
+                        'Min. order ${PriceConverter.convertPrice(restaurant.minimumOrder ?? 0)}',
                         style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
                       ),
                     ],

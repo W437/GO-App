@@ -6,17 +6,22 @@ import 'package:get/get.dart';
 
 class PriceConverter {
   static String convertPrice(double? price, {double? discount, String? discountType, bool forDM = false, bool isVariation = false}) {
+    // Handle null price gracefully
+    if (price == null) {
+      price = 0;
+    }
+
     if(discount != null && discountType != null){
       if(discountType == 'amount' && !isVariation) {
-        price = price! - discount;
+        price = price - discount;
       }else if(discountType == 'percent') {
-        price = price! - ((discount / 100) * price);
+        price = price - ((discount / 100) * price);
       }
     }
 
     int digitAfterDecimalPoint = Get.find<SplashController>().configModel!.digitAfterDecimalPoint ?? 2;
 
-    int tempPrice = price!.floor();
+    int tempPrice = price.floor();
     if((price - tempPrice) == 0) {
       digitAfterDecimalPoint = 0;
     }
