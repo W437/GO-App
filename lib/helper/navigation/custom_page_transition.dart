@@ -9,8 +9,13 @@ import 'package:get/get.dart';
 /// - 3D Perspective & Rotation
 /// - Spring-based overshoot on entry
 /// - Background scaling and dimming
-/// - Interactive swipe-to-close support (via standard Get/Navigator gestures)
+/// - Interactive swipe-to-dismiss from left edge
 class CustomPageTransition extends CustomTransition {
+  /// Threshold (0.0 - 1.0) of screen width to trigger dismiss
+  static const double dismissThreshold = 0.3;
+
+  /// Width of the left edge that accepts swipe gestures (0.0 - 1.0)
+  static const double swipeEdgeWidth = 0.15;
   @override
   Widget buildTransition(
     BuildContext context,
@@ -57,95 +62,201 @@ class CustomPageTransition extends CustomTransition {
             child: child,
           )
         else
-          // 2. Foreground Effect
-          AnimatedBuilder(
+          // 2. Foreground Effect with Interactive Swipe
+          _InteractiveDismissibleWrapper(
             animation: animation,
-            builder: (context, child) {
-              // Custom Curves
-              // Use a very smooth, natural curve for both open and close.
-              final double curvedValue = Curves.easeInOutExpo.transform(animation.value);
-
-              // Spring for scale
-              // We use a custom Cubic with a higher overshoot value (1.5) to make the bounce visible
-              // since we are only scaling from 0.92 to 1.0 (a small delta).
-              // Standard easeOutBack (1.275) only gives ~0.8% overshoot on this delta.
-              // This custom curve gives ~4% overshoot (1.04).
-              final double scaleValue = animation.status == AnimationStatus.reverse
-                  ? curvedValue // No overshoot on close
-                  : const Cubic(0.175, 0.885, 0.32, 1.5).transform(animation.value);
-
-              final size = MediaQuery.of(context).size;
-              final width = size.width;
-
-              // --- Parameters ---
-              const double startTranslateXRatio = 1.1;
-              const double startScale = 0.92;
-              const double startYAngle = 8.0 * pi / 180;
-              const double startZAngle = 1.5 * pi / 180;
-
-              // --- Logic ---
-              final double translateX = width * startTranslateXRatio * (1.0 - curvedValue);
-              final double yAngle = startYAngle * (1.0 - curvedValue);
-              final double zAngle = startZAngle * (1.0 - curvedValue);
-
-              // Scale logic
-              final double currentScale = startScale + (1.0 - startScale) * scaleValue;
-
-              // Corner Radius
-              final double cornerRadius = 24.0 * (1.0 - curvedValue);
-
-              // Shadow Opacity (fade in/out)
-              final double shadowOpacity = (curvedValue * 0.5).clamp(0.0, 0.3);
-
-              // --- Matrix ---
-              final Matrix4 matrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..translate(translateX, 0.0, 0.0)
-                ..scale(currentScale, currentScale, 1.0)
-                ..rotateY(yAngle)
-                ..rotateZ(zAngle);
-
-              Widget transformedChild = child ?? const SizedBox();
-
-              // Apply ClipRRect if needed
-              if (cornerRadius > 0.5) {
-                transformedChild = ClipRRect(
-                  borderRadius: BorderRadius.circular(cornerRadius),
-                  child: transformedChild,
-                );
-              }
-
-              // Wrap in Container for Shadow
-              // We apply the shadow *outside* the clip if possible, or to a container wrapping the clip.
-              // Since the clip clips the child, we need the shadow on the container *before* clipping? 
-              // No, shadow is usually on the "card" shape.
-              // If we clip the child, we lose the shadow if it's drawn by the child.
-              // So we wrap the clipped child in a container that has the shadow? 
-              // But the container needs to match the clip shape.
-              // Actually, physical model or DecoratedBox with borderRadius matches.
-              
-              return Transform(
-                transform: matrix,
-                alignment: Alignment.center,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(cornerRadius),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(shadowOpacity),
-                        blurRadius: 30,
-                        spreadRadius: 5,
-                        offset: const Offset(-10, 10), // Shadow to the left/bottom
-                      ),
-                    ],
-                  ),
-                  child: transformedChild,
-                ),
-              );
-            },
-            child: RepaintBoundary(child: child),
+            child: child,
           ),
       ],
+    );
+  }
+}
+
+/// Interactive wrapper that handles swipe-to-dismiss gesture
+class _InteractiveDismissibleWrapper extends StatefulWidget {
+  final Animation<double> animation;
+  final Widget child;
+
+  const _InteractiveDismissibleWrapper({
+    required this.animation,
+    required this.child,
+  });
+
+  @override
+  State<_InteractiveDismissibleWrapper> createState() =>
+      _InteractiveDismissibleWrapperState();
+}
+
+class _InteractiveDismissibleWrapperState
+    extends State<_InteractiveDismissibleWrapper>
+    with SingleTickerProviderStateMixin {
+  double _dragOffset = 0.0;
+  bool _isDragging = false;
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _bounceAnimation = Tween<double>(begin: 0.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _bounceController,
+        curve: Curves.easeOutCubic,
+      ),
+    )..addListener(() {
+        setState(() {
+          _dragOffset = _bounceAnimation.value;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    final size = MediaQuery.of(context).size;
+    final edgeWidth = size.width * CustomPageTransition.swipeEdgeWidth;
+
+    // Only allow drag if it starts from the left edge
+    if (details.globalPosition.dx > edgeWidth) {
+      return;
+    }
+
+    _isDragging = true;
+    _bounceController.stop();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isDragging) return;
+
+    setState(() {
+      // Only allow dragging to the right (positive offset)
+      _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, double.infinity);
+    });
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    if (!_isDragging) return;
+    _isDragging = false;
+
+    final size = MediaQuery.of(context).size;
+    final threshold = size.width * CustomPageTransition.dismissThreshold;
+
+    if (_dragOffset > threshold) {
+      // Dismiss the page
+      Get.back();
+    } else {
+      // Bounce back to original position
+      _bounceAnimation = Tween<double>(
+        begin: _dragOffset,
+        end: 0.0,
+      ).animate(
+        CurvedAnimation(
+          parent: _bounceController,
+          curve: Curves.easeOutCubic,
+        ),
+      );
+      _bounceController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onHorizontalDragStart: _handleDragStart,
+      onHorizontalDragUpdate: _handleDragUpdate,
+      onHorizontalDragEnd: _handleDragEnd,
+      child: AnimatedBuilder(
+        animation: widget.animation,
+        builder: (context, child) {
+          // Custom Curves
+          // Use a smooth, gentle curve for both open and close.
+          final double curvedValue = Curves.easeOutCubic.transform(widget.animation.value);
+
+          // Spring for scale
+          // We use a custom Cubic with a subtle overshoot value (1.2) for a gentle bounce
+          // since we are only scaling from 0.92 to 1.0 (a small delta).
+          // This gives a smooth, natural feel without being too aggressive.
+          final double scaleValue = widget.animation.status == AnimationStatus.reverse
+              ? curvedValue // No overshoot on close
+              : const Cubic(0.175, 0.885, 0.32, 1.2).transform(widget.animation.value);
+
+          final size = MediaQuery.of(context).size;
+          final width = size.width;
+
+          // --- Parameters ---
+          const double startTranslateXRatio = 1.1;
+          const double startScale = 0.92;
+          const double startYAngle = 8.0 * pi / 180;
+          const double startZAngle = 1.5 * pi / 180;
+
+          // --- Logic ---
+          // Combine animation offset with drag offset
+          final double animationTranslateX = width * startTranslateXRatio * (1.0 - curvedValue);
+          final double totalTranslateX = animationTranslateX + _dragOffset;
+
+          // Calculate progress based on combined offset (for rotation/scale)
+          final double totalProgress = (totalTranslateX / (width * startTranslateXRatio)).clamp(0.0, 1.0);
+          final double effectiveProgress = 1.0 - totalProgress;
+
+          final double yAngle = startYAngle * totalProgress;
+          final double zAngle = startZAngle * totalProgress;
+
+          // Scale logic - use the animation's scale value but adjust if dragging
+          final double currentScale = startScale + (1.0 - startScale) * scaleValue * effectiveProgress;
+
+          // Corner Radius
+          final double cornerRadius = 24.0 * totalProgress;
+
+          // Shadow Opacity (fade in/out)
+          final double shadowOpacity = (effectiveProgress * 0.5).clamp(0.0, 0.3);
+
+          // --- Matrix ---
+          final Matrix4 matrix = Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..translate(totalTranslateX, 0.0, 0.0)
+            ..scale(currentScale, currentScale, 1.0)
+            ..rotateY(yAngle)
+            ..rotateZ(zAngle);
+
+          Widget transformedChild = child ?? const SizedBox();
+
+          // Apply ClipRRect if needed
+          if (cornerRadius > 0.5) {
+            transformedChild = ClipRRect(
+              borderRadius: BorderRadius.circular(cornerRadius),
+              child: transformedChild,
+            );
+          }
+
+          return Transform(
+            transform: matrix,
+            alignment: Alignment.center,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(cornerRadius),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(shadowOpacity),
+                    blurRadius: 30,
+                    spreadRadius: 5,
+                    offset: const Offset(-10, 10), // Shadow to the left/bottom
+                  ),
+                ],
+              ),
+              child: transformedChild,
+            ),
+          );
+        },
+        child: RepaintBoundary(child: widget.child),
+      ),
     );
   }
 }
