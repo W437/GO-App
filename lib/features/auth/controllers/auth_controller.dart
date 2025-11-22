@@ -209,8 +209,8 @@ class AuthController extends GetxController implements GetxService {
     await authServiceInterface.socialLogout();
   }
 
-  Future<bool> clearSharedData({bool removeToken = true}) async {
-    return await authServiceInterface.clearSharedData(removeToken: removeToken);
+  Future<bool> clearSharedData({bool removeToken = true, bool clearGuestData = true}) async {
+    return await authServiceInterface.clearSharedData(removeToken: removeToken, clearGuestData: clearGuestData);
   }
 
   Future<bool> setNotificationActive(bool isActive) async {

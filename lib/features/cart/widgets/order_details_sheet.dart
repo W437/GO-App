@@ -354,75 +354,59 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
         ? 'tomorrow'.tr
         : DateConverter.timeStringToTime(restaurantController.restaurant!.restaurantOpeningTime!);
 
-    return Column(
-      children: [
-        // Unavailable notice
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                CupertinoIcons.time,
-                size: 32,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-              Text(
-                'Restaurant Currently Closed',
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeLarge,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Opens at ',
-                      style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeDefault,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                    TextSpan(
-                      text: openingTime,
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeDefault,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Dimensions.paddingSizeLarge,
+          vertical: Dimensions.paddingSizeDefault,
         ),
-
-        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-        // Remove from cart button
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-          child: CustomButtonWidget(
-            buttonText: cartController.cartList.length > 1
-                ? 'remove_all_from_cart'.tr
-                : 'remove_from_cart'.tr,
-            onPressed: () => cartController.clearCartOnline(),
-            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-            textColor: Theme.of(context).colorScheme.error,
-            icon: CupertinoIcons.delete,
-            isLoading: cartController.isClearCartLoading,
-          ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
         ),
-      ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.time,
+              size: 28,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+            Text(
+              'Restaurant Currently Closed',
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Opens at ',
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).hintColor,
+                    ),
+                  ),
+                  TextSpan(
+                    text: openingTime,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -443,33 +427,68 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                 'Order items',
                 style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
               ),
-              TextButton(
-                onPressed: () {
-                  if (isRestaurantOpen && cartController.cartList.isNotEmpty) {
-                    Get.toNamed(
-                      RouteHelper.getRestaurantRoute(
-                        cartController.cartList[0].product!.restaurantId,
-                      ),
-                      arguments: RestaurantScreen(
-                        restaurant: Restaurant(
-                          id: cartController.cartList[0].product!.restaurantId,
+              Row(
+                children: [
+                  // Delete all button - only show when restaurant is closed
+                  if (!isRestaurantOpen)
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: cartController.isClearCartLoading ? null : () => cartController.clearCartOnline(),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: cartController.isClearCartLoading
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                )
+                              : Icon(
+                                  CupertinoIcons.trash,
+                                  size: 20,
+                                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+                                ),
                         ),
                       ),
-                    );
-                  }
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  '+ Add more',
-                  style: robotoMedium.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: Dimensions.fontSizeDefault,
+                    ),
+                  if (!isRestaurantOpen)
+                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                  // Add more button
+                  TextButton(
+                    onPressed: () {
+                      if (isRestaurantOpen && cartController.cartList.isNotEmpty) {
+                        Get.toNamed(
+                          RouteHelper.getRestaurantRoute(
+                            cartController.cartList[0].product!.restaurantId,
+                          ),
+                          arguments: RestaurantScreen(
+                            restaurant: Restaurant(
+                              id: cartController.cartList[0].product!.restaurantId,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      '+ Add more',
+                      style: robotoMedium.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: Dimensions.fontSizeDefault,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),

@@ -23,7 +23,7 @@ abstract class AuthRepoInterface<SignUpModel> extends RepositoryInterface<SignUp
   bool isGuestLoggedIn();
   Future<Response> loginWithSocialMedia(SocialLogInBodyModel socialLogInModel);
   bool isLoggedIn();
-  Future<bool> clearSharedData({bool removeToken = true});
+  Future<bool> clearSharedData({bool removeToken = true, bool clearGuestData = true});
   bool isNotificationActive();
   Future<void> setNotificationActive(bool isActive);
   String getUserToken();

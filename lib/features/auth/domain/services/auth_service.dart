@@ -138,8 +138,8 @@ class AuthService implements AuthServiceInterface{
   }
 
   @override
-  Future<bool> clearSharedData({bool removeToken = true}) async {
-    return await authRepoInterface.clearSharedData(removeToken: removeToken);
+  Future<bool> clearSharedData({bool removeToken = true, bool clearGuestData = true}) async {
+    return await authRepoInterface.clearSharedData(removeToken: removeToken, clearGuestData: clearGuestData);
   }
 
   @override

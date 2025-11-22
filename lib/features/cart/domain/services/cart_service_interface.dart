@@ -9,6 +9,7 @@ abstract class CartServiceInterface {
   Future<Response> addMultipleCartItemOnline(List<OnlineCart> carts);
   List<CartModel> formatOnlineCartToLocalCart({required List<OnlineCartModel> onlineCartModel});
   void addToSharedPrefCartList(List<CartModel> cartProductList);
+  List<CartModel> getCartListFromSharedPref();
   Future<bool> clearCartOnline(String? guestId);
   Future<int> decideProductQuantity(List<CartModel> cartList, bool isIncrement, int index);
   Future<bool> updateCartQuantityOnline(int cartId, double price, int quantity, String? guestId);

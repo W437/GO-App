@@ -217,7 +217,7 @@ class AuthRepo implements AuthRepoInterface<SignUpBodyModel> {
   }
 
   @override
-  Future<bool> clearSharedData({bool removeToken = true}) async {
+  Future<bool> clearSharedData({bool removeToken = true, bool clearGuestData = true}) async {
     if(!GetPlatform.isWeb) {
       FirebaseMessaging.instance.unsubscribeFromTopic(AppConstants.topic);
       FirebaseMessaging.instance.unsubscribeFromTopic('zone_${AddressHelper.getAddressFromSharedPref()!.zoneId}_customer');
@@ -226,10 +226,20 @@ class AuthRepo implements AuthRepoInterface<SignUpBodyModel> {
       }
     }
     sharedPreferences.remove(AppConstants.token);
-    sharedPreferences.remove(AppConstants.guestId);
-    sharedPreferences.setStringList(AppConstants.cartList, []);
+
+    // Only clear guest data when explicitly logging out, not on auth errors
+    // This preserves cart when 401 errors occur for guest-inaccessible endpoints
+    if (clearGuestData) {
+      sharedPreferences.remove(AppConstants.guestId);
+      sharedPreferences.setStringList(AppConstants.cartList, []);
+    }
+
     apiClient.token = null;
-    await guestLogin();
+
+    // Only create new guest if we cleared the old one (explicit logout)
+    if (clearGuestData) {
+      await guestLogin();
+    }
     if(sharedPreferences.getString(AppConstants.userAddress) != null){
       AddressModel? addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
       apiClient.updateHeader(

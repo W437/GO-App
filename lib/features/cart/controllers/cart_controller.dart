@@ -26,6 +26,13 @@ class CartController extends GetxController implements GetxService {
   // Debouncer for quantity updates to prevent API spam
   final _quantityDebouncer = CustomDebounceHelper(milliseconds: 500);
 
+  @override
+  void onInit() {
+    super.onInit();
+    // Load cart from local storage on initialization
+    getCartDataFromLocal();
+  }
+
   // PHASE 1: Multi-restaurant cart support
   // New state for grouped carts (populated alongside _cartList for backward compatibility)
   Map<int, RestaurantCart> _restaurantCarts = {};
@@ -189,6 +196,8 @@ class CartController extends GetxController implements GetxService {
 
   Future<void> clearCartList() async {
     _cartList = [];
+    // Clear local storage
+    cartServiceInterface.addToSharedPrefCartList([]);
     if(AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) {
       await clearCartOnline();
     }
@@ -303,11 +312,27 @@ class CartController extends GetxController implements GetxService {
     // update();
   }
 
+  /// Load cart data from local storage (SharedPreferences)
+  /// This serves as a fallback when API is unavailable or user session expires
+  void getCartDataFromLocal() {
+    _cartList = cartServiceInterface.getCartListFromSharedPref();
+    if (_cartList.isNotEmpty) {
+      calculationCart();
+      groupCartsByRestaurant();
+      update();
+      debugPrint('✅ Loaded ${_cartList.length} items from local storage');
+    }
+  }
+
   Future<void> getCartDataOnline() async {
     _isLoading = true;
     List<OnlineCartModel> onlineCartList = await cartServiceInterface.getCartDataOnline(AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId());
     _cartList = [];
     _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
+
+    // Save to local storage for offline access
+    cartServiceInterface.addToSharedPrefCartList(_cartList);
+
     calculationCart();
 
     // PHASE 1: Group carts by restaurant after fetching

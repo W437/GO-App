@@ -10,9 +10,9 @@ import 'package:get/get.dart';
 class ApiChecker {
   static Future<void> checkApi(Response response, {bool showToaster = false}) async {
     if(response.statusCode == 401) {
-      // Session expired - clear data but DON'T force navigation
-      // Let the UI layer handle showing appropriate empty states/login prompts
-      await Get.find<AuthController>().clearSharedData(removeToken: false);
+      // Session expired - clear auth token but preserve guest data and cart
+      // This allows guests to continue using the app even when hitting endpoints that require real auth
+      await Get.find<AuthController>().clearSharedData(removeToken: false, clearGuestData: false);
       Get.find<FavouriteController>().removeFavourites();
       // DON'T navigate - respect user's current context (modals, screens, etc.)
     } else if(response.statusCode != 500) {

@@ -39,6 +39,22 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
   }
 
   @override
+  List<CartModel> getCartListFromSharedPref() {
+    List<String>? carts = sharedPreferences.getStringList(AppConstants.cartList);
+    List<CartModel> cartList = [];
+    if (carts != null && carts.isNotEmpty) {
+      for (var cart in carts) {
+        try {
+          cartList.add(CartModel.fromJson(jsonDecode(cart)));
+        } catch (e) {
+          // Skip invalid cart items
+        }
+      }
+    }
+    return cartList;
+  }
+
+  @override
   Future<bool> clearCartOnline(String? guestId) async {
     Response response = await apiClient.postData('${AppConstants.removeAllCartUri}${guestId != null ? '?guest_id=$guestId' : ''}', {"_method": "delete"});
     return (response.statusCode == 200);

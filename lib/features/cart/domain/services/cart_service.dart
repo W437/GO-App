@@ -76,6 +76,11 @@ class CartService implements CartServiceInterface {
   }
 
   @override
+  List<CartModel> getCartListFromSharedPref() {
+    return cartRepositoryInterface.getCartListFromSharedPref();
+  }
+
+  @override
   Future<bool> clearCartOnline(String? guestId) async {
     return await cartRepositoryInterface.clearCartOnline(guestId);
   }

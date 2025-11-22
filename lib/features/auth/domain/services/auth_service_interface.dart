@@ -19,7 +19,7 @@ abstract class AuthServiceInterface{
   String getGuestId();
   bool isGuestLoggedIn();
   Future<void> socialLogout();
-  Future<bool> clearSharedData({bool removeToken = true});
+  Future<bool> clearSharedData({bool removeToken = true, bool clearGuestData = true});
   Future<bool> setNotificationActive(bool isActive);
   bool isNotificationActive();
   String getUserToken();
