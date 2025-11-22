@@ -91,18 +91,25 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeOutCubic,
             alignment: Alignment.centerRight,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+            child: AnimatedScale(
+              duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              height: _badgeHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: theme.primaryColor,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(_cornerRadius),
-                  bottomLeft: Radius.circular(_cornerRadius),
+              scale: _isExpanded ? 1.2 : 1.0,
+              alignment: Alignment.centerRight,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: _badgeHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _isExpanded
+                      ? theme.disabledColor.withOpacity(0.15)
+                      : theme.primaryColor,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(_cornerRadius),
+                    bottomLeft: Radius.circular(_cornerRadius),
+                  ),
                 ),
-              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -153,7 +160,9 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
                     value: totalQuantity,
                     style: robotoBold.copyWith(
                       fontSize: Dimensions.fontSizeSmall,
-                      color: Colors.white,
+                      color: _isExpanded
+                          ? theme.textTheme.bodyLarge?.color
+                          : Colors.white,
                     ),
                   ),
 
@@ -193,6 +202,7 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
                   ),
                 ],
               ),
+            ),
             ),
           ),
         );

@@ -1,14 +1,15 @@
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
+import 'package:godelivery_user/features/checkout/screens/checkout_screen.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
-import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -107,7 +108,7 @@ class CheckoutButtonWidget extends StatelessWidget {
                   height: 56,
                   onPressed: cartController.isLoading || restaurantController.restaurant == null ? null : () {
                     Get.find<CheckoutController>().updateFirstTime();
-                    _processToCheckoutButtonPressed(restaurantController);
+                    _processToCheckoutButtonPressed(context, restaurantController);
                   },
                 );
               }
@@ -119,7 +120,7 @@ class CheckoutButtonWidget extends StatelessWidget {
     );
   }
 
-  void _processToCheckoutButtonPressed(RestaurantController restaurantController) {
+  void _processToCheckoutButtonPressed(BuildContext context, RestaurantController restaurantController) {
     if(!cartController.cartList.first.product!.scheduleOrder! && cartController.availableList.contains(false)) {
       showCustomSnackBar('one_or_more_product_unavailable'.tr);
     } else if(restaurantController.restaurant!.freeDelivery == null || restaurantController.restaurant!.cutlery == null) {
@@ -128,7 +129,16 @@ class CheckoutButtonWidget extends StatelessWidget {
       showCustomSnackBar('restaurant_is_close_now'.tr);
     } */else {
       Get.find<CouponController>().removeCouponData(false);
-      Get.toNamed(RouteHelper.getCheckoutRoute('cart', fromDineIn: fromDineIn));
+
+      // Navigate within sheet using CustomFullSheetNavigator
+      CustomFullSheetNavigator.push(
+        context,
+        CheckoutScreen(
+          fromCart: true,
+          cartList: cartController.cartList,
+          fromDineInPage: fromDineIn,
+        ),
+      );
     }
   }
 

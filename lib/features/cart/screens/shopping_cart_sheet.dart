@@ -167,10 +167,12 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                 children: [
                   // Shopping Carts View
                   ShoppingCartsView(onViewCart: () {
-                    // Open OrderDetailsSheet using custom bottom sheet
+                    // Open OrderDetailsSheet using custom bottom sheet with navigation support
                     CustomFullSheet.show(
                       context: context,
-                      child: const OrderDetailsSheet(),
+                      child: const CustomFullSheetNavigator(
+                        initialPage: OrderDetailsSheet(),
+                      ),
                       isFullScreen: true,
                     );
                   }),
