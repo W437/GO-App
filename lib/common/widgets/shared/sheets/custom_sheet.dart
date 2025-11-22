@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -59,21 +60,44 @@ class CustomSheet extends StatefulWidget {
           curve: curve,
         ));
 
-        // Fade animation - smooth opacity transition
-        final fadeAnimation = Tween<double>(
-          begin: 0.0,
-          end: 1.0,
+        // 3D rotation animation - top edges tilted forward (toward viewer)
+        final rotationXAnimation = Tween<double>(
+          begin: 0.6, // Stronger tilt: top tilted forward (toward viewer)
+          end: 0.0,   // Flat
         ).animate(CurvedAnimation(
           parent: animation,
-          curve: Curves.easeOut,
+          curve: curve,
         ));
 
-        return SlideTransition(
-          position: slideAnimation,
-          child: ScaleTransition(
-            scale: scaleAnimation,
-            child: FadeTransition(
-              opacity: fadeAnimation,
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            // Motion blur - peaks at middle of animation (fastest motion)
+            final t = animation.value;
+            final blurAmount = lerpDouble(0, 2, 1 - (t * 2 - 1).abs()) ?? 0;
+
+            // Create 3D perspective transformation
+            final transform = Matrix4.identity()
+              ..setEntry(3, 2, 0.003) // Stronger perspective for more visible effect
+              ..rotateX(rotationXAnimation.value); // Rotate around X-axis
+
+            return ImageFiltered(
+              imageFilter: ImageFilter.blur(
+                sigmaX: blurAmount,
+                sigmaY: blurAmount,
+                tileMode: TileMode.decal,
+              ),
+              child: Transform(
+                transform: transform,
+                alignment: Alignment.bottomCenter, // Pivot at bottom
+                child: child!,
+              ),
+            );
+          },
+          child: SlideTransition(
+            position: slideAnimation,
+            child: ScaleTransition(
+              scale: scaleAnimation,
               child: child,
             ),
           ),

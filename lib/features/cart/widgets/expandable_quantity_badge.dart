@@ -29,6 +29,11 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
   bool _isExpanded = false;
   Timer? _autoCollapseTimer;
 
+  static const double _badgeHeight = 44;
+  static const double _buttonSize = 26;
+  static const double _borderRadiusCollapsed = 16;
+  static const double _borderRadiusExpanded = 22;
+
   @override
   void dispose() {
     _autoCollapseTimer?.cancel();
@@ -58,7 +63,6 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
   }
 
   void _onQuantityChanged() {
-    // Reset timer when user interacts with +/- buttons
     if (_isExpanded) {
       _startAutoCollapseTimer();
     }
@@ -68,100 +72,103 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
   Widget build(BuildContext context) {
     return GetBuilder<CartController>(
       builder: (cartController) {
-        int quantity = widget.cart.quantity ?? 1;
+        final quantity = widget.cart.quantity ?? 1;
+        final theme = Theme.of(context);
 
         return GestureDetector(
           onTap: _isExpanded ? null : _toggle,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOut,
-            height: 44,
-            constraints: BoxConstraints(
-              minWidth: _isExpanded ? 120 : 44,
-              maxWidth: _isExpanded ? 140 : 44,
-            ),
-            decoration: BoxDecoration(
-              color: _isExpanded
-                  ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
-                  : Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(_isExpanded ? 22 : Dimensions.radiusSmall),
-              border: _isExpanded
-                  ? null
-                  : Border.all(
-                      color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-            ),
-            child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  );
-                },
-                child: _isExpanded
-                    ? Padding(
-                        key: const ValueKey('expanded'),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Minus button
-                            _buildCircleButton(
-                              icon: Icons.remove,
-                              onPressed: quantity > 1
-                                  ? () {
-                                      _onQuantityChanged();
-                                      cartController.setQuantity(
-                                        false,
-                                        widget.cart,
-                                        cartIndex: widget.cartIndex,
-                                      );
-                                    }
-                                  : null,
-                            ),
-                            const SizedBox(width: 8),
-
-                            // Quantity
-                            Text(
-                              '$quantity',
-                              style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeDefault,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-
-                            // Plus button
-                            _buildCircleButton(
-                              icon: Icons.add,
-                              onPressed: () {
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.center,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              height: _badgeHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: _isExpanded
+                    ? theme.primaryColor.withValues(alpha: 0.12)
+                    : theme.cardColor,
+                borderRadius: BorderRadius.circular(
+                  _isExpanded
+                      ? _borderRadiusExpanded
+                      : _borderRadiusCollapsed,
+                ),
+                border: _isExpanded
+                    ? null
+                    : Border.all(
+                        color: theme.disabledColor.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+              ),
+              child: ClipRect(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Minus button (slides in from left)
+                    _AnimatedSideButton(
+                      isVisible: _isExpanded,
+                      child: _buildCircleButton(
+                        icon: Icons.remove,
+                        enabled: quantity > 1,
+                        onTap: quantity > 1
+                            ? () {
                                 _onQuantityChanged();
                                 cartController.setQuantity(
-                                  true,
+                                  false,
                                   widget.cart,
                                   cartIndex: widget.cartIndex,
                                 );
-                              },
-                            ),
-                          ],
-                        ),
-                      )
-                    : Center(
-                        key: const ValueKey('collapsed'),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            '$quantity',
-                            style: robotoBold.copyWith(
-                              fontSize: Dimensions.fontSizeDefault,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
+                              }
+                            : null,
+                        color: theme.primaryColor,
                       ),
+                    ),
+
+                    // Spacing left of quantity
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      child: SizedBox(width: _isExpanded ? 8 : 0),
+                    ),
+
+                    // Quantity (stays centered visually)
+                    Text(
+                      '$quantity',
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+
+                    // Spacing right of quantity
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      child: SizedBox(width: _isExpanded ? 8 : 0),
+                    ),
+
+                    // Plus button (slides in from right)
+                    _AnimatedSideButton(
+                      isVisible: _isExpanded,
+                      child: _buildCircleButton(
+                        icon: Icons.add,
+                        enabled: true,
+                        onTap: () {
+                          _onQuantityChanged();
+                          cartController.setQuantity(
+                            true,
+                            widget.cart,
+                            cartIndex: widget.cartIndex,
+                          );
+                        },
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -171,21 +178,54 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
 
   Widget _buildCircleButton({
     required IconData icon,
-    required VoidCallback? onPressed,
+    required bool enabled,
+    required VoidCallback? onTap,
+    required Color color,
   }) {
+    final Color baseColor = enabled ? color : color.withValues(alpha: 0.4);
+
     return GestureDetector(
-      onTap: onPressed,
+      onTap: enabled ? onTap : null,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 26,
-        height: 26,
+        width: _buttonSize,
+        height: _buttonSize,
         decoration: BoxDecoration(
-          color: Colors.blue.withValues(alpha: 0.2),
+          color: baseColor.withValues(alpha: 0.12),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: 14,
-          color: Colors.blue,
+          color: baseColor,
+        ),
+      ),
+    );
+  }
+}
+
+/// Animates side buttons width + opacity so they "reveal" smoothly.
+class _AnimatedSideButton extends StatelessWidget {
+  final bool isVisible;
+  final Widget child;
+
+  const _AnimatedSideButton({
+    required this.isVisible,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      width: isVisible ? _ExpandableQuantityBadgeState._buttonSize : 0,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: isVisible ? 1 : 0,
+        child: IgnorePointer(
+          ignoring: !isVisible,
+          child: child,
         ),
       ),
     );

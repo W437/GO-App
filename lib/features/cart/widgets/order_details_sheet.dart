@@ -432,7 +432,8 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                   if (!isRestaurantOpen)
                     const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                   // Add more button
-                  TextButton(
+                  CustomButtonWidget(
+                    buttonText: '+ Add more',
                     onPressed: () {
                       if (isRestaurantOpen && cartController.cartList.isNotEmpty) {
                         Get.toNamed(
@@ -447,18 +448,11 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                         );
                       }
                     },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      '+ Add more',
-                      style: robotoMedium.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: Dimensions.fontSizeDefault,
-                      ),
-                    ),
+                    height: 32,
+                    width: 110,
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).disabledColor.withValues(alpha: 0.15),
+                    textColor: Theme.of(context).primaryColor,
                   ),
                 ],
               ),
