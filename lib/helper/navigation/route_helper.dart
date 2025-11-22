@@ -214,7 +214,7 @@ class RouteHelper {
   //static String getResetPasswordRoute(String? phone, String token, String page) => '$resetPassword?phone=$phone&token=$token&page=$page';
   static String getResetPasswordRoute({String? phone, String? email, required String token, required String page}) => '$resetPassword?phone=$phone&token=$token&page=$page&email=$email';
   static String getSearchRoute() => search;
-  static String getRestaurantRoute(int? id, {bool fromDinIn = false}) {
+  static String getRestaurantRoute(int? id, {bool fromDinIn = false, int? scrollToProductId}) {
     if(kIsWeb) {
       // Define MetaSEO object
       MetaSEO meta = MetaSEO();
@@ -223,7 +223,7 @@ class RouteHelper {
       meta.description(description: 'This is Store screen. Here have all information of store');
       meta.keywords(keywords: 'Flutter, Dart, SEO, Meta, Web');
     }
-    return '$restaurant?id=$id&from_dine_in=$fromDinIn';
+    return '$restaurant?id=$id&from_dine_in=$fromDinIn&scroll_to_product=${scrollToProductId ?? ''}';
   }
   static String getRestaurantDetailsRoute(Restaurant restaurant) {
     String data = base64Url.encode(utf8.encode(jsonEncode(restaurant.toJson())));

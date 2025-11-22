@@ -32,7 +32,8 @@ class RestaurantScreen extends StatefulWidget {
   final Restaurant? restaurant;
   final String slug;
   final bool fromDineIn;
-  const RestaurantScreen({super.key, required this.restaurant, this.slug = '', this.fromDineIn = false});
+  final int? scrollToProductId;
+  const RestaurantScreen({super.key, required this.restaurant, this.slug = '', this.fromDineIn = false, this.scrollToProductId});
 
   @override
   State<RestaurantScreen> createState() => _RestaurantScreenState();
@@ -42,6 +43,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
+  final Map<int, GlobalKey> _productKeys = {};
+  int? _highlightedProductId;
   int? _activeCategoryId = 0; // Default to "All" category
   bool _isManualScrolling = false;
 
@@ -185,7 +188,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     if (!isSameRestaurant || !hasProducts) {
       couponController.getRestaurantCouponList(restaurantId: widget.restaurant!.id ?? restController.restaurant!.id!);
       restController.getRestaurantRecommendedItemList(widget.restaurant!.id ?? restController.restaurant!.id!, false);
-      restController.getRestaurantProductList(widget.restaurant!.id ?? restController.restaurant!.id!, 1, 'all', false);
+      await restController.getRestaurantProductList(widget.restaurant!.id ?? restController.restaurant!.id!, 1, 'all', false);
+    }
+
+    // Scroll to product if specified
+    if (widget.scrollToProductId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToProduct(widget.scrollToProductId!);
+      });
     }
   }
 
@@ -305,6 +315,60 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     }
   }
 
+  void _scrollToProduct(int productId) async {
+    if (!scrollController.hasClients) return;
+
+    final key = _productKeys[productId];
+    if (key?.currentContext == null) {
+      print('⚠️ Product key not found for ID: $productId');
+      return;
+    }
+
+    setState(() {
+      _isManualScrolling = true;
+    });
+
+    try {
+      final box = key!.currentContext!.findRenderObject() as RenderBox;
+      final position = box.localToGlobal(Offset.zero);
+
+      // Calculate viewport center
+      final double viewportHeight = MediaQuery.of(context).size.height;
+      final double appBarHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
+      final double availableHeight = viewportHeight - appBarHeight;
+
+      // Center the product in the viewport
+      final double targetOffset = (scrollController.offset + position.dy) - (availableHeight / 2);
+      final double clampedTarget = targetOffset.clamp(0, scrollController.position.maxScrollExtent).toDouble();
+
+      await scrollController.animateTo(
+        clampedTarget,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+      );
+
+      // Trigger highlight animation
+      setState(() {
+        _highlightedProductId = productId;
+      });
+
+      // Remove highlight after 2 seconds
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        if (mounted) {
+          setState(() {
+            _highlightedProductId = null;
+          });
+        }
+      });
+    } catch (e) {
+      print('❌ Error scrolling to product: $e');
+    } finally {
+      setState(() {
+        _isManualScrolling = false;
+      });
+    }
+  }
+
   Map<int, List<Product>> _groupProductsByCategory(List<Product>? products) {
     final Map<int, List<Product>> categorized = {};
     if(products == null) {
@@ -387,10 +451,28 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: 5),
-                      child: RestaurantHorizontalProductCard(
-                        product: products[index],
+                    final product = products[index];
+                    _productKeys.putIfAbsent(product.id!, () => GlobalKey());
+
+                    return Container(
+                      key: _productKeys[product.id!],
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: 5),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            border: _highlightedProductId == product.id
+                                ? Border.all(
+                                    color: Theme.of(context).primaryColor,
+                                    width: 3,
+                                  )
+                                : null,
+                          ),
+                          child: RestaurantHorizontalProductCard(
+                            product: product,
+                          ),
+                        ),
                       ),
                     );
                   },

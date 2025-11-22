@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/cart/widgets/expandable_quantity_badge.dart';
+import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/helper/business_logic/cart_helper.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -30,9 +34,11 @@ class OrderItemWidget extends StatelessWidget {
     double? discount = cart.product!.discount;
     String? discountType = cart.product!.discountType;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-      child: Row(
+    return GestureDetector(
+      onTap: () => _navigateToProductInRestaurant(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+        child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
                 // Expandable Quantity Badge
@@ -120,6 +126,24 @@ class OrderItemWidget extends StatelessWidget {
                     ),
                   ),
         ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToProductInRestaurant(BuildContext context) {
+    if (cart.product?.restaurantId == null || cart.product?.id == null) {
+      return;
+    }
+
+    Get.toNamed(
+      RouteHelper.getRestaurantRoute(
+        cart.product!.restaurantId,
+        scrollToProductId: cart.product!.id,
+      ),
+      arguments: RestaurantScreen(
+        restaurant: Restaurant(id: cart.product!.restaurantId),
+        scrollToProductId: cart.product!.id,
       ),
     );
   }

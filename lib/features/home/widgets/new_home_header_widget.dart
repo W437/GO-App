@@ -9,7 +9,7 @@ import 'package:godelivery_user/features/location/controllers/location_controlle
 import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
-import 'package:godelivery_user/features/notification/screens/notification_screen.dart';
+import 'package:godelivery_user/features/notification/widgets/notification_content_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -94,7 +94,61 @@ class NewHomeHeaderWidget extends StatelessWidget {
                           icon: Icons.notifications_outlined,
                           onPressed: () => CustomFullSheet.show(
                             context: context,
-                            child: const NotificationScreen(),
+                            child: Scaffold(
+                              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                              appBar: PreferredSize(
+                                preferredSize: const Size.fromHeight(60),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.05),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: SafeArea(
+                                    bottom: false,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: Dimensions.paddingSizeDefault,
+                                        vertical: Dimensions.paddingSizeSmall,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // Back Button
+                                          RoundedIconButtonWidget(
+                                            icon: Icons.arrow_back,
+                                            onPressed: () => Get.back(),
+                                            size: 36,
+                                            iconSize: 20,
+                                            backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                                            pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.25),
+                                            iconColor: Theme.of(context).textTheme.bodyLarge!.color,
+                                          ),
+                                          const SizedBox(width: Dimensions.paddingSizeDefault),
+                                          // Title
+                                          Expanded(
+                                            child: Text(
+                                              'notification'.tr,
+                                              style: robotoBold.copyWith(
+                                                fontSize: Dimensions.fontSizeLarge,
+                                                color: Theme.of(context).textTheme.bodyLarge!.color,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 52), // Balance the back button width
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              body: const NotificationContentWidget(),
+                            ),
                           ),
                           size: 48,
                           iconSize: 24,
