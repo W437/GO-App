@@ -185,14 +185,14 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> with TickerProvid
     const dismissThreshold = 0.2; // Dismiss if dragged 20% of screen
 
     if (_dragOffset > screenHeight * dismissThreshold) {
-      // Dismiss the sheet - animate down from current position with anticipation
+      // Dismiss the sheet - animate down from current position
       final startOffset = _dragOffset;
       _dismissAnimation = Tween<double>(
         begin: startOffset,
         end: screenHeight,
       ).animate(CurvedAnimation(
         parent: _dismissController,
-        curve: Curves.easeInBack, // Slight pull-back then accelerates down
+        curve: Curves.easeOutQuint, // Very fast start, smooth slow end
       ));
 
       // Add listener to update drag offset as animation progresses
