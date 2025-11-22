@@ -17,8 +17,8 @@ class AnimatedTextTransition extends StatefulWidget {
     super.key,
     required this.value,
     this.style,
-    this.duration = const Duration(milliseconds: 320),
-    this.curve = Curves.easeOutCubic,
+    this.duration = const Duration(milliseconds: 350),
+    this.curve = Curves.easeOutBack,
     this.textAlign,
     this.delay,
   });
@@ -329,7 +329,7 @@ class _DigitTransition extends StatelessWidget {
                 Transform.translate(
                   offset: oldOffset,
                   child: Opacity(
-                    opacity: 1 - t,
+                    opacity: (1 - t).clamp(0.0, 1.0),
                     child: ImageFiltered(
                       imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                       child: Text(oldChar, style: style),
@@ -339,7 +339,7 @@ class _DigitTransition extends StatelessWidget {
                 Transform.translate(
                   offset: newOffset,
                   child: Opacity(
-                    opacity: t,
+                    opacity: t.clamp(0.0, 1.0),
                     child: ImageFiltered(
                       imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                       child: Text(newChar, style: style),
