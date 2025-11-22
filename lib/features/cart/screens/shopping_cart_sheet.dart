@@ -36,24 +36,44 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
   }
 
   Future<void> initCall() async {
-    Get.find<RestaurantController>().makeEmptyRestaurant(willUpdate: false);
-    Get.find<CartController>().setAvailableIndex(-1, willUpdate: false);
+    final cartController = Get.find<CartController>();
+    final restaurantController = Get.find<RestaurantController>();
+    final orderController = Get.find<OrderController>();
+
+    cartController.setAvailableIndex(-1, willUpdate: false);
     Get.find<CheckoutController>().setInstruction(-1, willUpdate: false);
-    await Get.find<CartController>().getCartDataOnline();
 
-    // Fetch history for "Order again"
-    Get.find<OrderController>().getHistoryOrders(1, notify: false);
+    // Only fetch cart if empty or not loaded
+    if (cartController.cartList.isEmpty) {
+      await cartController.getCartDataOnline();
+    }
 
-    if(Get.find<CartController>().cartList.isNotEmpty){
-      await Get.find<RestaurantController>().getRestaurantDetails(Restaurant(id: Get.find<CartController>().cartList[0].product!.restaurantId, name: null), fromCart: true);
-      Get.find<CartController>().calculationCart();
-      if(Get.find<CartController>().addCutlery){
-        Get.find<CartController>().updateCutlery(isUpdate: false);
+    // Only fetch order history if not already loaded
+    if (orderController.historyOrderList == null) {
+      orderController.getHistoryOrders(1, notify: false);
+    }
+
+    if(cartController.cartList.isNotEmpty){
+      final restaurantId = cartController.cartList[0].product!.restaurantId;
+
+      // Only fetch restaurant details if not already loaded or different restaurant
+      if (restaurantController.restaurant == null || restaurantController.restaurant!.id != restaurantId) {
+        await restaurantController.getRestaurantDetails(Restaurant(id: restaurantId, name: null), fromCart: true);
       }
-      if(Get.find<CartController>().needExtraPackage){
-        Get.find<CartController>().toggleExtraPackage(willUpdate: false);
+
+      cartController.calculationCart();
+
+      if(cartController.addCutlery){
+        cartController.updateCutlery(isUpdate: false);
       }
-      Get.find<RestaurantController>().getCartRestaurantSuggestedItemList(Get.find<CartController>().cartList[0].product!.restaurantId);
+      if(cartController.needExtraPackage){
+        cartController.toggleExtraPackage(willUpdate: false);
+      }
+
+      // Only fetch recommended items if not already loaded
+      if (restaurantController.suggestedItems == null || restaurantController.suggestedItems!.isEmpty) {
+        restaurantController.getCartRestaurantSuggestedItemList(restaurantId);
+      }
     }
   }
 

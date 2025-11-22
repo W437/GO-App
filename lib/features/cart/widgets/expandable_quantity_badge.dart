@@ -72,30 +72,27 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
 
         return GestureDetector(
           onTap: _isExpanded ? null : _toggle,
-          child: AnimatedSize(
+          child: AnimatedContainer(
             duration: const Duration(milliseconds: 350),
             curve: Curves.easeOut,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeOut,
-              height: 44,
-              width: _isExpanded ? null : 44,
-              constraints: _isExpanded
-                  ? const BoxConstraints(minWidth: 120)
-                  : null,
-              decoration: BoxDecoration(
-                color: _isExpanded
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
-                    : Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(_isExpanded ? 22 : Dimensions.radiusSmall),
-                border: _isExpanded
-                    ? null
-                    : Border.all(
-                        color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-              ),
-              child: AnimatedSwitcher(
+            height: 44,
+            constraints: BoxConstraints(
+              minWidth: _isExpanded ? 120 : 44,
+              maxWidth: _isExpanded ? 140 : 44,
+            ),
+            decoration: BoxDecoration(
+              color: _isExpanded
+                  ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
+                  : Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(_isExpanded ? 22 : Dimensions.radiusSmall),
+              border: _isExpanded
+                  ? null
+                  : Border.all(
+                      color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+            ),
+            child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
                 transitionBuilder: (child, animation) {
                   return FadeTransition(
@@ -165,7 +162,6 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
                           ),
                         ),
                       ),
-              ),
             ),
           ),
         );
