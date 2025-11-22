@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -63,6 +64,15 @@ class CustomBottomSheet extends StatefulWidget {
           curve: smoothCurve,
         ));
 
+        // Horizontal squeeze animation - starts squeezed, expands to full width
+        final scaleXAnimation = Tween<double>(
+          begin: 0.6, // Start heavily squeezed
+          end: 1.0,   // Expand to full width
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack, // Smooth expansion with slight overshoot
+        ));
+
         // 3D rotation animation - top tilts forward (toward viewer)
         final rotationXAnimation = Tween<double>(
           begin: 0.4, // X-axis: Top tilted forward ~23° (radians)
@@ -83,15 +93,27 @@ class CustomBottomSheet extends StatefulWidget {
         return AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
-            // Create 3D perspective transformation with top tilted forward
+            // Motion blur - peaks at middle of animation (fastest motion)
+            final t = animation.value;
+            final blurAmount = lerpDouble(0, 4, 1 - (t * 2 - 1).abs()) ?? 0;
+
+            // Create 3D perspective transformation with top tilted forward + horizontal squeeze
             final transform = Matrix4.identity()
               ..setEntry(3, 2, 0.002) // Stronger perspective for forward tilt effect
+              ..scale(scaleXAnimation.value, 1.0, 1.0) // Horizontal squeeze (X-axis only)
               ..rotateX(rotationXAnimation.value); // POSITIVE = top tilts FORWARD
 
-            return Transform(
-              transform: transform,
-              alignment: Alignment.bottomCenter, // Pivot at bottom
-              child: child!,
+            return ImageFiltered(
+              imageFilter: ImageFilter.blur(
+                sigmaX: blurAmount,
+                sigmaY: blurAmount,
+                tileMode: TileMode.decal,
+              ),
+              child: Transform(
+                transform: transform,
+                alignment: Alignment.bottomCenter, // Pivot at bottom
+                child: child!,
+              ),
             );
           },
           child: SlideTransition(
