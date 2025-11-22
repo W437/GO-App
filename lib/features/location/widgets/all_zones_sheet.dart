@@ -11,39 +11,14 @@ class AllZonesSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(Dimensions.radiusExtraLarge),
-          topRight: Radius.circular(Dimensions.radiusExtraLarge),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).hintColor.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-
+      child: Column(
+        children: [
             // Header with title and close button
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Dimensions.paddingSizeExtraLarge,
-                Dimensions.paddingSizeSmall,
-                Dimensions.paddingSizeExtraLarge,
-                Dimensions.paddingSizeDefault,
+              padding: const EdgeInsets.only(
+                bottom: Dimensions.paddingSizeDefault,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,14 +48,10 @@ class AllZonesSheet extends StatelessWidget {
             // Zone list
             Expanded(
               child: GetBuilder<LocationController>(builder: (locationController) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
-                  child: const ZoneListWidget(isBottomSheet: false),
-                );
+                return const ZoneListWidget(isBottomSheet: false);
               }),
             ),
           ],
-        ),
       ),
     );
   }

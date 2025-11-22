@@ -39,7 +39,6 @@ class ZonePolygonHelper {
 
       final isHighlighted = highlightedZoneId != null && zone.id == highlightedZoneId;
       final isOtherZone = highlightedZoneId != null && zone.id != highlightedZoneId;
-      final colorVariant = _colorForZone(baseColor, zone.id ?? index, hueStep: hueStep);
 
       // Thinner strokes and dimming for non-selected zones
       final effectiveStrokeWidth = isHighlighted ? 3 : 2; // Thinner strokes (must be int)
@@ -55,10 +54,8 @@ class ZonePolygonHelper {
               ? fillOpacity * 0.8  // Less dimming for better visibility
               : fillOpacity * 1.3).clamp(0.0, 1.0);
 
-      // Mute colors for non-selected zones
-      final effectiveColor = isOtherZone
-          ? _mutedColor(colorVariant)
-          : colorVariant;
+      // Use base color for all zones (brand blue)
+      final effectiveColor = baseColor;
 
       polygons.add(Polygon(
         polygonId: PolygonId('zone_${zone.id ?? polygons.length}'),

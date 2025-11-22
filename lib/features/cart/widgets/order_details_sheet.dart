@@ -201,6 +201,18 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     BuildContext context,
     CartController cartController,
   ) {
+    // Get saved special instructions
+    String? savedInstructions;
+    if (cartController.cartList.isNotEmpty) {
+      final restaurantId = cartController.cartList[0].product?.restaurantId;
+      if (restaurantId != null) {
+        final restaurantCart = cartController.getCartForRestaurant(restaurantId);
+        savedInstructions = restaurantCart?.specialInstructions;
+      }
+    }
+
+    final bool hasInstructions = savedInstructions != null && savedInstructions.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
       padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -215,7 +227,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
           children: [
             Icon(
               CupertinoIcons.chat_bubble_text,
-              color: Theme.of(context).primaryColor,
+              color: hasInstructions ? Colors.green : Theme.of(context).primaryColor,
               size: 28,
             ),
             const SizedBox(width: Dimensions.paddingSizeDefault),
@@ -231,11 +243,17 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Allergies, preferences, or prep requests',
+                    hasInstructions
+                      ? savedInstructions!
+                      : 'Allergies, preferences, or prep requests',
                     style: robotoRegular.copyWith(
                       fontSize: Dimensions.fontSizeSmall,
-                      color: Theme.of(context).hintColor,
+                      color: hasInstructions
+                        ? Theme.of(context).textTheme.bodyMedium?.color
+                        : Theme.of(context).hintColor,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -252,7 +270,20 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   }
 
   void _showMessageDialog(BuildContext context) {
-    _messageController.clear();
+    final cartController = Get.find<CartController>();
+
+    // Load existing special instructions if any
+    if (cartController.cartList.isNotEmpty) {
+      final restaurantId = cartController.cartList[0].product?.restaurantId;
+      if (restaurantId != null) {
+        final restaurantCart = cartController.getCartForRestaurant(restaurantId);
+        _messageController.text = restaurantCart?.specialInstructions ?? '';
+      } else {
+        _messageController.clear();
+      }
+    } else {
+      _messageController.clear();
+    }
 
     CustomSheet.show(
       context: context,
@@ -324,16 +355,25 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
           CustomButtonWidget(
             buttonText: 'Done',
             onPressed: () {
-              // TODO: Save to CheckoutController session
-              if (_messageController.text.isNotEmpty) {
-                Get.snackbar(
-                  'Saved',
-                  'Your message will be included with the order',
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                );
+              final cartController = Get.find<CartController>();
+
+              // Get restaurant ID from first cart item
+              if (cartController.cartList.isNotEmpty) {
+                final restaurantId = cartController.cartList[0].product?.restaurantId;
+                if (restaurantId != null) {
+                  // Save special instructions
+                  cartController.setCartSpecialInstructions(
+                    restaurantId,
+                    _messageController.text.trim(),
+                  );
+                }
               }
-              Get.back();
+
+              // Dismiss keyboard
+              FocusScope.of(context).unfocus();
+
+              // Close the dialog
+              Navigator.of(context).pop();
             },
           ),
         ],

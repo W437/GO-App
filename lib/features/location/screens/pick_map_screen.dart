@@ -1,6 +1,7 @@
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -284,11 +285,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
                                 const SizedBox(width: Dimensions.paddingSizeSmall),
                                 Expanded(
                                   child: CustomButtonWidget(
-                                    buttonText: locationController.inZone
-                                        ? (widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr)
-                                        : 'service_not_available_in_this_area'.tr,
+                                    buttonText: widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr,
                                     isLoading: locationController.isLoading,
-                                    onPressed: (locationController.buttonDisabled || locationController.loading)
+                                    onPressed: (locationController.buttonDisabled || locationController.loading || !locationController.inZone)
                                         ? null
                                         : () => _onPickAddressButtonPressed(locationController),
                                   ),
@@ -378,24 +377,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
   }
 
   void _showZoneSelectionActionSheet(BuildContext context) {
-    final controller = AnimationController(
-      duration: const Duration(milliseconds: 350),
-      vsync: Navigator.of(context),
-    );
-
-    final curvedAnimation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeOutBack,
-    );
-
-    controller.forward();
-
-    showModalBottomSheet(
+    CustomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      transitionAnimationController: controller,
-      builder: (context) => LocationSelectionSheet(
+      child: LocationSelectionSheet(
         onUseCurrentLocation: () {
           _checkPermission(() {
             Get.back();
@@ -420,6 +404,11 @@ class _PickMapScreenState extends State<PickMapScreen> {
           Get.back();
           // Keep the current map screen - user can pick location on map
         },
+      ),
+      showHandle: true,
+      padding: const EdgeInsets.symmetric(
+        horizontal: Dimensions.paddingSizeExtraLarge,
+        vertical: Dimensions.paddingSizeDefault,
       ),
     );
   }

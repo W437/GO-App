@@ -142,7 +142,7 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.favorite, color: Colors.orange, size: 14),
+                                  Icon(Icons.favorite, color: Colors.red, size: 14),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${product.likeCount ?? 0}',

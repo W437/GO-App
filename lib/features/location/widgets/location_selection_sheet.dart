@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -24,39 +25,13 @@ class LocationSelectionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<LocationController>(builder: (locationController) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(Dimensions.radiusExtraLarge),
-            topRight: Radius.circular(Dimensions.radiusExtraLarge),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).hintColor.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-
-              // Header with title and close button
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  Dimensions.paddingSizeExtraLarge,
-                  Dimensions.paddingSizeSmall,
-                  Dimensions.paddingSizeExtraLarge,
-                  Dimensions.paddingSizeDefault,
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+            // Header with title and close button
+            Padding(
+                padding: const EdgeInsets.only(
+                  bottom: Dimensions.paddingSizeDefault,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,7 +59,6 @@ class LocationSelectionSheet extends StatelessWidget {
               // Content
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
                   child: Column(
                     children: [
                       // Current location option
@@ -105,14 +79,12 @@ class LocationSelectionSheet extends StatelessWidget {
                       // Add new location button
                       _buildAddNewLocationButton(context),
 
-                      SizedBox(height: MediaQuery.of(context).viewPadding.bottom + Dimensions.paddingSizeDefault),
+                      const SizedBox(height: Dimensions.paddingSizeDefault),
                     ],
                   ),
                 ),
               ),
             ],
-          ),
-        ),
       );
     });
   }
@@ -272,24 +244,14 @@ class LocationSelectionSheet extends StatelessWidget {
   Widget _buildExploreServiceAreasButton(BuildContext context) {
     return _IOSStyleButton(
       onTap: () {
-        final controller = AnimationController(
-          duration: const Duration(milliseconds: 350),
-          vsync: Navigator.of(context),
-        );
-
-        final curvedAnimation = CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeOutBack,
-        );
-
-        controller.forward();
-
-        showModalBottomSheet(
+        CustomSheet.show(
           context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          transitionAnimationController: controller,
-          builder: (context) => const AllZonesSheet(),
+          child: const AllZonesSheet(),
+          showHandle: true,
+          padding: const EdgeInsets.symmetric(
+            horizontal: Dimensions.paddingSizeExtraLarge,
+            vertical: Dimensions.paddingSizeDefault,
+          ),
         );
       },
       child: Container(
