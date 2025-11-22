@@ -302,3 +302,146 @@ class _CustomFullSheetState extends State<CustomFullSheet> with TickerProviderSt
     );
   }
 }
+
+/// Navigation system for CustomFullSheet that allows multiple pages with slide transitions
+/// Usage: CustomFullSheetNavigator(initialPage: YourWidget())
+class CustomFullSheetNavigator extends StatelessWidget {
+  final Widget initialPage;
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  const CustomFullSheetNavigator({
+    super.key,
+    required this.initialPage,
+    this.navigatorKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (settings) {
+        // First page (initial route)
+        if (settings.name == Navigator.defaultRouteName) {
+          return PageRouteBuilder(
+            settings: settings,
+            pageBuilder: (_, __, ___) => initialPage,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: const Duration(milliseconds: 300),
+          );
+        }
+
+        // Subsequent pages
+        final page = settings.arguments as Widget?;
+        if (page == null) return null;
+
+        return _buildPageRoute(page, settings);
+      },
+    );
+  }
+
+  PageRouteBuilder _buildPageRoute(Widget page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (_, __, ___) => page,
+      transitionDuration: const Duration(milliseconds: 350),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // Forward: New page slides in from right
+        final inAnimation = Tween<Offset>(
+          begin: const Offset(1.0, 0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        ));
+
+        // Backward: Current page slides out to right, previous page slides in from left
+        final outAnimation = Tween<Offset>(
+          begin: Offset.zero,
+          end: const Offset(-0.25, 0), // Previous page slightly visible on left
+        ).animate(CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: Curves.easeOutCubic,
+        ));
+
+        return Stack(
+          children: [
+            // Previous page (slides left when new page enters)
+            if (secondaryAnimation.status != AnimationStatus.dismissed)
+              SlideTransition(
+                position: outAnimation,
+                child: child,
+              ),
+            // Current/New page (slides in from right)
+            SlideTransition(
+              position: inAnimation,
+              child: child,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Navigate to a new page within the sheet
+  static Future<T?> push<T>(BuildContext context, Widget page) {
+    return Navigator.of(context).push<T>(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => page,
+        transitionDuration: const Duration(milliseconds: 350),
+        reverseTransitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final inAnimation = Tween<Offset>(
+            begin: const Offset(1.0, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ));
+
+          final outAnimation = Tween<Offset>(
+            begin: Offset.zero,
+            end: const Offset(-0.25, 0),
+          ).animate(CurvedAnimation(
+            parent: secondaryAnimation,
+            curve: Curves.easeOutCubic,
+          ));
+
+          return Stack(
+            children: [
+              if (secondaryAnimation.status != AnimationStatus.dismissed)
+                SlideTransition(position: outAnimation, child: child),
+              SlideTransition(position: inAnimation, child: child),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Pop the current page and return to previous
+  static void pop<T>(BuildContext context, [T? result]) {
+    Navigator.of(context).pop(result);
+  }
+
+  /// Replace current page with a new one (no back navigation)
+  static Future<T?> replace<T>(BuildContext context, Widget page) {
+    return Navigator.of(context).pushReplacement<T, void>(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => page,
+        transitionDuration: const Duration(milliseconds: 350),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final inAnimation = Tween<Offset>(
+            begin: const Offset(1.0, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ));
+
+          return SlideTransition(position: inAnimation, child: child);
+        },
+      ),
+    );
+  }
+}

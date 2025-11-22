@@ -271,25 +271,32 @@ class _PickMapScreenState extends State<PickMapScreen> {
                             ),
                           ),
                         ),
-                      Positioned(
-                        right: Dimensions.paddingSizeSmall,
-                        top: 0,
-                        bottom: 0,
-                        child: Center(
-                          child: FloatingActionButton(
-                            heroTag: 'pick_map_screen_my_location',
-                            mini: true,
-                            backgroundColor: Theme.of(context).cardColor,
-                            onPressed: () => _checkPermission(() {
-                              Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
-                            }),
-                            child: Icon(
-                              Icons.my_location,
-                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                      if (!widget.fromSplash)
+                        Positioned(
+                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,
+                          right: Dimensions.paddingSizeSmall,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: CircularBackButtonWidget(
+                              showText: false,
+                              backgroundColor: Theme.of(context).cardColor,
+                              icon: Icons.my_location,
+                              iconColor: Colors.black,
+                              onPressed: () => _checkPermission(() {
+                                Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
+                              }),
                             ),
                           ),
                         ),
-                      ),
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -319,7 +326,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
                                     ],
                                   ),
                                   child: IconButton(
-                                    icon: const Icon(Icons.list_alt),
+                                    icon: const Icon(Icons.map_outlined),
                                     color: Theme.of(context).textTheme.bodyLarge!.color,
                                     onPressed: () => _showZoneSelectionActionSheet(context),
                                   ),
