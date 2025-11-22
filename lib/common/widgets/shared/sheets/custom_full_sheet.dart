@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 /// Reusable custom full sheet with smooth animations and swipe-to-dismiss
 /// Usage: CustomFullSheet.show(context, child: YourWidget())
@@ -303,10 +304,38 @@ class _CustomFullSheetState extends State<CustomFullSheet> with TickerProviderSt
   }
 }
 
-/// Navigation system for CustomFullSheet that allows multiple pages with slide transitions
-/// Usage: CustomFullSheetNavigator(initialPage: YourWidget())
-class CustomFullSheetNavigator extends StatelessWidget {
-  final Widget initialPage;
+/// Page configuration for CustomFullSheetNavigator
+class CustomFullSheetPage extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget child;
+  final Widget? leading;
+  final List<Widget>? actions;
+
+  const CustomFullSheetPage({
+    super.key,
+    required this.title,
+    this.subtitle,
+    required this.child,
+    this.leading,
+    this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  /// Extract page config from widget
+  static CustomFullSheetPage? of(BuildContext context) {
+    return context.findAncestorWidgetOfExactType<CustomFullSheetPage>();
+  }
+}
+
+/// Navigation system for CustomFullSheet with persistent top bar and smooth transitions
+/// Usage: CustomFullSheetNavigator(initialPage: CustomFullSheetPage(...))
+class CustomFullSheetNavigator extends StatefulWidget {
+  final CustomFullSheetPage initialPage;
   final GlobalKey<NavigatorState>? navigatorKey;
 
   const CustomFullSheetNavigator({
@@ -316,77 +345,13 @@ class CustomFullSheetNavigator extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      onGenerateRoute: (settings) {
-        // First page (initial route)
-        if (settings.name == Navigator.defaultRouteName) {
-          return PageRouteBuilder(
-            settings: settings,
-            pageBuilder: (_, __, ___) => initialPage,
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: const Duration(milliseconds: 300),
-          );
-        }
-
-        // Subsequent pages
-        final page = settings.arguments as Widget?;
-        if (page == null) return null;
-
-        return _buildPageRoute(page, settings);
-      },
-    );
-  }
-
-  PageRouteBuilder _buildPageRoute(Widget page, RouteSettings settings) {
-    return PageRouteBuilder(
-      settings: settings,
-      pageBuilder: (_, __, ___) => page,
-      transitionDuration: const Duration(milliseconds: 350),
-      reverseTransitionDuration: const Duration(milliseconds: 300),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        // Forward: New page slides in from right
-        final inAnimation = Tween<Offset>(
-          begin: const Offset(1.0, 0),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutCubic,
-        ));
-
-        // Backward: Current page slides out to right, previous page slides in from left
-        final outAnimation = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(-0.25, 0), // Previous page slightly visible on left
-        ).animate(CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: Curves.easeOutCubic,
-        ));
-
-        return Stack(
-          children: [
-            // Previous page (slides left when new page enters)
-            if (secondaryAnimation.status != AnimationStatus.dismissed)
-              SlideTransition(
-                position: outAnimation,
-                child: child,
-              ),
-            // Current/New page (slides in from right)
-            SlideTransition(
-              position: inAnimation,
-              child: child,
-            ),
-          ],
-        );
-      },
-    );
-  }
+  State<CustomFullSheetNavigator> createState() => _CustomFullSheetNavigatorState();
 
   /// Navigate to a new page within the sheet
-  static Future<T?> push<T>(BuildContext context, Widget page) {
+  static Future<T?> push<T>(BuildContext context, CustomFullSheetPage page) {
     return Navigator.of(context).push<T>(
       PageRouteBuilder(
+        settings: RouteSettings(arguments: page),
         pageBuilder: (_, __, ___) => page,
         transitionDuration: const Duration(milliseconds: 350),
         reverseTransitionDuration: const Duration(milliseconds: 300),
@@ -425,9 +390,10 @@ class CustomFullSheetNavigator extends StatelessWidget {
   }
 
   /// Replace current page with a new one (no back navigation)
-  static Future<T?> replace<T>(BuildContext context, Widget page) {
+  static Future<T?> replace<T>(BuildContext context, CustomFullSheetPage page) {
     return Navigator.of(context).pushReplacement<T, void>(
       PageRouteBuilder(
+        settings: RouteSettings(arguments: page),
         pageBuilder: (_, __, ___) => page,
         transitionDuration: const Duration(milliseconds: 350),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -442,6 +408,210 @@ class CustomFullSheetNavigator extends StatelessWidget {
           return SlideTransition(position: inAnimation, child: child);
         },
       ),
+    );
+  }
+}
+
+class _CustomFullSheetNavigatorState extends State<CustomFullSheetNavigator> {
+  late String _currentTitle;
+  String? _currentSubtitle;
+  Widget? _currentLeading;
+  List<Widget>? _currentActions;
+
+  String _nextTitle = '';
+  String? _nextSubtitle;
+  Widget? _nextLeading;
+  List<Widget>? _nextActions;
+
+  bool _isTransitioning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTitle = widget.initialPage.title;
+    _currentSubtitle = widget.initialPage.subtitle;
+    _currentLeading = widget.initialPage.leading;
+    _currentActions = widget.initialPage.actions;
+  }
+
+  void _updatePageInfo(CustomFullSheetPage page, {bool isTransition = false}) {
+    if (isTransition) {
+      setState(() {
+        _isTransitioning = true;
+        _nextTitle = page.title;
+        _nextSubtitle = page.subtitle;
+        _nextLeading = page.leading;
+        _nextActions = page.actions;
+      });
+
+      // After transition completes, update current
+      Future.delayed(const Duration(milliseconds: 350), () {
+        if (mounted) {
+          setState(() {
+            _currentTitle = _nextTitle;
+            _currentSubtitle = _nextSubtitle;
+            _currentLeading = _nextLeading;
+            _currentActions = _nextActions;
+            _isTransitioning = false;
+          });
+        }
+      });
+    } else {
+      setState(() {
+        _currentTitle = page.title;
+        _currentSubtitle = page.subtitle;
+        _currentLeading = page.leading;
+        _currentActions = page.actions;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Fixed top bar
+        _buildTopBar(context),
+
+        // Sliding content area
+        Expanded(
+          child: Navigator(
+            key: widget.navigatorKey,
+            onGenerateRoute: (settings) {
+              // First page (initial route)
+              if (settings.name == Navigator.defaultRouteName) {
+                return PageRouteBuilder(
+                  settings: settings,
+                  pageBuilder: (_, __, ___) => widget.initialPage,
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: const Duration(milliseconds: 300),
+                );
+              }
+
+              // Subsequent pages
+              final page = settings.arguments as CustomFullSheetPage?;
+              if (page == null) return null;
+
+              // Update top bar with transition
+              _updatePageInfo(page, isTransition: true);
+
+              return _buildPageRoute(page, settings);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Dimensions.paddingSizeDefault,
+        vertical: Dimensions.paddingSizeDefault,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Leading widget (back button)
+          _currentLeading ?? const SizedBox(width: 44),
+
+          // Title with crossfade
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeIn,
+              switchOutCurve: Curves.easeOut,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+              child: Column(
+                key: ValueKey(_currentTitle),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _currentTitle,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeExtraLarge,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (_currentSubtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      _currentSubtitle!,
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: Theme.of(context).hintColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // Actions with crossfade
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: SizedBox(
+              key: ValueKey(_currentActions?.length ?? 0),
+              width: 44,
+              child: _currentActions != null && _currentActions!.isNotEmpty
+                  ? _currentActions!.first
+                  : const SizedBox(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  PageRouteBuilder _buildPageRoute(CustomFullSheetPage page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (_, __, ___) => page,
+      transitionDuration: const Duration(milliseconds: 350),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // Only slide the content, top bar stays fixed
+        final inAnimation = Tween<Offset>(
+          begin: const Offset(1.0, 0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        ));
+
+        final outAnimation = Tween<Offset>(
+          begin: Offset.zero,
+          end: const Offset(-0.25, 0),
+        ).animate(CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: Curves.easeOutCubic,
+        ));
+
+        return Stack(
+          children: [
+            if (secondaryAnimation.status != AnimationStatus.dismissed)
+              SlideTransition(position: outAnimation, child: child),
+            SlideTransition(position: inAnimation, child: child),
+          ],
+        );
+      },
     );
   }
 }

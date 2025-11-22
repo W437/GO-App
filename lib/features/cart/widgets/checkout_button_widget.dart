@@ -21,7 +21,8 @@ class CheckoutButtonWidget extends StatelessWidget {
   final List<bool> availableList;
   final bool isRestaurantOpen;
   final bool fromDineIn;
-  const CheckoutButtonWidget({super.key, required this.cartController, required this.availableList, required this.isRestaurantOpen, this.fromDineIn = false});
+  final String restaurantName;
+  const CheckoutButtonWidget({super.key, required this.cartController, required this.availableList, required this.isRestaurantOpen, this.fromDineIn = false, required this.restaurantName});
 
   @override
   Widget build(BuildContext context) {
@@ -133,10 +134,14 @@ class CheckoutButtonWidget extends StatelessWidget {
       // Navigate within sheet using CustomFullSheetNavigator
       CustomFullSheetNavigator.push(
         context,
-        CheckoutScreen(
-          fromCart: true,
-          cartList: cartController.cartList,
-          fromDineInPage: fromDineIn,
+        CustomFullSheetPage(
+          title: restaurantName,
+          subtitle: 'Checkout',
+          child: CheckoutScreen(
+            fromCart: true,
+            cartList: cartController.cartList,
+            fromDineInPage: fromDineIn,
+          ),
         ),
       );
     }

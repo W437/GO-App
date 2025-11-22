@@ -167,11 +167,22 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                 children: [
                   // Shopping Carts View
                   ShoppingCartsView(onViewCart: () {
+                    final restaurantController = Get.find<RestaurantController>();
+                    String restaurantName = restaurantController.restaurant?.name ?? 'Restaurant';
+
                     // Open OrderDetailsSheet using custom bottom sheet with navigation support
                     CustomFullSheet.show(
                       context: context,
-                      child: const CustomFullSheetNavigator(
-                        initialPage: OrderDetailsSheet(),
+                      child: CustomFullSheetNavigator(
+                        initialPage: CustomFullSheetPage(
+                          title: restaurantName,
+                          subtitle: 'Your order',
+                          leading: CircularBackButtonWidget(
+                            icon: Icons.keyboard_arrow_down_rounded,
+                            onPressed: () => Get.back(),
+                          ),
+                          child: const OrderDetailsSheet(),
+                        ),
                       ),
                       isFullScreen: true,
                     );

@@ -118,7 +118,13 @@ class PricingViewWidget extends StatelessWidget {
 
               SizedBox(height: isDesktop ? Dimensions.paddingSizeLarge : 0),
 
-              isDesktop ? CheckoutButtonWidget(cartController: cartController, availableList: cartController.availableList, isRestaurantOpen: isRestaurantOpen, fromDineIn: fromDineIn) : const SizedBox.shrink(),
+              isDesktop ? CheckoutButtonWidget(
+                cartController: cartController,
+                availableList: cartController.availableList,
+                isRestaurantOpen: isRestaurantOpen,
+                fromDineIn: fromDineIn,
+                restaurantName: restaurantController.restaurant?.name ?? 'Restaurant',
+              ) : const SizedBox.shrink(),
 
             ]);
           }

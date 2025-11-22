@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
@@ -57,62 +56,17 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
 
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    // ============================================================
-                    // HEADER: Back button + Restaurant name + Subtitle
-                    // ============================================================
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Dimensions.paddingSizeDefault,
-                        vertical: Dimensions.paddingSizeDefault,
-                      ),
-                      child: Row(
-                        children: [
-                          // Circular back button with down arrow
-                          CircularBackButtonWidget(
-                            icon: Icons.keyboard_arrow_down_rounded,
-                            onPressed: () => Get.back(),
-                          ),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text(
-                                  restaurantName,
-                                  style: robotoBold.copyWith(
-                                    fontSize: Dimensions.fontSizeExtraLarge,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Your order',
-                                  style: robotoRegular.copyWith(
-                                    fontSize: Dimensions.fontSizeDefault,
-                                    color: Theme.of(context).hintColor,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 44), // Balance for back button
-                        ],
-                      ),
-                    ),
-
-                    // ============================================================
-                    // CONTENT
-                    // ============================================================
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        child: Column(
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  // ============================================================
+                  // CONTENT (Header removed - now handled by CustomFullSheetNavigator)
+                  // ============================================================
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // MESSAGE TO RESTAURANT SECTION
@@ -152,40 +106,40 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                         ),
                       ),
                     ),
-                  ],
-                ),
+                ],
+              ),
 
-                // ============================================================
-                // FLOATING BOTTOM CHECKOUT BAR WITH FADE OVERLAY
-                // ============================================================
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Theme.of(context).colorScheme.surface.withValues(alpha: 0.0),
-                          Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-                          Theme.of(context).colorScheme.surface,
-                          Theme.of(context).colorScheme.surface,
-                        ],
-                        stops: const [0.0, 0.2, 0.5, 1.0],
-                      ),
-                    ),
-                    child: CheckoutButtonWidget(
-                      cartController: cartController,
-                      availableList: cartController.availableList,
-                      isRestaurantOpen: isRestaurantOpen,
-                      fromDineIn: widget.fromDineIn,
+              // ============================================================
+              // FLOATING BOTTOM CHECKOUT BAR WITH FADE OVERLAY
+              // ============================================================
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context).colorScheme.surface.withValues(alpha: 0.0),
+                        Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context).colorScheme.surface,
+                      ],
+                      stops: const [0.0, 0.2, 0.5, 1.0],
                     ),
                   ),
+                  child: CheckoutButtonWidget(
+                    cartController: cartController,
+                    availableList: cartController.availableList,
+                    isRestaurantOpen: isRestaurantOpen,
+                    fromDineIn: widget.fromDineIn,
+                    restaurantName: restaurantName,
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       });
@@ -354,6 +308,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
           // Done button - Full width
           CustomButtonWidget(
             buttonText: 'Done',
+            radius: Dimensions.radiusDefault,
             onPressed: () {
               final cartController = Get.find<CartController>();
 

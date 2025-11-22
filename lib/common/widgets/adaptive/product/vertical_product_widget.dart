@@ -7,6 +7,7 @@ import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dar
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
@@ -44,10 +45,11 @@ class VerticalProductWidget extends StatelessWidget {
       child: CustomInkWellWidget(
         onTap: () {
           ResponsiveHelper.isMobile(context)
-              ? Get.bottomSheet(
-                  ProductBottomSheetWidget(product: product, isCampaign: isCampaign),
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
+              ? CustomSheet.show(
+                  context: context,
+                  child: ProductBottomSheetWidget(product: product, isCampaign: isCampaign),
+                  showHandle: true,
+                  padding: EdgeInsets.zero,
                 )
               : Get.dialog(
                   Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: isCampaign)),

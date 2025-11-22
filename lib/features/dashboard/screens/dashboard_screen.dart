@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/services.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/screens/shopping_cart_sheet.dart';
 import 'package:godelivery_user/features/checkout/widgets/congratulation_dialogue.dart';
 import 'package:godelivery_user/features/dashboard/widgets/registration_success_bottom_sheet.dart';
@@ -148,9 +149,10 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
     active = await Get.find<DashboardController>().checkLocationActive();
     if(widget.fromSplash && Get.find<DashboardController>().showLocationSuggestion && active){
       Future.delayed(const Duration(seconds: 1), () {
-        showModalBottomSheet(
-          context: Get.context!, isScrollControlled: true, backgroundColor: Colors.transparent,
-          builder: (con) => const AddressBottomSheet(),
+        CustomSheet.show(
+          context: Get.context!,
+          child: const AddressBottomSheet(),
+          showHandle: true,
         ).then((value) {
           Get.find<DashboardController>().hideSuggestedLocation();
           setState(() {});
