@@ -47,7 +47,7 @@ class ReviewRepository implements ReviewRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         return ProductModel.fromJson(jsonDecode(json)).products!;
       },

@@ -123,7 +123,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.restaurantTTL,
+
       deserializer: (json) => RestaurantModel.fromJson(jsonDecode(json)),
     );
   }
@@ -162,7 +162,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.restaurantTTL,
+
       deserializer: (json) {
         List<Restaurant> list = [];
         jsonDecode(json).forEach((restaurant) {
@@ -193,7 +193,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.restaurantTTL,
+
       deserializer: (json) {
         List<Restaurant> list = [];
         jsonDecode(json).forEach((restaurant) {
@@ -224,7 +224,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.restaurantTTL,
+
       deserializer: (json) {
         List<Restaurant> list = [];
         jsonDecode(json).forEach((restaurant) {
@@ -254,7 +254,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.restaurantTTL,
+
       deserializer: (json) {
         List<Restaurant> list = [];
         jsonDecode(json).forEach((restaurant) {

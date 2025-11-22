@@ -95,7 +95,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
           return null;
         }
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         List<Product> list = [];
         jsonDecode(json).forEach((campaign) {

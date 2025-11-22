@@ -55,7 +55,7 @@ class ProductRepository implements ProductRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         return ProductModel.fromJson(jsonDecode(json)).products!;
       },

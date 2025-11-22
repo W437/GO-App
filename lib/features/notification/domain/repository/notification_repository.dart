@@ -85,7 +85,7 @@ class NotificationRepository implements NotificationRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         List<NotificationModel> list = [];
         jsonDecode(json).forEach((notification) {

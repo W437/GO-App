@@ -47,7 +47,7 @@ class CuisineRepository implements CuisineRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) => CuisineModel.fromJson(jsonDecode(json)),
     );
   }

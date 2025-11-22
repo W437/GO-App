@@ -38,7 +38,7 @@ class AddressRepo implements AddressRepoInterface<AddressModel> {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         List<AddressModel> list = [];
         jsonDecode(json).forEach((address) {

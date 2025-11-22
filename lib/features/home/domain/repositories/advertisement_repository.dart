@@ -35,7 +35,7 @@ class AdvertisementRepository implements AdvertisementRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         List<AdvertisementModel> list = [];
         jsonDecode(json).forEach((data) {

@@ -50,7 +50,7 @@ class StoryRepository implements StoryRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         List<StoryCollectionModel> list = [];
         jsonDecode(json).forEach((data) {

@@ -53,7 +53,6 @@ class CategoryRepository implements CategoryRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.categoryTTL,
       deserializer: (json) {
         List<CategoryModel> list = [];
         jsonDecode(json).forEach((category) {

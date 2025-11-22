@@ -37,7 +37,7 @@ class HomeRepository implements HomeRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) => BannerModel.fromJson(jsonDecode(json)),
     );
   }
@@ -62,7 +62,7 @@ class HomeRepository implements HomeRepositoryInterface {
         }
         return null;
       },
-      ttl: CacheConfig.defaultTTL,
+
       deserializer: (json) {
         List<CashBackModel> list = [];
         jsonDecode(json).forEach((data) {
