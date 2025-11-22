@@ -218,8 +218,10 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                 left: Dimensions.paddingSizeDefault,
                 right: Dimensions.paddingSizeDefault,
                 top: Dimensions.paddingSizeDefault,
-                bottom: Dimensions.paddingSizeExtraSmall,
+                bottom: 0, // Remove bottom padding so extension goes beyond screen
               ),
+              margin: const EdgeInsets.only(bottom: -100), // Negative margin to keep position and extend downward
+
               child: SafeArea(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -392,6 +394,8 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                                   ),
                                 ),
                               ],
+                              // Extra space to extend the rounded rect beyond the screen
+                              const SizedBox(height: 100),
                             ],
                           ),
                         ),

@@ -70,10 +70,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   Timer? _cartWidgetTimer;
   int _previousCartCount = 0;
 
-  // Cart widget bounce animation
-  late AnimationController _cartBounceController;
-  late Animation<double> _cartBounceAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -125,30 +121,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
         curve: Curves.easeOut,
       ),
     );
-
-    // Initialize cart bounce animation (same as logo bounce)
-    _cartBounceController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _cartBounceAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.015)
-            .chain(CurveTween(curve: Curves.easeOutCubic)),
-        weight: 30,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.015, end: 0.995)
-            .chain(CurveTween(curve: Curves.easeInOutCubic)),
-        weight: 25,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.995, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 45,
-      ),
-    ]).animate(_cartBounceController);
   }
 
   @override
@@ -157,7 +129,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     scrollController.dispose();
     _bounceController.dispose();
     _pressController.dispose();
-    _cartBounceController.dispose();
     _cartWidgetTimer?.cancel();
     super.dispose();
   }
@@ -700,8 +671,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                 setState(() {
                   _showCartWidget = true;
                 });
-                // Trigger bounce immediately (runs simultaneously with slide)
-                _cartBounceController.forward(from: 0.0);
               }
             });
           } else if (currentCartCount == 0 && _previousCartCount > 0) {
@@ -732,19 +701,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
               );
             },
             child: _showCartWidget && cartController.cartList.isNotEmpty && !isDesktop
-                ? AnimatedBuilder(
+                ? BottomCartWidget(
                     key: const ValueKey('cart-widget'),
-                    animation: _cartBounceAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _cartBounceAnimation.value,
-                        child: child,
-                      );
-                    },
-                    child: BottomCartWidget(
-                      restaurantId: cartController.cartList[0].product!.restaurantId!,
-                      fromDineIn: widget.fromDineIn,
-                    ),
+                    restaurantId: cartController.cartList[0].product!.restaurantId!,
+                    fromDineIn: widget.fromDineIn,
                   )
                 : const SizedBox(key: ValueKey('empty-cart')),
           );
