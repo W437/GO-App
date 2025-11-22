@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_summary_card.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
+import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
+import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -51,6 +54,19 @@ class ShoppingCartsView extends StatelessWidget {
               itemImages: itemImages,
               onViewCart: onViewCart ?? () {},
               isOffline: !restaurantController.isRestaurantOpenNow(restaurant.active!, restaurant.schedules),
+              onAddMore: () {
+                // Navigate to restaurant menu
+                if (restaurant.id != null) {
+                  Get.toNamed(
+                    RouteHelper.getRestaurantRoute(restaurant.id!),
+                    arguments: RestaurantScreen(restaurant: restaurant),
+                  );
+                }
+              },
+              onDeleteCart: () {
+                // Delete all cart items for this restaurant
+                cartController.clearCartOnline();
+              },
             ),
           ],
         );

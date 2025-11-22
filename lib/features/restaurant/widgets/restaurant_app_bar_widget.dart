@@ -7,6 +7,7 @@ import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_wi
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/features/favourite/controllers/favourite_controller.dart';
+import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 
 class RestaurantAppBarWidget extends StatefulWidget {
   final RestaurantController restController;
@@ -26,19 +27,18 @@ class RestaurantAppBarWidget extends StatefulWidget {
 }
 
 class _RestaurantAppBarWidgetState extends State<RestaurantAppBarWidget> {
-  final TextEditingController _searchController = TextEditingController();
+  String _cachedDisplayText = 'Search';
 
   @override
   Widget build(BuildContext context) {
-    // Calculate transition progress (0.0 = at top, 1.0 = fully scrolled)
-    const double transitionStart = 50.0;
-    const double transitionEnd = 150.0;
-    final double transitionProgress = ((widget.scrollOffset - transitionStart) / (transitionEnd - transitionStart)).clamp(0.0, 1.0);
-
-    // Morph the display text
-    final String displayText = transitionProgress > 0.5
+    // Morph the display text at 400px scroll offset - only update cache when it actually changes
+    final String newDisplayText = widget.scrollOffset > 400
         ? (widget.restaurant?.name ?? 'Search')
         : 'Search';
+
+    if (newDisplayText != _cachedDisplayText) {
+      _cachedDisplayText = newDisplayText;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
@@ -83,39 +83,14 @@ class _RestaurantAppBarWidgetState extends State<RestaurantAppBarWidget> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        layoutBuilder: (currentChild, previousChildren) {
-                          return Stack(
-                            alignment: Alignment.centerLeft,
-                            children: <Widget>[
-                              ...previousChildren,
-                              if (currentChild != null) currentChild,
-                            ],
-                          );
-                        },
-                        transitionBuilder: (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0.0, 0.3),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Text(
-                          displayText,
-                          key: ValueKey<String>(displayText),
-                          textAlign: TextAlign.left,
-                          style: robotoMedium.copyWith(
-                            fontSize: Dimensions.fontSizeLarge,
-                            color: Colors.white,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                      child: AnimatedTextTransition(
+                        value: _cachedDisplayText,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        textAlign: TextAlign.left,
+                        style: robotoMedium.copyWith(
+                          fontSize: Dimensions.fontSizeLarge,
+                          color: Colors.white,
                         ),
                       ),
                     ),

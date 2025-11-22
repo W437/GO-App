@@ -190,13 +190,30 @@ class _AnimatedTextTransitionState extends State<AnimatedTextTransition>
     final newOffset = Offset(0, _direction * (1 - t) * maxOffset);
     final blurAmount = lerpDouble(0, 4, 1 - (t * 2 - 1).abs()) ?? 0;
 
+    // Determine stack alignment based on textAlign
+    final Alignment stackAlignment;
+    switch (widget.textAlign) {
+      case TextAlign.left:
+      case TextAlign.start:
+        stackAlignment = Alignment.centerLeft;
+        break;
+      case TextAlign.right:
+      case TextAlign.end:
+        stackAlignment = Alignment.centerRight;
+        break;
+      case TextAlign.center:
+      default:
+        stackAlignment = Alignment.center;
+        break;
+    }
+
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, child) {
           return ClipRect(
             child: Stack(
-              alignment: Alignment.center,
+              alignment: stackAlignment,
               children: [
                 if (_controller.isAnimating)
                   Transform.translate(

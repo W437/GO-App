@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
@@ -11,8 +12,10 @@ class CartSummaryCard extends StatelessWidget {
   final String restaurantLogo;
   final String? deliveryTime;
   final double subtotal;
-  final List<String> itemImages; // Or item names if images not available
+  final List<String> itemImages;
   final VoidCallback onViewCart;
+  final VoidCallback? onAddMore; // Navigate to restaurant menu
+  final VoidCallback? onDeleteCart; // Delete entire cart
   final String buttonText;
   final bool isOffline;
 
@@ -24,6 +27,8 @@ class CartSummaryCard extends StatelessWidget {
     required this.subtotal,
     required this.itemImages,
     required this.onViewCart,
+    this.onAddMore,
+    this.onDeleteCart,
     this.buttonText = 'View cart',
     this.isOffline = false,
   });
@@ -84,7 +89,13 @@ class CartSummaryCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.more_horiz, color: Theme.of(context).primaryColor), // Menu icon placeholder
+                // Menu button
+                IconButton(
+                  icon: Icon(Icons.more_horiz, color: Theme.of(context).primaryColor),
+                  onPressed: () => _showCartMenu(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
               ],
             ),
           ),
@@ -147,6 +158,121 @@ class CartSummaryCard extends StatelessWidget {
               radius: Dimensions.radiusDefault,
               isBold: false,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show cart menu with actions
+  void _showCartMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(Dimensions.radiusDefault),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(
+          vertical: Dimensions.paddingSizeLarge,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+              decoration: BoxDecoration(
+                color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Add more items
+            if (onAddMore != null)
+              ListTile(
+                leading: Icon(
+                  Icons.add_circle_outline,
+                  color: Theme.of(context).primaryColor,
+                ),
+                title: Text(
+                  'Add more items',
+                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                ),
+                onTap: () {
+                  Get.back();
+                  onAddMore?.call();
+                },
+              ),
+
+            // Delete cart
+            if (onDeleteCart != null)
+              ListTile(
+                leading: Icon(
+                  CupertinoIcons.delete,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                title: Text(
+                  'Delete cart',
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+                onTap: () {
+                  Get.back();
+                  // Show confirmation dialog
+                  _showDeleteConfirmation(context);
+                },
+              ),
+
+            // Cancel
+            ListTile(
+              leading: Icon(
+                Icons.close,
+                color: Theme.of(context).hintColor,
+              ),
+              title: Text(
+                'Cancel',
+                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+              ),
+              onTap: () => Get.back(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Show confirmation dialog before deleting cart
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete cart?'),
+        content: Text(
+          'Are you sure you want to delete all items from $restaurantName?',
+          style: robotoRegular,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              onDeleteCart?.call();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
           ),
         ],
       ),

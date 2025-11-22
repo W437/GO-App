@@ -76,7 +76,10 @@ class ProductController extends GetxController implements GetxService {
   void initializeProductData(Product product, {CartModel? cart}) {
     _product = product;
     initData(_product, cart);
-    update();
+    // Delay update to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      update();
+    });
   }
 
   Future<void> getPopularProductList(bool reload, String type, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {

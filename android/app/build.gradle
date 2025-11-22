@@ -2,9 +2,9 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    // Firebase enabled for OTP SMS authentication
-    id "com.google.gms.google-services"
-    id "com.google.firebase.crashlytics"
+    // Firebase temporarily disabled - google-services.json needs package name 'com.hopa.user'
+    // id "com.google.gms.google-services"
+    // id "com.google.firebase.crashlytics"
 }
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')

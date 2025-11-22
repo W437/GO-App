@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
-import 'package:godelivery_user/features/cart/widgets/cart_product_widget.dart';
+import 'package:godelivery_user/features/cart/widgets/order_item_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_suggested_item_view_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/checkout_button_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -124,6 +125,10 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                             cartController,
                           ),
 
+                        // Spacing before Order Items
+                        if (!isRestaurantOpen && restaurantController.restaurant != null)
+                          const SizedBox(height: Dimensions.paddingSizeLarge),
+
                         // ORDER ITEMS SECTION
                         _buildOrderItemsSection(
                           context,
@@ -194,14 +199,14 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Add a message for the restaurant',
+                    'Special instructions',
                     style: robotoMedium.copyWith(
                       fontSize: Dimensions.fontSizeDefault,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Special requests, allergies, dietary restrictions?',
+                    'Allergies, preferences, or prep requests',
                     style: robotoRegular.copyWith(
                       fontSize: Dimensions.fontSizeSmall,
                       color: Theme.of(context).hintColor,
@@ -224,41 +229,118 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   void _showMessageDialog(BuildContext context) {
     _messageController.clear();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Message to restaurant'),
-        content: TextField(
-          controller: _messageController,
-          maxLines: 4,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'E.g., No onions, extra spicy, allergies...',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(Dimensions.radiusDefault),
             ),
           ),
+          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              // Header
+              Center(
+                child: Text(
+                  'Special instructions',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeExtraLarge,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+
+              // Description
+              Text(
+                'Let the kitchen know about allergies, preferences, or how you want your food prepared.',
+                style: robotoRegular.copyWith(
+                  fontSize: Dimensions.fontSizeDefault,
+                  color: Theme.of(context).hintColor,
+                ),
+              ),
+
+              const SizedBox(height: Dimensions.paddingSizeLarge),
+
+              // Text input field
+              TextField(
+                controller: _messageController,
+                autofocus: true, // Auto-opens keyboard
+                maxLength: 400,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Type your message here...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  counterStyle: robotoRegular.copyWith(
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: Dimensions.paddingSizeLarge),
+
+              // Done button - Full width
+              CustomButtonWidget(
+                buttonText: 'Done',
+                onPressed: () {
+                  // TODO: Save to CheckoutController session
+                  if (_messageController.text.isNotEmpty) {
+                    Get.snackbar(
+                      'Saved',
+                      'Your message will be included with the order',
+                      snackPosition: SnackPosition.BOTTOM,
+                      duration: const Duration(seconds: 2),
+                    );
+                  }
+                  Get.back();
+                },
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (_messageController.text.isNotEmpty) {
-                Get.snackbar(
-                  'Saved',
-                  'Your message will be included with the order',
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                );
-              }
-              Get.back();
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }
@@ -268,75 +350,79 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     RestaurantController restaurantController,
     CartController cartController,
   ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-      ),
-      child: Column(
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'This restaurant is currently unavailable. It will be available at ',
-                  style: robotoRegular.copyWith(color: Theme.of(context).hintColor),
-                ),
-                TextSpan(
-                  text: restaurantController.restaurant!.restaurantOpeningTime == 'closed'
-                      ? 'tomorrow'.tr
-                      : DateConverter.timeStringToTime(
-                          restaurantController.restaurant!.restaurantOpeningTime!),
-                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                ),
-              ],
-            ),
+    final String openingTime = restaurantController.restaurant!.restaurantOpeningTime == 'closed'
+        ? 'tomorrow'.tr
+        : DateConverter.timeStringToTime(restaurantController.restaurant!.restaurantOpeningTime!);
+
+    return Column(
+      children: [
+        // Unavailable notice
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           ),
-          const SizedBox(height: Dimensions.paddingSizeSmall),
-          InkWell(
-            onTap: () => cartController.clearCartOnline(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Dimensions.paddingSizeDefault,
-                vertical: Dimensions.paddingSizeSmall,
+          child: Column(
+            children: [
+              Icon(
+                CupertinoIcons.time,
+                size: 32,
+                color: Theme.of(context).primaryColor,
               ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                border: Border.all(
-                  width: 1,
-                  color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              Text(
+                'Restaurant Currently Closed',
+                style: robotoBold.copyWith(
+                  fontSize: Dimensions.fontSizeLarge,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
+                textAlign: TextAlign.center,
               ),
-              child: cartController.isClearCartLoading
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator())
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.delete_solid,
-                          color: Theme.of(context).colorScheme.error,
-                          size: 20,
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeSmall),
-                        Text(
-                          cartController.cartList.length > 1
-                              ? 'remove_all_from_cart'.tr
-                              : 'remove_from_cart'.tr,
-                          style: robotoMedium.copyWith(
-                            fontSize: Dimensions.fontSizeSmall,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                      ],
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Opens at ',
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: Theme.of(context).hintColor,
+                      ),
                     ),
-            ),
+                    TextSpan(
+                      text: openingTime,
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        const SizedBox(height: Dimensions.paddingSizeDefault),
+
+        // Remove from cart button
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+          child: CustomButtonWidget(
+            buttonText: cartController.cartList.length > 1
+                ? 'remove_all_from_cart'.tr
+                : 'remove_from_cart'.tr,
+            onPressed: () => cartController.clearCartOnline(),
+            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+            textColor: Theme.of(context).colorScheme.error,
+            icon: CupertinoIcons.delete,
+            isLoading: cartController.isClearCartLoading,
+          ),
+        ),
+      ],
     );
   }
 
@@ -393,12 +479,10 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
             shrinkWrap: true,
             itemCount: cartController.cartList.length,
             itemBuilder: (context, index) {
-              return CartProductWidget(
+              return OrderItemWidget(
                 cart: cartController.cartList[index],
                 cartIndex: index,
                 addOns: cartController.addOnsList[index],
-                isAvailable: cartController.availableList[index],
-                isRestaurantOpen: isRestaurantOpen,
               );
             },
           ),

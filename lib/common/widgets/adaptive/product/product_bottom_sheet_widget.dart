@@ -81,7 +81,15 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
       showCustomSnackBar(warning);
     }
     if(product != null && product!.variations!.isEmpty) {
-      Get.find<ProductController>().setExistInCart(product!);
+      final cartIndex = Get.find<ProductController>().setExistInCart(product!);
+      print('🛒 [PRODUCT SHEET] setExistInCart called - cartIndex: $cartIndex');
+      print('   Product ID: ${product!.id}');
+      print('   Cart count: ${Get.find<CartController>().cartList.length}');
+      if (cartIndex != -1) {
+        print('   ✅ Found in cart! Quantity: ${Get.find<ProductController>().quantity}');
+      } else {
+        print('   ❌ Not in cart - will show Add to Cart');
+      }
     }
   }
 
@@ -387,9 +395,16 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                         child: Row(
                           children: [
                             QuantityButton(
-                              onTap: () {
+                              onTap: () async {
                                 if (productController.quantity! > 1) {
                                   productController.setQuantity(false, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign);
+                                } else if (productController.quantity == 1 && productController.cartIndex != -1) {
+                                  // Remove item from cart when quantity is 1
+                                  final cartCtrl = Get.find<CartController>();
+                                  final cartItem = cartCtrl.cartList[productController.cartIndex];
+                                  await cartCtrl.removeCartItemOnline(cartItem.id!);
+                                  Get.back(); // Close the bottom sheet
+                                  showCustomSnackBar('item_removed_from_cart'.tr, isError: false);
                                 }
                               },
                               isIncrement: false,
@@ -655,6 +670,29 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
       double priceWithAddonsVariation,
       ) async {
 
+    // If editing existing cart item, check if anything actually changed
+    if (productController.cartIndex != -1 && widget.cart != null) {
+      final originalCart = widget.cart!;
+
+      // Check quantity
+      final bool quantityChanged = productController.quantity != originalCart.quantity;
+
+      // Check addons (compare actual IDs, not just count)
+      final bool addonsChanged = !_areAddonListsEqual(addOnIdList, originalCart.addOnIds!);
+
+      // Check variations (compare selected variations)
+      final bool variationsChanged = !_areVariationsEqual(productController.selectedVariations, originalCart.variations!);
+
+      if (!quantityChanged && !addonsChanged && !variationsChanged) {
+        // Nothing changed, just close without API call
+        print('✅ No changes detected - closing without API call');
+        Get.back();
+        return;
+      }
+
+      print('📝 Changes detected - Quantity: $quantityChanged, Addons: $addonsChanged, Variations: $variationsChanged');
+    }
+
     _processVariationWarning(productController);
 
     if(productController.canAddToCartProduct) {
@@ -816,5 +854,34 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
     return addOnsList;
   }
 
+  // Compare addon lists for equality
+  bool _areAddonListsEqual(List<AddOn> list1, List<AddOn> list2) {
+    if (list1.length != list2.length) return false;
+
+    for (int i = 0; i < list1.length; i++) {
+      final addon1 = list1[i];
+      final addon2 = list2.firstWhereOrNull((a) => a.id == addon1.id);
+      if (addon2 == null || addon1.quantity != addon2.quantity) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Compare variation selections for equality
+  bool _areVariationsEqual(List<List<bool?>> variations1, List<List<bool?>> variations2) {
+    if (variations1.length != variations2.length) return false;
+
+    for (int i = 0; i < variations1.length; i++) {
+      if (variations1[i].length != variations2[i].length) return false;
+
+      for (int j = 0; j < variations1[i].length; j++) {
+        if (variations1[i][j] != variations2[i][j]) return false;
+      }
+    }
+    return true;
+  }
+
 }
+
 

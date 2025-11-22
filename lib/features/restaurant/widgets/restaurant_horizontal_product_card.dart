@@ -23,11 +23,6 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
 
     return CustomInkWellWidget(
       onTap: () {
-        // Check if product already in cart
-        final cartController = Get.find<CartController>();
-        final cartIndex = cartController.isExistInCart(product.id, null);
-        final cartItem = cartIndex != -1 ? cartController.cartList[cartIndex] : null;
-
         if (ResponsiveHelper.isMobile(context)) {
           showModalBottomSheet(
             context: context,
@@ -45,22 +40,12 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                   child: child,
                 );
               },
-              child: ProductBottomSheetWidget(
-                product: product,
-                inRestaurantPage: true,
-                cart: cartItem,
-                cartIndex: cartIndex,
-              ),
+              child: ProductBottomSheetWidget(product: product, inRestaurantPage: true),
             ),
           );
         } else {
           Get.dialog(
-            Dialog(child: ProductBottomSheetWidget(
-              product: product,
-              inRestaurantPage: true,
-              cart: cartItem,
-              cartIndex: cartIndex,
-            )),
+            Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
           );
         }
       },

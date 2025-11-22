@@ -13,6 +13,7 @@ import 'package:godelivery_user/features/restaurant/controllers/restaurant_contr
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
+import 'package:godelivery_user/helper/utilities/custom_debouncer_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -21,6 +22,9 @@ class CartController extends GetxController implements GetxService {
   final CartServiceInterface cartServiceInterface;
 
   CartController({required this.cartServiceInterface});
+
+  // Debouncer for quantity updates to prevent API spam
+  final _quantityDebouncer = CustomDebounceHelper(milliseconds: 500);
 
   // PHASE 1: Multi-restaurant cart support
   // New state for grouped carts (populated alongside _cartList for backward compatibility)
@@ -149,16 +153,23 @@ class CartController extends GetxController implements GetxService {
   }
 
   Future<void> setQuantity(bool isIncrement, CartModel cart, {int? cartIndex}) async {
-    _isLoading = true;
-    update();
     int index = cartIndex ?? _cartList.indexOf(cart);
+
+    // Update quantity locally (optimistic update for instant UI feedback)
     _cartList[index].quantity = await cartServiceInterface.decideProductQuantity(_cartList, isIncrement, index);
     cartServiceInterface.addToSharedPrefCartList(_cartList);
-
     calculationCart();
-    await updateCartQuantityOnline(_cartList[index].id!, _cartList[index].price!, _cartList[index].quantity!);
-    _isLoading = false;
-    update();
+    update(); // Update UI immediately
+
+    // Debounce the API call to prevent spam when clicking rapidly
+    final cartId = _cartList[index].id!;
+    final price = _cartList[index].price!;
+    final quantity = _cartList[index].quantity!;
+
+    _quantityDebouncer.run(() {
+      // Skip refresh to prevent overwriting local state during rapid clicks
+      updateCartQuantityOnline(cartId, price, quantity, skipRefresh: true);
+    });
   }
 
   void removeFromCart(int index) {
@@ -280,11 +291,11 @@ class CartController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> updateCartQuantityOnline(int cartId, double price, int quantity) async {
+  Future<void> updateCartQuantityOnline(int cartId, double price, int quantity, {bool skipRefresh = false}) async {
     // _isLoading = true;
     // update();
     bool success = await cartServiceInterface.updateCartQuantityOnline(cartId, price, quantity, AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId());
-    if(success) {
+    if(success && !skipRefresh) {
       getCartDataOnline();
       calculationCart();
     }
