@@ -4,10 +4,12 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/text/auto_scroll_text.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
+import 'package:godelivery_user/features/notification/screens/notification_screen.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -90,7 +92,10 @@ class NewHomeHeaderWidget extends StatelessWidget {
                       children: [
                         RoundedIconButtonWidget(
                           icon: Icons.notifications_outlined,
-                          onPressed: () => Get.toNamed(RouteHelper.getNotificationRoute()),
+                          onPressed: () => CustomFullSheet.show(
+                            context: context,
+                            child: const NotificationScreen(),
+                          ),
                           size: 48,
                           iconSize: 24,
                           backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),

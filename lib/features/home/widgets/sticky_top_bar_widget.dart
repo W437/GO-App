@@ -2,9 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/screens/access_location_screen.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
+import 'package:godelivery_user/features/notification/screens/notification_screen.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/widgets/guest_login_bottom_sheet.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
@@ -275,7 +277,10 @@ class _StickyTopBarWidgetState extends State<StickyTopBarWidget> {
 
               // Notification Button
               InkWell(
-                onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
+                onTap: () => CustomFullSheet.show(
+                  context: context,
+                  child: const NotificationScreen(),
+                ),
                 child: GetBuilder<NotificationController>(
                   builder: (notificationController) {
                     return SizedBox(
