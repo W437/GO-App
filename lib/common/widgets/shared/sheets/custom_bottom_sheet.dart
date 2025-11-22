@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
-/// Reusable custom bottom sheet with smooth animations
+/// Reusable custom bottom sheet with smooth animations and swipe-to-dismiss
 /// Usage: CustomBottomSheet.show(context, child: YourWidget())
-class CustomBottomSheet extends StatelessWidget {
+class CustomBottomSheet extends StatefulWidget {
   final Widget child;
   final double? height;
   final bool isFullScreen;
@@ -18,6 +19,9 @@ class CustomBottomSheet extends StatelessWidget {
     this.showDragHandle = false,
     this.borderRadius,
   });
+
+  @override
+  State<CustomBottomSheet> createState() => _CustomBottomSheetState();
 
   /// Show the bottom sheet with custom slide-up + scale bounce animation
   static Future<T?> show<T>({
@@ -36,50 +40,60 @@ class CustomBottomSheet extends StatelessWidget {
       barrierDismissible: isDismissible,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       barrierColor: Colors.black54,
-      transitionDuration: transitionDuration ?? const Duration(milliseconds: 500),
+      transitionDuration: transitionDuration ?? const Duration(milliseconds: 450),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        // Spring curve for natural physics-based animation
-        const springCurve = Curves.easeOutBack;
+        // Smooth curve without overshoot
+        const smoothCurve = Curves.easeOutCubic;
 
-        // Slide animation with spring physics
+        // Slide animation - smooth upward motion
         final slideAnimation = Tween<Offset>(
           begin: const Offset(0.0, 1.0),
           end: Offset.zero,
         ).animate(CurvedAnimation(
           parent: animation,
-          curve: springCurve,
+          curve: smoothCurve,
         ));
 
-        // Scale animation with spring physics and bounce
-        final scaleAnimation = TweenSequence<double>([
-          TweenSequenceItem(
-            tween: Tween<double>(begin: 0.85, end: 1.12)
-                .chain(CurveTween(curve: Curves.easeOutCirc)),
-            weight: 55,
-          ),
-          TweenSequenceItem(
-            tween: Tween<double>(begin: 1.12, end: 0.98)
-                .chain(CurveTween(curve: Curves.easeInOutSine)),
-            weight: 25,
-          ),
-          TweenSequenceItem(
-            tween: Tween<double>(begin: 0.98, end: 1.0)
-                .chain(CurveTween(curve: Curves.easeOut)),
-            weight: 20,
-          ),
-        ]).animate(animation);
-
-        // Fade animation for smoother appearance
-        final fadeAnimation = Tween<double>(
-          begin: 0.0,
+        // Scale animation - smooth scale without bounce
+        final scaleAnimation = Tween<double>(
+          begin: 0.94,
           end: 1.0,
         ).animate(CurvedAnimation(
           parent: animation,
-          curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
+          curve: smoothCurve,
         ));
 
-        return FadeTransition(
-          opacity: fadeAnimation,
+        // 3D rotation animation - top tilts forward (toward viewer)
+        final rotationXAnimation = Tween<double>(
+          begin: 0.4, // X-axis: Top tilted forward ~23° (radians)
+          end: 0.0,
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: smoothCurve,
+        ));
+
+        final rotationYAnimation = Tween<double>(
+          begin: 0.12, // Y-axis: Card rotation (radians)
+          end: 0.0,
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: smoothCurve,
+        ));
+
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            // Create 3D perspective transformation with top tilted forward
+            final transform = Matrix4.identity()
+              ..setEntry(3, 2, 0.002) // Stronger perspective for forward tilt effect
+              ..rotateX(rotationXAnimation.value); // POSITIVE = top tilts FORWARD
+
+            return Transform(
+              transform: transform,
+              alignment: Alignment.bottomCenter, // Pivot at bottom
+              child: child!,
+            );
+          },
           child: SlideTransition(
             position: slideAnimation,
             child: ScaleTransition(
@@ -100,34 +114,168 @@ class CustomBottomSheet extends StatelessWidget {
       },
     );
   }
+}
+
+class _CustomBottomSheetState extends State<CustomBottomSheet> with TickerProviderStateMixin {
+  double _dragOffset = 0.0;
+  bool _isDragging = false;
+  late AnimationController _dismissController;
+  late Animation<double> _dismissAnimation;
+  late AnimationController _snapBackController;
+  late Animation<double> _snapBackAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _dismissController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _dismissAnimation = CurvedAnimation(
+      parent: _dismissController,
+      curve: Curves.easeInCubic, // Fast start, slow end for dismiss
+    );
+
+    _snapBackController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _snapBackAnimation = CurvedAnimation(
+      parent: _snapBackController,
+      curve: Curves.easeOutBack, // Spring curve for snap-back
+    );
+
+    _snapBackAnimation.addListener(() {
+      if (!_isDragging) {
+        setState(() {
+          _dragOffset = _snapBackAnimation.value;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _dismissController.dispose();
+    _snapBackController.dispose();
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    // Only allow drag from top 100px of sheet
+    if (details.localPosition.dy <= 100) {
+      setState(() {
+        _isDragging = true;
+      });
+    }
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isDragging) return;
+
+    setState(() {
+      _dragOffset = (_dragOffset + details.delta.dy).clamp(0.0, double.infinity);
+    });
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    if (!_isDragging) return;
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    const dismissThreshold = 0.2; // Dismiss if dragged 20% of screen
+
+    if (_dragOffset > screenHeight * dismissThreshold) {
+      // Dismiss the sheet - animate down from current position with anticipation
+      final startOffset = _dragOffset;
+      _dismissAnimation = Tween<double>(
+        begin: startOffset,
+        end: screenHeight,
+      ).animate(CurvedAnimation(
+        parent: _dismissController,
+        curve: Curves.easeInBack, // Slight pull-back then accelerates down
+      ));
+
+      // Add listener to update drag offset as animation progresses
+      void updateOffset() {
+        setState(() {
+          _dragOffset = _dismissAnimation.value;
+        });
+      }
+
+      _dismissController.addListener(updateOffset);
+
+      setState(() {
+        _isDragging = false;
+      });
+
+      _dismissController.forward(from: 0.0).then((_) {
+        _dismissController.removeListener(updateOffset);
+        Get.back();
+      });
+    } else {
+      // Snap back smoothly with spring animation
+      _snapBackAnimation = Tween<double>(
+        begin: _dragOffset,
+        end: 0.0,
+      ).animate(CurvedAnimation(
+        parent: _snapBackController,
+        curve: Curves.easeOutBack,
+      ));
+
+      setState(() {
+        _isDragging = false;
+      });
+
+      _snapBackController.forward(from: 0.0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final double sheetHeight = isFullScreen
+    final double sheetHeight = widget.isFullScreen
         ? MediaQuery.of(context).size.height
-        : (height ?? MediaQuery.of(context).size.height * 0.75);
+        : (widget.height ?? MediaQuery.of(context).size.height * 0.75);
 
-    return SizedBox(
-      height: sheetHeight,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Optional drag handle
-          if (showDragHandle)
-            Container(
-              margin: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
+    // Calculate corner radius based on drag distance
+    // Max radius at Dimensions.radiusExtraLarge when dragged 100px or more
+    const maxRadius = Dimensions.radiusExtraLarge;
+    final dragProgress = (_dragOffset / 100.0).clamp(0.0, 1.0);
+    final currentRadius = maxRadius * dragProgress;
+
+    return GestureDetector(
+      onVerticalDragStart: _handleDragStart,
+      onVerticalDragUpdate: _handleDragUpdate,
+      onVerticalDragEnd: _handleDragEnd,
+      child: Transform.translate(
+        offset: Offset(0, _dragOffset), // Use _dragOffset directly (updated by both drag and animations)
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(currentRadius),
+          ),
+          child: SizedBox(
+            height: sheetHeight,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Optional drag handle
+                if (widget.showDragHandle)
+                  Container(
+                    margin: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                if (widget.showDragHandle) const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                // Sheet content - child is responsible for its own styling
+                Expanded(child: widget.child),
+              ],
             ),
-          if (showDragHandle) const SizedBox(height: Dimensions.paddingSizeSmall),
-
-          // Sheet content - child is responsible for its own styling
-          Expanded(child: child),
-        ],
+          ),
+        ),
       ),
     );
   }
