@@ -41,7 +41,14 @@ class CheckoutScreen extends StatefulWidget {
   final List<CartModel>? cartList;
   final bool fromCart;
   final bool fromDineInPage;
-  const CheckoutScreen({super.key, required this.fromCart, required this.cartList, this.fromDineInPage = false});
+  final bool showAppBar;
+  const CheckoutScreen({
+    super.key,
+    required this.fromCart,
+    required this.cartList,
+    this.fromDineInPage = false,
+    this.showAppBar = true,
+  });
 
   @override
   CheckoutScreenState createState() => CheckoutScreenState();
@@ -227,7 +234,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
 
     return Scaffold(
-      appBar: CustomAppBarWidget(title: 'checkout'.tr),
+      appBar: widget.showAppBar ? CustomAppBarWidget(title: 'checkout'.tr) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: guestCheckoutPermission || AuthHelper.isLoggedIn() ? GetBuilder<CheckoutController>(builder: (checkoutController) {
         return (checkoutController.distance != null && checkoutController.restaurant != null) ? GetBuilder<LocationController>(builder: (locationController) {

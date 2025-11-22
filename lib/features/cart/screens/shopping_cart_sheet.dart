@@ -114,12 +114,7 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                     'Your orders',
                     style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      // Edit functionality placeholder
-                    },
-                    child: Text('Edit', style: robotoBold.copyWith(color: Theme.of(context).primaryColor)),
-                  ),
+                  const SizedBox(width: 48), // Spacer for balance
                 ],
               ),
             ),

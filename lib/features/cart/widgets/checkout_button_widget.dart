@@ -141,6 +141,7 @@ class CheckoutButtonWidget extends StatelessWidget {
             fromCart: true,
             cartList: cartController.cartList,
             fromDineInPage: fromDineIn,
+            showAppBar: false, // No AppBar - using CustomFullSheetNavigator's top bar
           ),
         ),
       );
