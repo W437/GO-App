@@ -1,7 +1,10 @@
 import 'dart:convert';
 
-import 'package:godelivery_user/api/local_client.dart';
+
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
 import 'package:godelivery_user/features/product/domain/repositories/product_repository_interface.dart';
@@ -10,7 +13,8 @@ import 'package:get/get.dart';
 
 class ProductRepository implements ProductRepositoryInterface {
   final ApiClient apiClient;
-  ProductRepository({required this.apiClient});
+  final CacheManager cacheManager;
+  ProductRepository({required this.apiClient, required this.cacheManager});
 
   @override
   Future delete(int? id) {
@@ -34,25 +38,28 @@ class ProductRepository implements ProductRepositoryInterface {
 
   @override
   Future<List<Product>?> getList({int? offset, String? type, DataSourceEnum? source}) async {
-    List<Product>? popularProductList;
-    String cacheId = '${AppConstants.popularProductUri}?type=$type';
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.popularProductUri,
+      params: {'type': type},
+      schemaVersion: 1,
+    );
 
-    switch (source!) {
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<Product>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.popularProductUri}?type=$type');
         if (response.statusCode == 200) {
-          popularProductList = [];
+          List<Product> popularProductList = [];
           popularProductList.addAll(ProductModel.fromJson(response.body).products!);
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return popularProductList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if (cacheResponseData != null) {
-          popularProductList = [];
-          popularProductList.addAll(ProductModel.fromJson(jsonDecode(cacheResponseData)).products!);
-        }
-    }
-    return popularProductList;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) {
+        return ProductModel.fromJson(jsonDecode(json)).products!;
+      },
+    );
   }
 
   @override

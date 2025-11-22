@@ -1,7 +1,10 @@
 import 'dart:convert';
 
-import 'package:godelivery_user/api/local_client.dart';
+
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
@@ -13,7 +16,8 @@ import 'package:get/get.dart';
 
 class ReviewRepository implements ReviewRepositoryInterface {
   final ApiClient apiClient;
-  ReviewRepository({required this.apiClient});
+  final CacheManager cacheManager;
+  ReviewRepository({required this.apiClient, required this.cacheManager});
 
   @override
   Future<ResponseModel> submitReview(ReviewBodyModel reviewBody, bool isProduct) async {
@@ -26,27 +30,28 @@ class ReviewRepository implements ReviewRepositoryInterface {
 
   @override
   Future<List<Product>?> getList({int? offset, String? type, DataSourceEnum? source}) async {
-    List<Product>? reviewedProductList;
-    String cacheId = AppConstants.reviewedProductUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.reviewedProductUri,
+      params: {'type': type},
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<Product>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.reviewedProductUri}?type=$type');
-
-        if(response.statusCode == 200){
-          reviewedProductList = [];
+        if (response.statusCode == 200) {
+          List<Product> reviewedProductList = [];
           reviewedProductList.addAll(ProductModel.fromJson(response.body).products!);
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return reviewedProductList;
         }
-
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          reviewedProductList = [];
-          reviewedProductList.addAll(ProductModel.fromJson(jsonDecode(cacheResponseData)).products!);
-        }
-    }
-    return reviewedProductList;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) {
+        return ProductModel.fromJson(jsonDecode(json)).products!;
+      },
+    );
   }
 
   Future<ResponseModel> _submitReview(ReviewBodyModel reviewBody) async {

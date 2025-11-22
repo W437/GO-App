@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:godelivery_user/api/api_client.dart';
-import 'package:godelivery_user/api/local_client.dart';
+
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/features/cuisine/domain/models/cuisine_model.dart';
 import 'package:godelivery_user/features/cuisine/domain/models/cuisine_restaurants_model.dart';
 import 'package:godelivery_user/features/cuisine/domain/repositories/cuisine_repository_interface.dart';
@@ -10,7 +13,8 @@ import 'package:get/get_connect/connect.dart';
 
 class CuisineRepository implements CuisineRepositoryInterface {
   final ApiClient apiClient;
-  CuisineRepository({required this.apiClient});
+  final CacheManager cacheManager;
+  CuisineRepository({required this.apiClient, required this.cacheManager});
 
   @override
   Future add(value) {
@@ -29,25 +33,23 @@ class CuisineRepository implements CuisineRepositoryInterface {
 
   @override
   Future<CuisineModel?> getList({int? offset, DataSourceEnum? source}) async {
-    CuisineModel? cuisineModel;
-    String cacheId = AppConstants.cuisineUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.cuisineUri,
+      schemaVersion: 1,
+    );
 
-    switch(source!){
-      case DataSourceEnum.client:
+    return await cacheManager.get<CuisineModel>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData(AppConstants.cuisineUri);
-        if(response.statusCode == 200){
-          cuisineModel = CuisineModel.fromJson(response.body);
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        if (response.statusCode == 200) {
+          return CuisineModel.fromJson(response.body);
         }
-
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          cuisineModel = CuisineModel.fromJson(jsonDecode(cacheResponseData));
-        }
-    }
-
-    return cuisineModel;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) => CuisineModel.fromJson(jsonDecode(json)),
+    );
   }
 
   @override

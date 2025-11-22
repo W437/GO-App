@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:godelivery_user/api/api_client.dart';
-import 'package:godelivery_user/api/local_client.dart';
+
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/features/story/domain/models/story_collection_model.dart';
 import 'package:godelivery_user/features/story/domain/repositories/story_repository_interface.dart';
 import 'package:godelivery_user/util/app_constants.dart';
@@ -12,78 +15,50 @@ import 'dart:io';
 
 class StoryRepository implements StoryRepositoryInterface {
   final ApiClient apiClient;
-  StoryRepository({required this.apiClient});
+  final CacheManager cacheManager;
+  StoryRepository({required this.apiClient, required this.cacheManager});
 
   @override
   Future<List<StoryCollectionModel>?> getList(
       {int? offset, DataSourceEnum? source}) async {
-    List<StoryCollectionModel>? storyList;
-    String cacheId = AppConstants.storyFeedUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.storyFeedUri,
+      schemaVersion: 1,
+    );
 
-    switch (source!) {
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<StoryCollectionModel>>(
+      cacheKey,
+      fetcher: () async {
         print('📖 [STORY REPO] Calling API: ${AppConstants.storyFeedUri}');
         Response response = await apiClient.getData(AppConstants.storyFeedUri);
         print('📖 [STORY REPO] API Response - Status: ${response.statusCode}');
-        print('📖 [STORY REPO] API Response - Body type: ${response.body.runtimeType}');
 
         if (response.statusCode == 200) {
-          storyList = [];
-
+          List<StoryCollectionModel> storyList = [];
           // API returns {data: [...]} structure
           if (response.body is Map && response.body['data'] != null) {
             final dataList = response.body['data'] as List;
-            print('📖 [STORY REPO] ✅ Found ${dataList.length} story collections in data array');
-
             dataList.forEach((data) {
-              final collection = StoryCollectionModel.fromJson(data);
-              storyList?.add(collection);
-
-              // Debug: Show how many stories per restaurant
-              final restaurantName = collection.restaurant?.name ?? 'Unknown';
-              final storiesCount = collection.stories?.length ?? 0;
-              print('📖 [STORY REPO] Restaurant "$restaurantName" has $storiesCount stories');
-
-              // Debug: Show each story's media count
-              if (collection.stories != null) {
-                for (int i = 0; i < collection.stories!.length; i++) {
-                  final story = collection.stories![i];
-                  final mediaCount = story.media?.length ?? 0;
-                  print('   Story ${i + 1} (id: ${story.id}): "$story.title" - $mediaCount media items');
-                }
-              }
+              storyList.add(StoryCollectionModel.fromJson(data));
             });
-
-            // Cache the data array for local storage
-            LocalClient.organize(DataSourceEnum.client, cacheId,
-                jsonEncode(response.body['data']), apiClient.getHeader());
           } else if (response.body is List) {
-            // Fallback for direct array response
-            print('📖 [STORY REPO] ✅ Body is a direct List with ${response.body.length} items');
             response.body.forEach((data) {
-              storyList?.add(StoryCollectionModel.fromJson(data));
+              storyList.add(StoryCollectionModel.fromJson(data));
             });
-            LocalClient.organize(DataSourceEnum.client, cacheId,
-                jsonEncode(response.body), apiClient.getHeader());
-          } else {
-            print('📖 [STORY REPO] ❌ Unexpected response structure! Type: ${response.body.runtimeType}');
-            print('📖 [STORY REPO] Body content: ${response.body}');
           }
-        } else {
-          print('📖 [STORY REPO] ❌ API error: ${response.statusText} - ${response.body}');
+          return storyList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData =
-            await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if (cacheResponseData != null) {
-          storyList = [];
-          jsonDecode(cacheResponseData).forEach((data) {
-            storyList?.add(StoryCollectionModel.fromJson(data));
-          });
-        }
-    }
-
-    return storyList;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) {
+        List<StoryCollectionModel> list = [];
+        jsonDecode(json).forEach((data) {
+          list.add(StoryCollectionModel.fromJson(data));
+        });
+        return list;
+      },
+    );
   }
 
   @override

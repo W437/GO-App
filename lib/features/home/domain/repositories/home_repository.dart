@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:godelivery_user/api/api_client.dart';
-import 'package:godelivery_user/api/local_client.dart';
+
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/features/home/domain/models/banner_model.dart';
 import 'package:godelivery_user/features/home/domain/models/cashback_model.dart';
 import 'package:godelivery_user/features/home/domain/repositories/home_repository_interface.dart';
@@ -10,7 +13,8 @@ import 'package:get/get_connect.dart';
 
 class HomeRepository implements HomeRepositoryInterface {
   final ApiClient apiClient;
-  HomeRepository({required this.apiClient});
+  final CacheManager cacheManager;
+  HomeRepository({required this.apiClient, required this.cacheManager});
 
   @override
   Future<BannerModel?> getList({int? offset, DataSourceEnum? source}) async {
@@ -18,56 +22,55 @@ class HomeRepository implements HomeRepositoryInterface {
   }
 
   Future<BannerModel?> _getBannerList({required DataSourceEnum source}) async {
-    BannerModel? bannerModel;
-    String cacheId = AppConstants.bannerUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.bannerUri,
+      schemaVersion: 1,
+    );
 
-    switch(source) {
-      case DataSourceEnum.client:
+    return await cacheManager.get<BannerModel>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData(AppConstants.bannerUri);
-        if(response.statusCode == 200) {
+        if (response.statusCode == 200) {
           print('🔍 BANNER API RESPONSE: ${response.body}');
-          bannerModel = BannerModel.fromJson(response.body);
-          print('📊 Campaigns count: ${bannerModel.campaigns?.length ?? 0}');
-          print('📊 Banners count: ${bannerModel.banners?.length ?? 0}');
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return BannerModel.fromJson(response.body);
         }
-
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
-        }
-    }
-
-    return bannerModel;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) => BannerModel.fromJson(jsonDecode(json)),
+    );
   }
 
   @override
   Future<List<CashBackModel>?> getCashBackOfferList({DataSourceEnum? source}) async {
-    List<CashBackModel>? cashBackModelList;
-    String cacheId = AppConstants.cashBackOfferListUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.cashBackOfferListUri,
+      schemaVersion: 1,
+    );
 
-    switch(source!) {
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<CashBackModel>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData(AppConstants.cashBackOfferListUri);
-        if(response.statusCode == 200) {
-          cashBackModelList = [];
+        if (response.statusCode == 200) {
+          List<CashBackModel> cashBackModelList = [];
           response.body.forEach((data) {
-            cashBackModelList!.add(CashBackModel.fromJson(data));
+            cashBackModelList.add(CashBackModel.fromJson(data));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+          return cashBackModelList;
         }
-
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if(cacheResponseData != null) {
-          cashBackModelList = [];
-          jsonDecode(cacheResponseData).forEach((data) {
-            cashBackModelList!.add(CashBackModel.fromJson(data));
-          });
-        }
-    }
-    return cashBackModelList;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) {
+        List<CashBackModel> list = [];
+        jsonDecode(json).forEach((data) {
+          list.add(CashBackModel.fromJson(data));
+        });
+        return list;
+      },
+    );
   }
 
   @override

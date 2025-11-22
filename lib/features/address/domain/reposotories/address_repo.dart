@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:godelivery_user/api/api_client.dart';
-import 'package:godelivery_user/api/local_client.dart';
+
 import 'package:godelivery_user/common/enums/data_source_enum.dart';
+import 'package:godelivery_user/common/cache/cache_manager.dart';
+import 'package:godelivery_user/common/cache/cache_key.dart';
+import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/domain/reposotories/address_repo_interface.dart';
@@ -11,34 +14,39 @@ import 'package:get/get.dart';
 
 class AddressRepo implements AddressRepoInterface<AddressModel> {
   final ApiClient apiClient;
+  final CacheManager cacheManager;
 
-  AddressRepo({required this.apiClient});
+  AddressRepo({required this.apiClient, required this.cacheManager});
 
   @override
   Future<List<AddressModel>?> getList({int? offset, bool isLocal = false, DataSourceEnum? source}) async {
-    List<AddressModel>? addressList;
-    String cacheId = AppConstants.addressListUri;
+    final cacheKey = CacheKey(
+      endpoint: AppConstants.addressListUri,
+      schemaVersion: 1,
+    );
 
-    switch (source!) {
-      case DataSourceEnum.client:
+    return await cacheManager.get<List<AddressModel>>(
+      cacheKey,
+      fetcher: () async {
         Response response = await apiClient.getData(AppConstants.addressListUri);
         if (response.statusCode == 200) {
-          addressList = [];
+          List<AddressModel> addressList = [];
           response.body['addresses'].forEach((address) {
-            addressList!.add(AddressModel.fromJson(address));
+            addressList.add(AddressModel.fromJson(address));
           });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body['addresses']), apiClient.getHeader());
+          return addressList;
         }
-      case DataSourceEnum.local:
-        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
-        if (cacheResponseData != null) {
-          addressList = [];
-          jsonDecode(cacheResponseData).forEach((address) {
-            addressList!.add(AddressModel.fromJson(address));
-          });
-        }
-    }
-    return addressList;
+        return null;
+      },
+      ttl: CacheConfig.defaultTTL,
+      deserializer: (json) {
+        List<AddressModel> list = [];
+        jsonDecode(json).forEach((address) {
+          list.add(AddressModel.fromJson(address));
+        });
+        return list;
+      },
+    );
   }
 
   @override
