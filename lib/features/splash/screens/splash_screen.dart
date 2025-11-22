@@ -108,9 +108,16 @@ class SplashScreenState extends State<SplashScreen> {
       return; // Will be handled in _route()
     }
 
-    // Load all data while video plays - always fetch fresh on app launch
-    await splashController.loadAllData(useCache: false);
-    print('✅ [SPLASH] Parallel data loading complete');
+    // Load all data while video plays - BUT only if we are going to the dashboard
+    if (splashController.shouldLoadData) {
+      print('🚀 [SPLASH] Returning user detected - Starting parallel data load');
+      await splashController.loadAllData(useCache: false);
+      print('✅ [SPLASH] Parallel data loading complete');
+    } else {
+      print('🛑 [SPLASH] Fresh user detected - Skipping data load (will load in Dashboard)');
+      // We don't load data, but we don't mark it as failed either.
+      // The _route method will handle the navigation based on config only.
+    }
   }
 
   @override
@@ -226,6 +233,16 @@ class SplashScreenState extends State<SplashScreen> {
     // Check if data loading already completed (from parallel load in initState)
     if (splashController.dataLoadingComplete) {
       print('✅ [SPLASH] Data already loaded in parallel - navigating immediately');
+      await AppNavigator.navigateOnAppLaunch(
+        notification: widget.notificationBody,
+        linkBody: widget.linkBody,
+      );
+      return;
+    }
+
+    // Check if we intentionally skipped loading (Fresh User)
+    if (!splashController.shouldLoadData) {
+      print('⏩ [SPLASH] Data load was skipped (Fresh User) - navigating immediately');
       await AppNavigator.navigateOnAppLaunch(
         notification: widget.notificationBody,
         linkBody: widget.linkBody,

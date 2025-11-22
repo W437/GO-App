@@ -8,6 +8,7 @@ import 'package:godelivery_user/features/favourite/controllers/favourite_control
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/domain/services/location_service_interface.dart';
+import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
@@ -154,8 +155,15 @@ class LocationController extends GetxController implements GetxService {
           heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
         );
       }
-      ZoneResponseModel responseModel = await getZone(position.target.latitude.toString(), position.target.longitude.toString(), true);
-      _buttonDisabled = !responseModel.isSuccess;
+
+      // Use local zone checking instead of API call for better performance
+      final zoneId = ZonePolygonHelper.getZoneIdForPoint(
+        LatLng(position.target.latitude, position.target.longitude),
+        _zoneList,
+      );
+      _buttonDisabled = zoneId == null;
+      _inZone = zoneId != null;
+
       if (_changeAddress) {
         String addressFromGeocode = await getAddressFromGeocode(LatLng(position.target.latitude, position.target.longitude));
         fromAddress ? _address = addressFromGeocode : _pickAddress = addressFromGeocode;

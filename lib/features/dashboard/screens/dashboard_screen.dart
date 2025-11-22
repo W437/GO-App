@@ -80,6 +80,13 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       }
       _suggestAddressBottomSheet();
       Get.find<OrderController>().getRunningOrders(1, notify: false);
+
+      // Lazy Loading Check: If we skipped loading in Splash, do it now!
+      final splashController = Get.find<SplashController>();
+      if (!splashController.dataLoadingComplete && !splashController.dataLoadingFailed) {
+        print('🚀 [DASHBOARD] Triggering deferred data load...');
+        splashController.loadAllData(useCache: false);
+      }
     }
 
     _pageIndex = widget.pageIndex;

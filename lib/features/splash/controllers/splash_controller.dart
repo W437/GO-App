@@ -74,6 +74,18 @@ class SplashController extends GetxController implements GetxService {
 
   DateTime get currentTime => DateTime.now();
 
+  /// Check if we should load data during splash
+  /// Returns true ONLY if the user is a returning user (Intro done + Address saved)
+  /// This prevents wasting bandwidth for fresh installs who need to go through onboarding
+  bool get shouldLoadData {
+    final bool introShown = showIntro() ?? true; // Default to true (show intro) if null
+    final bool hasAddress = AddressHelper.getAddressFromSharedPref() != null;
+    
+    // If intro is NOT shown (meaning it's done) AND we have an address,
+    // then it's a returning user who goes straight to home. Load data!
+    return !introShown && hasAddress;
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // OLD ARCHITECTURE - DEPRECATED (keeping temporarily for reference/rollback)
   // ═══════════════════════════════════════════════════════════════════════════

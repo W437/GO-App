@@ -165,11 +165,12 @@ class _PickMapScreenState extends State<PickMapScreen> {
                           Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
                         },
                       ),
+                      // Top gradient
                       Positioned(
                         top: 0,
                         left: 0,
                         right: 0,
-                        height: 140,
+                        height: 160,
                         child: IgnorePointer(
                           child: Container(
                             decoration: BoxDecoration(
@@ -177,11 +178,40 @@ class _PickMapScreenState extends State<PickMapScreen> {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                                 colors: [
-                                  Colors.black.withOpacity(0.95),
-                                  Colors.black.withOpacity(0.4),
+                                  Colors.black.withOpacity(0.85),
+                                  Colors.black.withOpacity(0.65),
+                                  Colors.black.withOpacity(0.45),
+                                  Colors.black.withOpacity(0.25),
+                                  Colors.black.withOpacity(0.10),
                                   Colors.black.withOpacity(0.0),
                                 ],
-                                stops: const [0.0, 0.6, 1.0],
+                                stops: const [0.0, 0.25, 0.45, 0.65, 0.85, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Bottom gradient
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 200,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.85),
+                                  Colors.black.withOpacity(0.65),
+                                  Colors.black.withOpacity(0.45),
+                                  Colors.black.withOpacity(0.25),
+                                  Colors.black.withOpacity(0.10),
+                                  Colors.black.withOpacity(0.0),
+                                ],
+                                stops: const [0.0, 0.25, 0.45, 0.65, 0.85, 1.0],
                               ),
                             ),
                           ),
@@ -189,23 +219,21 @@ class _PickMapScreenState extends State<PickMapScreen> {
                       ),
                       IgnorePointer(
                         child: Center(
-                          child: locationController.loading
-                              ? const CircularProgressIndicator()
-                              : Padding(
-                                  padding: const EdgeInsets.only(bottom: 36.0),
-                                  child: Icon(
-                                    Icons.location_on,
-                                    size: 48,
-                                    color: Theme.of(context).colorScheme.primary,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 36.0),
+                            child: Icon(
+                              Icons.location_on,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.primary,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
                                 ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       if (!widget.fromSplash)
@@ -226,6 +254,20 @@ class _PickMapScreenState extends State<PickMapScreen> {
                             child: CircularBackButtonWidget(
                               showText: false,
                               backgroundColor: Theme.of(context).cardColor,
+                            ),
+                          ),
+                        ),
+                      // Hopa logo
+                      if (!widget.fromSplash)
+                        Positioned(
+                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 8,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Image.asset(
+                              Images.hopaWhiteLogo,
+                              height: 32,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
@@ -303,6 +345,16 @@ class _PickMapScreenState extends State<PickMapScreen> {
                           child: LocationPermissionOverlay(
                             onEnableLocation: _handleEnableLocation,
                             showSkip: false,
+                          ),
+                        ),
+                      // Address badge
+                      if (!_showLocationPermissionOverlay && locationController.pickAddress != null && locationController.pickAddress!.isNotEmpty)
+                        Positioned(
+                          top: MediaQuery.of(context).viewPadding.top + (widget.fromSplash ? 20 : 70),
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: _buildAddressBadge(locationController.pickAddress!),
                           ),
                         ),
                     ],
@@ -481,4 +533,56 @@ class _PickMapScreenState extends State<PickMapScreen> {
   // Set<Marker> _zoneMarkers(LocationController controller) {
   //   return <Marker>{};
   // }
+
+  Widget _buildAddressBadge(String address) {
+    // Remove country from address (last part after final comma)
+    final addressParts = address.split(',');
+    final addressWithoutCountry = addressParts.length > 1
+        ? addressParts.sublist(0, addressParts.length - 1).join(',').trim()
+        : address;
+
+    return Container(
+      constraints: const BoxConstraints(
+        maxWidth: 320,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.location_on,
+            size: 20,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+          Flexible(
+            child: Text(
+              addressWithoutCountry,
+              style: robotoMedium.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

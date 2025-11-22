@@ -1,6 +1,7 @@
 class Images {
   static const String logo = 'assets/image/branding/logo.png';
   static const String logoName = 'assets/image/branding/logo_name.png';
+  static const String hopaWhiteLogo = 'assets/image/hopa_white_logo.png';
   static const String placeholder = 'assets/image/placeholders/placeholder.svg';
   static const String arabic = 'assets/image/language/arabic.png';
   static const String hebrew = 'assets/image/language/hebrew.png';
