@@ -213,16 +213,16 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
             ),
 
             // Cart widget content
-            Container(
-              padding: const EdgeInsets.only(
-                left: Dimensions.paddingSizeDefault,
-                right: Dimensions.paddingSizeDefault,
-                top: Dimensions.paddingSizeDefault,
-                bottom: 0, // Remove bottom padding so extension goes beyond screen
-              ),
-              margin: const EdgeInsets.only(bottom: -100), // Negative margin to keep position and extend downward
-
-              child: SafeArea(
+            Transform.translate(
+              offset: const Offset(0, 100), // Shift down by 100px to keep position while extending beyond screen
+              child: Container(
+                padding: const EdgeInsets.only(
+                  left: Dimensions.paddingSizeDefault,
+                  right: Dimensions.paddingSizeDefault,
+                  top: Dimensions.paddingSizeDefault,
+                  bottom: Dimensions.paddingSizeExtraSmall,
+                ),
+                child: SafeArea(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -405,6 +405,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                     ),
                   ],
                 ),
+              ),
               ),
             ),
           ],

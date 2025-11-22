@@ -97,7 +97,7 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
               height: _badgeHeight,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: theme.disabledColor.withValues(alpha: 0.25),
+                color: theme.primaryColor,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(_cornerRadius),
                   bottomLeft: Radius.circular(_cornerRadius),
@@ -153,7 +153,7 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
                     value: totalQuantity,
                     style: robotoBold.copyWith(
                       fontSize: Dimensions.fontSizeSmall,
-                      color: theme.textTheme.bodyLarge?.color,
+                      color: Colors.white,
                     ),
                   ),
 

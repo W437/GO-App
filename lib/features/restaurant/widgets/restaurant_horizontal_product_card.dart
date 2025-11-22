@@ -56,42 +56,53 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
         width: 160,
         child: Stack(
           children: [
-            Container(
-              width: 160,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(6, 24, 44, 0.1),
-                    blurRadius: 0,
-                    spreadRadius: 2,
-                    offset: Offset(0, 0),
+            GetBuilder<CartController>(
+              builder: (cartController) {
+                int totalQuantity = 0;
+                for (var cartItem in cartController.cartList) {
+                  if (cartItem.product?.id == product.id) {
+                    totalQuantity += cartItem.quantity ?? 0;
+                  }
+                }
+
+                final bool isInCart = totalQuantity > 0;
+
+                return Container(
+                  width: 160,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    boxShadow: [
+                      const BoxShadow(
+                        color: Color.fromRGBO(6, 24, 44, 0.1),
+                        blurRadius: 0,
+                        spreadRadius: 2,
+                        offset: Offset(0, 0),
+                      ),
+                      const BoxShadow(
+                        color: Color.fromRGBO(6, 24, 44, 0.3),
+                        blurRadius: 6,
+                        spreadRadius: -1,
+                        offset: Offset(0, 4),
+                      ),
+                      const BoxShadow(
+                        color: Color.fromRGBO(255, 255, 255, 0.08),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                        offset: Offset(0, 1),
+                      ),
+                      const BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.3),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
                   ),
-                  BoxShadow(
-                    color: Color.fromRGBO(6, 24, 44, 0.3),
-                    blurRadius: 6,
-                    spreadRadius: -1,
-                    offset: Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: Color.fromRGBO(255, 255, 255, 0.08),
-                    blurRadius: 0,
-                    spreadRadius: 0,
-                    offset: Offset(0, 1),
-                  ),
-                  BoxShadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.3),
-                    blurRadius: 0,
-                    spreadRadius: 0,
-                    offset: Offset(0, 0),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  // Product Image - takes up top 70% of card
-                  Align(
+                  child: Stack(
+                    children: [
+                      // Product Image - takes up top 70% of card
+                      Align(
                     alignment: Alignment.topCenter,
                     child: FractionallySizedBox(
                       heightFactor: 0.7,
@@ -167,6 +178,38 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                   ),
                 ],
               ),
+            );
+              },
+            ),
+
+            // Blue strip at bottom - only when in cart
+            GetBuilder<CartController>(
+              builder: (cartController) {
+                int totalQuantity = 0;
+                for (var cartItem in cartController.cartList) {
+                  if (cartItem.product?.id == product.id) {
+                    totalQuantity += cartItem.quantity ?? 0;
+                  }
+                }
+
+                if (totalQuantity == 0) return const SizedBox();
+
+                return Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(Dimensions.radiusDefault),
+                        bottomRight: Radius.circular(Dimensions.radiusDefault),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
 
             // Expandable Cart Badge - Top Right Corner (inside CustomInkWellWidget but with pointer blocking)
@@ -175,7 +218,10 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
               right: 0,
               child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onPointerDown: (_) {}, // Block pointer events from triggering card tap
+                onPointerDown: (_) {}, // Block pointer events
+                onPointerUp: (_) {},   // Block pointer events
+                onPointerMove: (_) {}, // Block pointer events
+                onPointerCancel: (_) {}, // Block pointer events
                 child: CompactExpandableCartBadge(
                   productId: product.id!,
                 ),
