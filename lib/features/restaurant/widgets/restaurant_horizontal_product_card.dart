@@ -58,17 +58,11 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.1),
-              blurRadius: 6,
-              spreadRadius: -1,
-              offset: Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.06),
+              color: Color.fromRGBO(0, 0, 0, 0.16),
               blurRadius: 4,
-              spreadRadius: -1,
-              offset: Offset(0, 2),
-            )
+              spreadRadius: 0,
+              offset: Offset(0, 1),
+            ),
           ],
         ),
         child: Stack(

@@ -27,7 +27,7 @@ class OrderAgainView extends StatelessWidget {
         return NotLoggedInScreen(
           callBack: (success) {
             if (success) {
-              orderController.getOrderList();
+              orderController.getHistoryOrders(1);
             }
           },
         );
