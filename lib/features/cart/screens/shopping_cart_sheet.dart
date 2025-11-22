@@ -27,7 +27,6 @@ class ShoppingCartSheet extends StatefulWidget {
 
 class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _showDetails = false;
 
   @override
   void initState() {
@@ -67,22 +66,6 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    
-    // If showing details, return the detailed view (old cart screen)
-    if (_showDetails) {
-      return Scaffold(
-        appBar: CustomAppBarWidget(
-          title: 'my_cart'.tr, 
-          isBackButtonExist: true, 
-          onBackPressed: () {
-            setState(() {
-              _showDetails = false;
-            });
-          }
-        ),
-        body: OrderDetailsSheet(fromReorder: widget.fromReorder, fromDineIn: widget.fromDineIn),
-      );
-    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -158,23 +141,24 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                 controller: _tabController,
                 children: [
                   // Shopping Carts View
-                  // We wrap this to handle the "View Cart" callback
-                  GetBuilder<CartController>(builder: (cartController) {
-                     // If cart is empty, ShoppingCartsView handles it.
-                     // If not empty, we need to intercept the tap to show details.
-                     // But ShoppingCartsView is just a view. 
-                     // We can pass a callback or wrap it.
-                     // Actually, ShoppingCartsView uses CartSummaryCard which has onViewCart.
-                     // I need to modify ShoppingCartsView to accept the callback or handle it internally.
-                     // Let's modify ShoppingCartsView to accept a callback.
-                     // Wait, I already defined it but didn't implement the callback logic in ShoppingCartsView.
-                     // I'll just reimplement the view here or wrap it.
-                     // Better yet, I'll modify ShoppingCartsView to take the callback.
-                     return ShoppingCartsView(onViewCart: () {
-                        setState(() {
-                          _showDetails = true;
-                        });
-                     });
+                  ShoppingCartsView(onViewCart: () {
+                    // Open OrderDetailsSheet as a separate sheet on top
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      useSafeArea: true,
+                      builder: (context) => Container(
+                        height: MediaQuery.of(context).size.height,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        child: const OrderDetailsSheet(),
+                      ),
+                    );
                   }),
                   
                   const OrderAgainView(),

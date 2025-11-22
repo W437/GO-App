@@ -66,6 +66,7 @@ class AppConstants {
   static const String searchUri = '/api/v1/';
   static const String reviewUri = '/api/v1/products/reviews/submit';
   static const String productDetailsUri = '/api/v1/products/details/';
+  static const String productLikeUri = '/api/v1/products/';
   static const String lastLocationUri = '/api/v1/delivery-man/last-location?order_id=';
   static const String deliveryManReviewUri = '/api/v1/delivery-man/reviews/submit';
   static const String restaurantUri = '/api/v1/restaurants/get-restaurants';

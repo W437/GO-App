@@ -2,6 +2,9 @@
 /// Displays product details, variations, add-ons, and add to cart functionality
 
 import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
+import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/util/app_constants.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
@@ -163,6 +166,67 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.close, size: 20, color: Colors.black),
+                ),
+              ),
+            ),
+
+            // Like Button (top right)
+            Positioned(
+              top: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              child: InkWell(
+                onTap: () async {
+                  if (!Get.find<AuthController>().isLoggedIn()) {
+                    showCustomSnackBar('please_login_to_like'.tr);
+                    return;
+                  }
+
+                  try {
+                    final response = await Get.find<ApiClient>().postData(
+                      '${AppConstants.productLikeUri}${product!.id}/like',
+                      {},
+                    );
+
+                    if (response.statusCode == 200) {
+                      // Update local like count
+                      setState(() {
+                        product!.likeCount = response.body['like_count'];
+                      });
+
+                      showCustomSnackBar(
+                        response.body['message'],
+                        isError: false,
+                      );
+                    }
+                  } catch (e) {
+                    print('❌ Like error: $e');
+                    showCustomSnackBar('failed_to_like_product'.tr);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.favorite,
+                        size: 18,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(width: 4),
+                      AnimatedTextTransition(
+                        value: product!.likeCount ?? 0,
+                        style: robotoBold.copyWith(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

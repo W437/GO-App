@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -22,6 +23,11 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
 
     return CustomInkWellWidget(
       onTap: () {
+        // Check if product already in cart
+        final cartController = Get.find<CartController>();
+        final cartIndex = cartController.isExistInCart(product.id, null);
+        final cartItem = cartIndex != -1 ? cartController.cartList[cartIndex] : null;
+
         if (ResponsiveHelper.isMobile(context)) {
           showModalBottomSheet(
             context: context,
@@ -39,12 +45,22 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
                   child: child,
                 );
               },
-              child: ProductBottomSheetWidget(product: product, inRestaurantPage: true),
+              child: ProductBottomSheetWidget(
+                product: product,
+                inRestaurantPage: true,
+                cart: cartItem,
+                cartIndex: cartIndex,
+              ),
             ),
           );
         } else {
           Get.dialog(
-            Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
+            Dialog(child: ProductBottomSheetWidget(
+              product: product,
+              inRestaurantPage: true,
+              cart: cartItem,
+              cartIndex: cartIndex,
+            )),
           );
         }
       },

@@ -1,27 +1,22 @@
-import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_data_screen_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/widgets/web/web_constrained_box.dart';
-import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_product_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_suggested_item_view_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/checkout_button_widget.dart';
-import 'package:godelivery_user/features/cart/widgets/pricing_view_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/helper/converters/date_converter.dart';
-import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
+/// Order Details Sheet - Full-screen sheet showing one restaurant's cart
+/// Slides up on top of ShoppingCartSheet when user taps "View cart"
 class OrderDetailsSheet extends StatefulWidget {
   final bool fromReorder;
   final bool fromDineIn;
@@ -33,370 +28,382 @@ class OrderDetailsSheet extends StatefulWidget {
 
 class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   final ScrollController scrollController = ScrollController();
-  GlobalKey<ExpandableBottomSheetState> key = GlobalKey();
-  final GlobalKey _widgetKey = GlobalKey();
-  double _height = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    // Removed auto-expand/contract animation to prevent navigation loop
-  }
-
-  void _getExpandedBottomSheetHeight() {
-    if (_widgetKey.currentContext != null && mounted) {
-      final RenderBox renderBox = _widgetKey.currentContext!.findRenderObject() as RenderBox;
-      final size = renderBox.size;
-      setState(() {
-        _height = size.height;
-      });
-    }
-  }
-
-  void _onExpanded() {
-    if (mounted) {
-      _getExpandedBottomSheetHeight();
-    }
-  }
-
-  void _onContracted() {
-    if (mounted) {
-      setState(() {
-        _height = 0;
-      });
-    }
-  }
+  final TextEditingController _messageController = TextEditingController();
 
   @override
   void dispose() {
     scrollController.dispose();
+    _messageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    
+
     return GetBuilder<RestaurantController>(builder: (restaurantController) {
       return GetBuilder<CartController>(builder: (cartController) {
         bool isRestaurantOpen = true;
-        if(restaurantController.restaurant != null) {
-          isRestaurantOpen = restaurantController.isRestaurantOpenNow(restaurantController.restaurant!.active!, restaurantController.restaurant!.schedules);
+        if (restaurantController.restaurant != null) {
+          isRestaurantOpen = restaurantController.isRestaurantOpenNow(
+            restaurantController.restaurant!.active!,
+            restaurantController.restaurant!.schedules,
+          );
         }
 
-        bool suggestionEmpty = (restaurantController.suggestedItems != null && restaurantController.suggestedItems!.isEmpty);
-        
-        return (cartController.isLoading && widget.fromReorder) ? const Center(
-          child: SizedBox(height: 30, width: 30, child: CircularProgressIndicator()),
-        ) : cartController.cartList.isNotEmpty ? Column(
-          children: [
-            Expanded(
-              child: ExpandableBottomSheet(
-                key: key,
-                persistentHeader: isDesktop ? const SizedBox() : InkWell(
-                  onTap: (){
-                    if(cartController.isExpanded){
-                      cartController.setExpanded(false);
-                      setState(() {
-                        key.currentState!.contract();
-                      });
-                    } else {
-                      cartController.setExpanded(true);
-                      setState(() {
-                        key.currentState!.expand();
-                      });
-                    }
-                  },
-                  child: Container(
-                    color: Theme.of(context).cardColor,
-                    child: Container(
-                      constraints: const BoxConstraints.expand(height: 30),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).disabledColor.withValues(alpha: 0.5),
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
-                      ),
-                      child: Icon(Icons.drag_handle, color: Theme.of(context).hintColor, size: 25),
-                    ),
+        String restaurantName = restaurantController.restaurant?.name ?? 'Restaurant';
+
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: SafeArea(
+            child: Column(
+              children: [
+                // ============================================================
+                // HEADER: Back button + Restaurant name + Subtitle
+                // ============================================================
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Dimensions.paddingSizeDefault,
+                    vertical: Dimensions.paddingSizeDefault,
                   ),
-                ),
-                background: Column(
-                  children: [
-                    WebScreenTitleWidget(title: 'my_cart'.tr),
-
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: isDesktop ? const EdgeInsets.only(top: Dimensions.paddingSizeSmall) : EdgeInsets.zero,
-                        child: FooterViewWidget(
-                          child: Center(
-                            child: SizedBox(
-                              width: Dimensions.webMaxWidth,
-                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Expanded(
-                                    flex: 6,
-                                    child: Column(children: [
-                                      Container(
-                                        decoration: isDesktop ? BoxDecoration(
-                                          borderRadius: const  BorderRadius.all(Radius.circular(Dimensions.radiusDefault)),
-                                          color: Theme.of(context).cardColor,
-                                          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                                        ) : const BoxDecoration(),
-                                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                          WebConstrainedBox(
-                                            dataLength: cartController.cartList.length, minLength: 5, minHeight: suggestionEmpty ? 0.6 : 0.3,
-                                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                                              !isRestaurantOpen && restaurantController.restaurant != null ? !isDesktop ? Center(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-                                                  child: RichText(
-                                                    textAlign: TextAlign.center,
-                                                    text: TextSpan(children: [
-                                                      TextSpan(text: 'currently_the_restaurant_is_unavailable_the_restaurant_will_be_available_at'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-                                                      const TextSpan(text: ' '),
-                                                      TextSpan(
-                                                        text: restaurantController.restaurant!.restaurantOpeningTime == 'closed' ? 'tomorrow'.tr : DateConverter.timeStringToTime(restaurantController.restaurant!.restaurantOpeningTime!),
-                                                        style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                                                      ),
-                                                    ]),
-                                                  ),
-                                                ),
-                                              ) : Container(
-
-                                                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                                decoration: BoxDecoration(
-                                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                                  borderRadius: const BorderRadius.only(
-                                                    topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault),
-                                                  ),
-                                                ),
-                                                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-                                                  RichText(
-                                                    textAlign: TextAlign.start,
-                                                    text: TextSpan(children: [
-                                                      TextSpan(text: 'currently_the_restaurant_is_unavailable_the_restaurant_will_be_available_at'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-                                                      const TextSpan(text: ' '),
-                                                      TextSpan(
-                                                        text: restaurantController.restaurant!.restaurantOpeningTime == 'closed' ? 'tomorrow'.tr : DateConverter.timeStringToTime(restaurantController.restaurant!.restaurantOpeningTime!),
-                                                        style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                                                      ),
-                                                    ]),
-                                                  ),
-
-                                                  !isRestaurantOpen ? Align(
-                                                    alignment: Alignment.center,
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        cartController.clearCartOnline();
-                                                      },
-                                                      child: Container(
-                                                        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                                        margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                                                        decoration: BoxDecoration(
-                                                          color: Theme.of(context).cardColor,
-                                                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                                          border: Border.all(width: 1, color: Theme.of(context).disabledColor.withValues(alpha: 0.3)),
-                                                        ),
-                                                        child: !cartController.isClearCartLoading ? Row(mainAxisSize: MainAxisSize.min, children: [
-
-                                                          Icon(CupertinoIcons.delete_solid, color: Theme.of(context).colorScheme.error, size: 20),
-                                                          const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                                                          Text(
-                                                            cartController.cartList.length > 1 ? 'remove_all_from_cart'.tr : 'remove_from_cart'.tr,
-                                                            style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyLarge!.color?.withValues(alpha: 0.7)),
-                                                          ),
-
-                                                        ]) : const SizedBox(height: 20, width: 20, child: CircularProgressIndicator()),
-                                                      ),
-                                                    ),
-                                                  ) : const SizedBox(),
-
-                                                ]),
-
-                                              ) : const SizedBox(),
-
-                                              ConstrainedBox(
-                                                constraints: BoxConstraints(maxHeight: isDesktop ? MediaQuery.of(context).size.height * 0.4 : double.infinity),
-                                                child: ListView.builder(
-                                                  physics: isDesktop ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-                                                  shrinkWrap: true,
-                                                  padding: const EdgeInsets.only(
-                                                    left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeDefault,
-                                                  ),
-                                                  itemCount: cartController.cartList.length,
-                                                  itemBuilder: (context, index) {
-                                                    return CartProductWidget(
-                                                      cart: cartController.cartList[index], cartIndex: index, addOns: cartController.addOnsList[index],
-                                                      isAvailable: cartController.availableList[index], isRestaurantOpen: isRestaurantOpen,
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-
-                                              !isRestaurantOpen ? !isDesktop ? Align(
-                                                alignment: Alignment.center,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                                                  child: CustomInkWellWidget(
-                                                    onTap: () {
-                                                      cartController.clearCartOnline();
-                                                    },
-                                                    child: Container(
-                                                      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context).cardColor,
-                                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                                        border: Border.all(width: 1, color: Theme.of(context).disabledColor.withValues(alpha: 0.3)),
-                                                      ),
-                                                      child: !cartController.isClearCartLoading ? Row(mainAxisSize: MainAxisSize.min, children: [
-
-                                                        Icon(CupertinoIcons.delete_solid, color: Theme.of(context).colorScheme.error, size: 20),
-                                                        const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                                                        Text(cartController.cartList.length > 1 ? 'remove_all_from_cart'.tr : 'remove_from_cart'.tr, style: robotoMedium.copyWith(color: Theme.of(context).colorScheme.error, fontSize: Dimensions.fontSizeSmall)),
-
-                                                      ]) : const SizedBox(height: 20, width: 20, child: CircularProgressIndicator()),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ) : const SizedBox() : const SizedBox(),
-
-                                              SizedBox(height: isDesktop ? 40 : 0),
-
-                                              Container(
-                                                alignment: Alignment.center,
-                                                color: Theme.of(context).cardColor.withValues(alpha: 0.6),
-                                                child: TextButton.icon(
-                                                  onPressed: (){
-                                                    if(isRestaurantOpen) {
-                                                      Get.toNamed(
-                                                        RouteHelper.getRestaurantRoute(cartController.cartList[0].product!.restaurantId),
-                                                        arguments: RestaurantScreen(restaurant: Restaurant(id: cartController.cartList[0].product!.restaurantId)),
-                                                      );
-                                                    } else {
-                                                      Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
-                                                    }
-                                                  },
-                                                  icon: Icon(Icons.add_circle_outline_sharp, color: Theme.of(context).primaryColor),
-                                                  label: Text(
-                                                    isRestaurantOpen ? 'add_more_items'.tr : 'add_from_another_restaurants'.tr,
-                                                    style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeDefault),
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(height: !isDesktop ? 0 : 8),
-
-                                              !isDesktop ? CartSuggestedItemViewWidget(cartList: cartController.cartList) : const SizedBox(),
-                                            ]),
-                                          ),
-                                          const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                                          !isDesktop ? PricingViewWidget(cartController: cartController, isRestaurantOpen: isRestaurantOpen, fromDineIn: widget.fromDineIn,) : const SizedBox(),
-                                        ]),
-                                      ),
-                                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                                      isDesktop ? CartSuggestedItemViewWidget(cartList: cartController.cartList) : const SizedBox(),
-                                    ]),
-                                  ),
-                                  SizedBox(width: isDesktop ? Dimensions.paddingSizeLarge : 0),
-
-                                  isDesktop ? Expanded(flex: 4, child: PricingViewWidget(cartController: cartController, isRestaurantOpen: isRestaurantOpen, fromDineIn: widget.fromDineIn)) : const SizedBox(),
-
-                                ]),
-
-                              ]),
+                  child: Row(
+                    children: [
+                      // Circular back button with down arrow
+                      CircularBackButtonWidget(
+                        icon: Icons.keyboard_arrow_down_rounded,
+                        onPressed: () => Get.back(),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              restaurantName,
+                              style: robotoBold.copyWith(
+                                fontSize: Dimensions.fontSizeOverLarge,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Your order',
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeDefault,
+                                color: Theme.of(context).hintColor,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-
-                    SizedBox(height: _height),
-
-                  ],
-                ),
-
-                onIsExtendedCallback: _onExpanded,
-                onIsContractedCallback: _onContracted,
-
-                expandableContent: isDesktop ? const SizedBox() : Container(
-                  width: context.width,
-                  key: _widgetKey,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
+                      const SizedBox(width: 44), // Balance for back button
+                    ],
                   ),
-                  child: Column(children: [
-
-                    Container(
-                      padding: const EdgeInsets.only(
-                        left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeSmall,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
-                      ),
-                      child: Column(children: [
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text('item_price'.tr, style: robotoRegular),
-                          PriceConverter.convertAnimationPrice(cartController.itemPrice, textStyle: robotoRegular),
-                        ]),
-                        SizedBox(height: Dimensions.paddingSizeSmall),
-
-                        cartController.variationPrice > 0 ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('variations'.tr, style: robotoRegular),
-                            Text('(+) ${PriceConverter.convertPrice(cartController.variationPrice)}', style: robotoRegular, textDirection: TextDirection.ltr),
-                          ],
-                        ) : const SizedBox(),
-                        SizedBox(height: cartController.variationPrice > 0 ? Dimensions.paddingSizeSmall : 0),
-
-                        cartController.itemDiscountPrice > 0 ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text('discount'.tr, style: robotoRegular),
-                          restaurantController.restaurant != null ? Row(children: [
-                            Text('(-)', style: robotoRegular),
-                            PriceConverter.convertAnimationPrice(cartController.itemDiscountPrice, textStyle: robotoRegular),
-                          ]) : Text('calculating'.tr, style: robotoRegular),
-                        ]) : const SizedBox(),
-                        SizedBox(height: cartController.itemDiscountPrice > 0 ? Dimensions.paddingSizeSmall : 0),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('addons'.tr, style: robotoRegular),
-                            Row(children: [
-                              Text('(+)', style: robotoRegular),
-                              PriceConverter.convertAnimationPrice(cartController.addOns, textStyle: robotoRegular),
-                            ]),
-                          ],
-                        ),
-
-                      ]),
-                    ),
-
-                  ]),
                 ),
 
-              ),
-            ),
+                // ============================================================
+                // CONTENT
+                // ============================================================
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // MESSAGE TO RESTAURANT SECTION
+                        _buildMessageToRestaurantSection(context, cartController),
 
-            isDesktop ? const SizedBox.shrink() : CheckoutButtonWidget(cartController: cartController, availableList: cartController.availableList, isRestaurantOpen: isRestaurantOpen, fromDineIn: widget.fromDineIn),
+                        const SizedBox(height: Dimensions.paddingSizeDefault),
 
-          ],
-        ) : Center(
-          child: SingleChildScrollView(
-            child: FooterViewWidget(
-              child: NoDataScreen(isEmptyCart: true, title: 'you_have_not_add_to_cart_yet'.tr),
+                        // RESTAURANT UNAVAILABLE NOTICE
+                        if (!isRestaurantOpen && restaurantController.restaurant != null)
+                          _buildRestaurantUnavailableNotice(
+                            context,
+                            restaurantController,
+                            cartController,
+                          ),
+
+                        // ORDER ITEMS SECTION
+                        _buildOrderItemsSection(
+                          context,
+                          cartController,
+                          isRestaurantOpen,
+                        ),
+
+                        const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                        // RECOMMENDED ITEMS
+                        if (!isDesktop)
+                          CartSuggestedItemViewWidget(
+                            cartList: cartController.cartList,
+                          ),
+
+                        const SizedBox(height: 100), // Space for bottom bar
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ============================================================
+                // BOTTOM CHECKOUT BAR
+                // ============================================================
+                CheckoutButtonWidget(
+                  cartController: cartController,
+                  availableList: cartController.availableList,
+                  isRestaurantOpen: isRestaurantOpen,
+                  fromDineIn: widget.fromDineIn,
+                ),
+              ],
             ),
           ),
         );
       });
     });
+  }
+
+  // ==========================================================================
+  // UI SECTION BUILDERS
+  // ==========================================================================
+
+  /// Message to Restaurant Section
+  Widget _buildMessageToRestaurantSection(
+    BuildContext context,
+    CartController cartController,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+      ),
+      child: InkWell(
+        onTap: () => _showMessageDialog(context),
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        child: Row(
+          children: [
+            Icon(
+              CupertinoIcons.chat_bubble_text,
+              color: Theme.of(context).primaryColor,
+              size: 28,
+            ),
+            const SizedBox(width: Dimensions.paddingSizeDefault),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add a message for the restaurant',
+                    style: robotoMedium.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Special requests, allergies, dietary restrictions?',
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).hintColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: Theme.of(context).hintColor,
+              size: 24,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMessageDialog(BuildContext context) {
+    _messageController.clear();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Message to restaurant'),
+        content: TextField(
+          controller: _messageController,
+          maxLines: 4,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'E.g., No onions, extra spicy, allergies...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_messageController.text.isNotEmpty) {
+                Get.snackbar(
+                  'Saved',
+                  'Your message will be included with the order',
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+              }
+              Get.back();
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRestaurantUnavailableNotice(
+    BuildContext context,
+    RestaurantController restaurantController,
+    CartController cartController,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+      ),
+      child: Column(
+        children: [
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'This restaurant is currently unavailable. It will be available at ',
+                  style: robotoRegular.copyWith(color: Theme.of(context).hintColor),
+                ),
+                TextSpan(
+                  text: restaurantController.restaurant!.restaurantOpeningTime == 'closed'
+                      ? 'tomorrow'.tr
+                      : DateConverter.timeStringToTime(
+                          restaurantController.restaurant!.restaurantOpeningTime!),
+                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+          InkWell(
+            onTap: () => cartController.clearCartOnline(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimensions.paddingSizeDefault,
+                vertical: Dimensions.paddingSizeSmall,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                border: Border.all(
+                  width: 1,
+                  color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                ),
+              ),
+              child: cartController.isClearCartLoading
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator())
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.delete_solid,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20,
+                        ),
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        Text(
+                          cartController.cartList.length > 1
+                              ? 'remove_all_from_cart'.tr
+                              : 'remove_from_cart'.tr,
+                          style: robotoMedium.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderItemsSection(
+    BuildContext context,
+    CartController cartController,
+    bool isRestaurantOpen,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Order items',
+                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (isRestaurantOpen && cartController.cartList.isNotEmpty) {
+                    Get.toNamed(
+                      RouteHelper.getRestaurantRoute(
+                        cartController.cartList[0].product!.restaurantId,
+                      ),
+                      arguments: RestaurantScreen(
+                        restaurant: Restaurant(
+                          id: cartController.cartList[0].product!.restaurantId,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  '+ Add more',
+                  style: robotoMedium.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: Dimensions.fontSizeDefault,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+          ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: cartController.cartList.length,
+            itemBuilder: (context, index) {
+              return CartProductWidget(
+                cart: cartController.cartList[index],
+                cartIndex: index,
+                addOns: cartController.addOnsList[index],
+                isAvailable: cartController.availableList[index],
+                isRestaurantOpen: isRestaurantOpen,
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
