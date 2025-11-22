@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/order_item_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_suggested_item_view_widget.dart';
@@ -229,118 +230,89 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   void _showMessageDialog(BuildContext context) {
     _messageController.clear();
 
-    showModalBottomSheet(
+    CustomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(Dimensions.radiusDefault),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Center(
+            child: Text(
+              'Special instructions',
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeExtraLarge,
+              ),
             ),
           ),
-          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
 
-              // Header
-              Center(
-                child: Text(
-                  'Special instructions',
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeExtraLarge,
-                  ),
-                ),
-              ),
+          const SizedBox(height: Dimensions.paddingSizeDefault),
 
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-
-              // Description
-              Text(
-                'Let the kitchen know about allergies, preferences, or how you want your food prepared.',
-                style: robotoRegular.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-
-              const SizedBox(height: Dimensions.paddingSizeLarge),
-
-              // Text input field
-              TextField(
-                controller: _messageController,
-                autofocus: true, // Auto-opens keyboard
-                maxLength: 400,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: 'Type your message here...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  counterStyle: robotoRegular.copyWith(
-                    color: Theme.of(context).hintColor,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: Dimensions.paddingSizeLarge),
-
-              // Done button - Full width
-              CustomButtonWidget(
-                buttonText: 'Done',
-                onPressed: () {
-                  // TODO: Save to CheckoutController session
-                  if (_messageController.text.isNotEmpty) {
-                    Get.snackbar(
-                      'Saved',
-                      'Your message will be included with the order',
-                      snackPosition: SnackPosition.BOTTOM,
-                      duration: const Duration(seconds: 2),
-                    );
-                  }
-                  Get.back();
-                },
-              ),
-            ],
+          // Description
+          Text(
+            'Let the kitchen know about allergies, preferences, or how you want your food prepared.',
+            style: robotoRegular.copyWith(
+              fontSize: Dimensions.fontSizeDefault,
+              color: Theme.of(context).hintColor,
+            ),
           ),
-        ),
+
+          const SizedBox(height: Dimensions.paddingSizeLarge),
+
+          // Text input field
+          TextField(
+            controller: _messageController,
+            autofocus: true, // Auto-opens keyboard
+            maxLength: 400,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Type your message here...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                borderSide: BorderSide(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                borderSide: BorderSide(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                borderSide: BorderSide(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              counterStyle: robotoRegular.copyWith(
+                color: Theme.of(context).hintColor,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: Dimensions.paddingSizeLarge),
+
+          // Done button - Full width
+          CustomButtonWidget(
+            buttonText: 'Done',
+            onPressed: () {
+              // TODO: Save to CheckoutController session
+              if (_messageController.text.isNotEmpty) {
+                Get.snackbar(
+                  'Saved',
+                  'Your message will be included with the order',
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+              }
+              Get.back();
+            },
+          ),
+        ],
       ),
     );
   }
