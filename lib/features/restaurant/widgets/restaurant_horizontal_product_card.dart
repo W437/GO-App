@@ -71,75 +71,123 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
             )
           ],
         ),
-        child: Column(
+        child: Stack(
           children: [
-            // Product Image - fills the top section
-            Expanded(
-              flex: 3,
-              child: SizedBox(
-                width: double.infinity,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(Dimensions.radiusDefault),
-                    topRight: Radius.circular(Dimensions.radiusDefault),
-                  ),
-                  child: BlurhashImageWidget(
-                    imageUrl: product.imageFullUrl ?? '',
-                    blurhash: product.imageBlurhash,
-                    fit: BoxFit.cover,
+            Column(
+              children: [
+                // Product Image - fills the top section
+                Expanded(
+                  flex: 3,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(Dimensions.radiusDefault),
+                        topRight: Radius.circular(Dimensions.radiusDefault),
+                      ),
+                      child: BlurhashImageWidget(
+                        imageUrl: product.imageFullUrl ?? '',
+                        blurhash: product.imageBlurhash,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
 
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                  // Likes & Price Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                      // Likes & Price Row
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(Icons.favorite, color: Colors.orange, size: 14),
-                          const SizedBox(width: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.favorite, color: Colors.orange, size: 14),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${product.likeCount ?? 0}',
+                                style: robotoRegular.copyWith(
+                                  fontSize: Dimensions.fontSizeSmall,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                            ],
+                          ),
                           Text(
-                            '${product.likeCount ?? 0}',
-                            style: robotoRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor,
+                            PriceConverter.convertPrice(discountPrice),
+                            style: robotoBold.copyWith(
+                              fontSize: Dimensions.fontSizeDefault,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 4),
+
+                      // Name
                       Text(
-                        PriceConverter.convertPrice(discountPrice),
-                        style: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeDefault,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
+                        product.name ?? '',
+                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-
-                  // Name
-                  Text(
-                    product.name ?? '',
-                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
+
+            // Cart Quantity Badge - Top Right
+            GetBuilder<CartController>(
+              builder: (cartController) {
+                // Calculate total quantity of this product in cart
+                int totalQuantity = 0;
+                for (var cartItem in cartController.cartList) {
+                  if (cartItem.product?.id == product.id) {
+                    totalQuantity += cartItem.quantity ?? 0;
+                  }
+                }
+
+                if (totalQuantity == 0) return const SizedBox();
+
+                return Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '$totalQuantity',
+                      style: robotoBold.copyWith(
+                        color: Colors.white,
+                        fontSize: Dimensions.fontSizeSmall,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_logged_in_screen.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_summary_card.dart';
@@ -23,47 +24,12 @@ class OrderAgainView extends StatelessWidget {
 
       // Guest user - show login prompt
       if (orderController.historyUnauthorized && isGuest) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.lock_outline,
-                  size: 64,
-                  color: Theme.of(context).disabledColor,
-                ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                Text(
-                  'Login to see your orders',
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeLarge,
-                    color: Theme.of(context).textTheme.bodyLarge!.color,
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-                Text(
-                  'Sign in to view your order history',
-                  style: robotoRegular.copyWith(
-                    color: Theme.of(context).disabledColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-                SizedBox(
-                  width: 200,
-                  child: CustomButtonWidget(
-                    buttonText: 'Login',
-                    onPressed: () {
-                      Get.back(); // Close cart modal
-                      Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.main));
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+        return NotLoggedInScreen(
+          callBack: (success) {
+            if (success) {
+              orderController.getOrderList();
+            }
+          },
         );
       }
 
