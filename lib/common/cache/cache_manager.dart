@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/cache/cache_entry.dart';
 import 'package:godelivery_user/common/cache/cache_key.dart';
@@ -88,33 +89,44 @@ class CacheManager {
     return null;
   }
 
-  Future<void> set<T>(CacheKey key, T data, {Duration? ttl}) async {
+  Future<void> set<T>(CacheKey key, T data, {Duration? ttl, String Function(T)? serializer}) async {
     final duration = ttl ?? CacheConfig.getTTL(key.endpoint);
     final String id = key.id;
 
-    // Save to Memory
+    // Save to Memory (always succeeds)
     if (CacheConfig.enableMemoryCache) {
-      _memoryCache.set(id, data, duration);
+      try {
+        _memoryCache.set(id, data, duration);
+      } catch (e) {
+        print('⚠️ [CACHE MANAGER] Memory cache set failed for $id: $e');
+      }
     }
 
-    // Save to Disk
+    // Save to Disk (may fail, don't let it crash the app)
     if (CacheConfig.enableDiskCache) {
-      // We need to serialize T to String for Disk
-      // Assuming T is String or has toJson, or we rely on caller to pass String
-      // For this phase, let's assume we handle String or basic types.
-      // Real implementation might need a Serializer interface.
-      String serializedData;
-      if (data is String) {
-        serializedData = data;
-      } else {
-        // Fallback or error. For now toString() but that's risky for objects.
-        // Ideally we expect the data to be already serialized or we use jsonEncode
-        // But we don't know if T is encodable.
-        // Let's assume for now the repositories will pass String (json) or we add a serializer param.
-        serializedData = data.toString(); 
+      try {
+        // We need to serialize T to String for Disk
+        String serializedData;
+        if (data is String) {
+          serializedData = data;
+        } else if (serializer != null) {
+          // Use provided serializer
+          serializedData = serializer(data);
+        } else {
+          // Try JSON encoding for Lists and Maps
+          try {
+            serializedData = jsonEncode(data);
+          } catch (e) {
+            print('⚠️ [CACHE MANAGER] Cannot JSON encode data for $id, skipping disk cache');
+            return; // Skip disk cache if we can't serialize
+          }
+        }
+
+        await _diskCache.set(id, serializedData, duration);
+      } catch (e) {
+        print('⚠️ [CACHE MANAGER] Disk cache set failed for $id: $e');
+        // Continue even if disk cache fails - data is already in memory
       }
-      
-      await _diskCache.set(id, serializedData, duration);
     }
   }
 

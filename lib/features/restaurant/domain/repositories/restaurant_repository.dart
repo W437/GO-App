@@ -114,17 +114,19 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+      print('🏪 [RESTAURANT REPO] Cache invalidated, fetching fresh restaurant list');
+    }
+
     return await cacheManager.get<RestaurantModel>(
       cacheKey,
       fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.restaurantUri}/all?offset=$offset&limit=${fromMap ? 20 : 12}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
         if (response.statusCode == 200) {
           final model = RestaurantModel.fromJson(response.body);
-          // Don't cache empty responses
-          if (model.restaurants == null || model.restaurants!.isEmpty) {
-            print('⚠️ [RESTAURANT REPO] API returned empty restaurants - not caching');
-            return null;
-          }
+          print('🏪 [RESTAURANT REPO] API returned ${model.restaurants?.length ?? 0} restaurants');
           return model;
         }
         return null;
@@ -155,6 +157,11 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
+
     return await cacheManager.get<List<Restaurant>>(
       cacheKey,
       fetcher: () async {
@@ -164,12 +171,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
           response.body.forEach((restaurant) {
             latestRestaurantList.add(Restaurant.fromJson(restaurant));
           });
-          // Don't cache empty responses
-          if (latestRestaurantList.isEmpty) {
-            print('⚠️ [RESTAURANT REPO] API returned empty latest restaurants - not caching');
-            return null;
-          }
-          return latestRestaurantList;
+          return latestRestaurantList.isNotEmpty ? latestRestaurantList : null;
         }
         return null;
       },
@@ -191,6 +193,11 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
+
     return await cacheManager.get<List<Restaurant>>(
       cacheKey,
       fetcher: () async {
@@ -200,12 +207,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
           response.body.forEach((restaurant) {
             popularRestaurantList.add(Restaurant.fromJson(restaurant));
           });
-          // Don't cache empty responses
-          if (popularRestaurantList.isEmpty) {
-            print('⚠️ [RESTAURANT REPO] API returned empty popular restaurants - not caching');
-            return null;
-          }
-          return popularRestaurantList;
+          return popularRestaurantList.isNotEmpty ? popularRestaurantList : null;
         }
         return null;
       },
@@ -226,6 +228,11 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       params: {'type': type},
       schemaVersion: 1,
     );
+
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
 
     return await cacheManager.get<List<Restaurant>>(
       cacheKey,
@@ -256,6 +263,11 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       endpoint: AppConstants.orderAgainUri,
       schemaVersion: 1,
     );
+
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
 
     return await cacheManager.get<List<Restaurant>>(
       cacheKey,

@@ -66,6 +66,12 @@ class CampaignRepository implements CampaignRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+      print('🍔 [CAMPAIGN REPO] Cache invalidated, fetching fresh data');
+    }
+
     return await cacheManager.get<List<Product>>(
       cacheKey,
       fetcher: () async {
@@ -73,7 +79,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
         print('🍔 API URL: ${AppConstants.itemCampaignUri}');
         Response response = await apiClient.getData(AppConstants.itemCampaignUri);
         print('🍔 Item campaign response status: ${response.statusCode}');
-        
+
         if (response.statusCode == 200) {
           List<Product> itemCampaignList = [];
           if (response.body != null && response.body is List) {

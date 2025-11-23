@@ -44,20 +44,29 @@ class DiskCacheService {
     final size = data.length; // Approximate size in bytes for string
     final expiresAt = DateTime.now().add(ttl);
 
-    await _db.into(_db.cacheResponse).insertOnConflictUpdate(
-      CacheResponseCompanion(
-        cacheKey: Value(key),
-        endPoint: Value(key), // Use key as endpoint for legacy compatibility/uniqueness if needed
-        response: Value(data),
-        header: const Value(''), // Default empty header
-        metadata: Value(metadata),
-        expiresAt: Value(expiresAt),
-        lastAccessedAt: Value(DateTime.now()),
-        sizeBytes: Value(size),
-        schemaVersion: const Value(1),
-        createdAt: Value(DateTime.now()),
-      ),
-    );
+    try {
+      // Delete existing entry first to avoid UNIQUE constraint conflicts
+      // (table has both endPoint and cacheKey as UNIQUE)
+      await invalidate(key);
+
+      await _db.into(_db.cacheResponse).insert(
+        CacheResponseCompanion(
+          cacheKey: Value(key),
+          endPoint: Value(key), // Use key as endpoint for legacy compatibility/uniqueness if needed
+          response: Value(data),
+          header: const Value(''), // Default empty header
+          metadata: Value(metadata),
+          expiresAt: Value(expiresAt),
+          lastAccessedAt: Value(DateTime.now()),
+          sizeBytes: Value(size),
+          schemaVersion: const Value(1),
+          createdAt: Value(DateTime.now()),
+        ),
+      );
+    } catch (e) {
+      // Log error but don't crash - cache failures shouldn't break the app
+      print('⚠️ [DISK CACHE] Failed to cache $key: $e');
+    }
 
     // Check size limit and evict if needed (simple check, can be optimized)
     // Ideally run this periodically or on background, not every set

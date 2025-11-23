@@ -26,6 +26,13 @@ class StoryRepository implements StoryRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+      print('📖 [STORY REPO] Cache invalidated, fetching fresh data');
+    }
+
+    // Use cache-first strategy (or fetch fresh if cache was just invalidated)
     return await cacheManager.get<List<StoryCollectionModel>>(
       cacheKey,
       fetcher: () async {
@@ -53,9 +60,16 @@ class StoryRepository implements StoryRepositoryInterface {
 
       deserializer: (json) {
         List<StoryCollectionModel> list = [];
-        jsonDecode(json).forEach((data) {
-          list.add(StoryCollectionModel.fromJson(data));
-        });
+        final decoded = jsonDecode(json);
+        if (decoded is Map && decoded['data'] != null) {
+          (decoded['data'] as List).forEach((data) {
+            list.add(StoryCollectionModel.fromJson(data));
+          });
+        } else if (decoded is List) {
+          decoded.forEach((data) {
+            list.add(StoryCollectionModel.fromJson(data));
+          });
+        }
         return list;
       },
     );

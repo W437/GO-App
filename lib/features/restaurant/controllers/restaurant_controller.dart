@@ -212,14 +212,25 @@ class RestaurantController extends GetxController implements GetxService {
 
   _prepareRestaurantList(RestaurantModel? restaurantModel, int offset) {
     if (restaurantModel != null) {
+      print('🏪 [RESTAURANT CONTROLLER] Preparing restaurant list - offset: $offset, total: ${restaurantModel.totalSize}, count: ${restaurantModel.restaurants?.length ?? 0}');
       if (offset == 0) {
         _restaurantModel = restaurantModel;
-      }else {
-        _restaurantModel!.totalSize = restaurantModel.totalSize;
-        _restaurantModel!.offset = restaurantModel.offset;
-        _restaurantModel!.restaurants!.addAll(restaurantModel.restaurants!);
+        print('✅ [RESTAURANT CONTROLLER] Restaurant model set: ${_restaurantModel!.restaurants!.length} restaurants');
+      } else {
+        // Check if initial model exists before appending pagination data
+        if (_restaurantModel != null) {
+          _restaurantModel!.totalSize = restaurantModel.totalSize;
+          _restaurantModel!.offset = restaurantModel.offset;
+          _restaurantModel!.restaurants!.addAll(restaurantModel.restaurants!);
+          print('✅ [RESTAURANT CONTROLLER] Appended ${restaurantModel.restaurants!.length} restaurants, total: ${_restaurantModel!.restaurants!.length}');
+        } else {
+          print('⚠️ [RESTAURANT CONTROLLER] Cannot append offset $offset - initial model not loaded yet, setting as initial');
+          _restaurantModel = restaurantModel;
+        }
       }
       update();
+    } else {
+      print('❌ [RESTAURANT CONTROLLER] Restaurant model is NULL!');
     }
   }
 
@@ -396,8 +407,17 @@ class RestaurantController extends GetxController implements GetxService {
       if (productModel != null) {
         if (offset == 0) {
           _restaurantProducts = [];
+          _restaurantProducts!.addAll(productModel.products!);
+        } else {
+          // Ensure initial products list exists before appending
+          if (_restaurantProducts != null) {
+            _restaurantProducts!.addAll(productModel.products!);
+          } else {
+            print('⚠️ [RESTAURANT CONTROLLER] Cannot append offset $offset products - initial products not loaded yet, setting as initial');
+            _restaurantProducts = [];
+            _restaurantProducts!.addAll(productModel.products!);
+          }
         }
-        _restaurantProducts!.addAll(productModel.products!);
         _foodPageSize = productModel.totalSize;
         _foodPageOffset = productModel.offset;
         _foodPaginate = false;

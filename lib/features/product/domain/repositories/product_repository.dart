@@ -44,6 +44,11 @@ class ProductRepository implements ProductRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
+
     return await cacheManager.get<List<Product>>(
       cacheKey,
       fetcher: () async {

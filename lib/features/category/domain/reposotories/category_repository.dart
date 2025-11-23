@@ -40,6 +40,12 @@ class CategoryRepository implements CategoryRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
+
+    // Use cache-first strategy (or fetch fresh if cache was just invalidated)
     return await cacheManager.get<List<CategoryModel>>(
       cacheKey,
       fetcher: () async {
@@ -49,12 +55,7 @@ class CategoryRepository implements CategoryRepositoryInterface {
           response.body.forEach((category) {
             categoryList.add(CategoryModel.fromJson(category));
           });
-          // Don't cache empty responses
-          if (categoryList.isEmpty) {
-            print('⚠️ [CATEGORY REPO] API returned empty categories - not caching');
-            return null;
-          }
-          return categoryList;
+          return categoryList.isNotEmpty ? categoryList : null;
         }
         return null;
       },

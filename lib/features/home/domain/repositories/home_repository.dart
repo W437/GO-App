@@ -27,6 +27,12 @@ class HomeRepository implements HomeRepositoryInterface {
       schemaVersion: 1,
     );
 
+    // If source is CLIENT, invalidate cache first to force fresh fetch
+    if (source == DataSourceEnum.client) {
+      await cacheManager.invalidate(cacheKey);
+    }
+
+    // Use cache-first strategy (or fetch fresh if cache was just invalidated)
     return await cacheManager.get<BannerModel>(
       cacheKey,
       fetcher: () async {
