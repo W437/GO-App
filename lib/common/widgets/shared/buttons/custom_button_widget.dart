@@ -52,8 +52,56 @@ class CustomButtonWidget extends StatefulWidget {
   State<CustomButtonWidget> createState() => _CustomButtonWidgetState();
 }
 
-class _CustomButtonWidgetState extends State<CustomButtonWidget> {
-  bool _isPressed = false;
+class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProviderStateMixin {
+  late AnimationController _pressController;
+  late Animation<double> _pressAnimation;
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Press animation - very subtle scale down
+    _pressController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _pressAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(
+      parent: _pressController,
+      curve: Curves.easeOut,
+    ));
+
+    // Bounce animation - minimal spring back
+    _bounceController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _bounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.02).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 0.995).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.995, end: 1.0).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 30,
+      ),
+    ]).animate(_bounceController);
+  }
+
+  @override
+  void dispose() {
+    _pressController.dispose();
+    _bounceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +110,25 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> {
       final size = widget.width ?? widget.height ?? 44.0;
       return Padding(
         padding: widget.margin ?? EdgeInsets.zero,
-        child: GestureDetector(
-          onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => setState(() => _isPressed = true) : null,
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTapCancel: () => setState(() => _isPressed = false),
-          onTap: widget.isLoading ? null : widget.onPressed as void Function()?,
-          child: AnimatedOpacity(
-            opacity: _isPressed ? 0.6 : 1.0,
-            duration: const Duration(milliseconds: 100),
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_pressAnimation, _bounceAnimation]),
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _pressAnimation.value * _bounceAnimation.value,
+              child: child,
+            );
+          },
+          child: GestureDetector(
+            onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => _pressController.forward() : null,
+            onTapUp: (_) => _pressController.reverse(),
+            onTapCancel: () => _pressController.reverse(),
+            onTap: widget.isLoading ? null : () {
+              // Only start bounce if not already animating (prevent double-click reset)
+              if (!_bounceController.isAnimating) {
+                _bounceController.forward(from: 0.0);
+              }
+              widget.onPressed?.call();
+            },
             child: Container(
               width: size,
               height: size,
@@ -97,18 +156,32 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> {
       );
     }
 
-    // For regular buttons (existing behavior)
-    return Center(child: SizedBox(width: widget.width ?? Dimensions.webMaxWidth, child: Padding(
-      padding: widget.margin == null ? const EdgeInsets.all(0) : widget.margin!,
-      child: GestureDetector(
-        onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => setState(() => _isPressed = true) : null,
-        onTapUp: (_) => setState(() => _isPressed = false),
-        onTapCancel: () => setState(() => _isPressed = false),
-        onTap: widget.isLoading ? null : widget.onPressed as void Function()?,
-        child: AnimatedOpacity(
-          opacity: _isPressed ? 0.6 : 1.0,
-          duration: const Duration(milliseconds: 100),
-          child: Container(
+    // For regular buttons
+    return Center(
+      child: SizedBox(
+        width: widget.width ?? Dimensions.webMaxWidth,
+        child: Padding(
+          padding: widget.margin == null ? const EdgeInsets.all(0) : widget.margin!,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([_pressAnimation, _bounceAnimation]),
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _pressAnimation.value * _bounceAnimation.value,
+                child: child,
+              );
+            },
+            child: GestureDetector(
+              onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => _pressController.forward() : null,
+              onTapUp: (_) => _pressController.reverse(),
+              onTapCancel: () => _pressController.reverse(),
+              onTap: widget.isLoading ? null : () {
+                // Only start bounce if not already animating (prevent double-click reset)
+                if (!_bounceController.isAnimating) {
+                  _bounceController.forward(from: 0.0);
+                }
+                widget.onPressed?.call();
+              },
+              child: Container(
             decoration: BoxDecoration(
               color: widget.onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : widget.transparent
                   ? Colors.transparent : widget.color ?? Theme.of(context).primaryColor,
@@ -149,6 +222,8 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> {
           ),
         ),
       ),
-    )));
+    ),
+    ),
+    );
   }
 }

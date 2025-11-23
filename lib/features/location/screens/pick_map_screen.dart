@@ -45,16 +45,42 @@ class PickMapScreen extends StatefulWidget {
   State<PickMapScreen> createState() => _PickMapScreenState();
 }
 
-class _PickMapScreenState extends State<PickMapScreen> {
+class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProviderStateMixin {
   GoogleMapController? _mapController;
   CameraPosition? _cameraPosition;
   late LatLng _initialPosition;
   bool _showLocationPermissionOverlay = false;
   int? _currentZoneId;
+  late AnimationController _pinBounceController;
+  late Animation<double> _pinBounceAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize pin bounce animation
+    _pinBounceController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _pinBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.15)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.15, end: 0.95)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.95, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 30,
+      ),
+    ]).animate(_pinBounceController);
 
     Get.find<LocationController>().makeLoadingOff();
 
@@ -75,6 +101,12 @@ class _PickMapScreenState extends State<PickMapScreen> {
       double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '32.997473'),
       double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '35.144028'),
     );
+  }
+
+  @override
+  void dispose() {
+    _pinBounceController.dispose();
+    super.dispose();
   }
 
   @override
@@ -151,6 +183,10 @@ class _PickMapScreenState extends State<PickMapScreen> {
                               setState(() {
                                 _currentZoneId = newZoneId;
                               });
+                              // Animate pin when entering a valid zone
+                              if (newZoneId != null) {
+                                _pinBounceController.forward(from: 0.0);
+                              }
                             }
                           }
                         },
@@ -219,19 +255,28 @@ class _PickMapScreenState extends State<PickMapScreen> {
                       ),
                       IgnorePointer(
                         child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 36.0),
-                            child: Icon(
-                              Icons.location_on,
-                              size: 48,
-                              color: Theme.of(context).colorScheme.primary,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                          child: AnimatedBuilder(
+                            animation: _pinBounceAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _pinBounceAnimation.value,
+                                child: child,
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 36.0),
+                              child: Icon(
+                                Icons.location_on,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.primary,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -552,21 +597,22 @@ class _PickMapScreenState extends State<PickMapScreen> {
       constraints: const BoxConstraints(
         maxWidth: 320,
       ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Dimensions.paddingSizeDefault,
+        vertical: Dimensions.paddingSizeSmall,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(100),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.location_on,
-            size: 20,
+            size: 18,
             color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           const SizedBox(width: Dimensions.paddingSizeExtraSmall),
           Flexible(
@@ -575,16 +621,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
               style: robotoMedium.copyWith(
                 fontSize: Dimensions.fontSizeDefault,
                 color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),

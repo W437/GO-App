@@ -105,13 +105,23 @@ class TopSectionWidget extends StatelessWidget {
 
             isCashOnDeliveryActive && restaurantSubscriptionActive && isLoggedIn ? Container(
               width: context.width,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+              margin: EdgeInsets.only(
+                left: isDesktop ? 0 : 0,
+                right: isDesktop ? 0 : 0,
+                bottom: Dimensions.paddingSizeLarge,
               ),
-              margin: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : Dimensions.fontSizeDefault),
-              padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
+              padding: EdgeInsets.symmetric(
+                vertical: Dimensions.paddingSizeLarge,
+                horizontal: isDesktop ? Dimensions.paddingSizeLarge : 0,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+              ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('order_type'.tr, style: robotoMedium),
                 const SizedBox(height: Dimensions.paddingSizeExtraSmall),
@@ -161,17 +171,32 @@ class TopSectionWidget extends StatelessWidget {
 
             checkoutController.restaurant != null ? Container(
               width: context.width,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+              margin: EdgeInsets.only(
+                left: isDesktop ? 0 : 0,
+                right: isDesktop ? 0 : 0,
+                bottom: Dimensions.paddingSizeLarge,
               ),
-              margin: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : Dimensions.fontSizeDefault),
-              padding: EdgeInsets.symmetric(horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeSmall),
+              padding: EdgeInsets.symmetric(
+                vertical: Dimensions.paddingSizeLarge,
+                horizontal: isDesktop ? Dimensions.paddingSizeLarge : 0,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+              ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                Text('delivery_option'.tr, style: robotoMedium),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
+                Text(
+                  'delivery_option'.tr,
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeLarge,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeLarge),
 
                 SingleChildScrollView(controller: deliveryOptionScrollController, scrollDirection: Axis.horizontal, child: Row(children: [
 

@@ -390,14 +390,19 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 WebScreenTitleWidget(title: 'checkout'.tr),
 
-                Expanded(child: SingleChildScrollView(
-                  controller: scrollController,
-                  physics: const BouncingScrollPhysics(),
-                  child: FooterViewWidget(
-                    child: Center(
-                      child: SizedBox(
-                        width: Dimensions.webMaxWidth,
-                        child: ResponsiveHelper.isDesktop(context) ? Padding(
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeDefault,
+                      vertical: Dimensions.paddingSizeDefault,
+                    ),
+                    child: FooterViewWidget(
+                      child: Center(
+                        child: SizedBox(
+                          width: Dimensions.webMaxWidth,
+                          child: ResponsiveHelper.isDesktop(context) ? Padding(
                           padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge),
                           child: Row(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
 
@@ -516,7 +521,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               ],
             );
           });
-        }) : const CheckoutScreenShimmerView();
+        }) : const Center(child: CircularProgressIndicator());
       }) : NotLoggedInScreen(callBack: (value) {
         initCall();
         setState(() {});
