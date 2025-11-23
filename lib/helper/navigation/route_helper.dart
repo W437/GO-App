@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/images/image_viewer_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_found_widget.dart';
@@ -439,12 +440,17 @@ class RouteHelper {
         );
       },
       customTransition: _ThreeDGetTransition(),
-      transitionDuration: const Duration(milliseconds: 450),
+      transitionDuration: const Duration(milliseconds: 280),
       opaque: false,
     ),
-    GetPage(name: restaurantDetails, page: () => getRoute(RestaurantDetailsScreen(
-      restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
-    ))),
+    GetPage(
+      name: restaurantDetails,
+      page: () => getRoute(RestaurantDetailsScreen(
+        restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
+      )),
+      customTransition: _ThreeDGetTransition(),
+      transitionDuration: const Duration(milliseconds: 280),
+    ),
     GetPage(name: orderDetails, page: () {
       return getRoute(Get.arguments ?? OrderDetailsScreen(
         orderId: int.parse(Get.parameters['id'] ?? '0'),
@@ -684,20 +690,24 @@ class _ThreeDGetTransition extends CustomTransition {
         secondaryAnimation.value != 0.0;
 
     if (isBackground) {
-      // Parallax/scale for the route underneath.
+      // Parallax/blur/scale for the route underneath.
       return AnimatedBuilder(
         animation: secondaryAnimation,
         builder: (context, _) {
           final size = MediaQuery.of(context).size;
-          final double t = Curves.easeOut.transform(secondaryAnimation.value);
-          final double dx = -size.width * 0.12 * t;
-          final double scale = 1.0 - 0.08 * t;
+          final double t = Curves.easeInOutSine.transform(secondaryAnimation.value);
+          final double dx = -size.width * 0.20 * t; // 20% shift
+          final double scale = 1.0 - 0.1 * t; // Scale down from 1.0 to 0.9
+          final double blur = 4.0 * t; // Blur from 0 to 4
           return Transform.translate(
             offset: Offset(dx, 0),
             child: Transform.scale(
               scale: scale,
               alignment: Alignment.center,
-              child: child,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                child: child,
+              ),
             ),
           );
         },
@@ -735,9 +745,11 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
     _bounceAnimation = Tween<double>(begin: 0, end: 0).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
     )..addListener(() {
-        setState(() {
-          _dragOffset = _bounceAnimation.value;
-        });
+        if (mounted) {
+          setState(() {
+            _dragOffset = _bounceAnimation.value;
+          });
+        }
       });
   }
 
@@ -758,9 +770,11 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (!_isDragging) return;
-    setState(() {
-      _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, double.infinity);
-    });
+    if (mounted) {
+      setState(() {
+        _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, double.infinity);
+      });
+    }
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -780,7 +794,10 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
 
   @override
   Widget build(BuildContext context) {
-    final double curvedValue = Curves.easeOutCubic.transform(widget.animation.value);
+    // Linear (consistent speed) for closing, smooth for opening
+    final double curvedValue = widget.animation.status == AnimationStatus.reverse
+        ? Curves.linear.transform(widget.animation.value)
+        : Curves.easeOutCubic.transform(widget.animation.value);
 
     // Parameters for 3D effect.
     const double startTranslateXRatio = 1.1;

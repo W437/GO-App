@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/separators/muted_separator_widget.dart';
+import 'package:godelivery_user/features/restaurant/widgets/restaurant_location_map_widget.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RestaurantDetailsScreen extends StatelessWidget {
   final Restaurant restaurant;
@@ -48,13 +52,13 @@ class RestaurantDetailsScreen extends StatelessWidget {
               _buildDescriptionSection(context),
             const SizedBox(height: Dimensions.paddingSizeLarge),
 
+            // Map Section
+            RestaurantLocationMapWidget(restaurant: restaurant),
+            const SizedBox(height: Dimensions.paddingSizeLarge),
+
             // Opening Hours Section
             if (restaurant.schedules != null && restaurant.schedules!.isNotEmpty)
               _buildOpeningHoursSection(context),
-            const SizedBox(height: Dimensions.paddingSizeLarge),
-
-            // Location Section
-            _buildLocationSection(context),
             const SizedBox(height: Dimensions.paddingSizeLarge),
 
             // Contact & Info Section
@@ -63,6 +67,9 @@ class RestaurantDetailsScreen extends StatelessWidget {
 
             // Reviews Section
             _buildReviewsSection(context),
+
+            // Bottom spacing for visibility
+            const SizedBox(height: Dimensions.paddingSizeExtraLarge * 2),
           ],
         ),
       ),
@@ -110,6 +117,26 @@ class RestaurantDetailsScreen extends StatelessWidget {
               style: robotoRegular.copyWith(
                 fontSize: Dimensions.fontSizeDefault,
                 color: Theme.of(context).hintColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+
+        // Address
+        Row(
+          children: [
+            Icon(Icons.location_on, color: Theme.of(context).hintColor, size: 18),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                restaurant.address ?? '',
+                style: robotoRegular.copyWith(
+                  fontSize: Dimensions.fontSizeDefault,
+                  color: Theme.of(context).hintColor,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -191,89 +218,55 @@ class RestaurantDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'location'.tr,
-          style: robotoBold.copyWith(
-            fontSize: Dimensions.fontSizeExtraLarge,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
-        ),
-        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-        // Address
-        Text(
-          restaurant.address ?? '',
-          style: robotoRegular.copyWith(
-            fontSize: Dimensions.fontSizeDefault,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
-        ),
-        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-        // Map placeholder
-        Container(
-          height: 200,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          ),
-          child: Center(
-            child: Icon(
-              Icons.map,
-              size: 48,
-              color: Theme.of(context).hintColor,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildContactInfoSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'contact_info'.tr,
-          style: robotoBold.copyWith(
-            fontSize: Dimensions.fontSizeExtraLarge,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
-        ),
-        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-        // Phone
-        if (restaurant.phone != null && restaurant.phone!.isNotEmpty) ...[
-          Row(
-            children: [
-              Icon(Icons.phone, color: Theme.of(context).primaryColor, size: 20),
-              const SizedBox(width: Dimensions.paddingSizeSmall),
-              Text(
-                restaurant.phone ?? '',
-                style: robotoRegular.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Dimensions.paddingSizeDefault),
-        ],
-
-        // Website (placeholder)
+        // Buttons Row
         Row(
           children: [
-            Icon(Icons.language, color: Theme.of(context).primaryColor, size: 20),
-            const SizedBox(width: Dimensions.paddingSizeSmall),
-            Text(
-              'the${restaurant.name?.toLowerCase().replaceAll(' ', '')}.com',
-              style: robotoRegular.copyWith(
-                fontSize: Dimensions.fontSizeDefault,
-                color: Theme.of(context).primaryColor,
+            // Phone Button
+            if (restaurant.phone != null && restaurant.phone!.isNotEmpty) ...[
+              Expanded(
+                child: CustomButtonWidget(
+                  buttonText: 'Call',
+                  icon: Icons.phone,
+                  radius: Dimensions.radiusDefault,
+                  height: 50,
+                  expand: false,
+                  onPressed: () async {
+                    final Uri phoneUri = Uri.parse('tel:${restaurant.phone}');
+                    if (await canLaunchUrl(phoneUri)) {
+                      await launchUrl(phoneUri);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: Dimensions.paddingSizeSmall),
+            ],
+
+            // Website Button
+            Expanded(
+              child: CustomButtonWidget(
+                buttonText: 'VISIT SITE',
+                icon: Icons.language,
+                radius: Dimensions.radiusDefault,
+                height: 50,
+                expand: false,
+                textColor: Theme.of(context).primaryColor,
+                iconColor: Theme.of(context).primaryColor,
+                transparent: true,
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 1.5,
+                ),
+                onPressed: () async {
+                  final String websiteUrl = 'https://the${restaurant.name?.toLowerCase().replaceAll(' ', '')}.com';
+                  final Uri uri = Uri.parse(websiteUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
               ),
             ),
           ],
@@ -313,79 +306,73 @@ class RestaurantDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildReviewsSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-      ),
-      child: Column(
-        children: [
-          // Reviews header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'reviews'.tr,
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeExtraLarge,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              Row(
+    return Column(
+      children: [
+        // Separator line
+        const MutedSeparatorWidget(),
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+
+        // Reviews content
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Left side: Title and rating
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.star, color: Colors.orange, size: 20),
-                  const SizedBox(width: 4),
                   Text(
-                    '${restaurant.avgRating ?? 0}',
+                    'reviews'.tr,
                     style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
+                      fontSize: Dimensions.fontSizeExtraLarge,
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
-                  Text(
-                    ' (${restaurant.ratingCount ?? 0})',
-                    style: robotoRegular.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
-                      color: Theme.of(context).hintColor,
-                    ),
+                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.orange, size: 20),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${restaurant.avgRating ?? 0}',
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      Text(
+                        ' (${restaurant.ratingCount ?? 0})',
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeSmall,
+                          color: Theme.of(context).hintColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: Dimensions.paddingSizeDefault),
-
-          // See All Reviews button
-          InkWell(
-            onTap: () {
-              Get.toNamed(RouteHelper.getRestaurantReviewRoute(
-                restaurant.id,
-                restaurant.name,
-                restaurant,
-              ));
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: Dimensions.paddingSizeDefault,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-              ),
-              child: Center(
-                child: Text(
-                  'see_all_reviews'.tr,
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeLarge,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: Dimensions.paddingSizeDefault),
+
+            // Right side: Button
+            CustomButtonWidget(
+              buttonText: 'See All',
+              radius: Dimensions.radiusDefault,
+              height: 50,
+              width: 120,
+              expand: false,
+              fontSize: Dimensions.fontSizeDefault,
+              onPressed: () {
+                Get.toNamed(RouteHelper.getRestaurantReviewRoute(
+                  restaurant.id,
+                  restaurant.name,
+                  restaurant,
+                ));
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 

@@ -57,16 +57,48 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
   JustTheController tooTipController = JustTheController();
 
   final ScrollController scrollController = ScrollController();
-  
+
   Product? product;
+  double _scrollOffset = 0.0;
 
   @override
   void initState() {
     super.initState();
 
+    scrollController.addListener(_onScroll);
     _initCall();
   }
-  
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = scrollController.offset;
+    });
+  }
+
+  double _calculateTopPosition() {
+    const double initialTop = 260.0;
+    const double minTop = 100.0; // Maximum slide up position
+    const double scrollThreshold = 50.0; // Start sliding after scrolling 50 pixels (20% threshold)
+
+    if (_scrollOffset < scrollThreshold) {
+      return initialTop;
+    }
+
+    // Calculate slide amount after threshold
+    double slideAmount = (_scrollOffset - scrollThreshold) * 0.5; // Slide at 50% of scroll speed
+    double newTop = initialTop - slideAmount;
+
+    // Clamp between minTop and initialTop
+    return newTop.clamp(minTop, initialTop);
+  }
+
   Future<void> _initCall() async {
     if(widget.fromReview! || widget.inRestaurantPage) {
       // Use the product data directly without fetching
@@ -236,7 +268,7 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
 
             // 3. Scrollable Content
             Positioned.fill(
-              top: 260, // Overlap start
+              top: _calculateTopPosition(), // Dynamic position based on scroll
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
@@ -375,8 +407,16 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
               child: Container(
                 padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -5))],
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.0),
+                      Colors.white.withValues(alpha: 0.8),
+                      Colors.white,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
                 ),
                 child: SafeArea(
                   child: Row(

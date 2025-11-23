@@ -10,8 +10,10 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/restaurant/widgets/order_details_bottom_sheet.dart';
+import 'package:godelivery_user/features/restaurant/widgets/order_together_sheet.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 
 class RestaurantDetailsSectionWidget extends StatelessWidget {
   final Restaurant restaurant;
@@ -156,15 +158,28 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: Dimensions.paddingSizeSmall),
-                      
+
                       // Group Order Button
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      InkWell(
+                        onTap: () {
+                          CustomSheet.show(
+                            context: context,
+                            child: OrderTogetherSheet(restaurant: restaurant),
+                            showHandle: true,
+                            padding: EdgeInsets.zero,
+                            enableDrag: true,
+                            isDismissible: true,
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                          ),
+                          child: Icon(Icons.group_add_outlined, color: Theme.of(context).primaryColor, size: 24),
                         ),
-                        child: Icon(Icons.group_add_outlined, color: Theme.of(context).primaryColor, size: 24),
                       ),
                       const SizedBox(width: Dimensions.paddingSizeSmall),
 

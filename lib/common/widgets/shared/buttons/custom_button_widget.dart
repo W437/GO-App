@@ -138,7 +138,7 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
                 color: widget.onPressed == null
                   ? Theme.of(context).disabledColor.withValues(alpha: 0.6)
                   : widget.transparent
-                    ? Colors.transparent
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.08)
                     : widget.color ?? Theme.of(context).primaryColor,
                 shape: BoxShape.circle,
                 border: widget.border,
@@ -173,7 +173,7 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
         width: widget.expand ? double.infinity : widget.width,
         decoration: BoxDecoration(
           color: widget.onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : widget.transparent
-              ? Colors.transparent : widget.color ?? Theme.of(context).primaryColor,
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.08) : widget.color ?? Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(widget.radius),
           border: widget.border,
         ),
