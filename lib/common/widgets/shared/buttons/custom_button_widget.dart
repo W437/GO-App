@@ -227,15 +227,25 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
       child: animatedButton,
     );
 
-    if(widget.expand) {
-      padded = SizedBox(
-        width: double.infinity,
-        child: padded,
+    if (widget.expand) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          // Guarantee a finite width even when parent gives unbounded constraints (e.g. dialogs/sheets).
+          final double resolvedWidth = constraints.hasBoundedWidth && constraints.maxWidth < double.infinity
+              ? constraints.maxWidth
+              : MediaQuery.of(context).size.width;
+          return SizedBox(
+            width: resolvedWidth,
+            child: padded,
+          );
+        },
       );
-    } else if(widget.width != null) {
+    }
+
+    if (widget.width != null) {
       padded = SizedBox(width: widget.width, child: padded);
     }
 
-    return widget.expand ? Center(child: padded) : padded;
+    return padded;
   }
 }

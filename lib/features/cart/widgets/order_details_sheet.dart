@@ -56,89 +56,70 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
 
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          body: Stack(
+          body: Column(
             children: [
-              Positioned.fill(
-                child: Column(
-                  children: [
-                    // ============================================================
-                    // CONTENT (Header removed - now handled by CustomFullSheetNavigator)
-                    // ============================================================
-                    Expanded(
-                      child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // MESSAGE TO RESTAURANT SECTION
-                            _buildMessageToRestaurantSection(context, cartController),
+              // ============================================================
+              // CONTENT (Header removed - now handled by CustomFullSheetNavigator)
+              // ============================================================
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // MESSAGE TO RESTAURANT SECTION
+                        _buildMessageToRestaurantSection(context, cartController),
 
-                            const SizedBox(height: Dimensions.paddingSizeDefault),
+                        const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                            // RESTAURANT UNAVAILABLE NOTICE
-                            if (!isRestaurantOpen && restaurantController.restaurant != null)
-                              _buildRestaurantUnavailableNotice(
-                                context,
-                                restaurantController,
-                                cartController,
-                              ),
+                        // RESTAURANT UNAVAILABLE NOTICE
+                        if (!isRestaurantOpen && restaurantController.restaurant != null)
+                          _buildRestaurantUnavailableNotice(
+                            context,
+                            restaurantController,
+                            cartController,
+                          ),
 
-                            // Spacing before Order Items
-                            if (!isRestaurantOpen && restaurantController.restaurant != null)
-                              const SizedBox(height: Dimensions.paddingSizeLarge),
+                        // Spacing before Order Items
+                        if (!isRestaurantOpen && restaurantController.restaurant != null)
+                          const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                            // ORDER ITEMS SECTION
-                            _buildOrderItemsSection(
-                              context,
-                              cartController,
-                              isRestaurantOpen,
-                            ),
-
-                            const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                            // RECOMMENDED ITEMS
-                            if (!isDesktop)
-                              CartSuggestedItemViewWidget(
-                                cartList: cartController.cartList,
-                              ),
-
-                            const SizedBox(height: 180), // Space for floating bottom bar
-                          ],
+                        // ORDER ITEMS SECTION
+                        _buildOrderItemsSection(
+                          context,
+                          cartController,
+                          isRestaurantOpen,
                         ),
-                      ),
+
+                        const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                        // RECOMMENDED ITEMS
+                        if (!isDesktop)
+                          CartSuggestedItemViewWidget(
+                            cartList: cartController.cartList,
+                          ),
+
+                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
               // ============================================================
-              // FLOATING BOTTOM CHECKOUT BAR WITH FADE OVERLAY
+              // BOTTOM CHECKOUT BAR WITH GRADIENT BACKDROP
               // ============================================================
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Theme.of(context).colorScheme.surface.withValues(alpha: 0.0),
-                        Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-                        Theme.of(context).colorScheme.surface,
-                        Theme.of(context).colorScheme.surface,
-                      ],
-                      stops: const [0.0, 0.2, 0.5, 1.0],
-                    ),
-                  ),
-                  child: CheckoutButtonWidget(
-                    cartController: cartController,
-                    availableList: cartController.availableList,
-                    isRestaurantOpen: isRestaurantOpen,
-                    fromDineIn: widget.fromDineIn,
-                    restaurantName: restaurantName,
-                  ),
+              Container(
+                width: double.infinity,
+                color: Theme.of(context).cardColor,
+                child: CheckoutButtonWidget(
+                  cartController: cartController,
+                  availableList: cartController.availableList,
+                  isRestaurantOpen: isRestaurantOpen,
+                  fromDineIn: widget.fromDineIn,
+                  restaurantName: restaurantName,
                 ),
               ),
             ],
@@ -352,30 +333,39 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
         margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
         padding: const EdgeInsets.symmetric(
           horizontal: Dimensions.paddingSizeLarge,
-          vertical: Dimensions.paddingSizeDefault,
+          vertical: Dimensions.paddingSizeDefault + 6,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              CupertinoIcons.time,
-              size: 28,
-              color: Theme.of(context).primaryColor,
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                CupertinoIcons.time,
+                size: 18,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
             const SizedBox(height: Dimensions.paddingSizeSmall),
             Text(
               'Restaurant Currently Closed',
               style: robotoBold.copyWith(
-                fontSize: Dimensions.fontSizeDefault,
+                fontSize: Dimensions.fontSizeDefault + 1,
                 color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -383,14 +373,14 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                   TextSpan(
                     text: 'Opens at ',
                     style: robotoRegular.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
+                      fontSize: Dimensions.fontSizeSmall + 1,
                       color: Theme.of(context).hintColor,
                     ),
                   ),
                   TextSpan(
                     text: openingTime,
                     style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
+                      fontSize: Dimensions.fontSizeSmall + 1,
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
@@ -408,19 +398,23 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     CartController cartController,
     bool isRestaurantOpen,
   ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Order items',
-                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+              Expanded(
+                child: Text(
+                  'Order items',
+                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Delete all button - only show when restaurant is closed
                   if (!isRestaurantOpen)
@@ -454,6 +448,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                   // Add more button
                   CustomButtonWidget(
+                    expand: false,
                     buttonText: '+ Add more',
                     onPressed: () {
                       if (isRestaurantOpen && cartController.cartList.isNotEmpty) {

@@ -1,3 +1,5 @@
+import 'dart:math';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
@@ -33,102 +35,151 @@ class OrderItemWidget extends StatelessWidget {
     String variationText = CartHelper.setupVariationText(cart: cart);
     double? discount = cart.product!.discount;
     String? discountType = cart.product!.discountType;
+    final Color accent = Theme.of(context).primaryColor;
+    final double lineTotal = _calculateLineTotal(
+      discount: discount,
+      discountType: discountType,
+    );
 
     return GestureDetector(
       onTap: () => _navigateToProductInRestaurant(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+        padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-                // Expandable Quantity Badge
-                ExpandableQuantityBadge(
-                  cart: cart,
-                  cartIndex: cartIndex,
-                ),
-                const SizedBox(width: Dimensions.paddingSizeDefault),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Quantity badge (clickable)
+            ExpandableQuantityBadge(
+              cart: cart,
+              cartIndex: cartIndex,
+            ),
+            const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                // Item Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+            // Item Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cart.product!.name ?? '',
+                    style: robotoMedium.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+
+                  Text(
+                    PriceConverter.convertPrice(lineTotal),
+                    style: robotoMedium.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                      color: accent,
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+
+                  if (variationText.isNotEmpty || addOnText.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    if (variationText.isNotEmpty)
                       Text(
-                        cart.product!.name!,
-                        style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeDefault,
+                        variationText,
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeSmall,
+                          color: Theme.of(context).hintColor,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-
-                      if (variationText.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            variationText,
-                            style: robotoRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-
-                      if (addOnText.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            addOnText,
-                            style: robotoRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-
-                      const SizedBox(height: 4),
-
+                    if (addOnText.isNotEmpty)
                       Text(
-                        PriceConverter.convertPrice(
-                          cart.product!.price,
-                          discount: discount,
-                          discountType: discountType,
+                        addOnText,
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeSmall,
+                          color: Theme.of(context).hintColor,
                         ),
-                        style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeDefault,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        textDirection: TextDirection.ltr,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: Dimensions.paddingSizeDefault),
+
+            // Image
+            if (cart.product!.imageFullUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: BlurhashImageWidget(
+                    imageUrl: cart.product!.imageFullUrl!,
+                    blurhash: cart.product!.imageBlurhash,
+                    fit: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                   ),
                 ),
-                const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                // Image
-                if (cart.product!.imageFullUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    child: SizedBox(
-                      width: 80,
-                      height: 80,
-                      child: BlurhashImageWidget(
-                        imageUrl: cart.product!.imageFullUrl!,
-                        blurhash: cart.product!.imageBlurhash,
-                        fit: BoxFit.cover,
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      ),
-                    ),
-                  ),
-        ],
+              ),
+          ],
         ),
       ),
     );
+  }
+
+  double _calculateLineTotal({double? discount, String? discountType}) {
+    final int quantity = cart.quantity ?? 1;
+
+    // Base price with discount applied per item
+    final double unitPrice = PriceConverter.convertWithDiscount(
+          cart.product!.price!,
+          discount,
+          discountType,
+        ) ??
+        cart.product!.price!;
+    double total = unitPrice * quantity;
+
+    // Variation price (per selected option * quantity)
+    if (cart.product?.variations != null && cart.variations != null) {
+      final int variationGroupCount = min(cart.product!.variations!.length, cart.variations!.length);
+      for (int group = 0; group < variationGroupCount; group++) {
+        final variation = cart.product!.variations![group];
+        final selections = cart.variations![group];
+        if (variation.variationValues == null || selections == null) continue;
+
+        final int optionCount = min(variation.variationValues!.length, selections.length);
+        for (int option = 0; option < optionCount; option++) {
+          if (selections[option] == true) {
+            total += (variation.variationValues![option].optionPrice ?? 0) * quantity;
+          }
+        }
+      }
+    }
+
+    // Add-ons price (stored quantity is already absolute)
+    if (cart.addOnIds != null && cart.product?.addOns != null) {
+      for (final addOnId in cart.addOnIds!) {
+        final addOn = cart.product!.addOns!.firstWhereOrNull((element) => element.id == addOnId.id);
+        if (addOn != null) {
+          total += (addOn.price ?? 0) * (addOnId.quantity ?? 1);
+        }
+      }
+    }
+
+    return PriceConverter.toFixed(total);
   }
 
   void _navigateToProductInRestaurant(BuildContext context) {

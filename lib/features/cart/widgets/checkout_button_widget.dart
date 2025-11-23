@@ -101,18 +101,22 @@ class CheckoutButtonWidget extends StatelessWidget {
               ),
             ) : const SizedBox(),
 
-            GetBuilder<CartController>(
-              builder: (cartController) {
-                return CustomButtonWidget(
-                  radius: Dimensions.radiusDefault,
-                  buttonText: 'confirm_delivery_details'.tr,
-                  height: 56,
-                  onPressed: cartController.isLoading || restaurantController.restaurant == null ? null : () {
-                    Get.find<CheckoutController>().updateFirstTime();
-                    _processToCheckoutButtonPressed(context, restaurantController);
-                  },
-                );
-              }
+            SizedBox(
+              width: double.infinity,
+              child: GetBuilder<CartController>(
+                builder: (cartController) {
+                  return CustomButtonWidget(
+                    expand: false,
+                    radius: Dimensions.radiusDefault,
+                    buttonText: 'confirm_delivery_details'.tr,
+                    height: 56,
+                    onPressed: cartController.isLoading || restaurantController.restaurant == null ? null : () {
+                      Get.find<CheckoutController>().updateFirstTime();
+                      _processToCheckoutButtonPressed(context, restaurantController);
+                    },
+                  );
+                },
+              ),
             ),
             SizedBox(height: isDesktop ? Dimensions.paddingSizeExtraLarge : 0),
           ]);
