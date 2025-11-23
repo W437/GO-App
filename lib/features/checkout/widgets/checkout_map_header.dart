@@ -90,7 +90,6 @@ class CheckoutMapHeader extends StatelessWidget {
                 onTap: () {
                   Get.toNamed(RouteHelper.getAddAddressRoute(
                     true,
-                    false,
                     checkoutController.restaurant?.zoneId ?? 0,
                   ));
                 },

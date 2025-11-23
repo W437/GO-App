@@ -43,8 +43,8 @@ class WhenSection extends StatelessWidget {
                 title: 'standard'.tr,
                 subtitle: _getStandardETA(controller),
                 onTap: () {
-                  controller.updateDateSlot(0, notify: true);
-                  controller.updateTimeSlot(0, notify: true);
+                  controller.updateDateSlotIndex(0);
+                  controller.updateTimeSlot(0, false);
                 },
               ),
 

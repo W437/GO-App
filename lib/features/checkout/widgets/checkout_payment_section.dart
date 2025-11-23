@@ -5,6 +5,7 @@ import 'package:godelivery_user/features/coupon/controllers/coupon_controller.da
 import 'package:godelivery_user/features/checkout/widgets/coupon_bottom_sheet.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/features/checkout/widgets/payment_button_new.dart';
 
 class CheckoutPaymentSection extends StatelessWidget {
@@ -222,7 +223,7 @@ class CheckoutPaymentSection extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             PaymentButtonNew(
-              icon: Icons.money,
+              icon: Images.codIcon,
               title: 'cash_on_delivery'.tr,
               isSelected: controller.paymentMethodIndex == 0,
               onTap: () {
@@ -232,7 +233,7 @@ class CheckoutPaymentSection extends StatelessWidget {
             ),
             if (isWalletActive)
               PaymentButtonNew(
-                icon: Icons.account_balance_wallet,
+                icon: Images.walletIcon,
                 title: 'wallet'.tr,
                 isSelected: controller.paymentMethodIndex == 1,
                 onTap: () {
@@ -242,7 +243,7 @@ class CheckoutPaymentSection extends StatelessWidget {
               ),
             if (isDigitalPaymentActive)
               PaymentButtonNew(
-                icon: Icons.credit_card,
+                icon: Images.digitalPayment,
                 title: 'digital_payment'.tr,
                 isSelected: controller.paymentMethodIndex == 2,
                 onTap: () {
@@ -252,7 +253,7 @@ class CheckoutPaymentSection extends StatelessWidget {
               ),
             if (isOfflinePaymentActive)
               PaymentButtonNew(
-                icon: Icons.payment,
+                icon: Images.offlinePaymentIcon,
                 title: 'offline_payment'.tr,
                 isSelected: controller.paymentMethodIndex == 3,
                 onTap: () {
