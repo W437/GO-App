@@ -230,8 +230,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isLoggedIn = AuthHelper.isLoggedIn();
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F),
+      backgroundColor: theme.colorScheme.surface,
       appBar: widget.showAppBar ? CustomAppBarWidget(title: 'checkout'.tr) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: guestCheckoutPermission || AuthHelper.isLoggedIn() ? GetBuilder<CheckoutController>(builder: (checkoutController) {

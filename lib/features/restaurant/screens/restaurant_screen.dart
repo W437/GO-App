@@ -43,6 +43,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
+  final Map<int, ScrollController> _horizontalScrollControllers = {};
   int? _highlightedProductId;
   int? _activeCategoryId = 0; // Default to "All" category
   bool _isManualScrolling = false;
@@ -130,6 +131,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     _bounceController.dispose();
     _pressController.dispose();
     _cartWidgetTimer?.cancel();
+
+    // Dispose all horizontal scroll controllers
+    for (var controller in _horizontalScrollControllers.values) {
+      controller.dispose();
+    }
+
     super.dispose();
   }
 
@@ -178,8 +185,17 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
     // Scroll to product if specified
     if (widget.scrollToProductId != null) {
+      // Wait for multiple frames to ensure full layout
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToProduct(widget.scrollToProductId!);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            // Additional delay to ensure everything is settled
+            await Future.delayed(const Duration(milliseconds: 300));
+            if (mounted) {
+              _scrollToProduct(widget.scrollToProductId!);
+            }
+          });
+        });
       });
     }
   }
@@ -256,7 +272,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     }
   }
 
-  void _handleCategoryTap(int categoryId) async {
+  Future<void> _handleCategoryTap(int categoryId) async {
+    print('📍 _handleCategoryTap called with categoryId: $categoryId');
+
     setState(() {
       _activeCategoryId = categoryId;
       _isManualScrolling = true;
@@ -265,6 +283,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     if (scrollController.hasClients) {
       // Special handling for "All" category - scroll to top
       if (categoryId == 0) {
+        print('   Scrolling to top (All category)');
         await scrollController.animateTo(
           0,
           duration: const Duration(milliseconds: 450),
@@ -273,6 +292,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       } else {
         // Regular category - scroll to section and center in viewport
         final key = _categorySectionKeys[categoryId];
+        print('   Category key found: ${key != null}');
+        print('   Key has context: ${key?.currentContext != null}');
+
         if(key?.currentContext != null) {
           final box = key!.currentContext!.findRenderObject() as RenderBox;
           final position = box.localToGlobal(Offset.zero);
@@ -286,27 +308,55 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
           final double targetOffset = (scrollController.offset + position.dy) - (availableHeight / 2) + (_categoryBarHeight / 2);
           final double clampedTarget = targetOffset.clamp(0, scrollController.position.maxScrollExtent).toDouble();
 
+          print('   position.dy: ${position.dy}');
+          print('   viewportHeight: $viewportHeight');
+          print('   appBarHeight: $appBarHeight');
+          print('   availableHeight: $availableHeight');
+          print('   current scroll offset: ${scrollController.offset}');
+          print('   targetOffset: $targetOffset');
+          print('   clampedTarget: $clampedTarget');
+          print('   maxScrollExtent: ${scrollController.position.maxScrollExtent}');
+
           await scrollController.animateTo(
             clampedTarget,
             duration: const Duration(milliseconds: 450),
             curve: Curves.easeInOutCubic,
           );
+          print('   Scroll animation complete');
         }
       }
 
       setState(() {
         _isManualScrolling = false;
       });
+    } else {
+      print('⚠️ scrollController has no clients');
     }
   }
 
   void _scrollToProduct(int productId) async {
-    if (!scrollController.hasClients) return;
+    print('🔍 _scrollToProduct called with productId: $productId');
+    print('   scrollController.hasClients: ${scrollController.hasClients}');
+
+    if (!scrollController.hasClients) {
+      print('⚠️ scrollController has no clients yet');
+      return;
+    }
 
     // Find the category containing this product
     final restController = Get.find<RestaurantController>();
     final products = restController.restaurantProducts;
-    if (products == null) return;
+
+    print('   products loaded: ${products != null}');
+    print('   products count: ${products?.length ?? 0}');
+
+    if (products == null) {
+      // Data not loaded yet, try again after a short delay
+      print('⚠️ Products not loaded yet, retrying in 300ms...');
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) _scrollToProduct(productId);
+      return;
+    }
 
     // Find the product
     final product = products.firstWhereOrNull((p) => p.id == productId);
@@ -317,28 +367,38 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
     // Get the first category ID for this product
     final categoryId = product.categoryId;
+    print('   Found product: ${product.name}');
+    print('   Category ID: $categoryId');
+
     if (categoryId == null) {
       print('⚠️ Product has no category');
       return;
     }
 
-    // Scroll to the category section
-    _handleCategoryTap(categoryId);
+    print('✅ Calling _handleCategoryTap($categoryId)');
 
-    // Trigger highlight animation for the product
-    setState(() {
-      _highlightedProductId = productId;
-    });
+    // Scroll vertically to center the category section in the viewport
+    await _handleCategoryTap(categoryId);
 
-    // Remove highlight after 2.5 seconds
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      if (mounted) {
-        setState(() {
-          _highlightedProductId = null;
-        });
-      }
-    });
+    print('✅ Category scroll complete, highlighting product $productId');
+
+    // Trigger highlight animation for the product after scroll completes
+    if (mounted) {
+      setState(() {
+        _highlightedProductId = productId;
+      });
+
+      // Remove highlight after 3 seconds
+      Future.delayed(const Duration(milliseconds: 3000), () {
+        if (mounted) {
+          setState(() {
+            _highlightedProductId = null;
+          });
+        }
+      });
+    }
   }
+
 
   Map<int, List<Product>> _groupProductsByCategory(List<Product>? products) {
     final Map<int, List<Product>> categorized = {};
@@ -393,7 +453,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       }
       
       _categorySectionKeys.putIfAbsent(category.id!, () => GlobalKey());
+      _horizontalScrollControllers.putIfAbsent(category.id!, () => ScrollController());
       _activeCategoryId ??= category.id;
+
+      final horizontalController = _horizontalScrollControllers[category.id!]!;
 
       sections.add(
         Container(
@@ -413,11 +476,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                 ),
               ),
               const SizedBox(height: Dimensions.paddingSizeDefault),
-              
+
               // Horizontal List of Products
               SizedBox(
                 height: 250,
                 child: ListView.builder(
+                  controller: horizontalController,
                   scrollDirection: Axis.horizontal,
                   clipBehavior: Clip.none,
                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
@@ -428,7 +492,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                     return Padding(
                       padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, top: 8, bottom: 8),
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeOutCubic,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                           border: _highlightedProductId == product.id
@@ -436,6 +501,15 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                                   color: Theme.of(context).primaryColor,
                                   width: 3,
                                 )
+                              : null,
+                          boxShadow: _highlightedProductId == product.id
+                              ? [
+                                  BoxShadow(
+                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                                    blurRadius: 12,
+                                    spreadRadius: 2,
+                                  ),
+                                ]
                               : null,
                         ),
                         child: RestaurantProductHorizontalCard(
