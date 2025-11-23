@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
-import 'package:godelivery_user/features/restaurant/widgets/compact_expandable_cart_badge.dart';
+import 'package:godelivery_user/features/restaurant/widgets/expandable_product_quantity_badge.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -28,13 +28,13 @@ class RestaurantProductHorizontalCard extends StatelessWidget {
         if (ResponsiveHelper.isMobile(context)) {
           CustomSheet.show(
             context: context,
-            child: ProductBottomSheetWidget(product: product, inRestaurantPage: true),
-            showHandle: true,
+            child: RestaurantProductSheet(product: product, inRestaurantPage: true),
+            showHandle: false,
             padding: EdgeInsets.zero,
           );
         } else {
           Get.dialog(
-            Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: true)),
+            Dialog(child: RestaurantProductSheet(product: product, inRestaurantPage: true)),
           );
         }
       },
@@ -210,7 +210,7 @@ class RestaurantProductHorizontalCard extends StatelessWidget {
                 onPointerUp: (_) {},   // Block pointer events
                 onPointerMove: (_) {}, // Block pointer events
                 onPointerCancel: (_) {}, // Block pointer events
-                child: CompactExpandableCartBadge(
+                child: ExpandableProductQuantityBadge(
                   productId: product.id!,
                 ),
               ),

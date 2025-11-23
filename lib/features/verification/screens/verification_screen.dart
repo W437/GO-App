@@ -5,6 +5,7 @@ import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart
 import 'package:godelivery_user/features/auth/widgets/sign_in/existing_user_bottom_sheet.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/profile/domain/models/update_user_model.dart';
+import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/verification/controllers/verification_controller.dart';
@@ -23,6 +24,257 @@ import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 enum VerificationTypeEnum{phone, email}
+
+/// Lightweight inline OTP step for embedding inside auth flows (no Scaffold).
+class InlineVerificationStep extends StatefulWidget {
+  final String? number;
+  final String? email;
+  final String loginType;
+  final bool fromForgetPassword;
+  final bool fromSignUp;
+  final String? firebaseSession;
+  final VoidCallback onBack;
+  final VoidCallback onVerified;
+
+  const InlineVerificationStep({
+    super.key,
+    required this.number,
+    required this.email,
+    required this.loginType,
+    required this.fromForgetPassword,
+    this.fromSignUp = true,
+    this.firebaseSession,
+    required this.onBack,
+    required this.onVerified,
+  });
+
+  @override
+  State<InlineVerificationStep> createState() => _InlineVerificationStepState();
+}
+
+class _InlineVerificationStepState extends State<InlineVerificationStep> {
+  String? _number;
+  String? _email;
+  Timer? _timer;
+  int _seconds = 0;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    Get.find<VerificationController>().updateVerificationCode('', canUpdate: false);
+    if(widget.number != null) {
+      _number = widget.number!.startsWith('+') ? widget.number : '+${widget.number!.substring(1, widget.number!.length)}';
+    }
+    _email = widget.email;
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _seconds = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _seconds = _seconds - 1;
+      if(_seconds == 0) {
+        timer.cancel();
+        _timer?.cancel();
+      }
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer?.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<VerificationController>(builder: (verificationController) {
+      return SingleChildScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Back button row
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: widget.onBack,
+                icon: const Icon(Icons.arrow_back),
+              ),
+            ),
+
+            // Illustration area
+            Container(
+              width: context.width > 700 ? 350 : context.width * 0.85,
+              height: context.width > 700 ? 280 : 220,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                    Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.mail_outline_rounded,
+                      size: context.width > 700 ? 80 : 60,
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(height: 20),
+                    Icon(
+                      Icons.security_rounded,
+                      size: context.width > 700 ? 40 : 30,
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            Text(
+              'Check your messages',
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeOverLarge + 2,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+            SizedBox(
+              width: context.width > 700 ? 400 : context.width * 0.8,
+              child: Text(
+                _email != null
+                  ? 'We\'ve sent a 6-digit code to your email. Please enter it below.'
+                  : 'We\'ve sent a 6-digit code to your phone. Please enter it below.',
+                style: robotoRegular.copyWith(
+                  fontSize: Dimensions.fontSizeDefault,
+                  color: Theme.of(context).disabledColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: context.width > 700 ? 450 : context.width * 0.95,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              child: PinCodeTextField(
+                length: 6,
+                appContext: context,
+                keyboardType: TextInputType.number,
+                animationType: AnimationType.fade,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                pinTheme: PinTheme(
+                  shape: PinCodeFieldShape.box,
+                  fieldHeight: context.width > 400 ? 60 : 48,
+                  fieldWidth: context.width > 400 ? 50 : 38,
+                  borderWidth: 1.5,
+                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                  selectedColor: Theme.of(context).primaryColor,
+                  activeColor: Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                  inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.4),
+                  selectedFillColor: Theme.of(context).cardColor,
+                  activeFillColor: Theme.of(context).cardColor,
+                  inactiveFillColor: Theme.of(context).cardColor,
+                ),
+                cursorColor: Theme.of(context).primaryColor,
+                animationDuration: const Duration(milliseconds: 150),
+                enableActiveFill: true,
+                textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
+                onChanged: (value) => verificationController.updateVerificationCode(value, canUpdate: false),
+                beforeTextPaste: (text) => true,
+              ),
+            ),
+
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+            CustomButtonWidget(
+              buttonText: 'Verify',
+              isLoading: verificationController.isLoading,
+              onPressed: () => _verifyOtp(context, verificationController),
+            ),
+
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+
+            TextButton(
+              onPressed: _seconds == 0
+                  ? () async {
+                      _startTimer();
+                      await _resendOtp();
+                    }
+                  : null,
+              child: Text(
+                _seconds == 0
+                    ? 'Resend code'
+                    : '${'resend_code_in'.tr} 0:${_seconds.toString().padLeft(2, '0')}',
+                style: robotoRegular.copyWith(
+                  color: _seconds == 0 ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  void _verifyOtp(BuildContext context, VerificationController verificationController) {
+    if (widget.fromSignUp) {
+      verificationController.verifyPhone(
+        data: VerificationDataModel(
+          phone: _number,
+          email: _email,
+          verificationType: _number != null ? VerificationTypeEnum.phone.name : VerificationTypeEnum.email.name,
+          otp: verificationController.verificationCode,
+          loginType: widget.loginType,
+          guestId: AuthHelper.getGuestId(),
+        ),
+      ).then((ResponseModel response) {
+        if (response.isSuccess) {
+          widget.onVerified();
+        } else {
+          showCustomSnackBar(response.message);
+        }
+      });
+    } else {
+      verificationController.verifyToken(phone: _number, email: _email).then((ResponseModel response) {
+        if (response.isSuccess) {
+          widget.onVerified();
+        } else {
+          showCustomSnackBar(response.message);
+        }
+      });
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    if (widget.fromSignUp && widget.loginType == CentralizeLoginType.otp.name && _number != null) {
+      await Get.find<AuthController>().otpLogin(phone: _number!, otp: '', loginType: widget.loginType, verified: '');
+      showCustomSnackBar('resend_code_successful'.tr, isError: false);
+    } else {
+      final resp = await Get.find<VerificationController>().forgetPassword(phone: _number, email: _email);
+      if (resp.isSuccess) {
+        showCustomSnackBar('resend_code_successful'.tr, isError: false);
+      } else {
+        showCustomSnackBar(resp.message);
+      }
+    }
+  }
+}
 
 class VerificationScreen extends StatefulWidget {
   final String? number;

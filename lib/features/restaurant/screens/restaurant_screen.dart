@@ -44,6 +44,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   final TextEditingController _searchController = TextEditingController();
   final Map<int, GlobalKey> _categorySectionKeys = {};
   final Map<int, ScrollController> _horizontalScrollControllers = {};
+  final Map<int, AnimationController> _wiggleControllers = {};
+  final Map<int, AnimationController> _overlayControllers = {};
+  final Map<int, Animation<double>> _wiggleAnimations = {};
+  final Map<int, Animation<double>> _overlayAnimations = {};
   int? _highlightedProductId;
   int? _activeCategoryId = 0; // Default to "All" category
   bool _isManualScrolling = false;
@@ -137,6 +141,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       controller.dispose();
     }
 
+    // Dispose all wiggle controllers
+    for (var controller in _wiggleControllers.values) {
+      controller.dispose();
+    }
+
+    // Dispose all overlay controllers
+    for (var controller in _overlayControllers.values) {
+      controller.dispose();
+    }
+
     super.dispose();
   }
 
@@ -185,17 +199,13 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
     // Scroll to product if specified
     if (widget.scrollToProductId != null) {
-      // Wait for multiple frames to ensure full layout
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            // Additional delay to ensure everything is settled
-            await Future.delayed(const Duration(milliseconds: 300));
-            if (mounted) {
-              _scrollToProduct(widget.scrollToProductId!);
-            }
-          });
-        });
+      // Wait for cart widget to render (has 350ms delay) and layout to settle
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Wait for cart widget animation delay (350ms) + extra for layout
+        await Future.delayed(const Duration(milliseconds: 550));
+        if (mounted) {
+          _scrollToProduct(widget.scrollToProductId!);
+        }
       });
     }
   }
@@ -380,22 +390,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     // Scroll vertically to center the category section in the viewport
     await _handleCategoryTap(categoryId);
 
-    print('✅ Category scroll complete, highlighting product $productId');
+    print('✅ Category scroll complete, triggering wiggle for product $productId');
 
-    // Trigger highlight animation for the product after scroll completes
+    // Trigger both wiggle and overlay animations for the product
     if (mounted) {
-      setState(() {
-        _highlightedProductId = productId;
-      });
-
-      // Remove highlight after 3 seconds
-      Future.delayed(const Duration(milliseconds: 3000), () {
-        if (mounted) {
-          setState(() {
-            _highlightedProductId = null;
-          });
-        }
-      });
+      if (_wiggleControllers.containsKey(productId)) {
+        _wiggleControllers[productId]!.forward(from: 0.0);
+      }
+      if (_overlayControllers.containsKey(productId)) {
+        _overlayControllers[productId]!.forward(from: 0.0);
+      }
     }
   }
 
@@ -458,6 +462,46 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
       final horizontalController = _horizontalScrollControllers[category.id!]!;
 
+      // Create wiggle and overlay controllers for products in this category
+      for (final product in products) {
+        if (!_wiggleControllers.containsKey(product.id)) {
+          // Wiggle controller (700ms)
+          final wiggleController = AnimationController(
+            duration: const Duration(milliseconds: 700),
+            vsync: this,
+          );
+          _wiggleControllers[product.id!] = wiggleController;
+
+          // Overlay controller (1000ms)
+          final overlayController = AnimationController(
+            duration: const Duration(milliseconds: 1000),
+            vsync: this,
+          );
+          _overlayControllers[product.id!] = overlayController;
+
+          // Wiggle animation (subtle)
+          _wiggleAnimations[product.id!] = TweenSequence<double>([
+            TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.02), weight: 1),
+            TweenSequenceItem(tween: Tween(begin: 0.02, end: -0.02), weight: 2),
+            TweenSequenceItem(tween: Tween(begin: -0.02, end: 0.02), weight: 2),
+            TweenSequenceItem(tween: Tween(begin: 0.02, end: -0.02), weight: 2),
+            TweenSequenceItem(tween: Tween(begin: -0.02, end: 0.0), weight: 1),
+          ]).animate(CurvedAnimation(
+            parent: wiggleController,
+            curve: Curves.easeInOut,
+          ));
+
+          // Overlay opacity animation: 0 → 0.4 → 0 (1000ms)
+          _overlayAnimations[product.id!] = TweenSequence<double>([
+            TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.4), weight: 50),
+            TweenSequenceItem(tween: Tween(begin: 0.4, end: 0.0), weight: 50),
+          ]).animate(CurvedAnimation(
+            parent: overlayController,
+            curve: Curves.easeInOut,
+          ));
+        }
+      }
+
       sections.add(
         Container(
           key: _categorySectionKeys[category.id!],
@@ -488,34 +532,47 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];
+                    final wiggleAnimation = _wiggleAnimations[product.id];
+                    final overlayAnimation = _overlayAnimations[product.id];
 
                     return Padding(
                       padding: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, top: 8, bottom: 8),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.easeOutCubic,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          border: _highlightedProductId == product.id
-                              ? Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                  width: 3,
-                                )
-                              : null,
-                          boxShadow: _highlightedProductId == product.id
-                              ? [
-                                  BoxShadow(
-                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                                    blurRadius: 12,
-                                    spreadRadius: 2,
+                      child: wiggleAnimation != null && overlayAnimation != null
+                          ? AnimatedBuilder(
+                              animation: Listenable.merge([wiggleAnimation, overlayAnimation]),
+                              builder: (context, child) {
+                                return Transform.rotate(
+                                  angle: wiggleAnimation.value,
+                                  child: Stack(
+                                    children: [
+                                      child!,
+                                      // Blue overlay (ignores pointer events so it doesn't block taps)
+                                      Positioned.fill(
+                                        child: IgnorePointer(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor.withValues(
+                                                  alpha: overlayAnimation.value,
+                                                ),
+                                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ]
-                              : null,
-                        ),
-                        child: RestaurantProductHorizontalCard(
-                          product: product,
-                        ),
-                      ),
+                                );
+                              },
+                              child: RestaurantProductHorizontalCard(
+                                product: product,
+                              ),
+                            )
+                          : RestaurantProductHorizontalCard(
+                              product: product,
+                            ),
                     );
                   },
                 ),
@@ -755,7 +812,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
             // Cart just got its first item - start delay timer
             _showCartWidget = false;
             _cartWidgetTimer?.cancel();
-            _cartWidgetTimer = Timer(const Duration(seconds: 1), () {
+            _cartWidgetTimer = Timer(const Duration(milliseconds: 350), () {
               if (mounted) {
                 setState(() {
                   _showCartWidget = true;

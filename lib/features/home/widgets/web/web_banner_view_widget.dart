@@ -8,7 +8,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -162,9 +162,9 @@ class WebBannerViewWidget extends StatelessWidget {
       Product? product = homeController.bannerDataList![index];
       ResponsiveHelper.isMobile(context) ? showModalBottomSheet(
         context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-        builder: (con) => ProductBottomSheetWidget(product: product),
+        builder: (con) => RestaurantProductSheet(product: product),
       ) : showDialog(context: context, builder: (con) => Dialog(
-          child: ProductBottomSheetWidget(product: product)),
+          child: RestaurantProductSheet(product: product)),
       );
     }else if(homeController.bannerDataList![index] is Restaurant) {
       Restaurant restaurant = homeController.bannerDataList![index];

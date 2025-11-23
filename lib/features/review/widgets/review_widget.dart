@@ -1,7 +1,7 @@
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/rating_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/readmore_widget.dart';
 import 'package:godelivery_user/features/product/controllers/product_controller.dart';
@@ -60,7 +60,7 @@ class ReviewWidget extends StatelessWidget {
           onTap: () async {
             Product? product = await Get.find<ProductController>().getProductDetails(review.foodId!, null);
             if(product != null) {
-              Get.dialog(Dialog(child: ProductBottomSheetWidget(product: product, fromReview: true)));
+              Get.dialog(Dialog(child: RestaurantProductSheet(product: product, fromReview: true)));
             } else {
               showCustomSnackBar('product_is_not_available'.tr);
             }
@@ -93,7 +93,7 @@ class ReviewWidget extends StatelessWidget {
             Product? product = await Get.find<ProductController>().getProductDetails(review.foodId!, null);
             if(product != null) {
               Get.bottomSheet(
-                ProductBottomSheetWidget(product: product, fromReview: true),
+                RestaurantProductSheet(product: product, fromReview: true),
                 backgroundColor: Colors.transparent, isScrollControlled: true,
               );
             } else {

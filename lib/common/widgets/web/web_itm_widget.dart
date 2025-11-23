@@ -14,7 +14,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,10 +35,10 @@ class WebItemWidget extends StatelessWidget {
       InkWell(
         onTap: () {
           ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-            ProductBottomSheetWidget(product: product, isCampaign: false),
+            RestaurantProductSheet(product: product, isCampaign: false),
             backgroundColor: Colors.transparent, isScrollControlled: true,
           ) : Get.dialog(
-            Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: false)),
+            Dialog(child: RestaurantProductSheet(product: product, isCampaign: false)),
           );
         },
         child: Container(

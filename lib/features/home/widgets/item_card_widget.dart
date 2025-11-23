@@ -18,7 +18,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,11 +55,11 @@ class ItemCardWidget extends StatelessWidget {
         onTap: () {
           ResponsiveHelper.isMobile(context) ? CustomSheet.show(
             context: context,
-            child: ProductBottomSheetWidget(product: product, isCampaign: isCampaignItem),
+            child: RestaurantProductSheet(product: product, isCampaign: isCampaignItem),
             showHandle: true,
             padding: EdgeInsets.zero,
           ) : Get.dialog(
-            Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: isCampaignItem)),
+            Dialog(child: RestaurantProductSheet(product: product, isCampaign: isCampaignItem)),
           );
         },
         radius: Dimensions.radiusDefault,
@@ -168,11 +168,11 @@ class ItemCardWidget extends StatelessWidget {
                           if(isCampaignItem) {
                             ResponsiveHelper.isMobile(context) ? CustomSheet.show(
                               context: context,
-                              child: ProductBottomSheetWidget(product: product, isCampaign: true),
+                              child: RestaurantProductSheet(product: product, isCampaign: true),
                               showHandle: true,
                               padding: EdgeInsets.zero,
                             ) : Get.dialog(
-                              Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: true)),
+                              Dialog(child: RestaurantProductSheet(product: product, isCampaign: true)),
                             );
                           } else {
                             if(product.variations == null || (product.variations != null && product.variations!.isEmpty)) {
@@ -201,10 +201,10 @@ class ItemCardWidget extends StatelessWidget {
 
                             } else {
                               ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-                                ProductBottomSheetWidget(product: product, isCampaign: false),
+                                RestaurantProductSheet(product: product, isCampaign: false),
                                 backgroundColor: Colors.transparent, isScrollControlled: true,
                               ) : Get.dialog(
-                                Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: false)),
+                                Dialog(child: RestaurantProductSheet(product: product, isCampaign: false)),
                               );
                             }
                           }

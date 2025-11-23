@@ -25,49 +25,10 @@ class CustomPageTransition extends CustomTransition {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return Stack(
-      children: [
-        // 1. Background Effect
-        if (secondaryAnimation.status != AnimationStatus.dismissed)
-          AnimatedBuilder(
-            animation: secondaryAnimation,
-            builder: (context, child) {
-              final p = secondaryAnimation.value;
-              final scale = lerpDouble(1.0, 0.96, p)!;
-              final radius = lerpDouble(0.0, 16.0, p)!;
-              final dimAlpha = lerpDouble(0.0, 0.4, p)!; // Increased dimming for better contrast
-
-              final Matrix4 matrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..scale(scale, scale, 1.0);
-
-              return Stack(
-                children: [
-                  Transform(
-                    transform: matrix,
-                    alignment: Alignment.center,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(radius),
-                      child: child,
-                    ),
-                  ),
-                  IgnorePointer(
-                    child: Container(
-                      color: Colors.black.withOpacity(dimAlpha),
-                    ),
-                  ),
-                ],
-              );
-            },
-            child: child,
-          )
-        else
-          // 2. Foreground Effect with Interactive Swipe
-          _InteractiveDismissibleWrapper(
-            animation: animation,
-            child: child,
-          ),
-      ],
+    // Only transform the foreground route; let the previous route paint normally behind it.
+    return _InteractiveDismissibleWrapper(
+      animation: animation,
+      child: child,
     );
   }
 }
@@ -121,6 +82,12 @@ class _InteractiveDismissibleWrapperState
   }
 
   void _handleDragStart(DragStartDetails details) {
+    // Do not allow swipe-dismiss if there is nothing to pop (root/home).
+    final navigator = Navigator.of(context);
+    if (!navigator.canPop()) {
+      return;
+    }
+
     final size = MediaQuery.of(context).size;
     final edgeWidth = size.width * CustomPageTransition.swipeEdgeWidth;
 
@@ -169,6 +136,11 @@ class _InteractiveDismissibleWrapperState
 
   @override
   Widget build(BuildContext context) {
+    // If route cannot pop, disable interactive swipe entirely.
+    if (!Navigator.of(context).canPop()) {
+      return widget.child;
+    }
+
     return GestureDetector(
       onHorizontalDragStart: _handleDragStart,
       onHorizontalDragUpdate: _handleDragUpdate,

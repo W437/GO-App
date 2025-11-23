@@ -15,7 +15,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -63,10 +63,10 @@ class WebProductWidget extends StatelessWidget {
         }else {
           if(product!.restaurantStatus == 1){
             ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-              ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant, isCampaign: isCampaign),
+              RestaurantProductSheet(product: product, inRestaurantPage: inRestaurant, isCampaign: isCampaign),
               backgroundColor: Colors.transparent, isScrollControlled: true,
             ) : Get.dialog(
-              Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant)),
+              Dialog(child: RestaurantProductSheet(product: product, inRestaurantPage: inRestaurant)),
             );
           }else{
             showCustomSnackBar('item_is_not_available'.tr);

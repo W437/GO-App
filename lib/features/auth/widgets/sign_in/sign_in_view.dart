@@ -41,6 +41,8 @@ class _SignInViewState extends State<SignInView> {
   final TextEditingController _otpPhoneController = TextEditingController();
   String? _countryDialCode;
   GlobalKey<FormState>? _formKeyLogin;
+  final GlobalKey<NavigatorState> _authNavigatorKey = GlobalKey<NavigatorState>();
+  late BuildContext _rootContext;
 
   @override
   void initState() {
@@ -75,17 +77,72 @@ class _SignInViewState extends State<SignInView> {
     }
   }
 
+  void _pushOtpStep(String numberWithCountryCode) {
+    _authNavigatorKey.currentState?.pushNamed(
+      'otp',
+      arguments: _OtpRouteArgs(numberWithCountryCode),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(builder: (authController) {
-      return Form(
-        key: _formKeyLogin,
-        child: activeCentralizeLogin(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController),
-      );
+      return Builder(builder: (rootCtx) {
+        _rootContext = rootCtx;
+        return Form(
+          key: _formKeyLogin,
+          child: _buildAuthNavigator(authController),
+        );
+      });
     });
   }
 
-  Widget activeCentralizeLogin(CentralizeLoginSetup centralizeLoginSetup, AuthController authController) {
+  Widget _buildAuthNavigator(AuthController authController) {
+    return Navigator(
+      key: _authNavigatorKey,
+      onGenerateRoute: (settings) {
+        // Initial route = sign-in form
+        if (settings.name == Navigator.defaultRouteName) {
+          return PageRouteBuilder(
+            pageBuilder: (_, __, ___) => activeCentralizeLogin(
+              Get.find<SplashController>().configModel!.centralizeLoginSetup!,
+              authController,
+              pushOtp: (phoneWithCode) => _pushOtpStep(phoneWithCode),
+            ),
+          );
+        }
+        // OTP route
+        if (settings.name == 'otp') {
+          final _OtpRouteArgs args = settings.arguments as _OtpRouteArgs;
+          return PageRouteBuilder(
+            pageBuilder: (_, __, ___) => InlineVerificationStep(
+              number: args.number,
+              email: null,
+              loginType: CentralizeLoginType.otp.name,
+              fromSignUp: true,
+              fromForgetPassword: false,
+              firebaseSession: null,
+              onBack: () => _authNavigatorKey.currentState?.maybePop(),
+              onVerified: () {
+                // Close entire auth flow
+                Navigator.of(_rootContext).maybePop(true);
+              },
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              final offsetAnimation = Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+              return SlideTransition(position: offsetAnimation, child: child);
+            },
+          );
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget activeCentralizeLogin(CentralizeLoginSetup centralizeLoginSetup, AuthController authController, {required ValueChanged<String> pushOtp}) {
     // 🔍 DEBUG: Print login configuration
     print('═══════════════════════════════════════════════════════════');
     print('🔍 [LOGIN DEBUG] Configuration from Backend:');
@@ -112,7 +169,7 @@ class _SignInViewState extends State<SignInView> {
           countryDialCode: _countryDialCode,
           onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
           onClickLoginButton: () {
-            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp);
+            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp, pushInline: pushOtp);
           },
         );
 
@@ -163,7 +220,7 @@ class _SignInViewState extends State<SignInView> {
           onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
           socialEnable: true,
           onClickLoginButton: () {
-            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp);
+            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp, pushInline: pushOtp);
           },
         );
 
@@ -190,7 +247,7 @@ class _SignInViewState extends State<SignInView> {
 
 
   
-  void _otpLogin(AuthController authController, String countryDialCode, CentralizeLoginType loginType) async {
+  void _otpLogin(AuthController authController, String countryDialCode, CentralizeLoginType loginType, {ValueChanged<String>? pushInline}) async {
     String phone = _otpPhoneController.text.trim();
     String numberWithCountryCode = countryDialCode+phone;
     PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
@@ -202,7 +259,11 @@ class _SignInViewState extends State<SignInView> {
       } else {
         authController.otpLogin(phone: numberWithCountryCode, otp: '', loginType: loginType.name, verified: '', alreadyInApp: widget.backFromThis).then((response) {
           if (response.isSuccess) {
-            _processOtpSuccessSetup(response, authController, phone, countryDialCode);
+            if (pushInline != null) {
+              pushInline(numberWithCountryCode);
+            } else {
+              _processOtpSuccessSetup(response, authController, phone, countryDialCode);
+            }
           } else {
             showCustomSnackBar(response.message);
           }
@@ -316,4 +377,9 @@ class _SignInViewState extends State<SignInView> {
       }
     }
   }
+}
+
+class _OtpRouteArgs {
+  final String number;
+  _OtpRouteArgs(this.number);
 }

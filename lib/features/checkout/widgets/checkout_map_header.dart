@@ -24,13 +24,16 @@ class CheckoutMapHeader extends StatelessWidget {
     final homeDeliveryAvailable = Get.find<SplashController>().configModel?.homeDelivery ?? false;
     final takeAwayAvailable = Get.find<SplashController>().configModel?.takeAway ?? false;
     final dineInAvailable = checkoutController.restaurant?.isDineInActive ?? false;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GetBuilder<CheckoutController>(
       builder: (controller) {
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A),
+            color: isDark ? const Color(0xFF1A1A1A) : theme.cardColor,
             borderRadius: BorderRadius.circular(16),
+            border: isDark ? null : Border.all(color: theme.dividerColor.withOpacity(0.1)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,14 +44,14 @@ class CheckoutMapHeader extends StatelessWidget {
                   Container(
                     height: 180,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2A2A2A),
+                      color: isDark ? const Color(0xFF2A2A2A) : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     ),
                     child: Center(
                       child: Icon(
                         Icons.location_on,
                         size: 48,
-                        color: Colors.white.withOpacity(0.3),
+                        color: (isDark ? Colors.white : theme.iconTheme.color ?? Colors.grey).withOpacity(0.3),
                       ),
                     ),
                   ),
@@ -65,7 +68,7 @@ class CheckoutMapHeader extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            const Color(0xFF1A1A1A).withOpacity(0.9),
+                            (isDark ? const Color(0xFF1A1A1A) : theme.cardColor).withOpacity(0.9),
                           ],
                         ),
                       ),
@@ -78,7 +81,7 @@ class CheckoutMapHeader extends StatelessWidget {
               if (homeDeliveryAvailable || takeAwayAvailable || dineInAvailable)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                  child: _buildOrderTypeTabs(controller, homeDeliveryAvailable, takeAwayAvailable, dineInAvailable),
+                  child: _buildOrderTypeTabs(controller, homeDeliveryAvailable, takeAwayAvailable, dineInAvailable, theme),
                 ),
 
               // Quick action rows
@@ -133,6 +136,7 @@ class CheckoutMapHeader extends StatelessWidget {
     bool homeDeliveryAvailable,
     bool takeAwayAvailable,
     bool dineInAvailable,
+    ThemeData theme,
   ) {
     List<String> orderTypes = [];
     if (homeDeliveryAvailable) orderTypes.add('delivery');
@@ -143,20 +147,25 @@ class CheckoutMapHeader extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0F0F),
+        color: theme.brightness == Brightness.dark
+          ? const Color(0xFF0F0F0F)
+          : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(3),
       child: Row(
         children: orderTypes.map((type) {
           final isSelected = controller.orderType == type;
+          final isDark = theme.brightness == Brightness.dark;
           return Expanded(
             child: GestureDetector(
               onTap: () => controller.setOrderType(type, notify: true),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF2A2A2A) : Colors.transparent,
+                  color: isSelected
+                    ? (isDark ? const Color(0xFF2A2A2A) : theme.primaryColor.withOpacity(0.1))
+                    : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -164,7 +173,9 @@ class CheckoutMapHeader extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: robotoMedium.copyWith(
                     fontSize: 14,
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+                    color: isSelected
+                      ? (isDark ? Colors.white : theme.primaryColor)
+                      : (isDark ? Colors.white.withOpacity(0.5) : theme.textTheme.bodyMedium?.color?.withOpacity(0.6)),
                   ),
                 ),
               ),
@@ -198,71 +209,91 @@ class CheckoutMapHeader extends StatelessWidget {
     VoidCallback? onTap,
     ValueChanged<bool>? onToggle,
   }) {
-    return InkWell(
-      onTap: hasToggle ? null : onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: Colors.white.withOpacity(0.7),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: robotoMedium.copyWith(
-                      fontSize: 15,
-                      color: Colors.white,
-                    ),
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: robotoRegular.copyWith(
-                        fontSize: 13,
-                        color: Colors.white.withOpacity(0.5),
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return InkWell(
+          onTap: hasToggle ? null : onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 22,
+                  color: isDark
+                    ? Colors.white.withOpacity(0.7)
+                    : theme.iconTheme.color?.withOpacity(0.7),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: robotoMedium.copyWith(
+                          fontSize: 15,
+                          color: isDark ? Colors.white : theme.textTheme.bodyLarge?.color,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: robotoRegular.copyWith(
+                            fontSize: 13,
+                            color: isDark
+                              ? Colors.white.withOpacity(0.5)
+                              : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (showChevron)
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: isDark
+                      ? Colors.white.withOpacity(0.3)
+                      : theme.iconTheme.color?.withOpacity(0.3),
+                  ),
+                if (hasToggle)
+                  Switch(
+                    value: toggleValue,
+                    onChanged: onToggle,
+                    activeColor: theme.primaryColor,
+                  ),
+              ],
             ),
-            if (showChevron)
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: Colors.white.withOpacity(0.3),
-              ),
-            if (hasToggle)
-              Switch(
-                value: toggleValue,
-                onChanged: onToggle,
-                activeColor: const Color(0xFF00A8FF),
-                inactiveThumbColor: Colors.white.withOpacity(0.3),
-                inactiveTrackColor: Colors.white.withOpacity(0.1),
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 
   Widget _buildDivider() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 52),
-      child: Container(
-        height: 1,
-        color: Colors.white.withOpacity(0.08),
-      ),
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return Padding(
+          padding: const EdgeInsets.only(left: 52),
+          child: Container(
+            height: 1,
+            color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : theme.dividerColor.withOpacity(0.3),
+          ),
+        );
+      }
     );
   }
 }

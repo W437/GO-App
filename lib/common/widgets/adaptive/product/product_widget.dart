@@ -5,7 +5,7 @@ import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_
 import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/overflow_container_widget.dart';
@@ -80,11 +80,11 @@ class ProductWidget extends StatelessWidget {
               if(product!.restaurantStatus == 1){
                 ResponsiveHelper.isMobile(context) ? CustomSheet.show(
                   context: context,
-                  child: ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant, isCampaign: isCampaign),
+                  child: RestaurantProductSheet(product: product, inRestaurantPage: inRestaurant, isCampaign: isCampaign),
                   showHandle: true,
                   padding: EdgeInsets.zero,
                 ) : Get.dialog(
-                  Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant)),
+                  Dialog(child: RestaurantProductSheet(product: product, inRestaurantPage: inRestaurant)),
                 );
               }else{
                 showCustomSnackBar('item_is_not_available'.tr);

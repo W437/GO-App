@@ -7,7 +7,7 @@ import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -254,10 +254,10 @@ class ProductController extends GetxController implements GetxService {
       }
     } else {
       ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-        ProductBottomSheetWidget(product: product, isCampaign: false),
+        RestaurantProductSheet(product: product, isCampaign: false),
         backgroundColor: Colors.transparent, isScrollControlled: true,
       ) : Get.dialog(
-        Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: false)),
+        Dialog(child: RestaurantProductSheet(product: product, isCampaign: false)),
       );
     }
   }

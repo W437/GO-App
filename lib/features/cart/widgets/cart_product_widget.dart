@@ -13,7 +13,7 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/common/widgets/adaptive/quantity_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -68,12 +68,12 @@ class CartProductWidget extends StatelessWidget {
                     onTap: (){
                       ResponsiveHelper.isMobile(context) ? CustomSheet.show(
                         context: context,
-                        child: ProductBottomSheetWidget(product: cart.product, cartIndex: cartIndex, cart: cart),
+                        child: RestaurantProductSheet(product: cart.product, cartIndex: cartIndex, cart: cart),
                         showHandle: true,
                         padding: EdgeInsets.zero,
                       ).then((value) => Get.find<CartController>().getCartDataOnline(),
                       ) : showDialog(context: context, builder: (con) => Dialog(
-                        child: ProductBottomSheetWidget(product: cart.product, cartIndex: cartIndex, cart: cart),
+                        child: RestaurantProductSheet(product: cart.product, cartIndex: cartIndex, cart: cart),
                       )).then((value) => Get.find<CartController>().getCartDataOnline());
                     },
                     radius: Dimensions.radiusDefault,

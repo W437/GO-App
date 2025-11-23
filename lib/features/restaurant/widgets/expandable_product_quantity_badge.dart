@@ -7,21 +7,21 @@ import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
-/// Compact Expandable Cart Badge for Product Cards
+/// Expandable Product Quantity Badge for Product Cards
 /// Shows quantity in a compact badge that expands to show +/- controls
-class CompactExpandableCartBadge extends StatefulWidget {
+class ExpandableProductQuantityBadge extends StatefulWidget {
   final int productId;
 
-  const CompactExpandableCartBadge({
+  const ExpandableProductQuantityBadge({
     super.key,
     required this.productId,
   });
 
   @override
-  State<CompactExpandableCartBadge> createState() => _CompactExpandableCartBadgeState();
+  State<ExpandableProductQuantityBadge> createState() => _ExpandableProductQuantityBadgeState();
 }
 
-class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge> {
+class _ExpandableProductQuantityBadgeState extends State<ExpandableProductQuantityBadge> {
   bool _isExpanded = false;
   Timer? _autoCollapseTimer;
 
@@ -48,7 +48,7 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
 
   void _startAutoCollapseTimer() {
     _autoCollapseTimer?.cancel();
-    _autoCollapseTimer = Timer(const Duration(milliseconds: 2000), () {
+    _autoCollapseTimer = Timer(const Duration(milliseconds: 1000), () {
       if (_isExpanded && mounted) {
         setState(() {
           _isExpanded = false;
@@ -98,7 +98,7 @@ class _CompactExpandableCartBadgeState extends State<CompactExpandableCartBadge>
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: _isExpanded
-                    ? theme.disabledColor.withOpacity(0.15)
+                    ? Colors.white
                     : theme.primaryColor,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(_cornerRadius),

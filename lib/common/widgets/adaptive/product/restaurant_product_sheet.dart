@@ -1,4 +1,4 @@
-/// Product bottom sheet widget for detailed product view and cart interactions
+/// Restaurant Product Sheet for detailed product view and cart interactions
 /// Displays product details, variations, add-ons, and add to cart functionality
 
 import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
@@ -39,20 +39,20 @@ import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ProductBottomSheetWidget extends StatefulWidget {
+class RestaurantProductSheet extends StatefulWidget {
   final Product? product;
   final bool isCampaign;
   final CartModel? cart;
   final int? cartIndex;
   final bool inRestaurantPage;
   final bool? fromReview;
-  const ProductBottomSheetWidget({super.key, required this.product, this.isCampaign = false, this.cart, this.cartIndex, this.inRestaurantPage = false, this.fromReview = false});
+  const RestaurantProductSheet({super.key, required this.product, this.isCampaign = false, this.cart, this.cartIndex, this.inRestaurantPage = false, this.fromReview = false});
 
   @override
-  State<ProductBottomSheetWidget> createState() => _ProductBottomSheetWidgetState();
+  State<RestaurantProductSheet> createState() => _RestaurantProductSheetState();
 }
 
-class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
+class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
 
   JustTheController tooTipController = JustTheController();
 
@@ -133,9 +133,7 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
               left: 0,
               right: 0,
               height: 300,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusExtraLarge)),
-                child: Stack(
+              child: Stack(
                   fit: StackFit.expand,
                   children: [
                     BlurhashImageWidget(
@@ -159,7 +157,6 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                     ),
                   ],
                 ),
-              ),
             ),
 
             // 2. Close Button

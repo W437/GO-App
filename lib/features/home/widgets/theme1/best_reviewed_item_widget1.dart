@@ -11,7 +11,7 @@ import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/title_widget.dart';
 import 'package:flutter/material.dart';
@@ -50,10 +50,10 @@ class BestReviewedItemWidget1 extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-                        ProductBottomSheetWidget(product: productList[index], isCampaign: false),
+                        RestaurantProductSheet(product: productList[index], isCampaign: false),
                         backgroundColor: Colors.transparent, isScrollControlled: true,
                       ) : Get.dialog(
-                        Dialog(child: ProductBottomSheetWidget(product: productList[index])),
+                        Dialog(child: RestaurantProductSheet(product: productList[index])),
                       );
                     },
                     child: Container(
