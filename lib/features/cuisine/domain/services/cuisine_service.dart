@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/cuisine/domain/models/cuisine_model.dart';
 import 'package:godelivery_user/features/cuisine/domain/models/cuisine_restaurants_model.dart';
 import 'package:godelivery_user/features/cuisine/domain/repositories/cuisine_repository_interface.dart';
@@ -9,8 +8,8 @@ class CuisineService implements CuisineServiceInterface {
   CuisineService({required this.cuisineRepositoryInterface});
 
   @override
-  Future<CuisineModel?> getCuisineList({DataSourceEnum? source}) async {
-    return await cuisineRepositoryInterface.getList(source: source!);
+  Future<CuisineModel?> getCuisineList() async {
+    return await cuisineRepositoryInterface.getList();
   }
 
   @override

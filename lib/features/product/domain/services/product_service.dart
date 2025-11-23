@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/product/domain/repositories/product_repository_interface.dart';
@@ -13,8 +12,8 @@ class ProductService implements ProductServiceInterface {
   ProductService({required this.productRepositoryInterface});
 
   @override
-  Future<List<Product>?> getPopularProductList({required String type, DataSourceEnum? source}) async {
-    return await productRepositoryInterface.getList(type: type, source: source);
+  Future<List<Product>?> getPopularProductList({required String type}) async {
+    return await productRepositoryInterface.getList(type: type);
   }
 
   @override

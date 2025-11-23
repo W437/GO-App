@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/story/domain/models/story_collection_model.dart';
 import 'package:godelivery_user/features/story/domain/services/story_service_interface.dart';
 
@@ -36,23 +35,15 @@ class StoryController extends GetxController implements GetxService {
     update();
 
     try {
-      print('📖 [STORIES] Fetching from ${reload ? 'SERVER' : 'LOCAL CACHE'}');
-
-      List<StoryCollectionModel>? stories =
-          await storyServiceInterface.getStoryList(
-        source: reload ? DataSourceEnum.client : DataSourceEnum.local,
-      );
-
-      print('📖 [STORIES] Initial fetch result: ${stories?.length ?? 'null'} stories');
-
-      if ((stories == null || stories.isEmpty) && !reload) {
-        // Try fetching from server if local cache is empty or null
-        print('📖 [STORIES] Cache empty/null, fetching from server...');
-        stories = await storyServiceInterface.getStoryList(
-          source: DataSourceEnum.client,
-        );
-        print('📖 [STORIES] Server fetch result: ${stories?.length ?? 'null'} stories');
+      // Use cached data if available and not reloading
+      if (_storyList != null && !reload) {
+        print('✅ [STORIES] Using cached data: ${_storyList!.length} stories');
+        return;
       }
+
+      print('📖 [STORIES] Fetching from API');
+      List<StoryCollectionModel>? stories = await storyServiceInterface.getStoryList();
+      print('📖 [STORIES] Fetch result: ${stories?.length ?? 'null'} stories');
 
       _storyList = stories;
       print('📖 [STORIES] ✅ Stories loaded successfully: ${_storyList?.length ?? 0} collections');

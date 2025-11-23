@@ -1,11 +1,4 @@
-import 'dart:convert';
-
 import 'package:godelivery_user/api/api_client.dart';
-
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
-import 'package:godelivery_user/common/cache/cache_manager.dart';
-import 'package:godelivery_user/common/cache/cache_key.dart';
-import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/domain/reposotories/address_repo_interface.dart';
@@ -14,39 +7,20 @@ import 'package:get/get.dart';
 
 class AddressRepo implements AddressRepoInterface<AddressModel> {
   final ApiClient apiClient;
-  final CacheManager cacheManager;
 
-  AddressRepo({required this.apiClient, required this.cacheManager});
+  AddressRepo({required this.apiClient});
 
   @override
-  Future<List<AddressModel>?> getList({int? offset, bool isLocal = false, DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.addressListUri,
-      schemaVersion: 1,
-    );
-
-    return await cacheManager.get<List<AddressModel>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData(AppConstants.addressListUri);
-        if (response.statusCode == 200) {
-          List<AddressModel> addressList = [];
-          response.body['addresses'].forEach((address) {
-            addressList.add(AddressModel.fromJson(address));
-          });
-          return addressList;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<AddressModel> list = [];
-        jsonDecode(json).forEach((address) {
-          list.add(AddressModel.fromJson(address));
-        });
-        return list;
-      },
-    );
+  Future<List<AddressModel>?> getList({int? offset, bool isLocal = false}) async {
+    Response response = await apiClient.getData(AppConstants.addressListUri);
+    if (response.statusCode == 200) {
+      List<AddressModel> addressList = [];
+      response.body['addresses'].forEach((address) {
+        addressList.add(AddressModel.fromJson(address));
+      });
+      return addressList;
+    }
+    return null;
   }
 
   @override

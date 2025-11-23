@@ -1,11 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:godelivery_user/api/api_client.dart';
-
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
-import 'package:godelivery_user/common/cache/cache_manager.dart';
-import 'package:godelivery_user/common/cache/cache_key.dart';
-import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/features/story/domain/models/story_collection_model.dart';
 import 'package:godelivery_user/features/story/domain/repositories/story_repository_interface.dart';
 import 'package:godelivery_user/util/app_constants.dart';
@@ -15,64 +10,28 @@ import 'dart:io';
 
 class StoryRepository implements StoryRepositoryInterface {
   final ApiClient apiClient;
-  final CacheManager cacheManager;
-  StoryRepository({required this.apiClient, required this.cacheManager});
+  StoryRepository({required this.apiClient});
 
   @override
-  Future<List<StoryCollectionModel>?> getList(
-      {int? offset, DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.storyFeedUri,
-      schemaVersion: 1,
-    );
+  Future<List<StoryCollectionModel>?> getList({int? offset}) async {
+    Response response = await apiClient.getData(AppConstants.storyFeedUri);
 
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
-      print('📖 [STORY REPO] Cache invalidated, fetching fresh data');
+    if (response.statusCode == 200) {
+      List<StoryCollectionModel> storyList = [];
+      // API returns {data: [...]} structure
+      if (response.body is Map && response.body['data'] != null) {
+        final dataList = response.body['data'] as List;
+        dataList.forEach((data) {
+          storyList.add(StoryCollectionModel.fromJson(data));
+        });
+      } else if (response.body is List) {
+        response.body.forEach((data) {
+          storyList.add(StoryCollectionModel.fromJson(data));
+        });
+      }
+      return storyList;
     }
-
-    // Use cache-first strategy (or fetch fresh if cache was just invalidated)
-    return await cacheManager.get<List<StoryCollectionModel>>(
-      cacheKey,
-      fetcher: () async {
-        print('📖 [STORY REPO] Calling API: ${AppConstants.storyFeedUri}');
-        Response response = await apiClient.getData(AppConstants.storyFeedUri);
-        print('📖 [STORY REPO] API Response - Status: ${response.statusCode}');
-
-        if (response.statusCode == 200) {
-          List<StoryCollectionModel> storyList = [];
-          // API returns {data: [...]} structure
-          if (response.body is Map && response.body['data'] != null) {
-            final dataList = response.body['data'] as List;
-            dataList.forEach((data) {
-              storyList.add(StoryCollectionModel.fromJson(data));
-            });
-          } else if (response.body is List) {
-            response.body.forEach((data) {
-              storyList.add(StoryCollectionModel.fromJson(data));
-            });
-          }
-          return storyList;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<StoryCollectionModel> list = [];
-        final decoded = jsonDecode(json);
-        if (decoded is Map && decoded['data'] != null) {
-          (decoded['data'] as List).forEach((data) {
-            list.add(StoryCollectionModel.fromJson(data));
-          });
-        } else if (decoded is List) {
-          decoded.forEach((data) {
-            list.add(StoryCollectionModel.fromJson(data));
-          });
-        }
-        return list;
-      },
-    );
+    return null;
   }
 
   @override

@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/product/domain/models/basic_campaign_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/product/domain/services/campaign_service_interface.dart';
@@ -40,29 +39,21 @@ class CampaignController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> getItemCampaignList(bool reload, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
-    print('🔍 getItemCampaignList called - reload: $reload, dataSource: $dataSource, fromRecall: $fromRecall');
-    print('🔍 Current _itemCampaignList: ${_itemCampaignList?.length ?? "null"}');
-
-    if(_itemCampaignList == null || reload || fromRecall) {
-      if(!fromRecall) {
-        _itemCampaignList = null;
-      }
-
-      List<Product>? itemCampaignList;
-      if(dataSource == DataSourceEnum.local) {
-        print('📦 Fetching from LOCAL cache...');
-        itemCampaignList = await campaignServiceInterface.getItemCampaignList(source: DataSourceEnum.local);
-        print('📦 Local result: ${itemCampaignList?.length ?? "null"} items');
-        _prepareItemBasicCampaign(itemCampaignList);
-        getItemCampaignList(false, dataSource: DataSourceEnum.client, fromRecall: true);
-      } else {
-        print('🌐 Fetching from API...');
-        itemCampaignList = await campaignServiceInterface.getItemCampaignList(source: DataSourceEnum.client);
-        print('🌐 API result: ${itemCampaignList?.length ?? "null"} items');
-        _prepareItemBasicCampaign(itemCampaignList);
-      }
+  Future<void> getItemCampaignList(bool reload) async {
+    // Use cached data if available and not reloading
+    if (_itemCampaignList != null && !reload) {
+      print('✅ [CAMPAIGN] Using cached data: ${_itemCampaignList!.length} items');
+      return;
     }
+
+    if (reload) {
+      _itemCampaignList = null;
+    }
+
+    print('🌐 [CAMPAIGN] Fetching from API...');
+    List<Product>? itemCampaignList = await campaignServiceInterface.getItemCampaignList();
+    print('🌐 [CAMPAIGN] API result: ${itemCampaignList?.length ?? "null"} items');
+    _prepareItemBasicCampaign(itemCampaignList);
   }
 
   _prepareItemBasicCampaign(List<Product>? itemCampaignList) {

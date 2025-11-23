@@ -1,9 +1,8 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/interface/repository_interface.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 abstract class SplashRepositoryInterface extends RepositoryInterface {
-  Future<Response> getConfigData({required DataSourceEnum? source});
+  Future<Response> getConfigData();
   Future<bool> initSharedData();
   void disableIntro();
   bool? showIntro();

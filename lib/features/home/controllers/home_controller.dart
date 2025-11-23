@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/home/domain/models/banner_model.dart';
 import 'package:godelivery_user/features/home/domain/models/cashback_model.dart';
 import 'package:godelivery_user/features/home/domain/services/home_service_interface.dart';
@@ -29,21 +28,22 @@ class HomeController extends GetxController implements GetxService {
   bool _showFavButton = true;
   bool get showFavButton => _showFavButton;
 
-  Future<void> getBannerList(bool reload, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
-    if(_bannerImageList == null || reload || fromRecall) {
-      if(!fromRecall) {
-        _bannerImageList = null;
-      }
-      BannerModel? bannerModel;
-      if(dataSource == DataSourceEnum.local){
-        bannerModel = await homeServiceInterface.getBannerList(source: DataSourceEnum.local);
-        _prepareBannerList(bannerModel);
-        getBannerList(false, dataSource: DataSourceEnum.client, fromRecall: true);
-      }else{
-        bannerModel = await homeServiceInterface.getBannerList(source: DataSourceEnum.client);
-        _prepareBannerList(bannerModel);
-      }
+  Future<void> getBannerList(bool reload) async {
+    // Use cached data if available and not forcing reload
+    if (_bannerImageList != null && !reload) {
+      print('✅ [BANNER] Using cached data');
+      return;
     }
+
+    // Show shimmer while loading
+    if (reload) {
+      _bannerImageList = null;
+      update();
+    }
+
+    // Fetch from API
+    BannerModel? bannerModel = await homeServiceInterface.getBannerList();
+    _prepareBannerList(bannerModel);
   }
 
   _prepareBannerList(BannerModel? bannerModel){
@@ -99,18 +99,10 @@ class HomeController extends GetxController implements GetxService {
   }
 
 
-  Future<void> getCashBackOfferList({DataSourceEnum dataSource = DataSourceEnum.local}) async {
+  Future<void> getCashBackOfferList() async {
     _cashBackOfferList = null;
-    List<CashBackModel>? cashBackOfferList;
-
-    if(dataSource == DataSourceEnum.local){
-      cashBackOfferList = await homeServiceInterface.getCashBackOfferList(source: DataSourceEnum.local);
-      _prepareCashBackOfferList(cashBackOfferList);
-      getCashBackOfferList(dataSource: DataSourceEnum.client);
-    }else{
-      cashBackOfferList = await homeServiceInterface.getCashBackOfferList(source: DataSourceEnum.client);
-      _prepareCashBackOfferList(cashBackOfferList);
-    }
+    List<CashBackModel>? cashBackOfferList = await homeServiceInterface.getCashBackOfferList();
+    _prepareCashBackOfferList(cashBackOfferList);
   }
 
   _prepareCashBackOfferList(List<CashBackModel>? cashBackOfferList){

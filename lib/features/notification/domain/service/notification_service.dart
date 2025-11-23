@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_model.dart';
 import 'package:godelivery_user/features/notification/domain/repository/notification_repository_interface.dart';
 import 'package:godelivery_user/features/notification/domain/service/notification_service_interface.dart';
@@ -9,8 +8,8 @@ class NotificationService implements NotificationServiceInterface {
   NotificationService({required this.notificationRepositoryInterface});
 
   @override
-  Future<List<NotificationModel>?> getList({DataSourceEnum? source}) async {
-    List<NotificationModel>? notificationList = await notificationRepositoryInterface.getList(source: source);
+  Future<List<NotificationModel>?> getList() async {
+    List<NotificationModel>? notificationList = await notificationRepositoryInterface.getList();
     if(notificationList != null) {
       notificationList.sort((a, b) {
         return DateConverter.isoStringToLocalDate(a.updatedAt!).compareTo(DateConverter.isoStringToLocalDate(b.updatedAt!));

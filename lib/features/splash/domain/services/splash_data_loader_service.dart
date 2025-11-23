@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
@@ -158,14 +157,12 @@ class SplashDataLoaderService {
   ) async {
     print('📦 [SPLASH DATA LOADER] Loading core data...');
 
-    final dataSource = useCache ? DataSourceEnum.local : DataSourceEnum.client;
-
     try {
       // Load core data sequentially for visible progress
       await _loadWithRetry(
         'categories',
         'Finding delicious options...',
-        () => Get.find<CategoryController>().getCategoryList(false, dataSource: dataSource),
+        () => Get.find<CategoryController>().getCategoryList(false),
         onProgress,
         onError,
       );
@@ -174,7 +171,7 @@ class SplashDataLoaderService {
       await _loadWithRetry(
         'banners',
         'Spicing things up...',
-        () => Get.find<HomeController>().getBannerList(false, dataSource: dataSource),
+        () => Get.find<HomeController>().getBannerList(false),
         onProgress,
         onError,
       );
@@ -183,7 +180,7 @@ class SplashDataLoaderService {
       await _loadWithRetry(
         'cuisines',
         'Exploring cuisines...',
-        () => Get.find<CuisineController>().getCuisineList(dataSource: dataSource),
+        () => Get.find<CuisineController>().getCuisineList(),
         onProgress,
         onError,
       );
@@ -347,7 +344,7 @@ class SplashDataLoaderService {
         _loadWithRetry(
           'cashback',
           'Finding rewards for you...',
-          () => Get.find<HomeController>().getCashBackOfferList(dataSource: useCache ? DataSourceEnum.local : DataSourceEnum.client),
+          () => Get.find<HomeController>().getCashBackOfferList(),
           onProgress,
           onError,
         ),

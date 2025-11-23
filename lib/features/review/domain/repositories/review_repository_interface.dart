@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
@@ -7,7 +6,7 @@ import 'package:godelivery_user/interface/repository_interface.dart';
 
 abstract class ReviewRepositoryInterface extends RepositoryInterface {
   @override
-  Future<List<Product>?> getList({int? offset, String type, DataSourceEnum? source});
+  Future<List<Product>?> getList({int? offset, String type});
   Future<ResponseModel> submitReview(ReviewBodyModel reviewBody, bool isProduct);
   Future<List<ReviewModel>?> getRestaurantReviewList(String? restaurantID);
 }

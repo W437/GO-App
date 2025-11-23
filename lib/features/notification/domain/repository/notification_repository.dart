@@ -1,11 +1,5 @@
 import 'dart:convert';
-
 import 'package:godelivery_user/api/api_client.dart';
-
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
-import 'package:godelivery_user/common/cache/cache_manager.dart';
-import 'package:godelivery_user/common/cache/cache_key.dart';
-import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_model.dart';
 import 'package:godelivery_user/features/notification/domain/repository/notification_repository_interface.dart';
 import 'package:godelivery_user/util/app_constants.dart';
@@ -15,8 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class NotificationRepository implements NotificationRepositoryInterface {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
-  final CacheManager cacheManager;
-  NotificationRepository({required this.apiClient, required this.sharedPreferences, required this.cacheManager});
+  NotificationRepository({required this.apiClient, required this.sharedPreferences});
 
   @override
   void saveSeenNotificationCount(int count) {
@@ -66,44 +59,20 @@ class NotificationRepository implements NotificationRepositoryInterface {
   }
 
   @override
-  Future<List<NotificationModel>?> getList({int? offset, DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.notificationUri,
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  Future<List<NotificationModel>?> getList({int? offset}) async {
+    Response response = await apiClient.getData(AppConstants.notificationUri);
+    if (response.statusCode == 200) {
+      List<NotificationModel> notificationList = [];
+      response.body.forEach((notification) {
+        notificationList.add(NotificationModel.fromJson(notification));
+      });
+      return notificationList;
     }
-
-    return await cacheManager.get<List<NotificationModel>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData(AppConstants.notificationUri);
-        if (response.statusCode == 200) {
-          List<NotificationModel> notificationList = [];
-          response.body.forEach((notification) {
-            notificationList.add(NotificationModel.fromJson(notification));
-          });
-          return notificationList;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<NotificationModel> list = [];
-        jsonDecode(json).forEach((notification) {
-          list.add(NotificationModel.fromJson(notification));
-        });
-        return list;
-      },
-    );
+    return null;
   }
 
   @override
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
 }

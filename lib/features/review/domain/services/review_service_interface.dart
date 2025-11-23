@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
@@ -6,7 +5,7 @@ import 'package:godelivery_user/features/product/domain/models/review_body_model
 
 abstract class ReviewServiceInterface {
 
-  Future<List<Product>?> getReviewedProductList({required String type, DataSourceEnum? source});
+  Future<List<Product>?> getReviewedProductList({required String type});
   Future<ResponseModel> submitProductReview(ReviewBodyModel reviewBody);
   Future<ResponseModel> submitDeliverymanReview(ReviewBodyModel reviewBody);
   Future<List<ReviewModel>?> getRestaurantReviewList(String? restaurantID);

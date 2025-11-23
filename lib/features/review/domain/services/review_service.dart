@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
@@ -11,8 +10,8 @@ class ReviewService implements ReviewServiceInterface {
   ReviewService({required this.reviewRepositoryInterface});
 
   @override
-  Future<List<Product>?> getReviewedProductList({required String type, DataSourceEnum? source}) async {
-    return await reviewRepositoryInterface.getList(type: type, source: source);
+  Future<List<Product>?> getReviewedProductList({required String type}) async {
+    return await reviewRepositoryInterface.getList(type: type);
   }
 
   @override

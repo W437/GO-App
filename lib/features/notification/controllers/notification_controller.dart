@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_model.dart';
 import 'package:godelivery_user/features/notification/domain/service/notification_service_interface.dart';
 import 'package:get/get.dart';
@@ -13,20 +12,16 @@ class NotificationController extends GetxController implements GetxService {
   bool _hasNotification = false;
   bool get hasNotification => _hasNotification;
 
-  Future<void> getNotificationList(bool reload, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
-    if(_notificationList == null || reload || fromRecall) {
-      _notificationList = null;
-
-      List<NotificationModel>? notificationList;
-      if(dataSource == DataSourceEnum.local) {
-        notificationList = await notificationServiceInterface.getList(source: DataSourceEnum.local);
-        _prepareNotificationList(notificationList);
-        getNotificationList(false, dataSource: DataSourceEnum.client, fromRecall: true);
-      } else {
-        notificationList = await notificationServiceInterface.getList(source: DataSourceEnum.client);
-        _prepareNotificationList(notificationList);
-      }
+  Future<void> getNotificationList(bool reload) async {
+    // Use cached data if available
+    if (_notificationList != null && !reload) {
+      print('✅ [NOTIFICATION] Using cached data');
+      return;
     }
+
+    _notificationList = null;
+    List<NotificationModel>? notificationList = await notificationServiceInterface.getList();
+    _prepareNotificationList(notificationList);
   }
 
   _prepareNotificationList(List<NotificationModel>? notificationList) {

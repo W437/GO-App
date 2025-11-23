@@ -1,9 +1,8 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
 abstract class SplashServiceInterface {
-  Future<Response> getConfigData({required DataSourceEnum? source});
+  Future<Response> getConfigData();
   ConfigModel? prepareConfigData(Response response);
   Future<bool> initSharedData();
   bool? showIntro();

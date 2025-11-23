@@ -1,9 +1,3 @@
-import 'dart:convert';
-
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
-import 'package:godelivery_user/common/cache/cache_manager.dart';
-import 'package:godelivery_user/common/cache/cache_key.dart';
-import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
@@ -14,9 +8,8 @@ import 'package:get/get.dart';
 
 class CategoryRepository implements CategoryRepositoryInterface {
   final ApiClient apiClient;
-  final CacheManager cacheManager;
 
-  CategoryRepository({required this.apiClient, required this.cacheManager});
+  CategoryRepository({required this.apiClient});
 
   @override
   Future add(value) {
@@ -34,39 +27,16 @@ class CategoryRepository implements CategoryRepositoryInterface {
   }
 
   @override
-  Future<List<CategoryModel>?> getList({int? offset, DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.categoryUri,
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  Future<List<CategoryModel>?> getList({int? offset}) async {
+    Response response = await apiClient.getData(AppConstants.categoryUri);
+    if (response.statusCode == 200) {
+      List<CategoryModel> categoryList = [];
+      response.body.forEach((category) {
+        categoryList.add(CategoryModel.fromJson(category));
+      });
+      return categoryList;
     }
-
-    // Use cache-first strategy (or fetch fresh if cache was just invalidated)
-    return await cacheManager.get<List<CategoryModel>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData(AppConstants.categoryUri);
-        if (response.statusCode == 200) {
-          List<CategoryModel> categoryList = [];
-          response.body.forEach((category) {
-            categoryList.add(CategoryModel.fromJson(category));
-          });
-          return categoryList.isNotEmpty ? categoryList : null;
-        }
-        return null;
-      },
-      deserializer: (json) {
-        List<CategoryModel> list = [];
-        jsonDecode(json).forEach((category) {
-          list.add(CategoryModel.fromJson(category));
-        });
-        return list;
-      },
-    );
+    return null;
   }
 
   @override
@@ -100,23 +70,6 @@ class CategoryRepository implements CategoryRepositoryInterface {
     }
     return restaurantModel;
   }
-
-  // @override
-  // Future<dynamic> getSearchData(String? query, String? categoryID, bool isRestaurant, String type) async {
-  //   RestaurantModel? searchRestaurantModel;
-  //   ProductModel? searchProductModel;
-  //   Response response = await apiClient.getData(
-  //     '${AppConstants.searchUri}${isRestaurant ? 'restaurants' : 'products'}/search?name=$query&category_id=$categoryID&type=$type&offset=1&limit=50',
-  //   );
-  //   if (response.statusCode == 200) {
-  //       if (isRestaurant) {
-  //         searchRestaurantModel = RestaurantModel.fromJson(response.body);
-  //       } else {
-  //         searchProductModel = ProductModel.fromJson(response.body);
-  //       }
-  //   }
-  //   return isRestaurant ? searchRestaurantModel : searchProductModel;
-  // }
 
   @override
   Future<Response> getSearchData(String? query, String? categoryID, bool isRestaurant, String type) async {

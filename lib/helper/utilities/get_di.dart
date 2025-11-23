@@ -1,7 +1,6 @@
 
 import 'dart:convert';
 
-import 'package:godelivery_user/common/cache/cache_manager.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo.dart';
 import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
@@ -188,7 +187,6 @@ Future<Map<String, Map<String, String>>> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   Get.lazyPut(() => sharedPreferences);
   Get.lazyPut(() => ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()));
-  Get.lazyPut(() => CacheManager());
 
 
   ///Interfaces
@@ -196,7 +194,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => locationRepoInterface);
   LocationServiceInterface locationServiceInterface = LocationService(locationRepoInterface: Get.find());
   Get.lazyPut(() => locationServiceInterface);
-  AddressRepoInterface addressRepoInterface = AddressRepo(apiClient: Get.find(), cacheManager: Get.find());
+  AddressRepoInterface addressRepoInterface = AddressRepo(apiClient: Get.find());
   Get.lazyPut(() => addressRepoInterface);
   AddressServiceInterface addressServiceInterface = AddressService(addressRepoInterface: Get.find());
   Get.lazyPut(() => addressServiceInterface);
@@ -224,7 +222,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => verificationRepoInterface);
   VerificationServiceInterface verificationServiceInterface = VerificationService(verificationRepoInterface: Get.find(), authRepoInterface: Get.find());
   Get.lazyPut(() => verificationServiceInterface);
-  CategoryRepositoryInterface categoryRepositoryInterface = CategoryRepository(apiClient: Get.find(), cacheManager: Get.find());
+  CategoryRepositoryInterface categoryRepositoryInterface = CategoryRepository(apiClient: Get.find());
   Get.lazyPut(() => categoryRepositoryInterface);
   CategoryServiceInterface categoryServiceInterface = CategoryService(categoryRepositoryInterface: Get.find());
   Get.lazyPut(() => categoryServiceInterface);
@@ -236,7 +234,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => chatRepositoryInterface);
   ChatServiceInterface chatServiceInterface = ChatService(chatRepositoryInterface: Get.find());
   Get.lazyPut(() => chatServiceInterface);
-  CuisineRepositoryInterface cuisineRepositoryInterface = CuisineRepository(apiClient: Get.find(), cacheManager: Get.find());
+  CuisineRepositoryInterface cuisineRepositoryInterface = CuisineRepository(apiClient: Get.find());
   Get.lazyPut(() => cuisineRepositoryInterface);
   CuisineServiceInterface cuisineServiceInterface = CuisineService(cuisineRepositoryInterface: Get.find());
   Get.lazyPut(() => cuisineServiceInterface);
@@ -244,11 +242,11 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => favouriteRepositoryInterface);
   FavouriteServiceInterface favouriteServiceInterface = FavouriteService(favouriteRepositoryInterface: Get.find());
   Get.lazyPut(() => favouriteServiceInterface);
-  ProductRepositoryInterface productRepositoryInterface = ProductRepository(apiClient: Get.find(), cacheManager: Get.find());
+  ProductRepositoryInterface productRepositoryInterface = ProductRepository(apiClient: Get.find());
   Get.lazyPut(() => productRepositoryInterface);
   ProductServiceInterface productServiceInterface = ProductService(productRepositoryInterface: Get.find());
   Get.lazyPut(() => productServiceInterface);
-  ReviewRepositoryInterface reviewRepositoryInterface = ReviewRepository(apiClient: Get.find(), cacheManager: Get.find());
+  ReviewRepositoryInterface reviewRepositoryInterface = ReviewRepository(apiClient: Get.find());
   Get.lazyPut(() => reviewRepositoryInterface);
   ReviewServiceInterface reviewServiceInterface = ReviewService(reviewRepositoryInterface: Get.find());
   Get.lazyPut(() => reviewServiceInterface);
@@ -276,7 +274,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => languageRepositoryInterface);
   LanguageServiceInterface languageServiceInterface = LanguageService(languageRepositoryInterface: Get.find());
   Get.lazyPut(() => languageServiceInterface);
-  NotificationRepositoryInterface notificationRepositoryInterface = NotificationRepository(apiClient: Get.find(), sharedPreferences: Get.find(), cacheManager: Get.find());
+  NotificationRepositoryInterface notificationRepositoryInterface = NotificationRepository(apiClient: Get.find(), sharedPreferences: Get.find());
   Get.lazyPut(() => notificationRepositoryInterface);
   NotificationServiceInterface notificationServiceInterface = NotificationService(notificationRepositoryInterface: Get.find());
   Get.lazyPut(() => notificationServiceInterface);
@@ -292,7 +290,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => profileRepositoryInterface);
   ProfileServiceInterface profileServiceInterface = ProfileService(profileRepositoryInterface: Get.find());
   Get.lazyPut(() => profileServiceInterface);
-  RestaurantRepositoryInterface restaurantRepositoryInterface = RestaurantRepository(apiClient: Get.find(), sharedPreferences: Get.find(), cacheManager: Get.find());
+  RestaurantRepositoryInterface restaurantRepositoryInterface = RestaurantRepository(apiClient: Get.find(), sharedPreferences: Get.find());
   Get.lazyPut(() => restaurantRepositoryInterface);
   RestaurantServiceInterface restaurantServiceInterface = RestaurantService(restaurantRepositoryInterface: Get.find());
   Get.lazyPut(() => restaurantServiceInterface);
@@ -308,15 +306,15 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => orderRepositoryInterface);
   OrderServiceInterface orderServiceInterface = OrderService(orderRepositoryInterface: Get.find());
   Get.lazyPut(() => orderServiceInterface);
-  HomeRepositoryInterface homeRepositoryInterface = HomeRepository(apiClient: Get.find(), cacheManager: Get.find());
+  HomeRepositoryInterface homeRepositoryInterface = HomeRepository(apiClient: Get.find());
   Get.lazyPut(() => homeRepositoryInterface);
   HomeServiceInterface homeServiceInterface = HomeService(homeRepositoryInterface: Get.find());
   Get.lazyPut(() => homeServiceInterface);
-  CampaignRepositoryInterface campaignRepositoryInterface = CampaignRepository(apiClient: Get.find(), cacheManager: Get.find());
+  CampaignRepositoryInterface campaignRepositoryInterface = CampaignRepository(apiClient: Get.find());
   Get.lazyPut(() => campaignRepositoryInterface);
   CampaignServiceInterface campaignServiceInterface = CampaignService(campaignRepositoryInterface: Get.find());
   Get.lazyPut(() => campaignServiceInterface);
-  AdvertisementRepositoryInterface advertisementRepositoryInterface = AdvertisementRepository(apiClient: Get.find(), cacheManager: Get.find());
+  AdvertisementRepositoryInterface advertisementRepositoryInterface = AdvertisementRepository(apiClient: Get.find());
   Get.lazyPut(() => advertisementRepositoryInterface);
   AdvertisementServiceInterface advertisementServiceInterface = AdvertisementService(advertisementRepositoryInterface: Get.find());
   Get.lazyPut(() => advertisementServiceInterface);
@@ -324,7 +322,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => dineInRepositoryInterface);
   DineInServiceInterface dineInServiceInterface = DineInService(dineInRepositoryInterface: Get.find());
   Get.lazyPut(() => dineInServiceInterface);
-  StoryRepositoryInterface storyRepositoryInterface = StoryRepository(apiClient: Get.find(), cacheManager: Get.find());
+  StoryRepositoryInterface storyRepositoryInterface = StoryRepository(apiClient: Get.find());
   Get.lazyPut(() => storyRepositoryInterface);
   StoryServiceInterface storyServiceInterface = StoryService(storyRepositoryInterface: Get.find(), sharedPreferences: Get.find());
   Get.lazyPut(() => storyServiceInterface);

@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
@@ -69,25 +68,23 @@ class ReviewController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> getReviewedProductList(bool reload, String type, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
+  Future<void> getReviewedProductList(bool reload, String type, bool notify) async {
+    // Use cached data if available and not reloading
+    if (_reviewedProductList != null && !reload) {
+      print('✅ [REVIEW] Using cached reviewed products');
+      return;
+    }
+
     _reviewedType = type;
-    if(reload && !fromRecall) {
+    if(reload) {
       _reviewedProductList = null;
-    }
-    if(notify) {
-      update();
-    }
-    List<Product>? reviewedProductList;
-    if(_reviewedProductList == null || reload || fromRecall) {
-      if(dataSource == DataSourceEnum.local) {
-        reviewedProductList = await reviewServiceInterface.getReviewedProductList(type: type, source: DataSourceEnum.local);
-        _prepareReviewedProductList(reviewedProductList);
-        getReviewedProductList(false, type, false, dataSource: DataSourceEnum.client, fromRecall: true);
-      } else {
-        reviewedProductList = await reviewServiceInterface.getReviewedProductList(type: type, source: DataSourceEnum.client);
-        _prepareReviewedProductList(reviewedProductList);
+      if(notify) {
+        update();
       }
     }
+
+    List<Product>? reviewedProductList = await reviewServiceInterface.getReviewedProductList(type: type);
+    _prepareReviewedProductList(reviewedProductList);
   }
 
   _prepareReviewedProductList(List<Product>? reviewedProductList) {

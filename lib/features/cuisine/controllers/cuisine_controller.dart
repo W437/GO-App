@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/cuisine/domain/models/cuisine_model.dart';
 import 'package:godelivery_user/features/cuisine/domain/models/cuisine_restaurants_model.dart';
 import 'package:godelivery_user/features/cuisine/domain/services/cuisine_service_interface.dart';
@@ -34,17 +33,16 @@ class CuisineController extends GetxController implements GetxService {
     _cuisineRestaurantsModel = null;
   }
 
-  Future<void> getCuisineList({DataSourceEnum dataSource = DataSourceEnum.local}) async {
-    _selectedCuisines = [];
-    CuisineModel? cuisineModel;
-    if(dataSource == DataSourceEnum.local) {
-      cuisineModel = await cuisineServiceInterface.getCuisineList(source: DataSourceEnum.local);
-      _prepareCuisineList(cuisineModel);
-      getCuisineList(dataSource: DataSourceEnum.client);
-    } else {
-      cuisineModel = await cuisineServiceInterface.getCuisineList(source: DataSourceEnum.client);
-      _prepareCuisineList(cuisineModel);
+  Future<void> getCuisineList() async {
+    // Use cached data if available
+    if (_cuisineModel != null) {
+      print('✅ [CUISINE] Using cached data');
+      return;
     }
+
+    _selectedCuisines = [];
+    CuisineModel? cuisineModel = await cuisineServiceInterface.getCuisineList();
+    _prepareCuisineList(cuisineModel);
   }
 
   _prepareCuisineList(CuisineModel? cuisineModel) {

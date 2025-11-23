@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:godelivery_user/api/api_client.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/splash/domain/repositories/splash_repository_interface.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,18 +18,8 @@ class SplashRepository implements SplashRepositoryInterface {
   // }
 
   @override
-  Future<Response> getConfigData({required DataSourceEnum? source}) async {
-    if (source == DataSourceEnum.local) {
-      String? cachedData = sharedPreferences.getString(AppConstants.configCacheKey);
-      if (cachedData != null) {
-        return Response(statusCode: 200, body: jsonDecode(cachedData));
-      } else {
-        // No cache - return empty response and let client call handle API
-        return Response(statusCode: 404, statusText: 'No cached data');
-      }
-    } else {
-      return await getConfigDataFromApi();
-    }
+  Future<Response> getConfigData() async {
+    return await getConfigDataFromApi();
   }
 
   Future<Response> getConfigDataFromApi() async {

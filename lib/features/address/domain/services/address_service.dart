@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
@@ -28,8 +27,8 @@ class AddressService implements AddressServiceInterface{
   }
 
   @override
-  Future<List<AddressModel>?> getList({bool isLocal = false, DataSourceEnum? source}) async {
-    return await addressRepoInterface.getList(source: source);
+  Future<List<AddressModel>?> getList({bool isLocal = false}) async {
+    return await addressRepoInterface.getList();
   }
 
   @override

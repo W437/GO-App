@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/category/domain/models/category_model.dart';
@@ -12,8 +11,8 @@ class CategoryService implements CategoryServiceInterface {
   CategoryService({required this.categoryRepositoryInterface});
 
   @override
-  Future<List<CategoryModel>?> getCategoryList({DataSourceEnum? source}) async {
-    return await categoryRepositoryInterface.getList(source: source);
+  Future<List<CategoryModel>?> getCategoryList() async {
+    return await categoryRepositoryInterface.getList();
   }
 
   @override

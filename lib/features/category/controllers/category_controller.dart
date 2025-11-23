@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/category/domain/models/category_model.dart';
@@ -54,39 +53,26 @@ class CategoryController extends GetxController implements GetxService {
   int _offset = 1;
   int get offset => _offset;
 
-  Future<void> getCategoryList(bool reload, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
-    // Show shimmer on first load or when reloading
-    if(_categoryList == null || reload) {
-      if (reload) {
-        _categoryList = null; // Reset to show shimmer during refresh
-      }
+  Future<void> getCategoryList(bool reload) async {
+    // Use cached data if available and not forcing reload
+    if (_categoryList != null && !reload) {
+      print('✅ [CATEGORY] Using cached data: ${_categoryList!.length} categories');
+      return;
+    }
+
+    // Show shimmer while loading
+    if (reload) {
+      _categoryList = null;
       update();
     }
 
-    List<CategoryModel>? categoryList;
-
-    if(dataSource == DataSourceEnum.local) {
-      // Load from cache first (instant)
-      categoryList = await categoryServiceInterface.getCategoryList(source: DataSourceEnum.local);
-      print('🔍 Category cache returned: ${categoryList?.length} categories');
-      _prepareCategoryList(categoryList);
-      // Refresh in background
-      getCategoryList(false, dataSource: DataSourceEnum.client, fromRecall: true);
+    // Fetch from API
+    List<CategoryModel>? categoryList = await categoryServiceInterface.getCategoryList();
+    if (categoryList != null) {
+      _categoryList = categoryList;
+      print('✅ [CATEGORY] Loaded ${_categoryList!.length} categories from API');
     } else {
-      // Network call
-      categoryList = await categoryServiceInterface.getCategoryList(source: DataSourceEnum.client);
-      print('🔍 Category API returned: ${categoryList?.length} categories');
-      _prepareCategoryList(categoryList);
-    }
-  }
-
-  _prepareCategoryList(List<CategoryModel>? categoryList) {
-    if(categoryList != null) {
-      _categoryList = [];
-      _categoryList!.addAll(categoryList);
-      print('✅ Categories set: ${_categoryList!.length} categories');
-    } else {
-      print('❌ Categories API returned null!');
+      print('❌ [CATEGORY] API returned null!');
     }
     update();
   }

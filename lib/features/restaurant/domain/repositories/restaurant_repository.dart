@@ -1,10 +1,3 @@
-import 'dart:convert';
-
-
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
-import 'package:godelivery_user/common/cache/cache_manager.dart';
-import 'package:godelivery_user/common/cache/cache_key.dart';
-import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
@@ -17,8 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RestaurantRepository implements RestaurantRepositoryInterface {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
-  final CacheManager cacheManager;
-  RestaurantRepository({required this.apiClient, required this.sharedPreferences, required this.cacheManager});
+  RestaurantRepository({required this.apiClient, required this.sharedPreferences});
 
   @override
   Future<RecommendedProductModel?> getRestaurantRecommendedItemList(int? restaurantId) async {
@@ -99,204 +91,78 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
   }
 
   @override
-  Future<RestaurantModel?> getList({int? offset, String? filterBy, int? topRated, int? discount, int? veg, int? nonVeg, bool fromMap = false, DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: '${AppConstants.restaurantUri}/list',
-      params: {
-        'offset': offset,
-        'limit': fromMap ? 20 : 12,
-        'filter_data': filterBy,
-        'top_rated': topRated,
-        'discount': discount,
-        'veg': veg,
-        'non_veg': nonVeg,
-      },
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
-      print('🏪 [RESTAURANT REPO] Cache invalidated, fetching fresh restaurant list');
-    }
-
-    return await cacheManager.get<RestaurantModel>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData('${AppConstants.restaurantUri}/all?offset=$offset&limit=${fromMap ? 20 : 12}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
-        if (response.statusCode == 200) {
-          final model = RestaurantModel.fromJson(response.body);
-          print('🏪 [RESTAURANT REPO] API returned ${model.restaurants?.length ?? 0} restaurants');
-          return model;
-        }
-        return null;
-      },
-
-      deserializer: (json) => RestaurantModel.fromJson(jsonDecode(json)),
-    );
-  }
-
-  @override
-  Future<List<Restaurant>?> getRestaurantList({String? type, bool isRecentlyViewed = false, bool isOrderAgain = false, bool isPopular = false, bool isLatest = false, DataSourceEnum? source}) async {
-    if(isRecentlyViewed) {
-      return _getRecentlyViewedRestaurantList(type!, source: source);
-    } else if(isOrderAgain) {
-      return _getOrderAgainRestaurantList(source: source);
-    } else if(isPopular) {
-      return _getPopularRestaurantList(type!, source: source);
-    } else if(isLatest) {
-      return _getLatestRestaurantList(type!, source: source);
+  Future<RestaurantModel?> getList({int? offset, String? filterBy, int? topRated, int? discount, int? veg, int? nonVeg, bool fromMap = false}) async {
+    Response response = await apiClient.getData('${AppConstants.restaurantUri}/all?offset=$offset&limit=${fromMap ? 20 : 12}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
+    if (response.statusCode == 200) {
+      return RestaurantModel.fromJson(response.body);
     }
     return null;
   }
 
-  Future<List<Restaurant>?> _getLatestRestaurantList(String type, {DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.latestRestaurantUri,
-      params: {'type': type},
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  @override
+  Future<List<Restaurant>?> getRestaurantList({String? type, bool isRecentlyViewed = false, bool isOrderAgain = false, bool isPopular = false, bool isLatest = false}) async {
+    if(isRecentlyViewed) {
+      return _getRecentlyViewedRestaurantList(type!);
+    } else if(isOrderAgain) {
+      return _getOrderAgainRestaurantList();
+    } else if(isPopular) {
+      return _getPopularRestaurantList(type!);
+    } else if(isLatest) {
+      return _getLatestRestaurantList(type!);
     }
-
-    return await cacheManager.get<List<Restaurant>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData('${AppConstants.latestRestaurantUri}?type=$type');
-        if (response.statusCode == 200) {
-          List<Restaurant> latestRestaurantList = [];
-          response.body.forEach((restaurant) {
-            latestRestaurantList.add(Restaurant.fromJson(restaurant));
-          });
-          return latestRestaurantList.isNotEmpty ? latestRestaurantList : null;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<Restaurant> list = [];
-        jsonDecode(json).forEach((restaurant) {
-          list.add(Restaurant.fromJson(restaurant));
-        });
-        return list;
-      },
-    );
+    return null;
   }
 
-  Future<List<Restaurant>?> _getPopularRestaurantList(String type, {DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.popularRestaurantUri,
-      params: {'type': type},
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  Future<List<Restaurant>?> _getLatestRestaurantList(String type) async {
+    Response response = await apiClient.getData('${AppConstants.latestRestaurantUri}?type=$type');
+    if (response.statusCode == 200) {
+      List<Restaurant> latestRestaurantList = [];
+      response.body.forEach((restaurant) {
+        latestRestaurantList.add(Restaurant.fromJson(restaurant));
+      });
+      return latestRestaurantList.isNotEmpty ? latestRestaurantList : null;
     }
-
-    return await cacheManager.get<List<Restaurant>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData('${AppConstants.popularRestaurantUri}?type=$type');
-        if (response.statusCode == 200) {
-          List<Restaurant> popularRestaurantList = [];
-          response.body.forEach((restaurant) {
-            popularRestaurantList.add(Restaurant.fromJson(restaurant));
-          });
-          return popularRestaurantList.isNotEmpty ? popularRestaurantList : null;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<Restaurant> list = [];
-        jsonDecode(json).forEach((restaurant) {
-          list.add(Restaurant.fromJson(restaurant));
-        });
-        return list;
-      },
-    );
+    return null;
   }
 
-  Future<List<Restaurant>?> _getRecentlyViewedRestaurantList(String type, {DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.recentlyViewedRestaurantUri,
-      params: {'type': type},
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  Future<List<Restaurant>?> _getPopularRestaurantList(String type) async {
+    Response response = await apiClient.getData('${AppConstants.popularRestaurantUri}?type=$type');
+    if (response.statusCode == 200) {
+      List<Restaurant> popularRestaurantList = [];
+      response.body.forEach((restaurant) {
+        popularRestaurantList.add(Restaurant.fromJson(restaurant));
+      });
+      return popularRestaurantList.isNotEmpty ? popularRestaurantList : null;
     }
-
-    return await cacheManager.get<List<Restaurant>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData('${AppConstants.recentlyViewedRestaurantUri}?type=$type');
-        if (response.statusCode == 200) {
-          List<Restaurant> recentlyViewedRestaurantList = [];
-          response.body.forEach((restaurant) {
-            recentlyViewedRestaurantList.add(Restaurant.fromJson(restaurant));
-          });
-          return recentlyViewedRestaurantList;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<Restaurant> list = [];
-        jsonDecode(json).forEach((restaurant) {
-          list.add(Restaurant.fromJson(restaurant));
-        });
-        return list;
-      },
-    );
+    return null;
   }
 
-  Future<List<Restaurant>?> _getOrderAgainRestaurantList({DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.orderAgainUri,
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  Future<List<Restaurant>?> _getRecentlyViewedRestaurantList(String type) async {
+    Response response = await apiClient.getData('${AppConstants.recentlyViewedRestaurantUri}?type=$type');
+    if (response.statusCode == 200) {
+      List<Restaurant> recentlyViewedRestaurantList = [];
+      response.body.forEach((restaurant) {
+        recentlyViewedRestaurantList.add(Restaurant.fromJson(restaurant));
+      });
+      return recentlyViewedRestaurantList;
     }
+    return null;
+  }
 
-    return await cacheManager.get<List<Restaurant>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData(AppConstants.orderAgainUri);
-        if (response.statusCode == 200) {
-          List<Restaurant> orderAgainRestaurantList = [];
-          response.body.forEach((restaurant) {
-            orderAgainRestaurantList.add(Restaurant.fromJson(restaurant));
-          });
-          return orderAgainRestaurantList;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        List<Restaurant> list = [];
-        jsonDecode(json).forEach((restaurant) {
-          list.add(Restaurant.fromJson(restaurant));
-        });
-        return list;
-      },
-    );
+  Future<List<Restaurant>?> _getOrderAgainRestaurantList() async {
+    Response response = await apiClient.getData(AppConstants.orderAgainUri);
+    if (response.statusCode == 200) {
+      List<Restaurant> orderAgainRestaurantList = [];
+      response.body.forEach((restaurant) {
+        orderAgainRestaurantList.add(Restaurant.fromJson(restaurant));
+      });
+      return orderAgainRestaurantList;
+    }
+    return null;
   }
 
   @override
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
-  
 }

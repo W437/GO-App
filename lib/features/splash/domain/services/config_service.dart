@@ -1,6 +1,5 @@
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 
 /// Pure config data fetching service with no navigation side effects
 ///
@@ -20,9 +19,7 @@ class ConfigService {
   /// Fetch config from API (always fresh)
   /// Returns null if fetch fails or status != 200
   Future<ConfigModel?> fetchConfig() async {
-    final response = await _service.getConfigData(
-      source: DataSourceEnum.client,
-    );
+    final response = await _service.getConfigData();
 
     if (response.statusCode == 200) {
       return _service.prepareConfigData(response);
@@ -30,41 +27,14 @@ class ConfigService {
     return null;
   }
 
-  /// Fetch config with cache-first strategy
-  ///
-  /// Strategy:
-  /// 1. Try to get from cache first (instant response)
-  /// 2. If cache exists, return it and refresh in background
-  /// 3. If no cache, fetch from API and wait
-  ///
-  /// This provides instant app startup while keeping data fresh.
+  /// Fetch config (simplified - no more caching)
   Future<ConfigModel?> fetchConfigCached() async {
-    // Try cache first
-    final cacheResponse = await _service.getConfigData(
-      source: DataSourceEnum.local,
-    );
-
-    if (cacheResponse.statusCode == 200) {
-      final cachedConfig = _service.prepareConfigData(cacheResponse);
-
-      // Refresh in background (fire and forget - no await)
-      // This keeps cache fresh for next app launch
-      fetchConfig();
-
-      return cachedConfig;
-    }
-
-    // No cache - fetch from API
     return await fetchConfig();
   }
 
-  /// Check if config exists in cache
-  /// Useful for determining if we need to show loading states
+  /// Check if config exists (always returns false now since no cache)
   Future<bool> hasConfigCached() async {
-    final response = await _service.getConfigData(
-      source: DataSourceEnum.local,
-    );
-    return response.statusCode == 200;
+    return false;
   }
 
   /// Fetch config and check for connection errors

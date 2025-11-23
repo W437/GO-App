@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/splash/domain/models/config_model.dart';
 import 'package:godelivery_user/features/splash/domain/repositories/splash_repository_interface.dart';
 import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
@@ -9,14 +8,9 @@ class SplashService implements SplashServiceInterface {
   final SplashRepositoryInterface splashRepositoryInterface;
   SplashService({required this.splashRepositoryInterface});
 
-  /*@override
-  Future<Response> getConfigData({required DataSourceEnum? source}) async {
-    return await splashRepositoryInterface.getConfigData(source: source);
-  }*/
-
   @override
-  Future<Response> getConfigData({required DataSourceEnum? source}) async {
-    return await splashRepositoryInterface.getConfigData(source: source);
+  Future<Response> getConfigData() async {
+    return await splashRepositoryInterface.getConfigData();
   }
 
   @override

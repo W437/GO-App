@@ -1,7 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import 'package:godelivery_user/api/api_client.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_loader_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
@@ -87,39 +86,11 @@ class SplashController extends GetxController implements GetxService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // OLD ARCHITECTURE - DEPRECATED (keeping temporarily for reference/rollback)
+  // OLD ARCHITECTURE - REMOVED
   // ═══════════════════════════════════════════════════════════════════════════
-  // This old method mixed config loading with navigation, causing bugs.
-  // It has been replaced by:
-  // - loadConfig() for data fetching
-  // - AppNavigator for navigation
-  //
-  // All callsites have been migrated. This code can be removed after testing.
+  // The deprecated getConfigData() method has been removed.
+  // Use loadConfig() and AppNavigator.navigateOnAppLaunch() instead.
   // ═══════════════════════════════════════════════════════════════════════════
-
-  @Deprecated('Use loadConfig() and AppNavigator.navigateOnAppLaunch() instead')
-  Future<void> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local, NotificationBodyModel? notificationBody, bool fromMainFunction = false, bool shouldNavigate = true}) async {
-    _hasConnection = true;
-    _savedCookiesData = getCookiesData();
-    Response response;
-    if(source == DataSourceEnum.local) {
-      response = await splashServiceInterface.getConfigData(source: DataSourceEnum.local);
-      // If local cache exists, handle it and fetch fresh data in background
-      if(response.statusCode == 200) {
-        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, shouldNavigate: shouldNavigate, notificationBody: notificationBody, linkBody: null);
-        // Refresh in background without blocking (but don't navigate again!)
-        getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client, shouldNavigate: false);
-      } else {
-        // No cache - must wait for API response
-        response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
-        _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, shouldNavigate: shouldNavigate, notificationBody: notificationBody, linkBody: null);
-      }
-    } else {
-      response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
-      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, shouldNavigate: shouldNavigate, notificationBody: notificationBody, linkBody: null);
-    }
-
-  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // NEW ARCHITECTURE: Separated config loading from navigation
@@ -276,64 +247,10 @@ class SplashController extends GetxController implements GetxService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // OLD ARCHITECTURE SUPPORT METHODS - DEPRECATED
+  // OLD ARCHITECTURE SUPPORT METHODS - REMOVED
   // ═══════════════════════════════════════════════════════════════════════════
-  // These methods support the deprecated getConfigData() above.
-  // Can be removed after testing confirms migration was successful.
+  // Deprecated methods removed. Use new architecture instead.
   // ═══════════════════════════════════════════════════════════════════════════
-
-  @Deprecated('Part of old getConfigData() architecture')
-  void _handleConfigResponse(Response response, bool handleMaintenanceMode, bool fromMainFunction, {required bool shouldNavigate, required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
-    if(response.statusCode == 200) {
-      _configModel = splashServiceInterface.prepareConfigData(response);
-      if(_configModel != null) {
-        // 🔍 DEBUG: Print loaded config
-        print('═══════════════════════════════════════════════════════════');
-        print('🔍 [CONFIG DEBUG] Configuration loaded successfully!');
-        print('   Business Name: ${_configModel!.businessName ?? "N/A"}');
-        if(_configModel!.centralizeLoginSetup != null) {
-          print('📱 [CONFIG DEBUG] Centralize Login Setup:');
-          print('   Manual Login: ${_configModel!.centralizeLoginSetup!.manualLoginStatus}');
-          print('   OTP Login: ${_configModel!.centralizeLoginSetup!.otpLoginStatus}');
-          print('   Social Login: ${_configModel!.centralizeLoginSetup!.socialLoginStatus}');
-          print('   Google: ${_configModel!.centralizeLoginSetup!.googleLoginStatus}');
-          print('   Facebook: ${_configModel!.centralizeLoginSetup!.facebookLoginStatus}');
-          print('   Apple: ${_configModel!.centralizeLoginSetup!.appleLoginStatus}');
-        } else {
-          print('⚠️ [CONFIG DEBUG] centralizeLoginSetup is NULL!');
-        }
-        print('═══════════════════════════════════════════════════════════');
-
-        // Only navigate if this is the initial load, not background refresh
-        print('🚦 [NAVIGATION CHECK] shouldNavigate: $shouldNavigate');
-        if(shouldNavigate) {
-          print('✅ [NAVIGATION] Proceeding with navigation');
-          if(!GetPlatform.isWeb){
-            bool isMaintenanceMode = _configModel!.maintenanceMode!;
-            bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
-
-            if (isInMaintenance && handleMaintenanceMode) {
-              Get.offNamed(RouteHelper.getUpdateRoute(false));
-            } else if (handleMaintenanceMode && ((Get.currentRoute.contains(RouteHelper.update) && !isMaintenanceMode) || !isInMaintenance)) {
-              Get.offNamed(RouteHelper.getInitialRoute());
-            }
-          }
-          if(fromMainFunction) {
-            _mainConfigRouting();
-          } else {
-            route(notificationBody: notificationBody, linkBody: linkBody);
-          }
-        }
-        _onRemoveLoader();
-      }
-    } else {
-      if(response.statusText == ApiClient.noInternetMessage) {
-        _hasConnection = false;
-      }
-    }
-
-    update();
-  }
 
   void _onRemoveLoader() {
     final preloader = html.document.querySelector('.preloader');
@@ -342,16 +259,6 @@ class SplashController extends GetxController implements GetxService {
     }
   }
 
-  @Deprecated('Part of old getConfigData() architecture')
-  _mainConfigRouting() async {
-    if(GetPlatform.isWeb) {
-      bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
-
-      if (isInMaintenance) {
-        Get.offNamed(RouteHelper.getUpdateRoute(false));
-      }
-    }
-  }
 
   Future<bool> initSharedData() {
     return splashServiceInterface.initSharedData();

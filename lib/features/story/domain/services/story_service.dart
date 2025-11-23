@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/story/domain/models/story_collection_model.dart';
 import 'package:godelivery_user/features/story/domain/repositories/story_repository_interface.dart';
 import 'package:godelivery_user/features/story/domain/services/story_service_interface.dart';
@@ -17,9 +16,9 @@ class StoryService implements StoryServiceInterface {
 
   @override
   Future<List<StoryCollectionModel>?> getStoryList(
-      {required DataSourceEnum source}) async {
+      ) async {
     List<StoryCollectionModel>? storyCollections =
-        await storyRepositoryInterface.getList(source: source);
+        await storyRepositoryInterface.getList();
 
     if (storyCollections != null) {
       // Update hasUnseen flag based on local seen state

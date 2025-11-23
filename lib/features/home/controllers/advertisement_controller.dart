@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
 import 'package:godelivery_user/features/home/domain/services/advertisement_service_interface.dart';
 
@@ -17,19 +16,15 @@ class AdvertisementController extends GetxController implements GetxService {
 
   bool autoPlay = true;
 
-  Future<void> getAdvertisementList({DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
-    if(!fromRecall) {
-      _advertisementList = null;
+  Future<void> getAdvertisementList() async {
+    // Use cached data if available
+    if (_advertisementList != null) {
+      print('✅ [ADVERTISEMENT] Using cached data');
+      return;
     }
-    List<AdvertisementModel>? advertisementList;
-    if(dataSource == DataSourceEnum.local) {
-      advertisementList = await advertisementServiceInterface.getAdvertisementList(source: DataSourceEnum.local);
-      _prepareAdvertisement(advertisementList);
-      getAdvertisementList(dataSource: DataSourceEnum.client, fromRecall: true);
-    } else {
-      advertisementList = await advertisementServiceInterface.getAdvertisementList(source: DataSourceEnum.client);
-      _prepareAdvertisement(advertisementList);
-    }
+
+    List<AdvertisementModel>? advertisementList = await advertisementServiceInterface.getAdvertisementList();
+    _prepareAdvertisement(advertisementList);
   }
 
   _prepareAdvertisement(List<AdvertisementModel>? advertisementList) {

@@ -1,10 +1,3 @@
-import 'dart:convert';
-
-
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
-import 'package:godelivery_user/common/cache/cache_manager.dart';
-import 'package:godelivery_user/common/cache/cache_key.dart';
-import 'package:godelivery_user/common/cache/cache_config.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/response_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
@@ -16,8 +9,7 @@ import 'package:get/get.dart';
 
 class ReviewRepository implements ReviewRepositoryInterface {
   final ApiClient apiClient;
-  final CacheManager cacheManager;
-  ReviewRepository({required this.apiClient, required this.cacheManager});
+  ReviewRepository({required this.apiClient});
 
   @override
   Future<ResponseModel> submitReview(ReviewBodyModel reviewBody, bool isProduct) async {
@@ -29,34 +21,14 @@ class ReviewRepository implements ReviewRepositoryInterface {
   }
 
   @override
-  Future<List<Product>?> getList({int? offset, String? type, DataSourceEnum? source}) async {
-    final cacheKey = CacheKey(
-      endpoint: AppConstants.reviewedProductUri,
-      params: {'type': type},
-      schemaVersion: 1,
-    );
-
-    // If source is CLIENT, invalidate cache first to force fresh fetch
-    if (source == DataSourceEnum.client) {
-      await cacheManager.invalidate(cacheKey);
+  Future<List<Product>?> getList({int? offset, String? type}) async {
+    Response response = await apiClient.getData('${AppConstants.reviewedProductUri}?type=$type');
+    if (response.statusCode == 200) {
+      List<Product> reviewedProductList = [];
+      reviewedProductList.addAll(ProductModel.fromJson(response.body).products!);
+      return reviewedProductList;
     }
-
-    return await cacheManager.get<List<Product>>(
-      cacheKey,
-      fetcher: () async {
-        Response response = await apiClient.getData('${AppConstants.reviewedProductUri}?type=$type');
-        if (response.statusCode == 200) {
-          List<Product> reviewedProductList = [];
-          reviewedProductList.addAll(ProductModel.fromJson(response.body).products!);
-          return reviewedProductList;
-        }
-        return null;
-      },
-
-      deserializer: (json) {
-        return ProductModel.fromJson(jsonDecode(json)).products!;
-      },
-    );
+    return null;
   }
 
   Future<ResponseModel> _submitReview(ReviewBodyModel reviewBody) async {
@@ -83,7 +55,9 @@ class ReviewRepository implements ReviewRepositoryInterface {
     Response response = await apiClient.getData('${AppConstants.restaurantReviewUri}?restaurant_id=$restaurantID');
     if (response.statusCode == 200) {
       restaurantReviewList = [];
-      response.body.forEach((review) => restaurantReviewList!.add(ReviewModel.fromJson(review)));
+      response.body['reviews'].forEach((review) {
+        restaurantReviewList!.add(ReviewModel.fromJson(review));
+      });
     }
     return restaurantReviewList;
   }
@@ -107,5 +81,4 @@ class ReviewRepository implements ReviewRepositoryInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-  
 }

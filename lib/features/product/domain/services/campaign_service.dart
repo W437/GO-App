@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/product/domain/models/basic_campaign_model.dart';
 import 'package:godelivery_user/features/product/domain/repositories/campaign_repository_interface.dart';
@@ -15,8 +14,8 @@ class CampaignService implements CampaignServiceInterface {
   }
 
   @override
-  Future<List<Product>?> getItemCampaignList({DataSourceEnum? source}) async {
-    return await campaignRepositoryInterface.getList(source: source);
+  Future<List<Product>?> getItemCampaignList() async {
+    return await campaignRepositoryInterface.getList();
   }
 
   @override

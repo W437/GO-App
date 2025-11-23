@@ -1,4 +1,3 @@
-import 'package:godelivery_user/common/enums/data_source_enum.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
@@ -82,27 +81,23 @@ class ProductController extends GetxController implements GetxService {
     });
   }
 
-  Future<void> getPopularProductList(bool reload, String type, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
+  Future<void> getPopularProductList(bool reload, String type, bool notify) async {
+    // Use cached data if available and not reloading
+    if (_popularProductList != null && !reload) {
+      print('✅ [PRODUCT] Using cached popular products');
+      return;
+    }
+
     _popularType = type;
     if(reload) {
       _popularProductList = null;
-    }
-    if(notify) {
-      update();
-    }
-    if(_popularProductList == null || reload || fromRecall) {
-      _popularProductList = null;
-
-      List<Product>? popularProductList;
-      if(dataSource == DataSourceEnum.local) {
-        popularProductList = await productServiceInterface.getPopularProductList(type: type, source: DataSourceEnum.local);
-        _preparePopularProductList(popularProductList);
-        getPopularProductList(false, type, false, dataSource: DataSourceEnum.client, fromRecall: true);
-      } else {
-        popularProductList = await productServiceInterface.getPopularProductList(type: type, source: DataSourceEnum.client);
-        _preparePopularProductList(popularProductList);
+      if(notify) {
+        update();
       }
     }
+
+    List<Product>? popularProductList = await productServiceInterface.getPopularProductList(type: type);
+    _preparePopularProductList(popularProductList);
   }
 
   _preparePopularProductList(List<Product>? popularProductList) {
