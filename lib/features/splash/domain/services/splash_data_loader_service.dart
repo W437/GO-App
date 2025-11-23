@@ -219,14 +219,14 @@ class SplashDataLoaderService {
         _loadWithRetry(
           'dine_in',
           'Finding dine-in spots...',
-          () => Get.find<DineInController>().getDineInRestaurantList(1, false),
+          () => Get.find<DineInController>().getDineInRestaurantList(0, false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'restaurants',
           'Hunting down the best spots...',
-          () => Get.find<RestaurantController>().getRestaurantList(1, false),
+          () => Get.find<RestaurantController>().getRestaurantList(0, false),
           onProgress,
           onError,
         ),
@@ -340,7 +340,7 @@ class SplashDataLoaderService {
         _loadWithRetry(
           'orders',
           'Tracking your orders...',
-          () => Get.find<OrderController>().getRunningOrders(1, notify: false),
+          () => Get.find<OrderController>().getRunningOrders(0, notify: false),
           onProgress,
           onError,
         ),

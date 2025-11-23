@@ -78,7 +78,7 @@ class DineInController extends GetxController implements GetxService {
     }
     DineInModel? dineInRestaurantModel = await dineInServiceInterface.getDineInRestaurantList(offset: offset, isDistance: _isDistance, isRating: _isRating, isVeg: _veg, isNonVeg: _nonVeg, isDiscounted: _isDiscounted, selectedCuisines: _selectedCuisines);
     if(dineInRestaurantModel != null) {
-      if(offset == 1) {
+      if(offset == 0) {
         _dineInModel = dineInRestaurantModel;
       } else {
         _dineInModel!.totalSize = dineInRestaurantModel.totalSize;

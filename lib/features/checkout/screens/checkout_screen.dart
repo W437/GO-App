@@ -480,7 +480,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      height: 200,
+                      height: 220,
                       child: IgnorePointer(
                         child: Container(
                           decoration: BoxDecoration(
@@ -488,56 +488,59 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: [
-                                Colors.black.withOpacity(0.82),
-                                Colors.black.withOpacity(0.58),
-                                Colors.black.withOpacity(0.36),
-                                Colors.black.withOpacity(0.18),
-                                Colors.black.withOpacity(0.08),
+                                Colors.white.withOpacity(0.95),
+                                Colors.white.withOpacity(0.75),
+                                Colors.white.withOpacity(0.55),
+                                Colors.white.withOpacity(0.35),
+                                Colors.white.withOpacity(0.15),
                                 Colors.transparent,
                               ],
-                              stops: const [0.0, 0.25, 0.45, 0.65, 0.85, 1.0],
+                              stops: const [0.0, 0.22, 0.42, 0.62, 0.82, 1.0],
                             ),
                           ),
                         ),
                       ),
                     ),
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeExtraSmall),
-                          child: Row(children: [
-                            Text(
-                              'total_amount'.tr,
-                              style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
-                            ),
+                    SafeArea(
+                      top: false,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeExtraSmall),
+                            child: Row(children: [
+                              Text(
+                                'total_amount'.tr,
+                                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
+                              ),
 
 
-                            (checkoutController.taxIncluded == 1) ? Text(' ${'vat_tax_inc'.tr}', style: robotoMedium.copyWith(
-                              fontSize: Dimensions.fontSizeExtraSmall, color: Colors.white,
-                            )) : const SizedBox(),
+                              (checkoutController.taxIncluded == 1) ? Text(' ${'vat_tax_inc'.tr}', style: robotoMedium.copyWith(
+                                fontSize: Dimensions.fontSizeExtraSmall, color: Colors.white,
+                              )) : const SizedBox(),
 
-                            const Expanded(child: SizedBox()),
+                              const Expanded(child: SizedBox()),
 
-                            PriceConverter.convertAnimationPrice(
-                              total * (checkoutController.subscriptionOrder ? (subscriptionQty == 0 ? 1 : subscriptionQty) : 1),
-                              textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
-                            ),
-                          ]),
-                        ),
+                              PriceConverter.convertAnimationPrice(
+                                total * (checkoutController.subscriptionOrder ? (subscriptionQty == 0 ? 1 : subscriptionQty) : 1),
+                                textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
+                              ),
+                            ]),
+                          ),
 
-                        OrderPlaceButton(
-                          checkoutController: checkoutController, locationController: locationController,
-                          todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, deliveryCharge: deliveryCharge,
-                          discount: discount, total: total, maxCodOrderAmount: maxCodOrderAmount, subscriptionQty: subscriptionQty,
-                          cartList: _cartList!, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                          isWalletActive: _isWalletActive, fromCart: widget.fromCart, guestNumberTextEditingController: guestContactPersonNumberController,
-                          guestNumberNode: guestNumberNode, guestNameTextEditingController: guestContactPersonNameController,
-                          guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-                          isOfflinePaymentActive: _isOfflinePaymentActive, subTotal: subTotal, couponController: couponController,
-                          taxPercent: taxPercent!, extraPackagingAmount: extraPackagingCharge,
-                          taxIncluded: (checkoutController.taxIncluded == 1), tax: checkoutController.orderTax!,
-                        ),
-                      ],
+                          OrderPlaceButton(
+                            checkoutController: checkoutController, locationController: locationController,
+                            todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, deliveryCharge: deliveryCharge,
+                            discount: discount, total: total, maxCodOrderAmount: maxCodOrderAmount, subscriptionQty: subscriptionQty,
+                            cartList: _cartList!, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
+                            isWalletActive: _isWalletActive, fromCart: widget.fromCart, guestNumberTextEditingController: guestContactPersonNumberController,
+                            guestNumberNode: guestNumberNode, guestNameTextEditingController: guestContactPersonNameController,
+                            guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
+                            isOfflinePaymentActive: _isOfflinePaymentActive, subTotal: subTotal, couponController: couponController,
+                            taxPercent: taxPercent!, extraPackagingAmount: extraPackagingCharge,
+                            taxIncluded: (checkoutController.taxIncluded == 1), tax: checkoutController.orderTax!,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

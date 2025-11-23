@@ -170,7 +170,7 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
         widget.onPressed?.call();
       },
       child: Container(
-        width: widget.expand ? null : double.infinity,
+        width: widget.expand ? double.infinity : widget.width,
         decoration: BoxDecoration(
           color: widget.onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : widget.transparent
               ? Colors.transparent : widget.color ?? Theme.of(context).primaryColor,
@@ -178,7 +178,7 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
           border: widget.border,
         ),
         constraints: BoxConstraints(
-          minWidth: widget.expand ? (widget.width ?? Dimensions.webMaxWidth) : (widget.width ?? 0),
+          minWidth: widget.expand ? 0 : (widget.width ?? 0),
           minHeight: widget.height ?? 56,
         ),
         child: widget.child ?? Center(
@@ -229,7 +229,7 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
 
     if(widget.expand) {
       padded = SizedBox(
-        width: widget.width ?? Dimensions.webMaxWidth,
+        width: double.infinity,
         child: padded,
       );
     } else if(widget.width != null) {

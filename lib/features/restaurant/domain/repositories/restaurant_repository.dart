@@ -119,7 +119,13 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       fetcher: () async {
         Response response = await apiClient.getData('${AppConstants.restaurantUri}/all?offset=$offset&limit=${fromMap ? 20 : 12}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
         if (response.statusCode == 200) {
-          return RestaurantModel.fromJson(response.body);
+          final model = RestaurantModel.fromJson(response.body);
+          // Don't cache empty responses
+          if (model.restaurants == null || model.restaurants!.isEmpty) {
+            print('⚠️ [RESTAURANT REPO] API returned empty restaurants - not caching');
+            return null;
+          }
+          return model;
         }
         return null;
       },
@@ -158,6 +164,11 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
           response.body.forEach((restaurant) {
             latestRestaurantList.add(Restaurant.fromJson(restaurant));
           });
+          // Don't cache empty responses
+          if (latestRestaurantList.isEmpty) {
+            print('⚠️ [RESTAURANT REPO] API returned empty latest restaurants - not caching');
+            return null;
+          }
           return latestRestaurantList;
         }
         return null;
@@ -189,6 +200,11 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
           response.body.forEach((restaurant) {
             popularRestaurantList.add(Restaurant.fromJson(restaurant));
           });
+          // Don't cache empty responses
+          if (popularRestaurantList.isEmpty) {
+            print('⚠️ [RESTAURANT REPO] API returned empty popular restaurants - not caching');
+            return null;
+          }
           return popularRestaurantList;
         }
         return null;

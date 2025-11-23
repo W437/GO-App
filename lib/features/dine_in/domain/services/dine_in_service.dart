@@ -8,7 +8,7 @@ class DineInService implements DineInServiceInterface {
 
   @override
   Future<DineInModel?> getDineInRestaurantList({int? offset, required bool isDistance, required bool isRating, required bool isVeg, required bool isNonVeg, required bool isDiscounted, required List<int> selectedCuisines}) async {
-    return await dineInRepositoryInterface.getRestaurantList(offset: 1, isDistance: isDistance, isRating: isRating, isVeg: isVeg, isNonVeg: isNonVeg, isDiscounted: isDiscounted, selectedCuisines: selectedCuisines);
+    return await dineInRepositoryInterface.getRestaurantList(offset: offset, isDistance: isDistance, isRating: isRating, isVeg: isVeg, isNonVeg: isNonVeg, isDiscounted: isDiscounted, selectedCuisines: selectedCuisines);
   }
 
  }

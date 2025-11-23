@@ -49,6 +49,11 @@ class CategoryRepository implements CategoryRepositoryInterface {
           response.body.forEach((category) {
             categoryList.add(CategoryModel.fromJson(category));
           });
+          // Don't cache empty responses
+          if (categoryList.isEmpty) {
+            print('⚠️ [CATEGORY REPO] API returned empty categories - not caching');
+            return null;
+          }
           return categoryList;
         }
         return null;

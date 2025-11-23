@@ -14,6 +14,11 @@ class DineInRepository implements DineInRepositoryInterface {
     Response response = await apiClient.getData('${AppConstants.dineInRestaurantListUri}?offset=$offset&limit=10&sort_by=${isDistance ? 'distance' : isRating ? 'rating' : ''}&veg=${isVeg ? 1 : 0}&non_veg=${isNonVeg ? 1 : 0}&discount=${isDiscounted ? 1 : 0}&cuisine=$selectedCuisines');
     if (response.statusCode == 200) {
       dineInModel = DineInModel.fromJson(response.body);
+      // Don't return empty responses on first page
+      if (offset == 0 && (dineInModel.restaurants == null || dineInModel.restaurants!.isEmpty)) {
+        print('⚠️ [DINE-IN REPO] API returned empty restaurants on first page - returning null');
+        return null;
+      }
     }
     return dineInModel;
   }

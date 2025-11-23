@@ -79,16 +79,29 @@ class HomeScreen extends StatefulWidget {
 
     final splashController = Get.find<SplashController>();
 
-    // Check if data was already loaded in splash screen
+    // Check if data was already loaded in splash screen AND verify it's not empty
     if (!reload && splashController.dataLoadingComplete) {
-      print('✅ [HOME] Data already loaded in splash - skipping load');
-      // Data already loaded in splash, just verify and refresh stories/config in background
-      splashController.refreshConfig(); // No await - background refresh
-      Get.find<StoryController>().getStories(reload: false); // Background refresh
-      return;
+      // Verify critical data is actually loaded (not just marked as complete)
+      final categoryController = Get.find<CategoryController>();
+      final restaurantController = Get.find<RestaurantController>();
+
+      final hasCriticalData = (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) ||
+                              (restaurantController.restaurantModel != null &&
+                               restaurantController.restaurantModel!.restaurants != null &&
+                               restaurantController.restaurantModel!.restaurants!.isNotEmpty);
+
+      if (hasCriticalData) {
+        print('✅ [HOME] Data already loaded in splash - skipping load');
+        // Data already loaded in splash, just verify and refresh stories/config in background
+        splashController.refreshConfig(); // No await - background refresh
+        Get.find<StoryController>().getStories(reload: false); // Background refresh
+        return;
+      } else {
+        print('⚠️ [HOME] Splash marked complete but data is empty - forcing reload');
+      }
     }
 
-    // User manually pulled to refresh OR data wasn't loaded in splash
+    // User manually pulled to refresh OR data wasn't loaded in splash OR data is empty
     print('🔄 [HOME] Loading data - reload requested or splash data incomplete');
 
     // Refresh config (no await for faster perceived load)
@@ -98,7 +111,7 @@ class HomeScreen extends StatefulWidget {
     Get.find<CategoryController>().getCategoryList(reload);
     Get.find<CuisineController>().getCuisineList();
     Get.find<AdvertisementController>().getAdvertisementList();
-    Get.find<DineInController>().getDineInRestaurantList(1, reload);
+    Get.find<DineInController>().getDineInRestaurantList(0, reload);
     Get.find<StoryController>().getStories(reload: true); // Always fetch fresh stories from API
     Get.find<LocationController>().getZoneList();
     if(splashController.configModel!.popularRestaurant == 1) {
@@ -114,13 +127,13 @@ class HomeScreen extends StatefulWidget {
     if(splashController.configModel!.mostReviewedFoods == 1) {
       Get.find<ReviewController>().getReviewedProductList(reload, 'all', false);
     }
-    Get.find<RestaurantController>().getRestaurantList(1, reload);
+    Get.find<RestaurantController>().getRestaurantList(0, reload);
     if(Get.find<AuthController>().isLoggedIn()) {
       await Get.find<ProfileController>().getUserInfo();
       Get.find<RestaurantController>().getRecentlyViewedRestaurantList(reload, 'all', false);
       Get.find<RestaurantController>().getOrderAgainRestaurantList(reload);
       Get.find<NotificationController>().getNotificationList(reload);
-      Get.find<OrderController>().getRunningOrders(1, notify: false);
+      Get.find<OrderController>().getRunningOrders(0, notify: false);
       Get.find<AddressController>().getAddressList();
       Get.find<HomeController>().getCashBackOfferList();
     }

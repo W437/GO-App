@@ -69,7 +69,7 @@ class RestaurantController extends GetxController implements GetxService {
 
   List<int> _foodOffsetList = [];
 
-  int _foodOffset = 1;
+  int _foodOffset = 0;
   int get foodOffset => _foodOffset;
 
   String _type = 'all';
@@ -200,10 +200,10 @@ class RestaurantController extends GetxController implements GetxService {
     }
 
     RestaurantModel? restaurantModel;
-    if(source == DataSourceEnum.local && offset == 1) {
+    if(source == DataSourceEnum.local && offset == 0) {
       restaurantModel = await restaurantServiceInterface.getRestaurantList(offset, _restaurantType, _topRated, _discount, _veg, _nonVeg, fromMap: fromMap, source: DataSourceEnum.local);
       _prepareRestaurantList(restaurantModel, offset);
-      getRestaurantList(1, false, fromMap: fromMap, source: DataSourceEnum.client);
+      getRestaurantList(0, false, fromMap: fromMap, source: DataSourceEnum.client);
     } else {
       restaurantModel = await restaurantServiceInterface.getRestaurantList(offset, _restaurantType, _topRated, _discount, _veg, _nonVeg, fromMap: fromMap, source: DataSourceEnum.client);
       _prepareRestaurantList(restaurantModel, offset);
@@ -212,7 +212,7 @@ class RestaurantController extends GetxController implements GetxService {
 
   _prepareRestaurantList(RestaurantModel? restaurantModel, int offset) {
     if (restaurantModel != null) {
-      if (offset == 1) {
+      if (offset == 0) {
         _restaurantModel = restaurantModel;
       }else {
         _restaurantModel!.totalSize = restaurantModel.totalSize;
@@ -225,27 +225,27 @@ class RestaurantController extends GetxController implements GetxService {
 
   void setRestaurantType(String type) {
     _restaurantType = type;
-    getRestaurantList(1, true);
+    getRestaurantList(0, true);
   }
 
   void setTopRated() {
     _topRated = restaurantServiceInterface.setTopRated(_topRated);
-    getRestaurantList(1, true);
+    getRestaurantList(0, true);
   }
 
   void setDiscount() {
     _discount = restaurantServiceInterface.setDiscounted(_discount);
-    getRestaurantList(1, true);
+    getRestaurantList(0, true);
   }
 
   void setVeg() {
     _veg = restaurantServiceInterface.setVeg(_veg);
-    getRestaurantList(1, true);
+    getRestaurantList(0, true);
   }
 
   void setNonVeg() {
     _nonVeg = restaurantServiceInterface.setNonVeg(_nonVeg);
-    getRestaurantList(1, true);
+    getRestaurantList(0, true);
   }
 
   Future<void> getPopularRestaurantList(bool reload, String type, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
@@ -378,11 +378,11 @@ class RestaurantController extends GetxController implements GetxService {
 
   Future<void> getRestaurantProductList(int? restaurantID, int offset, String type, bool notify) async {
     _foodOffset = offset;
-    if(offset == 1 || _restaurantProducts == null) {
+    if(offset == 0 || _restaurantProducts == null) {
       _type = type;
       _foodOffsetList = [];
       _restaurantProducts = null;
-      _foodOffset = 1;
+      _foodOffset = 0;
       if(notify) {
         update();
       }
@@ -394,7 +394,7 @@ class RestaurantController extends GetxController implements GetxService {
           ? _categoryList![_categoryIndex].id : 0, type);
 
       if (productModel != null) {
-        if (offset == 1) {
+        if (offset == 0) {
           _restaurantProducts = [];
         }
         _restaurantProducts!.addAll(productModel.products!);
@@ -431,14 +431,14 @@ class RestaurantController extends GetxController implements GetxService {
     }else {
       _isSearching = true;
       _searchText = searchText;
-      if(offset == 1 || _restaurantSearchProductModel == null) {
+      if(offset == 0 || _restaurantSearchProductModel == null) {
         _searchType = type;
         _restaurantSearchProductModel = null;
         update();
       }
       ProductModel? productModel = await restaurantServiceInterface.getRestaurantSearchProductList(searchText, storeID, offset, type);
       if (productModel != null) {
-        if (offset == 1) {
+        if (offset == 0) {
           _restaurantSearchProductModel = productModel;
         }else {
           _restaurantSearchProductModel!.products!.addAll(productModel.products!);
