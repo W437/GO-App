@@ -15,11 +15,6 @@ class WoltLikePageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    // Skip initial route transition
-    if (route.settings.name == Navigator.defaultRouteName) {
-      return child;
-    }
-
     final Size size = MediaQuery.of(context).size;
 
     // Determine if this route is underneath another animating route
