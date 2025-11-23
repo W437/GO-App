@@ -439,8 +439,8 @@ class RouteHelper {
         );
       },
       customTransition: _ThreeDGetTransition(),
-      opaque: false,
       transitionDuration: const Duration(milliseconds: 450),
+      opaque: false,
     ),
     GetPage(name: restaurantDetails, page: () => getRoute(RestaurantDetailsScreen(
       restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
@@ -679,6 +679,32 @@ class _ThreeDGetTransition extends CustomTransition {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    final bool isBackground =
+        secondaryAnimation.status != AnimationStatus.dismissed ||
+        secondaryAnimation.value != 0.0;
+
+    if (isBackground) {
+      // Parallax/scale for the route underneath.
+      return AnimatedBuilder(
+        animation: secondaryAnimation,
+        builder: (context, _) {
+          final size = MediaQuery.of(context).size;
+          final double t = Curves.easeOut.transform(secondaryAnimation.value);
+          final double dx = -size.width * 0.12 * t;
+          final double scale = 1.0 - 0.08 * t;
+          return Transform.translate(
+            offset: Offset(dx, 0),
+            child: Transform.scale(
+              scale: scale,
+              alignment: Alignment.center,
+              child: child,
+            ),
+          );
+        },
+      );
+    }
+
+    // Foreground 3D transform.
     return _ThreeDTransitionBody(animation: animation, child: child);
   }
 }
