@@ -58,6 +58,8 @@ import 'package:godelivery_user/features/address/domain/models/address_model.dar
 import 'package:godelivery_user/features/product/domain/models/basic_campaign_model.dart';
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/helper/navigation/three_d_page_route.dart';
+import 'dart:math';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/address/screens/add_address_screen.dart';
 import 'package:godelivery_user/features/address/screens/address_screen.dart';
@@ -227,10 +229,6 @@ class RouteHelper {
     return '$restaurant?id=$id&from_dine_in=$fromDinIn&scroll_to_product=${scrollToProductId ?? ''}';
   }
 
-  /// Helper to open a page with the 3D transition while keeping the previous route stationary.
-  static Future<T?> openWithThreeD<T>(Widget page) {
-    return Navigator.of(Get.context!).push<T>(ThreeDPageRoute(page: page));
-  }
   static String getRestaurantDetailsRoute(Restaurant restaurant) {
     String data = base64Url.encode(utf8.encode(jsonEncode(restaurant.toJson())));
     return '$restaurantDetails?restaurant=$data';
@@ -343,6 +341,11 @@ class RouteHelper {
   static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
   static String getMartRoute() => mart;
 
+  /// Helper to open a page with the 3D transition while keeping the previous route stationary.
+  static Future<T?> openWithThreeD<T>(Widget page) {
+    return Navigator.of(Get.context!).push<T>(ThreeDPageRoute(page: page));
+  }
+
   static List<GetPage> routes = [
     GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true'))), popGesture: false),
     GetPage(name: splash, page: () {
@@ -435,8 +438,9 @@ class RouteHelper {
           byPuss: Get.parameters['slug']?.isNotEmpty ?? false,
         );
       },
-      transition: Transition.native,
+      customTransition: _ThreeDGetTransition(),
       opaque: false,
+      transitionDuration: const Duration(milliseconds: 450),
     ),
     GetPage(name: restaurantDetails, page: () => getRoute(RestaurantDetailsScreen(
       restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
@@ -661,5 +665,160 @@ class RouteHelper {
         : MaintenanceHelper.isMaintenanceEnable() ? const UpdateScreen(isUpdate: false)
         : (AddressHelper.getAddressFromSharedPref() == null && !byPuss)
         ? AccessLocationScreen(fromSignUp: false, fromHome: false, route: Get.currentRoute) : navigateTo;
+  }
+}
+
+/// GetX custom transition wrapper that mimics the 3D foreground-only transform.
+class _ThreeDGetTransition extends CustomTransition {
+  @override
+  Widget buildTransition(
+    BuildContext context,
+    Curve? curve,
+    Alignment? alignment,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return _ThreeDTransitionBody(animation: animation, child: child);
+  }
+}
+
+class _ThreeDTransitionBody extends StatefulWidget {
+  final Animation<double> animation;
+  final Widget child;
+  const _ThreeDTransitionBody({required this.animation, required this.child});
+
+  @override
+  State<_ThreeDTransitionBody> createState() => _ThreeDTransitionBodyState();
+}
+
+class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
+    with SingleTickerProviderStateMixin {
+  double _dragOffset = 0.0;
+  bool _isDragging = false;
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
+    _bounceAnimation = Tween<double>(begin: 0, end: 0).animate(
+      CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
+    )..addListener(() {
+        setState(() {
+          _dragOffset = _bounceAnimation.value;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    if (!Navigator.of(context).canPop()) return;
+    final size = MediaQuery.of(context).size;
+    final edgeWidth = size.width * 0.15;
+    if (details.globalPosition.dx > edgeWidth) return;
+    _isDragging = true;
+    _bounceController.stop();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isDragging) return;
+    setState(() {
+      _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, double.infinity);
+    });
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    if (!_isDragging) return;
+    _isDragging = false;
+    final size = MediaQuery.of(context).size;
+    final threshold = size.width * 0.3;
+    if (_dragOffset > threshold) {
+      Navigator.of(context).maybePop();
+    } else {
+      _bounceAnimation = Tween<double>(begin: _dragOffset, end: 0).animate(
+        CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
+      );
+      _bounceController.forward(from: 0);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double curvedValue = Curves.easeOutCubic.transform(widget.animation.value);
+
+    // Parameters for 3D effect.
+    const double startTranslateXRatio = 1.1;
+    const double startScale = 0.92;
+    const double startYAngle = 8.0 * pi / 180;
+    const double startZAngle = 1.5 * pi / 180;
+
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+
+    final double animationTranslateX = width * startTranslateXRatio * (1.0 - curvedValue);
+    final double totalTranslateX = animationTranslateX + _dragOffset;
+
+    final double totalProgress = (totalTranslateX / (width * startTranslateXRatio)).clamp(0.0, 1.0);
+    final double effectiveProgress = 1.0 - totalProgress;
+
+    final double yAngle = startYAngle * totalProgress;
+    final double zAngle = startZAngle * totalProgress;
+
+    final double scaleValue = widget.animation.status == AnimationStatus.reverse
+        ? curvedValue
+        : const Cubic(0.175, 0.885, 0.32, 1.2).transform(widget.animation.value);
+    final double currentScale = startScale + (1.0 - startScale) * scaleValue * effectiveProgress;
+
+    final double cornerRadius = 24.0 * totalProgress;
+    final double shadowOpacity = (effectiveProgress * 0.5).clamp(0.0, 0.3);
+
+    Widget transformedChild = widget.child;
+    if (cornerRadius > 0.5) {
+      transformedChild = ClipRRect(
+        borderRadius: BorderRadius.circular(cornerRadius),
+        child: transformedChild,
+      );
+    }
+
+    final Matrix4 matrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.001)
+      ..translate(totalTranslateX, 0.0, 0.0)
+      ..scale(currentScale, currentScale, 1.0)
+      ..rotateY(yAngle)
+      ..rotateZ(zAngle);
+
+    return GestureDetector(
+      onHorizontalDragStart: _handleDragStart,
+      onHorizontalDragUpdate: _handleDragUpdate,
+      onHorizontalDragEnd: _handleDragEnd,
+      child: Transform(
+        transform: matrix,
+        alignment: Alignment.center,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(cornerRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(shadowOpacity),
+                blurRadius: 30,
+                spreadRadius: 5,
+                offset: const Offset(-10, 10),
+              ),
+            ],
+          ),
+          child: transformedChild,
+        ),
+      ),
+    );
   }
 }
