@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -590,8 +591,8 @@ class _CustomFullSheetNavigatorState extends State<CustomFullSheetNavigator> {
     // Show back button if we're deeper than the first page
     final bool showBackButton = _pageStack.length > 1;
 
-    // Use custom leading if provided, otherwise show animated navigation button
-    final Widget leadingWidget = _currentLeading ?? _AnimatedNavigationButton(
+    // Always use animated navigation button (ignore custom leading for navigation)
+    final Widget leadingWidget = _AnimatedNavigationButton(
       showBackButton: showBackButton,
       onTap: showBackButton
         ? () {
@@ -723,8 +724,8 @@ class _PageInfo {
   });
 }
 
-/// Animated button that morphs between down arrow and back arrow
-class _AnimatedNavigationButton extends StatelessWidget {
+/// Animated button wrapper that rotates CircularBackButtonWidget
+class _AnimatedNavigationButton extends StatefulWidget {
   final bool showBackButton;
   final VoidCallback onTap;
 
@@ -734,27 +735,72 @@ class _AnimatedNavigationButton extends StatelessWidget {
   });
 
   @override
+  State<_AnimatedNavigationButton> createState() => _AnimatedNavigationButtonState();
+}
+
+class _AnimatedNavigationButtonState extends State<_AnimatedNavigationButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotationController;
+  late Animation<double> _rotationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _rotationController,
+      curve: Curves.easeInOutCubic,
+    ));
+
+    // Set initial state
+    if (widget.showBackButton) {
+      _rotationController.value = 1.0;
+    }
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedNavigationButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Animate when state changes
+    if (widget.showBackButton != oldWidget.showBackButton) {
+      if (widget.showBackButton) {
+        _rotationController.forward();
+      } else {
+        _rotationController.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: Theme.of(context).hintColor.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: AnimatedRotation(
-          turns: showBackButton ? 0.25 : 0.0, // Rotate 90 degrees (0.25 turns)
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: Icon(
-            showBackButton ? Icons.arrow_back_rounded : Icons.keyboard_arrow_down_rounded,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-            size: 20,
+    return AnimatedBuilder(
+      animation: _rotationAnimation,
+      builder: (context, child) {
+        // Rotate from 0° (down ↓) to +90° (left ←) - clockwise rotation
+        final angle = _rotationAnimation.value * 1.5707963267948966; // +π/2 radians = +90°
+
+        return Transform.rotate(
+          angle: angle,
+          child: CircularBackButtonWidget(
+            icon: Icons.keyboard_arrow_down_rounded,
+            onPressed: widget.onTap,
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

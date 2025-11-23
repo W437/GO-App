@@ -172,10 +172,6 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
                         initialPage: CustomFullSheetPage(
                           title: restaurantName,
                           subtitle: 'Your order',
-                          leading: CircularBackButtonWidget(
-                            icon: Icons.keyboard_arrow_down_rounded,
-                            onPressed: () => Get.back(),
-                          ),
                           child: const OrderDetailsSheet(),
                         ),
                       ),

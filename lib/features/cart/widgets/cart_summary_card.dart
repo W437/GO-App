@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/modals/animated_modal_widget.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -166,84 +167,95 @@ class CartSummaryCard extends StatelessWidget {
 
   /// Show cart menu with actions
   void _showCartMenu(BuildContext context) {
-    showModalBottomSheet(
+    AnimatedModalWidget.show(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(Dimensions.radiusDefault),
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(
-          vertical: Dimensions.paddingSizeLarge,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
-              decoration: BoxDecoration(
-                color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.4),
+              blurRadius: 4,
+              spreadRadius: 0,
+              offset: Offset(0, 2),
             ),
-
-            // Add more items
-            if (onAddMore != null)
-              ListTile(
-                leading: Icon(
-                  Icons.add_circle_outline,
-                  color: Theme.of(context).primaryColor,
-                ),
-                title: Text(
-                  'Add more items',
-                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
-                ),
-                onTap: () {
-                  Get.back();
-                  onAddMore?.call();
-                },
-              ),
-
-            // Delete cart
-            if (onDeleteCart != null)
-              ListTile(
-                leading: Icon(
-                  CupertinoIcons.delete,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                title: Text(
-                  'Delete cart',
-                  style: robotoMedium.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-                onTap: () {
-                  Get.back();
-                  // Show confirmation dialog
-                  _showDeleteConfirmation(context);
-                },
-              ),
-
-            // Cancel
-            ListTile(
-              leading: Icon(
-                Icons.close,
-                color: Theme.of(context).hintColor,
-              ),
-              title: Text(
-                'Cancel',
-                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
-              ),
-              onTap: () => Get.back(),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.3),
+              blurRadius: 13,
+              spreadRadius: -3,
+              offset: Offset(0, 7),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.2),
+              blurRadius: 0,
+              spreadRadius: 0,
+              offset: Offset(0, -3),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 1.0),
+              blurRadius: 0,
+              spreadRadius: 0,
+              offset: Offset(0, 0),
             ),
           ],
+        ),
+        padding: const EdgeInsets.symmetric(
+          vertical: Dimensions.paddingSizeDefault,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Add more items
+              if (onAddMore != null) ...[
+                CustomButtonWidget(
+                  buttonText: 'Add more items',
+                  icon: Icons.add_circle_outline,
+                  color: Theme.of(context).disabledColor.withOpacity(0.1),
+                  textColor: Theme.of(context).textTheme.bodyLarge?.color,
+                  iconColor: Theme.of(context).primaryColor,
+                  radius: Dimensions.radiusDefault,
+                  onPressed: () {
+                    Get.back();
+                    onAddMore?.call();
+                  },
+                ),
+                const SizedBox(height: Dimensions.paddingSizeSmall),
+              ],
+
+              // Delete cart
+              if (onDeleteCart != null) ...[
+                CustomButtonWidget(
+                  buttonText: 'Delete cart',
+                  icon: CupertinoIcons.delete,
+                  color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                  textColor: Theme.of(context).colorScheme.error,
+                  iconColor: Theme.of(context).colorScheme.error,
+                  radius: Dimensions.radiusDefault,
+                  onPressed: () {
+                    Get.back();
+                    _showDeleteConfirmation(context);
+                  },
+                ),
+                const SizedBox(height: Dimensions.paddingSizeSmall),
+              ],
+
+              // Cancel
+              CustomButtonWidget(
+                buttonText: 'Cancel',
+                icon: Icons.close,
+                color: Theme.of(context).disabledColor.withOpacity(0.1),
+                textColor: Theme.of(context).hintColor,
+                iconColor: Theme.of(context).hintColor,
+                radius: Dimensions.radiusDefault,
+                onPressed: () => Get.back(),
+              ),
+            ],
+          ),
         ),
       ),
     );
