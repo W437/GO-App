@@ -25,6 +25,7 @@ class CustomButtonWidget extends StatefulWidget {
   final bool isCircular;
   final Widget? child;
   final BoxBorder? border;
+  final bool expand;
 
   const CustomButtonWidget({
     super.key,
@@ -46,6 +47,7 @@ class CustomButtonWidget extends StatefulWidget {
     this.isCircular = false,
     this.child,
     this.border,
+    this.expand = true,
   });
 
   @override
@@ -157,73 +159,83 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
     }
 
     // For regular buttons
-    return Center(
-      child: SizedBox(
-        width: widget.width ?? Dimensions.webMaxWidth,
-        child: Padding(
-          padding: widget.margin == null ? const EdgeInsets.all(0) : widget.margin!,
-          child: AnimatedBuilder(
-            animation: Listenable.merge([_pressAnimation, _bounceAnimation]),
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _pressAnimation.value * _bounceAnimation.value,
-                child: child,
-              );
-            },
-            child: GestureDetector(
-              onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => _pressController.forward() : null,
-              onTapUp: (_) => _pressController.reverse(),
-              onTapCancel: () => _pressController.reverse(),
-              onTap: widget.isLoading ? null : () {
-                // Only start bounce if not already animating (prevent double-click reset)
-                if (!_bounceController.isAnimating) {
-                  _bounceController.forward(from: 0.0);
-                }
-                widget.onPressed?.call();
-              },
-              child: Container(
-            decoration: BoxDecoration(
-              color: widget.onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : widget.transparent
-                  ? Colors.transparent : widget.color ?? Theme.of(context).primaryColor,
-              borderRadius: BorderRadius.circular(widget.radius),
-              border: widget.border,
+    Widget buttonCore = GestureDetector(
+      onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => _pressController.forward() : null,
+      onTapUp: (_) => _pressController.reverse(),
+      onTapCancel: () => _pressController.reverse(),
+      onTap: widget.isLoading ? null : () {
+        if (!_bounceController.isAnimating) {
+          _bounceController.forward(from: 0.0);
+        }
+        widget.onPressed?.call();
+      },
+      child: Container(
+        width: widget.expand ? null : double.infinity,
+        decoration: BoxDecoration(
+          color: widget.onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : widget.transparent
+              ? Colors.transparent : widget.color ?? Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(widget.radius),
+          border: widget.border,
+        ),
+        constraints: BoxConstraints(
+          minWidth: widget.expand ? (widget.width ?? Dimensions.webMaxWidth) : (widget.width ?? 0),
+          minHeight: widget.height ?? 56,
+        ),
+        child: widget.child ?? Center(
+          child: widget.isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+            const SizedBox(
+              height: 15, width: 15,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 2,
+              ),
             ),
-            constraints: BoxConstraints(
-              minWidth: widget.width ?? Dimensions.webMaxWidth,
-              minHeight: widget.height ?? 56,
-            ),
-            child: widget.child ?? Center(
-              child: widget.isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
-                const SizedBox(
-                  height: 15, width: 15,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2,
-                  ),
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white)),
-              ]) : Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
-                widget.icon != null ? Padding(
-                  padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
-                  child: Icon(widget.icon, color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
-                ) : const SizedBox(),
-                widget.buttonText != null ? Text(widget.buttonText!, textAlign: TextAlign.center,  style: widget.isBold ? robotoBold.copyWith(
-                    color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
-                    fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
-                  ) : robotoRegular.copyWith(
-                    color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
-                    fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
-                  )
-                ) : const SizedBox(),
-              ]),
-            ),
-          ),
+            Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white)),
+          ]) : Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+            widget.icon != null ? Padding(
+              padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
+              child: Icon(widget.icon, color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
+            ) : const SizedBox(),
+            widget.buttonText != null ? Text(widget.buttonText!, textAlign: TextAlign.center,  style: widget.isBold ? robotoBold.copyWith(
+                color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
+                fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
+              ) : robotoRegular.copyWith(
+                color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
+                fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
+              )
+            ) : const SizedBox(),
+          ]),
         ),
       ),
-    ),
-    ),
     );
+
+    Widget animatedButton = AnimatedBuilder(
+      animation: Listenable.merge([_pressAnimation, _bounceAnimation]),
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _pressAnimation.value * _bounceAnimation.value,
+          child: child,
+        );
+      },
+      child: buttonCore,
+    );
+
+    Widget padded = Padding(
+      padding: widget.margin == null ? const EdgeInsets.all(0) : widget.margin!,
+      child: animatedButton,
+    );
+
+    if(widget.expand) {
+      padded = SizedBox(
+        width: widget.width ?? Dimensions.webMaxWidth,
+        child: padded,
+      );
+    } else if(widget.width != null) {
+      padded = SizedBox(width: widget.width, child: padded);
+    }
+
+    return widget.expand ? Center(child: padded) : padded;
   }
 }

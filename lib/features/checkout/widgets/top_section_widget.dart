@@ -4,6 +4,7 @@ import 'package:godelivery_user/features/checkout/widgets/coupon_section.dart';
 import 'package:godelivery_user/features/checkout/widgets/delivery_man_tips_section.dart';
 import 'package:godelivery_user/features/checkout/widgets/delivery_option_button.dart';
 import 'package:godelivery_user/features/checkout/widgets/delivery_section.dart';
+import 'package:godelivery_user/features/checkout/widgets/checkout_section_card.dart';
 import 'package:godelivery_user/features/checkout/widgets/estimated_arrival_time_widget.dart';
 import 'package:godelivery_user/features/checkout/widgets/guest_login_widget.dart';
 import 'package:godelivery_user/features/checkout/widgets/order_type_widget.dart';
@@ -103,28 +104,14 @@ class TopSectionWidget extends StatelessWidget {
 
             SizedBox(height: !isDesktop && isCashOnDeliveryActive && restaurantSubscriptionActive ? Dimensions.paddingSizeSmall : 0),
 
-            isCashOnDeliveryActive && restaurantSubscriptionActive && isLoggedIn ? Container(
-              width: context.width,
-              margin: EdgeInsets.only(
-                left: isDesktop ? 0 : 0,
-                right: isDesktop ? 0 : 0,
-                bottom: Dimensions.paddingSizeLarge,
-              ),
+            isCashOnDeliveryActive && restaurantSubscriptionActive && isLoggedIn ? CheckoutSectionCard(
+              title: 'order_type'.tr,
+              margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
               padding: EdgeInsets.symmetric(
                 vertical: Dimensions.paddingSizeLarge,
-                horizontal: isDesktop ? Dimensions.paddingSizeLarge : 0,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                    width: 1,
-                  ),
-                ),
+                horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall,
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('order_type'.tr, style: robotoMedium),
-                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                 Row(children: [
                   Expanded(child: OrderTypeWidget(
                     title: 'regular'.tr,
@@ -169,60 +156,79 @@ class TopSectionWidget extends StatelessWidget {
             ) : const SizedBox(),
             SizedBox(height: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeSmall : isCashOnDeliveryActive && restaurantSubscriptionActive && isLoggedIn ? Dimensions.paddingSizeSmall : 0),
 
-            checkoutController.restaurant != null ? Container(
-              width: context.width,
-              margin: EdgeInsets.only(
-                left: isDesktop ? 0 : 0,
-                right: isDesktop ? 0 : 0,
-                bottom: Dimensions.paddingSizeLarge,
-              ),
-              padding: EdgeInsets.symmetric(
-                vertical: Dimensions.paddingSizeLarge,
-                horizontal: isDesktop ? Dimensions.paddingSizeLarge : 0,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                    width: 1,
-                  ),
+            checkoutController.restaurant != null ? (
+              isDesktop ? CheckoutSectionCard(
+                title: 'delivery_option'.tr,
+                margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                child: SingleChildScrollView(
+                  controller: deliveryOptionScrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(children: [
+                    (Get.find<SplashController>().configModel!.homeDelivery! && checkoutController.restaurant!.delivery!)
+                        ? DeliveryOptionButton(
+                      value: 'delivery', title: 'home_delivery'.tr, charge: charge,
+                      isFree: checkoutController.restaurant!.freeDelivery, total: total,
+                      chargeForView: deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
+                      badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip,
+                    ) : const SizedBox(),
+                    const SizedBox(width: Dimensions.paddingSizeDefault),
+                    (Get.find<SplashController>().configModel!.takeAway! && checkoutController.restaurant!.takeAway!) ? DeliveryOptionButton(
+                      value: 'take_away', title: 'take_away'.tr, charge: deliveryCharge, isFree: true, total: total,
+                      badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip,
+                    ) : const SizedBox(),
+                    const SizedBox(width: Dimensions.paddingSizeDefault),
+                    (Get.find<SplashController>().configModel!.dineInOrderOption! && checkoutController.restaurant!.isActiveDineIn!) ? DeliveryOptionButton(
+                      value: 'dine_in', title: 'dine_in'.tr, charge: deliveryCharge, isFree: true, total: total,
+                      badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip, guestNameTextEditingController: guestNameTextEditingController,
+                      guestNumberTextEditingController: guestNumberTextEditingController, guestEmailController: guestEmailController,
+                    ) : const SizedBox(),
+                  ]),
                 ),
-              ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
-                  'delivery_option'.tr,
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeLarge,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
+              ) : CheckoutSectionCard(
+                title: 'delivery_option'.tr,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double itemWidth = (constraints.maxWidth - Dimensions.paddingSizeSmall) / 2;
+                    List<Widget> options = [];
+                    if(Get.find<SplashController>().configModel!.homeDelivery! && checkoutController.restaurant!.delivery!) {
+                      options.add(SizedBox(
+                        width: itemWidth,
+                        child: DeliveryOptionButton(
+                          value: 'delivery', title: 'home_delivery'.tr, charge: charge,
+                          isFree: checkoutController.restaurant!.freeDelivery, total: total,
+                          chargeForView: deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
+                          badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip,
+                        ),
+                      ));
+                    }
+                    if(Get.find<SplashController>().configModel!.takeAway! && checkoutController.restaurant!.takeAway!) {
+                      options.add(SizedBox(
+                        width: itemWidth,
+                        child: DeliveryOptionButton(
+                          value: 'take_away', title: 'take_away'.tr, charge: deliveryCharge, isFree: true, total: total,
+                          badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip,
+                        ),
+                      ));
+                    }
+                    if(Get.find<SplashController>().configModel!.dineInOrderOption! && checkoutController.restaurant!.isActiveDineIn!) {
+                      options.add(SizedBox(
+                        width: itemWidth,
+                        child: DeliveryOptionButton(
+                          value: 'dine_in', title: 'dine_in'.tr, charge: deliveryCharge, isFree: true, total: total,
+                          badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip, guestNameTextEditingController: guestNameTextEditingController,
+                          guestNumberTextEditingController: guestNumberTextEditingController, guestEmailController: guestEmailController,
+                        ),
+                      ));
+                    }
+                    return options.isNotEmpty ? Wrap(
+                      spacing: Dimensions.paddingSizeSmall,
+                      runSpacing: Dimensions.paddingSizeSmall,
+                      children: options,
+                    ) : const SizedBox();
+                  },
                 ),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                SingleChildScrollView(controller: deliveryOptionScrollController, scrollDirection: Axis.horizontal, child: Row(children: [
-
-                  (Get.find<SplashController>().configModel!.homeDelivery! && checkoutController.restaurant!.delivery!) ? DeliveryOptionButton(
-                    value: 'delivery', title: 'home_delivery'.tr, charge: charge,
-                    isFree: checkoutController.restaurant!.freeDelivery, total: total,
-                    chargeForView: deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
-                    badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip,
-                  ) : const SizedBox(),
-                  const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                  (Get.find<SplashController>().configModel!.takeAway! && checkoutController.restaurant!.takeAway!) ? DeliveryOptionButton(
-                    value: 'take_away', title: 'take_away'.tr, charge: deliveryCharge, isFree: true, total: total,
-                    badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip,
-                  ) : const SizedBox(),
-                  const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                  (Get.find<SplashController>().configModel!.dineInOrderOption! && checkoutController.restaurant!.isActiveDineIn!) ? DeliveryOptionButton(
-                    value: 'dine_in', title: 'dine_in'.tr, charge: deliveryCharge, isFree: true, total: total,
-                    badWeatherCharge: badWeatherCharge, extraChargeForToolTip: extraChargeForToolTip, guestNameTextEditingController: guestNameTextEditingController,
-                    guestNumberTextEditingController: guestNumberTextEditingController, guestEmailController: guestEmailController,
-                  ) : const SizedBox(),
-
-                ])),
-                SizedBox(height: isDesktop ? Dimensions.paddingSizeDefault : 0),
-              ]),
+              )
             ) : const SizedBox(),
             const SizedBox(height: Dimensions.paddingSizeSmall),
 

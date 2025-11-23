@@ -1,4 +1,5 @@
 import 'package:just_the_tooltip/just_the_tooltip.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/custom_tool_tip.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
@@ -32,8 +33,21 @@ class DeliveryOptionButton extends StatelessWidget {
     return GetBuilder<CheckoutController>(
       builder: (checkoutController) {
         bool select = checkoutController.orderType == value;
-        return InkWell(
-          onTap: () async {
+        return SizedBox(
+          width: double.infinity,
+          child: CustomButtonWidget(
+            expand: false,
+            height: 82,
+            radius: Dimensions.radiusLarge,
+            color: select ? Theme.of(context).cardColor : const Color(0xFFF7F8FA),
+            border: Border.all(
+              color: select
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).disabledColor.withValues(alpha: 0.4),
+              width: select ? 1.6 : 1.1,
+            ),
+            margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+            onPressed: () async {
             checkoutController.setOrderType(value);
             checkoutController.setInstruction(-1);
 
@@ -75,50 +89,108 @@ class DeliveryOptionButton extends StatelessWidget {
                 checkoutController.setPaymentMethod(-1);
               }
             }
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: select ? Theme.of(context).cardColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-              border: Border.all(color: select ? Theme.of(context).primaryColor : Theme.of(context).disabledColor, width: 0.5),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeSmall),
+            },
             child: Row(
               children: [
-                Radio(
-                  value: value,
-                  groupValue: checkoutController.orderType,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  onChanged: (String? value) {
-                    checkoutController.setOrderType(value!);
-                  },
-                  activeColor: Theme.of(context).primaryColor,
-                  visualDensity: const VisualDensity(horizontal: -3, vertical: -3),
+                _buildIconBadge(context, select),
+                const SizedBox(width: Dimensions.paddingSizeDefault),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeLarge,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              value == 'delivery'
+                                  ? '${'charge'.tr}: ${chargeForView ?? ''}'
+                                  : (isFree == true ? 'free'.tr : chargeForView ?? ''),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Theme.of(context).hintColor.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                          value == 'delivery' && checkoutController.extraCharge != null && (chargeForView ?? '') != '0' && extraChargeForToolTip > 0 ? CustomToolTip(
+                            message: '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(extraChargeForToolTip)} ${badWeatherCharge > 0 ? '${'and_bad_weather_charge'.tr} ${PriceConverter.convertPrice(badWeatherCharge)}' : ''}',
+                            tooltipController: deliveryFeeTooltipController,
+                            preferredDirection: AxisDirection.right,
+                            child: Icon(Icons.info_outline, color: Theme.of(context).primaryColor, size: 16),
+                          ) : const SizedBox(),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color)),
-
-                  Row(children: [
-                    Text(value == 'delivery' ? '${'charge'.tr}: +$chargeForView' : 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                    value == 'delivery' && checkoutController.extraCharge != null && (chargeForView! != '0') && extraChargeForToolTip > 0 ? CustomToolTip(
-                      message: '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(extraChargeForToolTip)} ${badWeatherCharge > 0 ? '${'and_bad_weather_charge'.tr} ${PriceConverter.convertPrice(badWeatherCharge)}' : ''}',
-                      tooltipController: deliveryFeeTooltipController,
-                      preferredDirection: AxisDirection.right,
-                      child: const Icon(Icons.info, color: Colors.blue, size: 14),
-                    ) : const SizedBox(),
-                  ]),
-
-                ]),
                 const SizedBox(width: Dimensions.paddingSizeSmall),
+                _buildSelectionIndicator(context, select),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildIconBadge(BuildContext context, bool isSelected) {
+    IconData icon = Icons.delivery_dining_rounded;
+    if (value == 'take_away') {
+      icon = Icons.shopping_bag_outlined;
+    } else if (value == 'dine_in') {
+      icon = Icons.restaurant_menu_outlined;
+    }
+
+    return Container(
+      height: 46,
+      width: 46,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Theme.of(context).primaryColor.withValues(alpha: isSelected ? 0.16 : 0.08),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: isSelected ? 0.8 : 0.4),
+          width: 1.2,
+        ),
+      ),
+      child: Icon(icon, color: Theme.of(context).primaryColor, size: 22),
+    );
+  }
+
+  Widget _buildSelectionIndicator(BuildContext context, bool isSelected) {
+    final Color borderColor = isSelected
+        ? Theme.of(context).primaryColor
+        : Theme.of(context).disabledColor.withValues(alpha: 0.6);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      height: 22,
+      width: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: 2),
+        color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.18) : Colors.transparent,
+      ),
+      child: isSelected ? Center(
+        child: Container(
+          height: 10,
+          width: 10,
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ) : const SizedBox(),
     );
   }
 

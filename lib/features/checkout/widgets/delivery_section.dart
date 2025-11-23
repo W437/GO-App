@@ -1,9 +1,10 @@
-import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/widgets/address_card_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/checkout/widgets/checkout_section_card.dart';
 import 'package:godelivery_user/features/checkout/widgets/delivery_info_fields.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -45,30 +46,21 @@ class DeliverySection extends StatelessWidget {
         guestNameTextEditingController: guestNameTextEditingController,
         guestNumberTextEditingController: guestNumberTextEditingController,
         guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-      ) : !takeAway && !isDineIn ? Container(
-        margin: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : Dimensions.fontSizeDefault),
-        padding: EdgeInsets.symmetric(horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeSmall),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+      ) : !takeAway && !isDineIn ? CheckoutSectionCard(
+        title: 'deliver_to'.tr,
+        trailing: CustomButtonWidget(
+          isCircular: true,
+          height: 42,
+          width: 42,
+          expand: false,
+          color: Colors.white,
+          border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.4)),
+          icon: Icons.arrow_drop_down_rounded,
+          iconColor: Theme.of(context).textTheme.bodyMedium?.color,
+          iconSize: 26,
+          onPressed: () => dropDownKey.currentState?.toggleDropdown(),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('deliver_to'.tr, style: robotoMedium),
-            CustomInkWellWidget(
-              onTap: () async{
-                dropDownKey.currentState?.toggleDropdown();
-              },
-              radius: Dimensions.radiusDefault,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeSmall),
-                child: Icon(Icons.arrow_drop_down_rounded, size: 40),
-              ),
-            ),
-          ]),
-
-
           Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
@@ -147,9 +139,9 @@ class DeliverySection extends StatelessWidget {
           Container(
             constraints: BoxConstraints(minHeight: ResponsiveHelper.isDesktop(context) ? 90 : 75),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              border: Border.all(color: Theme.of(context).primaryColor, width: 0.3),
+              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+              color: Colors.white,
+              border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.4), width: 1),
             ),
             child: AddressCardWidget(
               address: (checkoutController.address.length-1) >= checkoutController.addressIndex ? checkoutController.address[checkoutController.addressIndex] : checkoutController.address[0],
