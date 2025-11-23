@@ -12,7 +12,6 @@ import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dar
 import 'package:godelivery_user/helper/utilities/notification_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
-import 'package:godelivery_user/helper/navigation/custom_page_transition.dart';
 import 'package:godelivery_user/theme/dark_theme.dart';
 import 'package:godelivery_user/theme/light_theme.dart';
 import 'package:godelivery_user/util/app_constants.dart';
@@ -157,8 +156,8 @@ class _MyAppState extends State<MyApp> {
             fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),
             initialRoute: GetPlatform.isWeb ? RouteHelper.getInitialRoute() : RouteHelper.getSplashRoute(widget.body, widget.linkBody),
             getPages: RouteHelper.routes,
-            customTransition: CustomPageTransition(),
-            transitionDuration: const Duration(milliseconds: 450),
+            defaultTransition: Transition.cupertino,
+            transitionDuration: const Duration(milliseconds: 300),
             builder: (BuildContext context, widget) {
               return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)), child: Material(
                 child: SafeArea(

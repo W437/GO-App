@@ -38,6 +38,7 @@ import 'package:godelivery_user/features/order/screens/order_details_screen.dart
 import 'package:godelivery_user/features/order/screens/order_screen.dart';
 import 'package:godelivery_user/features/order/screens/order_tracking_screen.dart';
 import 'package:godelivery_user/features/order/screens/refund_request_screen.dart';
+import 'package:godelivery_user/helper/navigation/three_d_page_route.dart';
 import 'package:godelivery_user/features/profile/domain/models/update_user_model.dart';
 import 'package:godelivery_user/features/profile/screens/profile_screen.dart';
 import 'package:godelivery_user/features/profile/screens/update_profile_screen.dart';
@@ -224,6 +225,11 @@ class RouteHelper {
       meta.keywords(keywords: 'Flutter, Dart, SEO, Meta, Web');
     }
     return '$restaurant?id=$id&from_dine_in=$fromDinIn&scroll_to_product=${scrollToProductId ?? ''}';
+  }
+
+  /// Helper to open a page with the 3D transition while keeping the previous route stationary.
+  static Future<T?> openWithThreeD<T>(Widget page) {
+    return Navigator.of(Get.context!).push<T>(ThreeDPageRoute(page: page));
   }
   static String getRestaurantDetailsRoute(Restaurant restaurant) {
     String data = base64Url.encode(utf8.encode(jsonEncode(restaurant.toJson())));
@@ -412,12 +418,26 @@ class RouteHelper {
       email: Get.parameters['email'],
     )),
     GetPage(name: search, page: () => getRoute(const SearchScreen())),
-    GetPage(name: restaurant, page: () {
-      return getRoute(Get.arguments ?? RestaurantScreen(
-        restaurant: Restaurant(id: Get.parameters['id'] != 'null' && Get.parameters['id'] != null ? int.parse(Get.parameters['id']!) : null),
-        slug: Get.parameters['slug'] ?? '', fromDineIn: Get.parameters['from_dine_in'] == 'true',
-      ), byPuss: Get.parameters['slug']?.isNotEmpty ?? false);
-    }),
+    GetPage(
+      name: restaurant,
+      page: () {
+        return getRoute(
+          Get.arguments ??
+              RestaurantScreen(
+                restaurant: Restaurant(
+                  id: Get.parameters['id'] != 'null' && Get.parameters['id'] != null
+                      ? int.parse(Get.parameters['id']!)
+                      : null,
+                ),
+                slug: Get.parameters['slug'] ?? '',
+                fromDineIn: Get.parameters['from_dine_in'] == 'true',
+              ),
+          byPuss: Get.parameters['slug']?.isNotEmpty ?? false,
+        );
+      },
+      transition: Transition.native,
+      opaque: false,
+    ),
     GetPage(name: restaurantDetails, page: () => getRoute(RestaurantDetailsScreen(
       restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
     ))),
