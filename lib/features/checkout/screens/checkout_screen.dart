@@ -4,10 +4,9 @@ import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_w
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:godelivery_user/features/checkout/widgets/bottom_section_widget.dart';
 import 'package:godelivery_user/features/checkout/widgets/checkout_screen_shimmer_view.dart';
 import 'package:godelivery_user/features/checkout/widgets/order_place_button.dart';
-import 'package:godelivery_user/features/checkout/widgets/top_section_widget.dart';
+import 'package:godelivery_user/features/checkout/widgets/checkout_mobile_view.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
 import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
@@ -29,10 +28,8 @@ import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/adaptive/navigation/custom_app_bar_widget.dart';
-import 'package:godelivery_user/common/widgets/adaptive/navigation/footer_view_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_logged_in_screen.dart';
-import 'package:godelivery_user/common/widgets/web/web_page_title_widget.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:flutter/material.dart';
@@ -234,7 +231,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
 
     return Scaffold(
-      backgroundColor: ResponsiveHelper.isDesktop(context) ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF6FAFF),
+      backgroundColor: const Color(0xFF0F0F0F),
       appBar: widget.showAppBar ? CustomAppBarWidget(title: 'checkout'.tr) : null,
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: guestCheckoutPermission || AuthHelper.isLoggedIn() ? GetBuilder<CheckoutController>(builder: (checkoutController) {
@@ -389,92 +386,46 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
             return Column(
               children: [
-                WebScreenTitleWidget(title: 'checkout'.tr),
-
                 Expanded(
                   child: SingleChildScrollView(
                     controller: scrollController,
                     physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeDefault,
-                      vertical: Dimensions.paddingSizeDefault,
-                    ),
-                    child: FooterViewWidget(
-                      child: Center(
-                        child: SizedBox(
-                          width: Dimensions.webMaxWidth,
-                          child: ResponsiveHelper.isDesktop(context) ? Padding(
-                          padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge),
-                          child: Row(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-
-                            Expanded(flex: 6, child: TopSectionWidget(
-                              charge: charge, deliveryCharge: deliveryCharge,
-                              locationController: locationController, tomorrowClosed: tomorrowClosed, todayClosed: todayClosed,
-                              price: price, discount: discount, addOns: addOnsPrice, restaurantSubscriptionActive: restaurantSubscriptionActive,
-                              showTips: showTips, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                              isWalletActive: _isWalletActive, fromCart: widget.fromCart, total: total, tooltipController3: tooltipController3, tooltipController2: tooltipController2,
-                              guestNameTextEditingController: guestContactPersonNameController, guestNumberTextEditingController: guestContactPersonNumberController,
-                              guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-                              guestNumberNode: guestNumberNode, isOfflinePaymentActive: _isOfflinePaymentActive, loginTooltipController: loginTooltipController,
-                              callBack: () => initCall(), deliveryChargeForView: _deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
-                              badWeatherCharge: badWeatherChargeForToolTip, extraChargeForToolTip: extraChargeForToolTip,
-                              deliveryOptionScrollController: deliveryOptionScrollController,
-                            )),
-                            const SizedBox(width: Dimensions.paddingSizeLarge),
-
-                            Expanded(
-                              flex: 4,
-                              child: BottomSectionWidget(
-                                isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!, isWalletActive: _isWalletActive,
-                                total: total, subTotal: subTotal, discount: discount, couponController: couponController,
-                                taxIncluded: (checkoutController.taxIncluded == 1), tax: checkoutController.orderTax!, deliveryCharge: deliveryCharge, checkoutController: checkoutController, locationController: locationController,
-                                todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, maxCodOrderAmount: maxCodOrderAmount,
-                                subscriptionQty: subscriptionQty, taxPercent: taxPercent!, fromCart: widget.fromCart, cartList: _cartList,
-                                price: price, addOns: addOnsPrice, charge: charge,
-                                guestNumberTextEditingController: guestContactPersonNumberController, guestNumberNode: guestNumberNode,
-                                guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-                                guestNameTextEditingController: guestContactPersonNameController, isOfflinePaymentActive: _isOfflinePaymentActive,
-                                expansionTileController: expansionTileController, serviceFeeTooltipController: serviceFeeTooltipController, referralDiscount: referralDiscount,
-                                extraPackagingAmount: extraPackagingCharge, /*extraDiscount: extraDiscount*/
-                              ),
-                            )
-                          ]),
-                        ) : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                          TopSectionWidget(
-                            charge: charge, deliveryCharge: deliveryCharge,
-                            locationController: locationController, tomorrowClosed: tomorrowClosed, todayClosed: todayClosed,
-                            price: price, discount: discount, addOns: addOnsPrice, restaurantSubscriptionActive: restaurantSubscriptionActive,
-                            showTips: showTips, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                            isWalletActive: _isWalletActive, fromCart: widget.fromCart, total: total, tooltipController3: tooltipController3, tooltipController2: tooltipController2,
-                            guestNameTextEditingController: guestContactPersonNameController, guestNumberTextEditingController: guestContactPersonNumberController,
-                            guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-                            guestNumberNode: guestNumberNode, isOfflinePaymentActive: _isOfflinePaymentActive, loginTooltipController: loginTooltipController,
-                            callBack: () => initCall(), deliveryChargeForView: _deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
-                            badWeatherCharge: badWeatherChargeForToolTip, extraChargeForToolTip: extraChargeForToolTip,
-                            deliveryOptionScrollController: deliveryOptionScrollController,
-                          ),
-
-                          BottomSectionWidget(
-                            isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!, isWalletActive: _isWalletActive,
-                            total: total, subTotal: subTotal, discount: discount, couponController: couponController,
-                            taxIncluded: (checkoutController.taxIncluded == 1), tax: checkoutController.orderTax!, deliveryCharge: deliveryCharge, checkoutController: checkoutController, locationController: locationController,
-                            todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, maxCodOrderAmount: maxCodOrderAmount,
-                            subscriptionQty: subscriptionQty, taxPercent: taxPercent!, fromCart: widget.fromCart, cartList: _cartList!,
-                            price: price, addOns: addOnsPrice, charge: charge,
-                            guestNumberTextEditingController: guestContactPersonNumberController, guestNumberNode: guestNumberNode,
-                            guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-                            guestNameTextEditingController: guestContactPersonNameController, isOfflinePaymentActive: _isOfflinePaymentActive,
-                            expansionTileController: expansionTileController, serviceFeeTooltipController: serviceFeeTooltipController, referralDiscount: referralDiscount,
-                            extraPackagingAmount: extraPackagingCharge, /*extraDiscount: extraDiscount*/
-                          ),
-                        ]),
-                      ),
+                    padding: const EdgeInsets.only(top: 16, bottom: 260),
+                    child: CheckoutMobileView(
+                      checkoutController: checkoutController,
+                      price: price,
+                      discount: discount,
+                      addOns: addOnsPrice,
+                      deliveryCharge: deliveryCharge,
+                      total: total,
+                      extraPackagingCharge: extraPackagingCharge,
+                      additionalCharge: additionalCharge,
+                      guestNameTextEditingController: guestContactPersonNameController,
+                      guestNumberTextEditingController: guestContactPersonNumberController,
+                      guestEmailController: guestEmailController,
+                      guestNumberNode: guestNumberNode,
+                      guestEmailNode: guestEmailNode,
+                      tooltipController2: tooltipController2,
+                      badWeatherCharge: badWeatherChargeForToolTip,
+                      extraChargeForToolTip: extraChargeForToolTip,
+                      tomorrowClosed: tomorrowClosed,
+                      todayClosed: todayClosed,
+                      charge: charge,
+                      subscriptionQty: subscriptionQty,
+                      orderAmount: orderAmount,
+                      maxCodOrderAmount: maxCodOrderAmount,
+                      cartList: _cartList!,
+                      isCashOnDeliveryActive: _isCashOnDeliveryActive!,
+                      isDigitalPaymentActive: _isDigitalPaymentActive!,
+                      isWalletActive: _isWalletActive,
+                      isOfflinePaymentActive: _isOfflinePaymentActive,
+                      fromCart: widget.fromCart,
+                      callBack: () => initCall(),
                     ),
                   ),
-                )),
+                ),
 
-                ResponsiveHelper.isDesktop(context) ? const SizedBox() : Stack(
+                Stack(
                   children: [
                     Positioned(
                       left: 0,
@@ -488,11 +439,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: [
-                                Colors.white.withOpacity(0.95),
-                                Colors.white.withOpacity(0.75),
-                                Colors.white.withOpacity(0.55),
-                                Colors.white.withOpacity(0.35),
-                                Colors.white.withOpacity(0.15),
+                                const Color(0xFF0F0F0F).withOpacity(1.0),
+                                const Color(0xFF0F0F0F).withOpacity(0.95),
+                                const Color(0xFF0F0F0F).withOpacity(0.75),
+                                const Color(0xFF0F0F0F).withOpacity(0.55),
+                                const Color(0xFF0F0F0F).withOpacity(0.35),
                                 Colors.transparent,
                               ],
                               stops: const [0.0, 0.22, 0.42, 0.62, 0.82, 1.0],
