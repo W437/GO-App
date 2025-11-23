@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:godelivery_user/features/app_data/controllers/app_data_controller.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo.dart';
 import 'package:godelivery_user/features/dashboard/domain/repositories/dashboard_repo_interface.dart';
@@ -326,6 +327,9 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => storyRepositoryInterface);
   StoryServiceInterface storyServiceInterface = StoryService(storyRepositoryInterface: Get.find(), sharedPreferences: Get.find());
   Get.lazyPut(() => storyServiceInterface);
+
+  /// App Data Controller - Centralized data loading coordinator
+  Get.lazyPut(() => AppDataController());
 
 
   /// Controller

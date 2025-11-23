@@ -17,12 +17,11 @@ import 'package:godelivery_user/features/order/controllers/order_controller.dart
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 
-/// Service responsible for coordinating all data loading during splash screen
-/// with progress tracking, timeout handling, and retry logic
-class SplashDataLoaderService {
+/// Centralized service for coordinating all app-wide data loading
+/// Handles initial load, refresh, progress tracking, and error handling
+class AppDataLoaderService {
   static const int maxRetries = 2;
   static const int requestTimeout = 15; // seconds per request
-  static const int totalTimeout = 45; // seconds total
 
   double _progress = 0.0;
   String _currentMessage = '';
@@ -59,44 +58,44 @@ class SplashDataLoaderService {
     'cashback': 100.0,
   };
 
-  /// Main method to load all data with progress tracking
-  Future<bool> loadAllData({
+  /// Load all application data with progress tracking
+  /// Used during app initialization
+  Future<bool> loadInitialData({
     required Function(double, String) onProgress,
     required Function(String) onError,
-    bool useCache = true,
   }) async {
     try {
       _progress = 0.0;
       _hasError = false;
 
-      print('🚀 [SPLASH DATA LOADER] Starting comprehensive data load...');
+      print('🚀 [APP DATA] Starting initial data load...');
 
       // Message 1: Start
       onProgress(5.0, 'Waking up the kitchen...');
 
-      // Config verification (no message)
+      // Config verification
       if (Get.find<SplashController>().configModel == null) {
-        print('❌ [SPLASH DATA LOADER] Config not available!');
+        print('❌ [APP DATA] Config not available!');
         onError('Failed to load configuration');
         return false;
       }
 
-      // Load user data silently (if logged in)
+      // Load user data if logged in
       if (Get.find<AuthController>().isLoggedIn()) {
-        await _loadUserData(onProgress, onError, useCache);
+        await _loadUserData(onProgress, onError);
       }
 
       // Message 2: Loading core data
       onProgress(20.0, 'Finding delicious options...');
-      await _loadCoreData(onProgress, onError, useCache);
+      await _loadCoreData(onProgress, onError);
 
       // Message 3: Loading restaurants
       onProgress(50.0, 'Hunting down the best spots...');
-      await _loadConditionalData(onProgress, onError, useCache);
+      await _loadConditionalData(onProgress, onError);
 
-      // Load auth data silently (if logged in)
+      // Load auth data if logged in
       if (Get.find<AuthController>().isLoggedIn()) {
-        await _loadAuthData(onProgress, onError, useCache);
+        await _loadAuthData(onProgress, onError);
       }
 
       // Message 4: Almost done
@@ -105,11 +104,11 @@ class SplashDataLoaderService {
 
       // Message 5: Complete
       onProgress(100.0, 'Bon appétit!');
-      print('✅ [SPLASH DATA LOADER] All data loaded successfully');
+      print('✅ [APP DATA] All data loaded successfully');
 
       return true;
     } catch (e) {
-      print('❌ [SPLASH DATA LOADER] Error: $e');
+      print('❌ [APP DATA] Error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       onError('Failed to load data: $e');
@@ -117,16 +116,54 @@ class SplashDataLoaderService {
     }
   }
 
+  /// Refresh all data (for pull-to-refresh)
+  Future<void> refreshAllData() async {
+    print('🔄 [APP DATA] Refreshing all data...');
+
+    final config = Get.find<SplashController>().configModel!;
+
+    // Refresh core data
+    await Future.wait([
+      Get.find<CategoryController>().getCategoryList(true),
+      Get.find<HomeController>().getBannerList(true),
+      Get.find<CuisineController>().getCuisineList(),
+      Get.find<AdvertisementController>().getAdvertisementList(),
+      Get.find<StoryController>().getStories(reload: true),
+      Get.find<RestaurantController>().getRestaurantList(0, true),
+      Get.find<CampaignController>().getItemCampaignList(true),
+    ]);
+
+    // Refresh conditional data
+    if (config.popularRestaurant == 1) {
+      Get.find<RestaurantController>().getPopularRestaurantList(true, 'all', false);
+    }
+    if (config.popularFood == 1) {
+      Get.find<ProductController>().getPopularProductList(true, 'all', false);
+    }
+    if (config.newRestaurant == 1) {
+      Get.find<RestaurantController>().getLatestRestaurantList(true, 'all', false);
+    }
+
+    // Refresh auth data
+    if (Get.find<AuthController>().isLoggedIn()) {
+      Get.find<ProfileController>().getUserInfo();
+      Get.find<RestaurantController>().getRecentlyViewedRestaurantList(true, 'all', false);
+      Get.find<RestaurantController>().getOrderAgainRestaurantList(true);
+      Get.find<NotificationController>().getNotificationList(true);
+      Get.find<AddressController>().getAddressList();
+    }
+
+    print('✅ [APP DATA] Refresh complete');
+  }
+
   /// Load user-specific data (profile, addresses)
   Future<void> _loadUserData(
     Function(double, String) onProgress,
     Function(String) onError,
-    bool useCache,
   ) async {
-    print('👤 [SPLASH DATA LOADER] Loading user data...');
+    print('👤 [APP DATA] Loading user data...');
 
     try {
-      // Load profile and addresses in parallel
       await Future.wait([
         _loadWithRetry(
           'profile',
@@ -144,99 +181,92 @@ class SplashDataLoaderService {
         ),
       ]);
     } catch (e) {
-      print('⚠️ [SPLASH DATA LOADER] User data loading failed: $e');
+      print('⚠️ [APP DATA] User data loading failed: $e');
       // Non-critical, continue anyway
     }
   }
 
   /// Load core data that doesn't depend on config flags
+  /// ALL loaded in parallel for maximum speed!
   Future<void> _loadCoreData(
     Function(double, String) onProgress,
     Function(String) onError,
-    bool useCache,
   ) async {
-    print('📦 [SPLASH DATA LOADER] Loading core data...');
+    print('📦 [APP DATA] Loading core data in parallel...');
 
     try {
-      // Load core data sequentially for visible progress
-      await _loadWithRetry(
-        'categories',
-        'Finding delicious options...',
-        () => Get.find<CategoryController>().getCategoryList(false),
-        onProgress,
-        onError,
-      );
-      await Future.delayed(const Duration(milliseconds: 50));
+      // Load ALL core data in parallel for maximum speed
+      onProgress(20.0, 'Loading your personalized experience...');
 
-      await _loadWithRetry(
-        'banners',
-        'Spicing things up...',
-        () => Get.find<HomeController>().getBannerList(false),
-        onProgress,
-        onError,
-      );
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      await _loadWithRetry(
-        'cuisines',
-        'Exploring cuisines...',
-        () => Get.find<CuisineController>().getCuisineList(),
-        onProgress,
-        onError,
-      );
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      await _loadWithRetry(
-        'advertisements',
-        'Checking for deals...',
-        () => Get.find<AdvertisementController>().getAdvertisementList(),
-        onProgress,
-        onError,
-      );
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      await _loadWithRetry(
-        'stories',
-        'What\'s cooking today...',
-        () => Get.find<StoryController>().getStories(reload: !useCache),
-        onProgress,
-        onError,
-      );
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      // Load remaining in parallel (faster)
       await Future.wait([
         _loadWithRetry(
+          'categories',
+          'Categories...',
+          () => Get.find<CategoryController>().getCategoryList(false),
+          onProgress,
+          onError,
+        ),
+        _loadWithRetry(
+          'banners',
+          'Banners...',
+          () => Get.find<HomeController>().getBannerList(false),
+          onProgress,
+          onError,
+        ),
+        _loadWithRetry(
+          'cuisines',
+          'Cuisines...',
+          () => Get.find<CuisineController>().getCuisineList(),
+          onProgress,
+          onError,
+        ),
+        _loadWithRetry(
+          'advertisements',
+          'Ads...',
+          () => Get.find<AdvertisementController>().getAdvertisementList(),
+          onProgress,
+          onError,
+        ),
+        _loadWithRetry(
+          'stories',
+          'Stories...',
+          () => Get.find<StoryController>().getStories(reload: false),
+          onProgress,
+          onError,
+        ),
+        _loadWithRetry(
           'zones',
-          'Mapping your neighborhood...',
+          'Zones...',
           () => Get.find<LocationController>().getZoneList(),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'dine_in',
-          'Finding dine-in spots...',
+          'Dine-in...',
           () => Get.find<DineInController>().getDineInRestaurantList(0, false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'restaurants',
-          'Hunting down the best spots...',
+          'Restaurants...',
           () => Get.find<RestaurantController>().getRestaurantList(0, false),
           onProgress,
           onError,
         ),
         _loadWithRetry(
           'campaigns',
-          'Looking for surprises...',
+          'Campaigns...',
           () => Get.find<CampaignController>().getItemCampaignList(false),
           onProgress,
           onError,
         ),
       ]);
+
+      print('✅ [APP DATA] Core data loaded in parallel');
     } catch (e) {
-      print('⚠️ [SPLASH DATA LOADER] Core data loading failed: $e');
+      print('⚠️ [APP DATA] Core data loading failed: $e');
       throw e; // Core data is critical
     }
   }
@@ -245,9 +275,8 @@ class SplashDataLoaderService {
   Future<void> _loadConditionalData(
     Function(double, String) onProgress,
     Function(String) onError,
-    bool useCache,
   ) async {
-    print('🎯 [SPLASH DATA LOADER] Loading conditional data...');
+    print('🎯 [APP DATA] Loading conditional data...');
 
     final config = Get.find<SplashController>().configModel!;
     final futures = <Future>[];
@@ -297,7 +326,7 @@ class SplashDataLoaderService {
       try {
         await Future.wait(futures);
       } catch (e) {
-        print('⚠️ [SPLASH DATA LOADER] Conditional data loading failed: $e');
+        print('⚠️ [APP DATA] Conditional data loading failed: $e');
         // Non-critical, continue anyway
       }
     }
@@ -307,9 +336,8 @@ class SplashDataLoaderService {
   Future<void> _loadAuthData(
     Function(double, String) onProgress,
     Function(String) onError,
-    bool useCache,
   ) async {
-    print('🔐 [SPLASH DATA LOADER] Loading auth-dependent data...');
+    print('🔐 [APP DATA] Loading auth-dependent data...');
 
     try {
       await Future.wait([
@@ -350,7 +378,7 @@ class SplashDataLoaderService {
         ),
       ]);
     } catch (e) {
-      print('⚠️ [SPLASH DATA LOADER] Auth data loading failed: $e');
+      print('⚠️ [APP DATA] Auth data loading failed: $e');
       // Non-critical, continue anyway
     }
   }
@@ -373,19 +401,19 @@ class SplashDataLoaderService {
         await loadFunction().timeout(
           Duration(seconds: requestTimeout),
           onTimeout: () {
-            print('⏱️ [SPLASH DATA LOADER] Timeout for $key');
+            print('⏱️ [APP DATA] Timeout for $key');
             throw TimeoutException('Request timeout for $key');
           },
         );
 
-        print('✅ [SPLASH DATA LOADER] Loaded: $key');
+        print('✅ [APP DATA] Loaded: $key');
         return; // Success
       } catch (e) {
         attempts++;
-        print('⚠️ [SPLASH DATA LOADER] Attempt $attempts/$maxRetries failed for $key: $e');
+        print('⚠️ [APP DATA] Attempt $attempts/$maxRetries failed for $key: $e');
 
         if (attempts >= maxRetries) {
-          print('❌ [SPLASH DATA LOADER] Max retries reached for $key');
+          print('❌ [APP DATA] Max retries reached for $key');
           // Don't throw - let non-critical data fail silently
           return;
         }

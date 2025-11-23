@@ -19,6 +19,7 @@ import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dia
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/discount_tag_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -52,9 +53,11 @@ class ItemCardWidget extends StatelessWidget {
       ),
       child: CustomInkWellWidget(
         onTap: () {
-          ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-            ProductBottomSheetWidget(product: product, isCampaign: isCampaignItem),
-            backgroundColor: Colors.transparent, isScrollControlled: true,
+          ResponsiveHelper.isMobile(context) ? CustomSheet.show(
+            context: context,
+            child: ProductBottomSheetWidget(product: product, isCampaign: isCampaignItem),
+            showHandle: true,
+            padding: EdgeInsets.zero,
           ) : Get.dialog(
             Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: isCampaignItem)),
           );
@@ -163,9 +166,11 @@ class ItemCardWidget extends StatelessWidget {
                       ) : InkWell(
                         onTap: () {
                           if(isCampaignItem) {
-                            ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-                              ProductBottomSheetWidget(product: product, isCampaign: true),
-                              backgroundColor: Colors.transparent, isScrollControlled: true,
+                            ResponsiveHelper.isMobile(context) ? CustomSheet.show(
+                              context: context,
+                              child: ProductBottomSheetWidget(product: product, isCampaign: true),
+                              showHandle: true,
+                              padding: EdgeInsets.zero,
                             ) : Get.dialog(
                               Dialog(child: ProductBottomSheetWidget(product: product, isCampaign: true)),
                             );

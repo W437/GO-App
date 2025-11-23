@@ -11,7 +11,7 @@ import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
-import 'package:godelivery_user/features/restaurant/widgets/restaurant_horizontal_product_card.dart';
+import 'package:godelivery_user/features/restaurant/widgets/restaurant_product_horizontal_card.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_app_bar_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_details_section_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -438,7 +438,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                                 )
                               : null,
                         ),
-                        child: RestaurantHorizontalProductCard(
+                        child: RestaurantProductHorizontalCard(
                           product: product,
                         ),
                       ),

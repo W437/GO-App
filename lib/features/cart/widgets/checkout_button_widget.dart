@@ -30,7 +30,7 @@ class CheckoutButtonWidget extends StatelessWidget {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
 
     return Container(
-      width: Dimensions.webMaxWidth,
+      width: isDesktop ? Dimensions.webMaxWidth : null,
       padding:  const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeDefault),
       decoration: isDesktop ? null : BoxDecoration(
         color: Theme.of(context).cardColor,

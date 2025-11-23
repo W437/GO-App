@@ -1,4 +1,5 @@
 import 'package:godelivery_user/common/widgets/mobile/menu_drawer_widget.dart';
+import 'package:godelivery_user/features/app_data/controllers/app_data_controller.dart';
 import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
 import 'package:godelivery_user/features/story/widgets/story_strip_widget.dart';
@@ -77,66 +78,30 @@ class HomeScreen extends StatefulWidget {
   static Future<void> loadData(bool reload) async {
     print('🏠 [HOME] loadData called - reload: $reload');
 
-    final splashController = Get.find<SplashController>();
-
-    // Check if data was already loaded in splash screen AND verify it's not empty
-    if (!reload && splashController.dataLoadingComplete) {
-      // Verify critical data is actually loaded (not just marked as complete)
-      final categoryController = Get.find<CategoryController>();
-      final restaurantController = Get.find<RestaurantController>();
-
-      final hasCriticalData = (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) ||
-                              (restaurantController.restaurantModel != null &&
-                               restaurantController.restaurantModel!.restaurants != null &&
-                               restaurantController.restaurantModel!.restaurants!.isNotEmpty);
-
-      if (hasCriticalData) {
-        print('✅ [HOME] Data already loaded in splash - skipping load');
-        // Data already loaded in splash, just verify and refresh stories/config in background
-        splashController.refreshConfig(); // No await - background refresh
-        Get.find<StoryController>().getStories(reload: false); // Background refresh
-        return;
-      } else {
-        print('⚠️ [HOME] Splash marked complete but data is empty - forcing reload');
-      }
+    if (reload) {
+      // User pulled to refresh - use AppDataController
+      print('🔄 [HOME] Refreshing all data via AppDataController');
+      await Get.find<AppDataController>().refreshAllData();
+      return;
     }
 
-    // User manually pulled to refresh OR data wasn't loaded in splash OR data is empty
-    print('🔄 [HOME] Loading data - reload requested or splash data incomplete');
+    // Check if data already loaded
+    final categoryController = Get.find<CategoryController>();
+    final restaurantController = Get.find<RestaurantController>();
 
-    // Refresh config (no await for faster perceived load)
-    splashController.refreshConfig();
+    final hasCriticalData = (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) ||
+                            (restaurantController.restaurantModel != null &&
+                             restaurantController.restaurantModel!.restaurants != null &&
+                             restaurantController.restaurantModel!.restaurants!.isNotEmpty);
 
-    Get.find<HomeController>().getBannerList(reload);
-    Get.find<CategoryController>().getCategoryList(reload);
-    Get.find<CuisineController>().getCuisineList();
-    Get.find<AdvertisementController>().getAdvertisementList();
-    Get.find<DineInController>().getDineInRestaurantList(0, reload);
-    Get.find<StoryController>().getStories(reload: true); // Always fetch fresh stories from API
-    Get.find<LocationController>().getZoneList();
-    if(splashController.configModel!.popularRestaurant == 1) {
-      Get.find<RestaurantController>().getPopularRestaurantList(reload, 'all', false);
+    if (hasCriticalData) {
+      print('✅ [HOME] Data already loaded - using cached data');
+      return;
     }
-    Get.find<CampaignController>().getItemCampaignList(reload);
-    if(splashController.configModel!.popularFood == 1) {
-      Get.find<ProductController>().getPopularProductList(reload, 'all', false);
-    }
-    if(splashController.configModel!.newRestaurant == 1) {
-      Get.find<RestaurantController>().getLatestRestaurantList(reload, 'all', false);
-    }
-    if(splashController.configModel!.mostReviewedFoods == 1) {
-      Get.find<ReviewController>().getReviewedProductList(reload, 'all', false);
-    }
-    Get.find<RestaurantController>().getRestaurantList(0, reload);
-    if(Get.find<AuthController>().isLoggedIn()) {
-      await Get.find<ProfileController>().getUserInfo();
-      Get.find<RestaurantController>().getRecentlyViewedRestaurantList(reload, 'all', false);
-      Get.find<RestaurantController>().getOrderAgainRestaurantList(reload);
-      Get.find<NotificationController>().getNotificationList(reload);
-      Get.find<OrderController>().getRunningOrders(0, notify: false);
-      Get.find<AddressController>().getAddressList();
-      Get.find<HomeController>().getCashBackOfferList();
-    }
+
+    // No data - should not happen if splash loaded properly, but handle gracefully
+    print('⚠️ [HOME] No data found - triggering reload');
+    await Get.find<AppDataController>().refreshAllData();
   }
 
   @override

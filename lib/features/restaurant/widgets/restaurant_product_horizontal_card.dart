@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/compact_expandable_cart_badge.dart';
@@ -11,9 +12,9 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
-class RestaurantHorizontalProductCard extends StatelessWidget {
+class RestaurantProductHorizontalCard extends StatelessWidget {
   final Product product;
-  const RestaurantHorizontalProductCard({super.key, required this.product});
+  const RestaurantProductHorizontalCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -25,24 +26,11 @@ class RestaurantHorizontalProductCard extends StatelessWidget {
     return CustomInkWellWidget(
       onTap: () {
         if (ResponsiveHelper.isMobile(context)) {
-          showModalBottomSheet(
+          CustomSheet.show(
             context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            useRootNavigator: true,
-            builder: (context) => TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.95, end: 1.0),
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  alignment: Alignment.bottomCenter,
-                  child: child,
-                );
-              },
-              child: ProductBottomSheetWidget(product: product, inRestaurantPage: true),
-            ),
+            child: ProductBottomSheetWidget(product: product, inRestaurantPage: true),
+            showHandle: true,
+            padding: EdgeInsets.zero,
           );
         } else {
           Get.dialog(

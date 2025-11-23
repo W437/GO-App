@@ -13,7 +13,7 @@ import 'package:godelivery_user/features/splash/domain/models/config_model.dart'
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
 import 'package:godelivery_user/features/splash/domain/services/splash_service_interface.dart';
 import 'package:godelivery_user/features/splash/domain/services/config_service.dart';
-import 'package:godelivery_user/features/splash/domain/services/splash_data_loader_service.dart';
+import 'package:godelivery_user/features/app_data/controllers/app_data_controller.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/utilities/maintance_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -27,11 +27,9 @@ import 'package:universal_html/html.dart' as html;
 class SplashController extends GetxController implements GetxService {
   final SplashServiceInterface splashServiceInterface;
   late final ConfigService _configService;
-  late final SplashDataLoaderService _dataLoaderService;
 
   SplashController({required this.splashServiceInterface}) {
     _configService = ConfigService(splashServiceInterface);
-    _dataLoaderService = SplashDataLoaderService();
   }
 
   ConfigModel? _configModel;
@@ -173,9 +171,10 @@ class SplashController extends GetxController implements GetxService {
 
   /// Load all application data during splash screen
   /// Returns true if successful, false if failed
+  /// Delegates to AppDataController for actual loading
   Future<bool> loadAllData({bool useCache = true}) async {
     try {
-      print('🚀 [SPLASH] Starting comprehensive data load...');
+      print('🚀 [SPLASH] Starting data load via AppDataController...');
 
       _dataLoadingComplete = false;
       _dataLoadingFailed = false;
@@ -195,21 +194,23 @@ class SplashController extends GetxController implements GetxService {
         }
       }
 
-      // Load all data using the data loader service
-      final success = await _dataLoaderService.loadAllData(
-        onProgress: (progress, message) {
-          _loadingProgress = progress;
-          _loadingMessage = message;
-          update();
-          print('📊 [SPLASH] Progress: ${progress.toStringAsFixed(0)}% - $message');
-        },
-        onError: (error) {
+      // Use AppDataController for loading
+      final appDataController = Get.find<AppDataController>();
+
+      // Subscribe to progress updates
+      appDataController.addListener(() {
+        _loadingProgress = appDataController.loadingProgress;
+        _loadingMessage = appDataController.loadingMessage;
+
+        if (appDataController.hasError) {
           _dataLoadingFailed = true;
-          _dataLoadingError = error;
-          print('❌ [SPLASH] Data loading error: $error');
-        },
-        useCache: useCache,
-      );
+          _dataLoadingError = appDataController.errorMessage;
+        }
+
+        update();
+      });
+
+      final success = await appDataController.loadInitialData();
 
       if (success) {
         _dataLoadingComplete = true;
@@ -242,7 +243,7 @@ class SplashController extends GetxController implements GetxService {
     _dataLoadingComplete = false;
     _dataLoadingFailed = false;
     _dataLoadingError = '';
-    _dataLoaderService.reset();
+    Get.find<AppDataController>().resetLoadingState();
     update();
   }
 

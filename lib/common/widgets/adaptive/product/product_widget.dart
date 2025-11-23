@@ -6,6 +6,7 @@ import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/not_available_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/product_bottom_sheet_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/home/widgets/overflow_container_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
@@ -77,9 +78,11 @@ class ProductWidget extends StatelessWidget {
               }
             }else {
               if(product!.restaurantStatus == 1){
-                ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
-                  ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant, isCampaign: isCampaign),
-                  backgroundColor: Colors.transparent, isScrollControlled: true,
+                ResponsiveHelper.isMobile(context) ? CustomSheet.show(
+                  context: context,
+                  child: ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant, isCampaign: isCampaign),
+                  showHandle: true,
+                  padding: EdgeInsets.zero,
                 ) : Get.dialog(
                   Dialog(child: ProductBottomSheetWidget(product: product, inRestaurantPage: inRestaurant)),
                 );

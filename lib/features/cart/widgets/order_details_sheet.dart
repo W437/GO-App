@@ -58,13 +58,14 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: Stack(
             children: [
-              Column(
-                children: [
-                  // ============================================================
-                  // CONTENT (Header removed - now handled by CustomFullSheetNavigator)
-                  // ============================================================
-                  Expanded(
-                    child: SingleChildScrollView(
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    // ============================================================
+                    // CONTENT (Header removed - now handled by CustomFullSheetNavigator)
+                    // ============================================================
+                    Expanded(
+                      child: SingleChildScrollView(
                       controller: scrollController,
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +107,8 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                         ),
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
 
               // ============================================================
@@ -478,17 +480,17 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
             ],
           ),
           const SizedBox(height: Dimensions.paddingSizeSmall),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: cartController.cartList.length,
-            itemBuilder: (context, index) {
-              return OrderItemWidget(
-                cart: cartController.cartList[index],
-                cartIndex: index,
-                addOns: cartController.addOnsList[index],
-              );
-            },
+          Column(
+            children: List.generate(
+              cartController.cartList.length,
+              (index) {
+                return OrderItemWidget(
+                  cart: cartController.cartList[index],
+                  cartIndex: index,
+                  addOns: cartController.addOnsList[index],
+                );
+              },
+            ),
           ),
         ],
       ),
