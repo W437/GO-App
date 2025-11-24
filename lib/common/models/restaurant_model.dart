@@ -109,6 +109,7 @@ class Restaurant {
   String? description;
   String? shortDescription;
   int? totalFoodLikes;
+  List<dynamic>? coupons; // Coupons now included in restaurant details
 
   Restaurant({
     this.id,
@@ -185,6 +186,7 @@ class Restaurant {
     this.description,
     this.shortDescription,
     this.totalFoodLikes,
+    this.coupons,
   });
 
   Restaurant.fromJson(Map<String, dynamic> json) {
@@ -314,6 +316,7 @@ class Restaurant {
     description = json['description'];
     shortDescription = json['short_description'];
     totalFoodLikes = json['total_food_likes'];
+    coupons = json['coupons']; // Parse coupons from restaurant details
   }
 
   Map<String, dynamic> toJson() {

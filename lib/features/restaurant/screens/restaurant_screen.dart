@@ -187,17 +187,24 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       parallelCalls.add(categoryController.getCategoryList(true));
     }
 
-    // Only fetch products/coupons/recommended if different restaurant or products don't match
+    // Only fetch products if different restaurant or products don't match
+    // Note: The new smart products endpoint includes recommended flags
+    // and coupons are now included in restaurant details
     if (!isSameRestaurant || !hasCorrectProducts) {
       final restaurantId = widget.restaurant!.id ?? restController.restaurant!.id!;
       parallelCalls.add(restController.getRestaurantProductList(restaurantId, 0, 'all', false));
-      parallelCalls.add(couponController.getRestaurantCouponList(restaurantId: restaurantId));
-      parallelCalls.add(restController.getRestaurantRecommendedItemList(restaurantId, false));
+      // Coupons are now included in restaurant details, no separate call needed
+      // Recommended products are now flagged in the products response
     }
 
     // Execute all calls in parallel
     if (parallelCalls.isNotEmpty) {
       await Future.wait(parallelCalls);
+    }
+
+    // Extract coupons from restaurant details (new optimization)
+    if (restController.restaurant != null && restController.restaurant!.coupons != null) {
+      couponController.setCouponsFromRestaurant(restController.restaurant!.coupons);
     }
 
     // Scroll to product if specified

@@ -38,9 +38,18 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
   @override
   Future<ProductModel?> getRestaurantProductList(int? restaurantID, int offset, int? categoryID, String type) async {
     ProductModel? productModel;
-    Response response = await apiClient.getData(
-      '${AppConstants.restaurantProductUri}?restaurant_id=$restaurantID&category_id=$categoryID&offset=$offset&limit=12&type=$type',
-    );
+    // Use new smart products endpoint for initial load (offset 0)
+    // This returns all products with is_recommended and is_popular flags
+    String url;
+    if (offset == 0 && categoryID == 0) {
+      // Use smart endpoint for initial full product load
+      url = '${AppConstants.smartProductsUri}/$restaurantID?include=recommended,popular';
+    } else {
+      // Use legacy endpoint for pagination and category filtering
+      url = '${AppConstants.restaurantProductUri}?restaurant_id=$restaurantID&category_id=$categoryID&offset=$offset&limit=12&type=$type';
+    }
+
+    Response response = await apiClient.getData(url);
     if (response.statusCode == 200) {
       productModel = ProductModel.fromJson(response.body);
     }

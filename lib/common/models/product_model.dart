@@ -73,6 +73,8 @@ class Product {
   List<String>? nutritionsName;
   List<String>? allergiesName;
   int? likeCount;
+  bool? isRecommended; // New flag from smart products endpoint
+  bool? isPopular; // New flag from smart products endpoint
 
   Product({
     this.id,
@@ -107,6 +109,8 @@ class Product {
     this.nutritionsName,
     this.allergiesName,
     this.likeCount,
+    this.isRecommended,
+    this.isPopular,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -168,6 +172,8 @@ class Product {
     nutritionsName = json['nutritions_name']?.cast<String>();
     allergiesName = json['allergies_name']?.cast<String>();
     likeCount = json['like_count'];
+    isRecommended = json['is_recommended'] ?? false;
+    isPopular = json['is_popular'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
@@ -212,6 +218,8 @@ class Product {
     data['nutritions_name'] = nutritionsName;
     data['allergies_name'] = allergiesName;
     data['like_count'] = likeCount;
+    data['is_recommended'] = isRecommended;
+    data['is_popular'] = isPopular;
     return data;
   }
 }

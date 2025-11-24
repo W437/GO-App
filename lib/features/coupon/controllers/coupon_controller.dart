@@ -44,7 +44,22 @@ class CouponController extends GetxController implements GetxService {
   }
 
   Future<void> getRestaurantCouponList({required int restaurantId}) async {
+    // Legacy method - kept for backward compatibility
+    // Coupons are now included in restaurant details
     _couponList = await couponServiceInterface.getRestaurantCouponList(restaurantId: restaurantId);
+    update();
+  }
+
+  // New method to set coupons from restaurant details
+  void setCouponsFromRestaurant(List<dynamic>? coupons) {
+    if (coupons != null) {
+      _couponList = [];
+      for (var coupon in coupons) {
+        if (coupon is Map<String, dynamic>) {
+          _couponList!.add(CouponModel.fromJson(coupon));
+        }
+      }
+    }
     update();
   }
 

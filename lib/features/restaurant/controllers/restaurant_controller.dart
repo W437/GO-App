@@ -42,6 +42,18 @@ class RestaurantController extends GetxController implements GetxService {
   List<Product>? _restaurantProducts;
   List<Product>? get restaurantProducts => _restaurantProducts;
 
+  // Filter recommended products from main product list using is_recommended flag
+  List<Product>? get recommendedProducts {
+    if (_restaurantProducts == null) return null;
+    return _restaurantProducts!.where((product) => product.isRecommended == true).toList();
+  }
+
+  // Filter popular products from main product list using is_popular flag
+  List<Product>? get popularProducts {
+    if (_restaurantProducts == null) return null;
+    return _restaurantProducts!.where((product) => product.isPopular == true).toList();
+  }
+
   ProductModel? _restaurantProductModel;
   ProductModel? get restaurantProductModel => _restaurantProductModel;
 
