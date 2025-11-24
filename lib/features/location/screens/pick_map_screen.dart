@@ -16,7 +16,7 @@ import 'package:godelivery_user/features/location/widgets/permission_dialog.dart
 import 'package:godelivery_user/features/location/widgets/mapbox_pick_map_widget.dart';
 import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
-import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
+import 'package:godelivery_user/features/location/widgets/location_manager_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/location_permission_overlay.dart';
 import 'package:godelivery_user/features/location/widgets/zone_floating_badge.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
@@ -1021,35 +1021,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   }
 
   void _showZoneSelectionActionSheet(BuildContext context) {
-    CustomSheet.show(
-      context: context,
-      child: LocationSelectionSheet(
-        onUseCurrentLocation: null,  // Disabled - map is for zone selection only
-        onLocationSelected: (address) {
-          Get.back();
-          final target = LatLng(
-            double.parse(address.latitude ?? '0'),
-            double.parse(address.longitude ?? '0'),
-          );
-          if (Environment.useMapbox) {
-            _mapboxKey.currentState?.moveCamera(target, zoom: 12);
-          } else if (_mapController != null) {
-            _mapController!.moveCamera(CameraUpdate.newCameraPosition(
-              CameraPosition(target: target, zoom: 12),
-            ));
-          }
-        },
-        onAddNewLocation: () {
-          Get.back();
-          // Keep the current map screen - user can pick location on map
-        },
-      ),
-      showHandle: true,
-      padding: const EdgeInsets.symmetric(
-        horizontal: Dimensions.paddingSizeExtraLarge,
-        vertical: Dimensions.paddingSizeDefault,
-      ),
-    );
+    LocationManagerSheet.show(context);
   }
 
   Set<Polygon> _zonePolygons(LocationController controller, BuildContext context) {

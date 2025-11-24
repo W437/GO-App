@@ -130,17 +130,23 @@ class _NoInternetScreenState extends State<NoInternetScreen> with TickerProvider
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Animated illustration
+                  // Animated Hopa logo (muted)
                   ScaleTransition(
                     scale: _scaleAnimation,
-                    child: Image.asset(
-                      Images.noInternet,
-                      width: 120,
-                      height: 120,
-                      semanticLabel: 'No internet connection illustration',
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.grey.shade400,
+                        BlendMode.srcIn,
+                      ),
+                      child: Image.asset(
+                        'assets/image/hopa_white_logo.png',
+                        width: 180,
+                        fit: BoxFit.contain,
+                        semanticLabel: 'Hopa logo',
+                      ),
                     ),
                   ),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
 
                   // "Oops!" heading
                   Text(
@@ -158,7 +164,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> with TickerProvider
                     'no_internet_connection'.tr,
                     textAlign: TextAlign.center,
                     style: robotoRegular.copyWith(
-                      color: Theme.of(context).textTheme.bodyMedium!.color?.withValues(alpha: 0.7),
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
                       fontSize: Dimensions.fontSizeLarge,
                     ),
                   ),
@@ -169,7 +175,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> with TickerProvider
                     'please_check_connection'.tr,
                     textAlign: TextAlign.center,
                     style: robotoRegular.copyWith(
-                      color: Theme.of(context).disabledColor,
+                      color: Colors.grey.shade600,
                       fontSize: Dimensions.fontSizeDefault,
                     ),
                   ),
@@ -180,7 +186,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> with TickerProvider
                     'check_wifi_data'.tr,
                     textAlign: TextAlign.center,
                     style: robotoRegular.copyWith(
-                      color: Theme.of(context).disabledColor,
+                      color: Colors.grey.shade500,
                       fontSize: Dimensions.fontSizeSmall,
                       fontStyle: FontStyle.italic,
                     ),

@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/text/auto_scroll_text.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
-import 'package:godelivery_user/features/location/screens/pick_map_screen.dart';
-import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
-import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
+import 'package:godelivery_user/features/location/widgets/location_manager_sheet.dart';
 import 'package:godelivery_user/features/notification/controllers/notification_controller.dart';
 import 'package:godelivery_user/features/notification/widgets/notification_content_widget.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
@@ -233,113 +229,6 @@ class NewHomeHeaderWidget extends StatelessWidget {
   }
 
   void _showLocationSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _BounceWrapper(
-        child: LocationSelectionSheet(
-        onUseCurrentLocation: () {
-          _checkPermission(context, () {
-            Get.back();
-            Get.find<LocationController>().getCurrentLocation(true);
-          });
-        },
-        onLocationSelected: (address) {
-          Get.back();
-          AddressHelper.saveAddressInSharedPref(address);
-          Get.find<LocationController>().updatePosition(
-            CameraPosition(
-              target: LatLng(
-                double.parse(address.latitude ?? '0'),
-                double.parse(address.longitude ?? '0'),
-              ),
-              zoom: 16,
-            ),
-            true,
-          );
-        },
-        onAddNewLocation: () {
-          Get.back();
-          CustomFullSheet.show(
-            context: context,
-            child: const PickMapScreen(
-              fromSignUp: false,
-              fromSplash: false,
-              fromAddAddress: false,
-              canRoute: false,
-              route: 'home',
-            ),
-          );
-        },
-      ),
-      ),
-    );
-  }
-
-  void _checkPermission(BuildContext context, Function onTap) async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied) {
-      Get.snackbar('Permission Required', 'Location permission is required to use this feature');
-    } else if (permission == LocationPermission.deniedForever) {
-      Get.dialog(const PermissionDialog());
-    } else {
-      onTap();
-    }
-  }
-
-  /// Wrapper widget that adds bounce animation to bottom sheet
-  Widget _BounceWrapper({required Widget child}) {
-    return _BounceWrapperWidget(child: child);
-  }
-}
-
-class _BounceWrapperWidget extends StatefulWidget {
-  final Widget child;
-
-  const _BounceWrapperWidget({required this.child});
-
-  @override
-  State<_BounceWrapperWidget> createState() => _BounceWrapperWidgetState();
-}
-
-class _BounceWrapperWidgetState extends State<_BounceWrapperWidget> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
-
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0, 1),
-        end: Offset.zero,
-      ).animate(_animation),
-      child: widget.child,
-    );
+    LocationManagerSheet.show(context);
   }
 }

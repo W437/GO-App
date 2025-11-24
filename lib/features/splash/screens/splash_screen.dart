@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:animated_emoji/animated_emoji.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_internet_screen_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
@@ -315,6 +317,37 @@ class SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  /// Build emojis behind the logo
+  List<Widget> _buildFloatingEmojis(BuildContext context) {
+    return [
+      // Fire emoji - right side
+      Center(
+        child: Transform.translate(
+          offset: const Offset(110, -35), // x: 110, y: -35
+          child: Transform.rotate(
+            angle: 15 * (pi / 180), // 15 degrees to the right
+            child: const _FloatingEmoji(
+              emoji: AnimatedEmojis.fire,
+              size: 50,
+              delay: 0,
+            ),
+          ),
+        ),
+      ),
+      // Heart eyes emoji - above logo
+      Center(
+        child: Transform.translate(
+          offset: const Offset(0, -60), // centered x, above logo
+          child: const _FloatingEmoji(
+            emoji: AnimatedEmojis.heartEyes,
+            size: 50,
+            delay: 100,
+          ),
+        ),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     print('🎥 [SPLASH] Building splash screen - skipPressed: $_skipPressed');
@@ -351,77 +384,75 @@ class SplashScreenState extends State<SplashScreen> {
               color: Colors.white,
             ),
 
-            // Logo image (primary blue color) with loading indicator below
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo
-                  SizedBox(
-                    width: 180,
-                    height: 180,
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        Theme.of(context).primaryColor,
-                        BlendMode.srcIn,
-                      ),
-                      child: Image.asset(
-                        'assets/image/hopa_white_logo.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
+            // Floating animated emojis
+            ..._buildFloatingEmojis(context),
 
-                  // Progress indicator for data loading
-                  GetBuilder<SplashController>(
-                    builder: (splashController) {
-                      // Always show progress bar (renders with logo)
-                      return SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          child: TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            tween: Tween<double>(
-                              begin: splashController.loadingProgress / 100,
-                              end: splashController.loadingProgress / 100,
-                            ),
-                            builder: (context, value, child) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Progress bar
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: LinearProgressIndicator(
-                                      value: value.clamp(0.01, 1.0),
-                                      minHeight: 6,
-                                      backgroundColor: Colors.grey.shade200,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(context).primaryColor,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: Dimensions.paddingSizeSmall),
-                                  // Loading message (centered)
-                                  Text(
-                                    splashController.loadingMessage,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        );
-                    },
+            // Logo with liquid fill effect based on loading progress
+            GetBuilder<SplashController>(
+              builder: (splashController) {
+                return TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOut,
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: splashController.loadingProgress / 100,
                   ),
-                ],
-              ),
+                  builder: (context, fillProgress, child) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Logo with liquid fill effect
+                          SizedBox(
+                            width: 200,
+                            child: Stack(
+                              children: [
+                                // Background: Muted/gray logo
+                                ColorFiltered(
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.grey.shade300,
+                                    BlendMode.srcIn,
+                                  ),
+                                  child: Image.asset(
+                                    'assets/image/hopa_white_logo.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                                // Foreground: Blue logo clipped from bottom to top
+                                ClipRect(
+                                  clipper: _LiquidFillClipper(fillProgress),
+                                  child: ColorFiltered(
+                                    colorFilter: ColorFilter.mode(
+                                      Theme.of(context).primaryColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/image/hopa_white_logo.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Loading message
+                          Text(
+                            splashController.loadingMessage,
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
             ),
 
             // Video player kept in logic but not displayed (for future use)
@@ -503,6 +534,92 @@ class _FallbackLogo extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Custom clipper for liquid fill effect - reveals from bottom to top
+class _LiquidFillClipper extends CustomClipper<Rect> {
+  final double fillProgress; // 0.0 to 1.0
+
+  _LiquidFillClipper(this.fillProgress);
+
+  @override
+  Rect getClip(Size size) {
+    // Clip from bottom to top based on progress
+    // At 0% progress: clip is at bottom (nothing visible)
+    // At 100% progress: clip covers full height (fully visible)
+    final top = size.height * (1.0 - fillProgress);
+    return Rect.fromLTRB(0, top, size.width, size.height);
+  }
+
+  @override
+  bool shouldReclip(_LiquidFillClipper oldClipper) {
+    return oldClipper.fillProgress != fillProgress;
+  }
+}
+
+/// Floating animated emoji with gentle bobbing motion
+class _FloatingEmoji extends StatefulWidget {
+  final AnimatedEmojiData emoji;
+  final double size;
+  final int delay;
+
+  const _FloatingEmoji({
+    required this.emoji,
+    required this.size,
+    this.delay = 0,
+  });
+
+  @override
+  State<_FloatingEmoji> createState() => _FloatingEmojiState();
+}
+
+class _FloatingEmojiState extends State<_FloatingEmoji>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    // Start animation after delay
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) {
+        _controller.repeat(reverse: true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _floatAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: child,
+        );
+      },
+      child: AnimatedEmoji(
+        widget.emoji,
+        size: widget.size,
       ),
     );
   }
