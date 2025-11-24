@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_widget.dart';
@@ -11,6 +14,7 @@ import 'package:godelivery_user/features/location/widgets/permission_dialog.dart
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
 import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/location_permission_overlay.dart';
+import 'package:godelivery_user/features/location/widgets/zone_floating_badge.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -22,10 +26,17 @@ import 'package:godelivery_user/common/widgets/web/web_menu_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Map mode enum
+enum MapMode {
+  zoneSelection,
+  addressSelection,
+}
 
 class PickMapScreen extends StatefulWidget {
   final bool fromSignUp;
@@ -55,6 +66,15 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   late Animation<double> _pinBounceAnimation;
   late AnimationController _badgeBounceController;
   late Animation<double> _badgeBounceAnimation;
+  late AnimationController _tapPromptWiggleController;
+  late Animation<double> _tapPromptWiggleAnimation;
+  late AnimationController _tapPromptBounceController;
+  late Animation<double> _tapPromptBounceAnimation;
+  Timer? _tapPromptTimer;
+  MapMode _currentMode = MapMode.zoneSelection;  // Default to zone selection
+  int? _selectedZoneId;  // For zone selection mode
+  LatLng? _selectedZoneCenter;  // Center position of selected zone
+  String? _selectedZoneName;  // Name of selected zone
 
   @override
   void initState() {
@@ -108,12 +128,54 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       ),
     ]).animate(_badgeBounceController);
 
+    // Initialize tap prompt animations
+    _tapPromptWiggleController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    // Scale pop animation
+    _tapPromptWiggleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.12,
+    ).animate(CurvedAnimation(
+      parent: _tapPromptWiggleController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Wiggle rotation animation
+    _tapPromptBounceController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _tapPromptBounceAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.08,
+    ).animate(CurvedAnimation(
+      parent: _tapPromptBounceController,
+      curve: Curves.easeInOutSine,
+    ));
+
     Get.find<LocationController>().makeLoadingOff();
 
-    // Show location permission overlay if coming from onboarding
-    if (widget.route == RouteHelper.onBoarding) {
-      _showLocationPermissionOverlay = true;
-    }
+    // Start animations after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Trigger first animation immediately
+      if (_currentMode == MapMode.zoneSelection && _selectedZoneId == null) {
+        _triggerTapPromptAnimation();
+      }
+
+      // Start the repeating timer every 3 seconds
+      _tapPromptTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+        if (_currentMode == MapMode.zoneSelection && _selectedZoneId == null) {
+          _triggerTapPromptAnimation();
+        }
+      });
+    });
+
+    // No location permissions needed - map is for zone selection only
+    _showLocationPermissionOverlay = false;
 
     // Call after build to avoid setState during build error
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -123,16 +185,17 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     if(widget.fromAddAddress) {
       Get.find<LocationController>().setPickData();
     }
-    _initialPosition = LatLng(
-      double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '32.997473'),
-      double.parse(Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '35.144028'),
-    );
+    // Center around Shefa-Amr (Northern Israel service area)
+    _initialPosition = const LatLng(32.82461934938776, 35.14441039413214);
   }
 
   @override
   void dispose() {
     _pinBounceController.dispose();
     _badgeBounceController.dispose();
+    _tapPromptWiggleController.dispose();
+    _tapPromptBounceController.dispose();
+    _tapPromptTimer?.cancel();
     super.dispose();
   }
 
@@ -140,6 +203,20 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   bool _isNightTime() {
     final hour = DateTime.now().hour;
     return hour >= 18 || hour < 6;
+  }
+
+  /// Trigger the tap prompt animation
+  void _triggerTapPromptAnimation() {
+    if (!_tapPromptWiggleController.isAnimating && !_tapPromptBounceController.isAnimating) {
+      // Scale pop
+      _tapPromptWiggleController.forward(from: 0.0).then((_) {
+        _tapPromptWiggleController.reverse();
+      });
+      // Wiggle rotation
+      _tapPromptBounceController.forward(from: 0.0).then((_) {
+        _tapPromptBounceController.reverse();
+      });
+    }
   }
 
   @override
@@ -162,40 +239,27 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                     children: [
                       GoogleMap(
                         initialCameraPosition: CameraPosition(
-                          target: widget.fromAddAddress
-                              ? LatLng(locationController.position.latitude, locationController.position.longitude)
-                              : _initialPosition,
-                          zoom: 16,
+                          target: _initialPosition,
+                          zoom: 10.43,  // Zoom level to show Northern Israel service area
                         ),
-                        minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+                        minMaxZoomPreference: const MinMaxZoomPreference(6.5, 14),  // Limited zoom for zone selection
                         polygons: _zonePolygons(locationController, context),
-                        // markers: _zoneMarkers(locationController),  // Removed zone name markers
+                        markers: <Marker>{},  // No markers - using overlay instead
                         onMapCreated: (GoogleMapController mapController) {
                           _mapController = mapController;
 
-                          // Initialize current zone based on initial position
-                          if (widget.fromAddAddress) {
-                            _currentZoneId = ZonePolygonHelper.getZoneIdForPoint(
-                              LatLng(locationController.position.latitude, locationController.position.longitude),
-                              locationController.zoneList,
-                            );
-                          } else {
-                            _currentZoneId = ZonePolygonHelper.getZoneIdForPoint(
-                              _initialPosition,
-                              locationController.zoneList,
-                            );
-                          }
+                          // Map is for zone selection only, no automatic location requests
+                          // Initialize without setting any specific zone as current
+                          _currentZoneId = null;
 
-                          // Don't auto-request location if showing permission overlay
-                          if (!widget.fromAddAddress && widget.route != 'splash' && !_showLocationPermissionOverlay) {
-                            Get.find<LocationController>()
-                                .getCurrentLocation(false, mapController: mapController)
-                                .then((value) {
-                              if (widget.fromSplash) {
-                                _onPickAddressButtonPressed(locationController);
-                              }
-                            });
-                          }
+                          // Log initial map position
+                          print('════════════════════════════════════════════');
+                          print('🚀 INITIAL MAP POSITION & ZOOM LEVEL');
+                          print('────────────────────────────────────────────');
+                          print('Latitude:  ${_initialPosition.latitude}');
+                          print('Longitude: ${_initialPosition.longitude}');
+                          print('Zoom:      10.43');
+                          print('════════════════════════════════════════════');
                         },
                         zoomControlsEnabled: false,
                         onCameraMove: (CameraPosition cameraPosition) {
@@ -205,21 +269,42 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           locationController.disableButton();
                         },
                         onCameraIdle: () {
-                          Get.find<LocationController>().updatePosition(_cameraPosition, false);
+                          // Defer state updates to avoid layout assertion errors
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            Get.find<LocationController>().updatePosition(_cameraPosition, false);
+                          });
                           // Update the current zone when camera stops moving
                           if (_cameraPosition != null) {
-                            final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
-                              _cameraPosition!.target,
-                              locationController.zoneList,
-                            );
-                            if (newZoneId != _currentZoneId) {
-                              setState(() {
-                                _currentZoneId = newZoneId;
-                              });
-                              // Animate pin and badge when entering a valid zone
-                              if (newZoneId != null) {
-                                _pinBounceController.forward(from: 0.0);
-                                _badgeBounceController.forward(from: 0.0);
+                            // LOG MAP POSITION FOR REFINEMENT (commented out for production)
+                            // print('════════════════════════════════════════════');
+                            // print('📍 MAP POSITION & ZOOM LEVEL');
+                            // print('────────────────────────────────────────────');
+                            // print('Latitude:  ${_cameraPosition!.target.latitude}');
+                            // print('Longitude: ${_cameraPosition!.target.longitude}');
+                            // print('Zoom:      ${_cameraPosition!.zoom}');
+                            // print('────────────────────────────────────────────');
+                            // print('Copy this for _initialPosition:');
+                            // print('const LatLng(${_cameraPosition!.target.latitude}, ${_cameraPosition!.target.longitude})');
+                            // print('');
+                            // print('Copy this for zoom:');
+                            // print('zoom: ${_cameraPosition!.zoom},');
+                            // print('════════════════════════════════════════════');
+
+                            // Only update current zone in address mode
+                            if (_currentMode == MapMode.addressSelection) {
+                              final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
+                                _cameraPosition!.target,
+                                locationController.zoneList,
+                              );
+                              if (newZoneId != _currentZoneId) {
+                                setState(() {
+                                  _currentZoneId = newZoneId;
+                                });
+                                // Animate pin and badge when entering a valid zone
+                                if (newZoneId != null) {
+                                  _pinBounceController.forward(from: 0.0);
+                                  _badgeBounceController.forward(from: 0.0);
+                                }
                               }
                             }
                           }
@@ -287,37 +372,42 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           ),
                         ),
                       ),
-                      IgnorePointer(
-                        child: Center(
-                          child: AnimatedBuilder(
-                            animation: _pinBounceAnimation,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: _pinBounceAnimation.value,
-                                child: child,
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 36.0),
-                              child: Icon(
-                                Icons.location_on,
-                                size: 48,
-                                color: Theme.of(context).colorScheme.primary,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                      // Zone badge overlay - disabled for now in zone mode
+                      // Pin marker - only show in address selection mode
+                      if (_currentMode == MapMode.addressSelection)
+                        IgnorePointer(
+                          child: Center(
+                            child: AnimatedBuilder(
+                              animation: _pinBounceAnimation,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _pinBounceAnimation.value,
+                                  child: child,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 36.0),
+                                child: Icon(
+                                  Icons.location_on,
+                                  size: 48,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
 
-                      // Zone Badge (centered, shifted up 100px)
-                      if (_currentZoneId != null)
+                      // Address Badge for address mode only (floating above pin)
+                      if (_currentMode == MapMode.addressSelection &&
+                          locationController.pickAddress != null &&
+                          locationController.pickAddress!.isNotEmpty)
                         Positioned(
                           left: 0,
                           right: 0,
@@ -338,7 +428,6 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    // Main tooltip body
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: Dimensions.paddingSizeDefault,
@@ -355,21 +444,30 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                           ),
                                         ],
                                       ),
-                                      child: Text(
-                                        locationController.zoneList
-                                            ?.firstWhereOrNull((zone) => zone.id == _currentZoneId)
-                                            ?.displayName ?? '',
-                                        style: robotoBold.copyWith(
-                                          fontSize: Dimensions.fontSizeDefault,
-                                          color: Colors.black,
-                                        ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.location_on,
+                                            size: 18,
+                                            color: Theme.of(context).primaryColor,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            _getAddressWithoutCountry(locationController.pickAddress ?? ''),
+                                            style: robotoBold.copyWith(
+                                              fontSize: Dimensions.fontSizeDefault,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     // Arrow pointer
                                     Transform.translate(
                                       offset: const Offset(0, -6),
                                       child: Transform.rotate(
-                                        angle: 0.785398, // 45 degrees in radians
+                                        angle: 0.785398,
                                         child: Container(
                                           width: 12,
                                           height: 12,
@@ -414,112 +512,233 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           ),
                         ),
                       // Hopa logo
-                      if (!widget.fromSplash)
-                        Positioned(
-                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 8,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Image.asset(
-                              Images.hopaWhiteLogo,
-                              height: 32,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      if (!widget.fromSplash)
-                        Positioned(
-                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,
-                          right: Dimensions.paddingSizeSmall,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: CircularBackButtonWidget(
-                              showText: false,
-                              backgroundColor: Theme.of(context).cardColor,
-                              icon: Icons.my_location,
-                              iconColor: Colors.black,
-                              onPressed: () => _checkPermission(() {
-                                Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
-                              }),
-                            ),
-                          ),
-                        ),
                       Positioned(
-                        bottom: 0,
+                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 8,
                         left: 0,
                         right: 0,
-                        child: SafeArea(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              Dimensions.paddingSizeExtraLarge,
-                              0,
-                              Dimensions.paddingSizeExtraLarge,
-                              Dimensions.paddingSizeDefault,
-                            ),
-                            child: Row(
+                        child: Center(
+                          child: Image.asset(
+                            Images.hopaWhiteLogo,
+                            height: 32,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      // Zone count text below logo
+                      Positioned(
+                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 44, // 8 + 32 (logo) + 4 spacing
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: RichText(
+                            text: TextSpan(
+                              style: robotoMedium.copyWith(
+                                fontSize: 13,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
                               children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.map_outlined),
-                                    color: Theme.of(context).textTheme.bodyLarge!.color,
-                                    onPressed: () => _showZoneSelectionActionSheet(context),
+                                TextSpan(
+                                  text: '${locationController.zoneList?.length ?? 0}',
+                                  style: robotoBold.copyWith(
+                                    fontSize: 14,
+                                    color: Theme.of(context).primaryColor,
                                   ),
                                 ),
-                                const SizedBox(width: Dimensions.paddingSizeSmall),
-                                Expanded(
-                                  child: CustomButtonWidget(
-                                    buttonText: widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr,
-                                    isLoading: locationController.isLoading,
-                                    onPressed: (locationController.buttonDisabled || locationController.loading || !locationController.inZone)
-                                        ? null
-                                        : () => _onPickAddressButtonPressed(locationController),
-                                  ),
+                                TextSpan(
+                                  text: ' ${'service_zones_available'.tr}',
                                 ),
                               ],
                             ),
                           ),
                         ),
                       ),
-                      // Location permission overlay
-                      if (_showLocationPermissionOverlay)
-                        Positioned.fill(
-                          child: LocationPermissionOverlay(
-                            onEnableLocation: _handleEnableLocation,
-                            showSkip: false,
+                      // Mode selector label
+                      Positioned(
+                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 68, // Above mode selector
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Text(
+                            'select_map_mode'.tr,
+                            style: robotoRegular.copyWith(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.5),
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
-                      // Address badge
-                      if (!_showLocationPermissionOverlay && locationController.pickAddress != null && locationController.pickAddress!.isNotEmpty)
+                      ),
+                      // Mode toggle selector - positioned under label
+                      Positioned(
+                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 84, // Below label
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            height: 35,
+                            width: 160,
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[800]!.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(100),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              children: [
+                                // Sliding indicator
+                                AnimatedAlign(
+                                  alignment: _currentMode == MapMode.zoneSelection
+                                      ? Alignment.centerLeft
+                                      : Alignment.centerRight,
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeOutCubic,
+                                  child: Container(
+                                    width: 77,
+                                    height: 29,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF00BCD4),
+                                      borderRadius: BorderRadius.circular(100),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF00BCD4).withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // Tab Labels
+                                Row(
+                                  children: [
+                                    _buildModeButton(
+                                      mode: MapMode.zoneSelection,
+                                      icon: Icons.map,
+                                      label: 'Zone',
+                                    ),
+                                    _buildModeButton(
+                                      mode: MapMode.addressSelection,
+                                      icon: Icons.location_on,
+                                      label: 'Address',
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Bottom controls based on mode
+                      if (_currentMode == MapMode.zoneSelection)
                         Positioned(
-                          top: MediaQuery.of(context).viewPadding.top + (widget.fromSplash ? 20 : 70),
+                          bottom: 0,
                           left: 0,
                           right: 0,
-                          child: Center(
-                            child: _buildAddressBadge(locationController.pickAddress!),
+                          child: SafeArea(
+                            child: _selectedZoneId != null
+                                ? ZoneFloatingBadge(
+                                    key: const ValueKey('zone_floating_badge'),
+                                    selectedZone: locationController.zoneList?.firstWhereOrNull(
+                                      (zone) => zone.id == _selectedZoneId,
+                                    ),
+                                    zones: locationController.zoneList ?? [],
+                                    onZoneChanged: (zone) {
+                                      if (zone != null) {
+                                        // Don't rebuild immediately, just update the selection
+                                        _selectedZoneId = zone.id;
+                                        _selectedZoneName = zone.displayName ?? zone.name ?? 'Zone ${zone.id}';
+                                        if (zone.formattedCoordinates != null) {
+                                          _selectedZoneCenter = _calculateZoneCenter(zone.formattedCoordinates!);
+                                        }
+                                        // Move camera without setState to avoid rebuild
+                                        _moveToZoneCenter(zone.id!, locationController.zoneList ?? []);
+                                      }
+                                    },
+                                    onConfirm: () => _onZoneSelected(locationController),
+                                  )
+                                : AnimatedBuilder(
+                                    animation: Listenable.merge([
+                                      _tapPromptWiggleAnimation,
+                                      _tapPromptBounceAnimation,
+                                    ]),
+                                    builder: (context, child) {
+                                      return Transform.scale(
+                                        scale: _tapPromptWiggleAnimation.value,
+                                        child: Transform.rotate(
+                                          angle: _tapPromptBounceAnimation.value *
+                                              ((_tapPromptBounceController.value < 0.5) ? 1 : -1),
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(bottom: 40),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: Dimensions.paddingSizeExtraLarge,
+                                        vertical: Dimensions.paddingSizeLarge,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Tap your ',
+                                            style: robotoMedium.copyWith(
+                                              fontSize: Dimensions.fontSizeExtraLarge,
+                                              color: Colors.white.withOpacity(0.9),
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.location_on,
+                                            size: 28,
+                                            color: Theme.of(context).primaryColor,
+                                          ),
+                                          Text(
+                                            ' zone!',
+                                            style: robotoMedium.copyWith(
+                                              fontSize: Dimensions.fontSizeExtraLarge,
+                                              color: Colors.white.withOpacity(0.9),
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                           ),
                         ),
+                      // Address confirmation button for address mode
+                      if (_currentMode == MapMode.addressSelection)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: SafeArea(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                Dimensions.paddingSizeExtraLarge,
+                                0,
+                                Dimensions.paddingSizeExtraLarge,
+                                Dimensions.paddingSizeDefault,
+                              ),
+                              child: CustomButtonWidget(
+                                buttonText: 'confirm_delivery_address'.tr,
+                                isLoading: locationController.isLoading,
+                                onPressed: (locationController.buttonDisabled || locationController.loading || !locationController.inZone)
+                                    ? null
+                                    : () => _onPickAddressButtonPressed(locationController),
+                              ),
+                            ),
+                          ),
+                        ),
+                      // Location permissions not needed - map is for zone selection only
                     ],
                   );
                 }),
@@ -595,12 +814,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     CustomSheet.show(
       context: context,
       child: LocationSelectionSheet(
-        onUseCurrentLocation: () {
-          _checkPermission(() {
-            Get.back();
-            Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
-          });
-        },
+        onUseCurrentLocation: null,  // Disabled - map is for zone selection only
         onLocationSelected: (address) {
           Get.back();
           if (_mapController != null) {
@@ -610,7 +824,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                   double.parse(address.latitude ?? '0'),
                   double.parse(address.longitude ?? '0'),
                 ),
-                zoom: 16,
+                zoom: 12,  // Zoom in closer when selecting a specific location
               ),
             ));
           }
@@ -640,10 +854,28 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       baseColor: theme.colorScheme.primary,
       strokeOpacity: 0.85,
       fillOpacity: 0.15,  // Slightly reduced for better balance with thinner strokes
-      highlightedZoneId: _currentZoneId,  // Use the tracked current zone ID
+      highlightedZoneId: _currentMode == MapMode.zoneSelection
+          ? _selectedZoneId  // Highlight selected zone in zone mode
+          : _currentZoneId,  // Highlight current zone in address mode
       useEnhancedStyle: true,
       onZoneTap: (zoneId) {
-        // When a zone is clicked, move the camera to its center
+        if (_currentMode == MapMode.zoneSelection) {
+          // In zone selection mode, select the zone
+          final selectedZone = controller.zoneList.firstWhereOrNull(
+            (zone) => zone.id == zoneId,
+          );
+
+          if (selectedZone != null) {
+            setState(() {
+              _selectedZoneId = zoneId;
+              _selectedZoneName = selectedZone.displayName ?? selectedZone.name ?? 'Zone $zoneId';
+              if (selectedZone.formattedCoordinates != null) {
+                _selectedZoneCenter = _calculateZoneCenter(selectedZone.formattedCoordinates!);
+              }
+            });
+          }
+        }
+        // Move to zone center
         _moveToZoneCenter(zoneId, controller.zoneList);
       },
     );
@@ -692,10 +924,49 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     }
   }
 
-  // Removed zone marker methods as we're not showing zone name badges anymore
-  // Set<Marker> _zoneMarkers(LocationController controller) {
-  //   return <Marker>{};
-  // }
+  // Calculate the center point of a zone
+  LatLng _calculateZoneCenter(List<FormattedCoordinates> coordinates) {
+    if (coordinates.isEmpty) {
+      return _initialPosition;
+    }
+
+    double sumLat = 0;
+    double sumLng = 0;
+    int count = 0;
+
+    for (final coord in coordinates) {
+      if (coord.lat != null && coord.lng != null) {
+        sumLat += coord.lat!;
+        sumLng += coord.lng!;
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      return LatLng(sumLat / count, sumLng / count);
+    }
+
+    return _initialPosition;
+  }
+
+
+  String _getAddressWithoutCountry(String address) {
+    if (address.isEmpty) return '';
+    final addressParts = address.split(',');
+    return addressParts.length > 1
+        ? addressParts.sublist(0, addressParts.length - 1).join(',').trim()
+        : address;
+  }
+
+  void _onZoneSelected(LocationController locationController) {
+    if (_selectedZoneId != null) {
+      final selectedZone = locationController.zoneList
+          ?.firstWhereOrNull((zone) => zone.id == _selectedZoneId);
+      if (selectedZone != null) {
+        Get.back(result: selectedZone);
+      }
+    }
+  }
 
   Widget _buildAddressBadge(String address) {
     // Remove country from address (last part after final comma)
@@ -739,6 +1010,55 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModeButton({
+    required MapMode mode,
+    required IconData icon,
+    required String label,
+  }) {
+    final bool isSelected = _currentMode == mode;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _currentMode = mode;
+            if (mode == MapMode.zoneSelection) {
+              // Reset zone selection
+              _currentZoneId = null;
+              _selectedZoneId = null;
+              _selectedZoneName = null;
+              _selectedZoneCenter = null;
+            }
+          });
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? Colors.white : Colors.white60,
+              ),
+              const SizedBox(width: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                style: robotoMedium.copyWith(
+                  fontSize: Dimensions.fontSizeSmall,
+                  color: isSelected ? Colors.white : Colors.white60,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

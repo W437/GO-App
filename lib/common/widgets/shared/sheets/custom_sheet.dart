@@ -37,7 +37,7 @@ class CustomSheet extends StatefulWidget {
       barrierDismissible: isDismissible,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       barrierColor: Colors.black54,
-      transitionDuration: transitionDuration ?? const Duration(milliseconds: 350),
+      transitionDuration: transitionDuration ?? const Duration(milliseconds: 450),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         // Smooth and swift curve
         const curve = Curves.easeOutExpo;
@@ -135,7 +135,7 @@ class _CustomSheetState extends State<CustomSheet> with TickerProviderStateMixin
     );
     _dismissAnimation = CurvedAnimation(
       parent: _dismissController,
-      curve: Curves.easeOut,
+      curve: Curves.fastOutSlowIn,
     );
 
     _snapBackController = AnimationController(
