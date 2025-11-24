@@ -165,7 +165,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
     // Check if we already have cached data for this restaurant
     final bool isSameRestaurant = restController.restaurant?.id == widget.restaurant!.id;
-    final bool hasProducts = restController.restaurantProducts != null;
+    // Check if products belong to THIS restaurant (not just if they exist)
+    final bool hasCorrectProducts = restController.restaurantProducts != null &&
+                                     restController.restaurantProducts!.isNotEmpty &&
+                                     restController.restaurantProducts!.first.restaurantId == widget.restaurant!.id;
     final bool hasRestaurantDetails = restController.restaurant != null &&
                                      restController.restaurant!.schedules != null;
 
@@ -184,10 +187,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       parallelCalls.add(categoryController.getCategoryList(true));
     }
 
-    // Only fetch products/coupons/recommended if different restaurant or no products
-    if (!isSameRestaurant || !hasProducts) {
+    // Only fetch products/coupons/recommended if different restaurant or products don't match
+    if (!isSameRestaurant || !hasCorrectProducts) {
       final restaurantId = widget.restaurant!.id ?? restController.restaurant!.id!;
-      parallelCalls.add(restController.getRestaurantProductList(restaurantId, 1, 'all', false));
+      parallelCalls.add(restController.getRestaurantProductList(restaurantId, 0, 'all', false));
       parallelCalls.add(couponController.getRestaurantCouponList(restaurantId: restaurantId));
       parallelCalls.add(restController.getRestaurantRecommendedItemList(restaurantId, false));
     }
@@ -653,7 +656,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
             }
             restController.setCategoryList();
             bool hasCoupon = (couponController.couponList!= null && couponController.couponList!.isNotEmpty);
-            final bool hasProductsData = restController.restaurantProducts != null && categoryController.categoryList != null;
+            // Check if products exist AND belong to current restaurant (by checking product's restaurantId)
+            final bool productsMatchCurrentRestaurant = restController.restaurantProducts != null &&
+                                                        restController.restaurantProducts!.isNotEmpty &&
+                                                        restController.restaurantProducts!.first.restaurantId == widget.restaurant!.id;
+            final bool hasProductsData = productsMatchCurrentRestaurant && categoryController.categoryList != null;
 
             // Use widget.restaurant for initial data, fallback to controller data when loaded
             final Restaurant activeRestaurant = restController.restaurant ?? widget.restaurant!;
