@@ -69,9 +69,10 @@ class AppConstants {
   static const String productLikeUri = '/api/v1/products/';
   static const String lastLocationUri = '/api/v1/delivery-man/last-location?order_id=';
   static const String deliveryManReviewUri = '/api/v1/delivery-man/reviews/submit';
-  static const String restaurantUri = '/api/v1/restaurants/get-restaurants';
-  static const String popularRestaurantUri = '/api/v1/restaurants/popular';
-  static const String latestRestaurantUri = '/api/v1/restaurants/latest';
+  static const String restaurantUri = '/api/v1/restaurants/get-restaurants'; // Legacy - kept for compatibility
+  static const String popularRestaurantUri = '/api/v1/restaurants/popular'; // Legacy - kept for compatibility
+  static const String latestRestaurantUri = '/api/v1/restaurants/latest'; // Legacy - kept for compatibility
+  static const String unifiedRestaurantUri = '/api/v1/restaurants/unified'; // New unified endpoint
   static const String restaurantDetailsUri = '/api/v1/restaurants/details/';
   static const String basicCampaignUri = '/api/v1/campaigns/basic';
   static const String itemCampaignUri = '/api/v1/campaigns/item';

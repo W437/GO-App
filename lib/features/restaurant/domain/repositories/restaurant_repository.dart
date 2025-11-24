@@ -92,7 +92,10 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
 
   @override
   Future<RestaurantModel?> getList({int? offset, String? filterBy, int? topRated, int? discount, int? veg, int? nonVeg, bool fromMap = false}) async {
-    Response response = await apiClient.getData('${AppConstants.restaurantUri}/all?offset=$offset&limit=${fromMap ? 20 : 12}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
+    // Use new unified endpoint with preset=all
+    // Convert offset: frontend uses 0-based, unified API uses 1-based
+    final apiOffset = (offset ?? 0) == 0 ? 1 : offset! + 1;
+    Response response = await apiClient.getData('${AppConstants.unifiedRestaurantUri}?preset=all&offset=$apiOffset&limit=${fromMap ? 20 : 25}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
     if (response.statusCode == 200) {
       return RestaurantModel.fromJson(response.body);
     }
@@ -114,24 +117,40 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
   }
 
   Future<List<Restaurant>?> _getLatestRestaurantList(String type) async {
-    Response response = await apiClient.getData('${AppConstants.latestRestaurantUri}?type=$type');
+    // Use new unified endpoint with preset=latest
+    Response response = await apiClient.getData('${AppConstants.unifiedRestaurantUri}?preset=latest&type=$type&limit=20&offset=1');
     if (response.statusCode == 200) {
       List<Restaurant> latestRestaurantList = [];
-      response.body.forEach((restaurant) {
-        latestRestaurantList.add(Restaurant.fromJson(restaurant));
-      });
+      // Handle both array response (legacy) and object response (unified)
+      if (response.body is List) {
+        response.body.forEach((restaurant) {
+          latestRestaurantList.add(Restaurant.fromJson(restaurant));
+        });
+      } else if (response.body is Map && response.body['restaurants'] != null) {
+        response.body['restaurants'].forEach((restaurant) {
+          latestRestaurantList.add(Restaurant.fromJson(restaurant));
+        });
+      }
       return latestRestaurantList.isNotEmpty ? latestRestaurantList : null;
     }
     return null;
   }
 
   Future<List<Restaurant>?> _getPopularRestaurantList(String type) async {
-    Response response = await apiClient.getData('${AppConstants.popularRestaurantUri}?type=$type');
+    // Use new unified endpoint with preset=popular
+    Response response = await apiClient.getData('${AppConstants.unifiedRestaurantUri}?preset=popular&type=$type&limit=50&offset=1');
     if (response.statusCode == 200) {
       List<Restaurant> popularRestaurantList = [];
-      response.body.forEach((restaurant) {
-        popularRestaurantList.add(Restaurant.fromJson(restaurant));
-      });
+      // Handle both array response (legacy) and object response (unified)
+      if (response.body is List) {
+        response.body.forEach((restaurant) {
+          popularRestaurantList.add(Restaurant.fromJson(restaurant));
+        });
+      } else if (response.body is Map && response.body['restaurants'] != null) {
+        response.body['restaurants'].forEach((restaurant) {
+          popularRestaurantList.add(Restaurant.fromJson(restaurant));
+        });
+      }
       return popularRestaurantList.isNotEmpty ? popularRestaurantList : null;
     }
     return null;
