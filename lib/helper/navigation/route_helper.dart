@@ -440,7 +440,7 @@ class RouteHelper {
         );
       },
       customTransition: _ThreeDGetTransition(),
-      transitionDuration: const Duration(milliseconds: 280),
+      transitionDuration: const Duration(milliseconds: 500),
       opaque: false,
     ),
     GetPage(
@@ -449,7 +449,9 @@ class RouteHelper {
         restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+'))))),
       )),
       customTransition: _ThreeDGetTransition(),
-      transitionDuration: const Duration(milliseconds: 280),
+      transitionDuration: const Duration(milliseconds: 500),
+      opaque: false,
+      popGesture: true,
     ),
     GetPage(name: orderDetails, page: () {
       return getRoute(Get.arguments ?? OrderDetailsScreen(
@@ -696,18 +698,23 @@ class _ThreeDGetTransition extends CustomTransition {
         builder: (context, _) {
           final size = MediaQuery.of(context).size;
           final double t = Curves.easeInOutSine.transform(secondaryAnimation.value);
-          final double dx = -size.width * 0.20 * t; // 20% shift
-          final double scale = 1.0 - 0.1 * t; // Scale down from 1.0 to 0.9
+          final double dx = -size.width * 0.20 * t; // 20% shift left
           final double blur = 4.0 * t; // Blur from 0 to 4
+          final double overlayOpacity = 0.5 * t; // Fade from 0 to 0.5
           return Transform.translate(
             offset: Offset(dx, 0),
-            child: Transform.scale(
-              scale: scale,
-              alignment: Alignment.center,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                child: child,
-              ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                  child: child,
+                ),
+                // Dark overlay
+                Container(
+                  color: Colors.black.withValues(alpha: overlayOpacity),
+                ),
+              ],
             ),
           );
         },
@@ -728,80 +735,18 @@ class _ThreeDTransitionBody extends StatefulWidget {
   State<_ThreeDTransitionBody> createState() => _ThreeDTransitionBodyState();
 }
 
-class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
-    with SingleTickerProviderStateMixin {
-  double _dragOffset = 0.0;
-  bool _isDragging = false;
-  late AnimationController _bounceController;
-  late Animation<double> _bounceAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _bounceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-    );
-    _bounceAnimation = Tween<double>(begin: 0, end: 0).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
-    )..addListener(() {
-        if (mounted) {
-          setState(() {
-            _dragOffset = _bounceAnimation.value;
-          });
-        }
-      });
-  }
-
-  @override
-  void dispose() {
-    _bounceController.dispose();
-    super.dispose();
-  }
-
-  void _handleDragStart(DragStartDetails details) {
-    if (!Navigator.of(context).canPop()) return;
-    final size = MediaQuery.of(context).size;
-    final edgeWidth = size.width * 0.15;
-    if (details.globalPosition.dx > edgeWidth) return;
-    _isDragging = true;
-    _bounceController.stop();
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    if (!_isDragging) return;
-    if (mounted) {
-      setState(() {
-        _dragOffset = (_dragOffset + details.delta.dx).clamp(0.0, double.infinity);
-      });
-    }
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    if (!_isDragging) return;
-    _isDragging = false;
-    final size = MediaQuery.of(context).size;
-    final threshold = size.width * 0.3;
-    if (_dragOffset > threshold) {
-      Navigator.of(context).maybePop();
-    } else {
-      _bounceAnimation = Tween<double>(begin: _dragOffset, end: 0).animate(
-        CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
-      );
-      _bounceController.forward(from: 0);
-    }
-  }
+class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody> {
 
   @override
   Widget build(BuildContext context) {
-    // Linear (consistent speed) for closing, smooth for opening
+    // Fast start for opening, fast end for closing
     final double curvedValue = widget.animation.status == AnimationStatus.reverse
-        ? Curves.linear.transform(widget.animation.value)
-        : Curves.easeOutCubic.transform(widget.animation.value);
+        ? Curves.fastOutSlowIn.flipped.transform(widget.animation.value)
+        : Curves.fastOutSlowIn.transform(widget.animation.value);
 
     // Parameters for 3D effect.
     const double startTranslateXRatio = 1.1;
-    const double startScale = 0.92;
+    const double startScale = 1.1; // Start larger, scale down to 1.0
     const double startYAngle = 8.0 * pi / 180;
     const double startZAngle = 1.5 * pi / 180;
 
@@ -809,7 +754,7 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
     final width = size.width;
 
     final double animationTranslateX = width * startTranslateXRatio * (1.0 - curvedValue);
-    final double totalTranslateX = animationTranslateX + _dragOffset;
+    final double totalTranslateX = animationTranslateX;
 
     final double totalProgress = (totalTranslateX / (width * startTranslateXRatio)).clamp(0.0, 1.0);
     final double effectiveProgress = 1.0 - totalProgress;
@@ -817,15 +762,22 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
     final double yAngle = startYAngle * totalProgress;
     final double zAngle = startZAngle * totalProgress;
 
-    final double scaleValue = widget.animation.status == AnimationStatus.reverse
-        ? curvedValue
-        : const Cubic(0.175, 0.885, 0.32, 1.2).transform(widget.animation.value);
-    final double currentScale = startScale + (1.0 - startScale) * scaleValue * effectiveProgress;
+    final double currentScale = 1.0; // Keep at full scale
 
     final double cornerRadius = 24.0 * totalProgress;
     final double shadowOpacity = (effectiveProgress * 0.5).clamp(0.0, 0.3);
+    final double foregroundBlur = 6.0 * totalProgress; // Blur from 6 to 0 as screen slides in
 
     Widget transformedChild = widget.child;
+
+    // Apply blur for both opening and closing
+    if (foregroundBlur > 0.1) {
+      transformedChild = ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: foregroundBlur, sigmaY: foregroundBlur),
+        child: transformedChild,
+      );
+    }
+
     if (cornerRadius > 0.5) {
       transformedChild = ClipRRect(
         borderRadius: BorderRadius.circular(cornerRadius),
@@ -840,27 +792,22 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody>
       ..rotateY(yAngle)
       ..rotateZ(zAngle);
 
-    return GestureDetector(
-      onHorizontalDragStart: _handleDragStart,
-      onHorizontalDragUpdate: _handleDragUpdate,
-      onHorizontalDragEnd: _handleDragEnd,
-      child: Transform(
-        transform: matrix,
-        alignment: Alignment.center,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(cornerRadius),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(shadowOpacity),
-                blurRadius: 30,
-                spreadRadius: 5,
-                offset: const Offset(-10, 10),
-              ),
-            ],
-          ),
-          child: transformedChild,
+    return Transform(
+      transform: matrix,
+      alignment: Alignment.center,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(cornerRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(shadowOpacity),
+              blurRadius: 30,
+              spreadRadius: 5,
+              offset: const Offset(-10, 10),
+            ),
+          ],
         ),
+        child: transformedChild,
       ),
     );
   }

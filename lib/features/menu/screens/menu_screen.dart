@@ -156,7 +156,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       child: Opacity(
                         opacity: 0.15,
                         child: CustomAssetImageWidget(
-                          Images.logo,
+                          Images.hopaWhiteLogo,
                           width: 180,
                           height: 180,
                           color: Colors.white,

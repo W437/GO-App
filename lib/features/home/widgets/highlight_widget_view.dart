@@ -19,6 +19,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:video_player/video_player.dart';
+import 'package:animated_emoji/animated_emoji.dart';
 
 class HighlightWidgetView extends StatefulWidget {
   const HighlightWidgetView({super.key});
@@ -43,13 +44,22 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'highlights_for_you'.tr,
-                    style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeOverLarge,
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'highlights_for_you'.tr,
+                        style: robotoBold.copyWith(
+                          fontSize: Dimensions.fontSizeOverLarge,
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      AnimatedEmoji(
+                        AnimatedEmojis.fire,
+                        size: 28,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(

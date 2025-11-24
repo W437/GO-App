@@ -323,36 +323,39 @@ class SplashScreenState extends State<SplashScreen> {
         return Stack(
           fit: StackFit.expand,
           children: [
-            // Thumbnail shown while video loads
-            Image.asset(
-              'assets/image/splash_thumbnail.jpg',
-              fit: BoxFit.contain,
+            // White background
+            Container(
+              color: Colors.white,
             ),
 
-            // Video player on top, only visible when ready
-            if (isVideoReady)
-              Container(
-                color: Colors.white,
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: _videoController.value.aspectRatio,
-                    child: VideoPlayer(_videoController),
+            // Logo image (primary blue color) with loading indicator below
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Logo
+                  SizedBox(
+                    width: 180,
+                    height: 180,
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Theme.of(context).primaryColor,
+                        BlendMode.srcIn,
+                      ),
+                      child: Image.asset(
+                        'assets/image/hopa_white_logo.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                  const SizedBox(height: Dimensions.paddingSizeLarge),
 
-            // Progress indicator for data loading
-            GetBuilder<SplashController>(
-              builder: (splashController) {
-                // Show progress and keep visible even at 100%
-                if (splashController.loadingProgress > 0) {
-                  return Positioned(
-                    bottom: 80,
-                    left: 0,
-                    right: 0,
-                    child: SafeArea(
-                      child: Center(
-                        child: SizedBox(
+                  // Progress indicator for data loading
+                  GetBuilder<SplashController>(
+                    builder: (splashController) {
+                      // Show progress and keep visible even at 100%
+                      if (splashController.loadingProgress > 0) {
+                        return SizedBox(
                           width: MediaQuery.of(context).size.width * 0.5,
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 300),
@@ -392,14 +395,29 @@ class SplashScreenState extends State<SplashScreen> {
                               );
                             },
                           ),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
             ),
+
+            // Video player kept in logic but not displayed (for future use)
+            // Uncomment the block below to re-enable video:
+            /*
+            if (isVideoReady)
+              Container(
+                color: Colors.white,
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: _videoController.value.aspectRatio,
+                    child: VideoPlayer(_videoController),
+                  ),
+                ),
+              ),
+            */
 
             // Skip button at the bottom (only if enabled)
             if (skipButtonDelaySeconds != null)

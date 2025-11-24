@@ -16,13 +16,14 @@ class AdvertisementController extends GetxController implements GetxService {
 
   bool autoPlay = true;
 
-  Future<void> getAdvertisementList() async {
-    // Use cached data if available
-    if (_advertisementList != null) {
+  Future<void> getAdvertisementList({bool reload = false}) async {
+    // Use cached data if available (unless reload is forced)
+    if (_advertisementList != null && !reload) {
       print('✅ [ADVERTISEMENT] Using cached data');
       return;
     }
 
+    print('🔄 [ADVERTISEMENT] ${reload ? "Reloading" : "Loading"} advertisements...');
     List<AdvertisementModel>? advertisementList = await advertisementServiceInterface.getAdvertisementList();
     _prepareAdvertisement(advertisementList);
   }

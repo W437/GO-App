@@ -6,6 +6,7 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:animated_emoji/animated_emoji.dart';
 
 class BadWeatherWidget extends StatefulWidget {
   const BadWeatherWidget({super.key});
@@ -106,12 +107,11 @@ class _BadWeatherWidgetState extends State<BadWeatherWidget> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           ),
-          child: Icon(
-            Icons.cloud_outlined,
-            size: 32,
-            color: Theme.of(context).primaryColor,
+          child: AnimatedEmoji(
+            AnimatedEmojis.rainCloud,
+            size: 48,
           ),
         ),
         const SizedBox(width: Dimensions.paddingSizeSmall),

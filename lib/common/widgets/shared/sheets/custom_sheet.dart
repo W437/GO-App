@@ -39,8 +39,8 @@ class CustomSheet extends StatefulWidget {
       barrierColor: Colors.black54,
       transitionDuration: transitionDuration ?? const Duration(milliseconds: 350),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        // Smooth easing curve
-        const curve = Curves.easeOutCubic;
+        // Smooth and swift curve
+        const curve = Curves.easeOutExpo;
 
         // Slide animation - smooth upward motion
         final slideAnimation = Tween<Offset>(
@@ -62,7 +62,7 @@ class CustomSheet extends StatefulWidget {
 
         // 3D rotation animation - top edges tilted forward (toward viewer)
         final rotationXAnimation = Tween<double>(
-          begin: 0.6, // Stronger tilt: top tilted forward (toward viewer)
+          begin: 0.3, // Subtle tilt: top tilted forward (toward viewer)
           end: 0.0,   // Flat
         ).animate(CurvedAnimation(
           parent: animation,

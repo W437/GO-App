@@ -335,7 +335,7 @@ class _DigitTransition extends StatelessWidget {
         final t = animation.value;
         final oldOffset = Offset(0, direction * t * -maxOffset);
         final newOffset = Offset(0, direction * (1 - t) * maxOffset);
-        final blur = lerpDouble(0, 1.5, 1 - (t * 2 - 1).abs()) ?? 0;
+        final blur = lerpDouble(0, 6, 1 - (t * 2 - 1).abs()) ?? 0;
 
         return ClipRect(
           child: SizedBox(

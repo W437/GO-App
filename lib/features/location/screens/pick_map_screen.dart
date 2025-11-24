@@ -45,7 +45,7 @@ class PickMapScreen extends StatefulWidget {
   State<PickMapScreen> createState() => _PickMapScreenState();
 }
 
-class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProviderStateMixin {
+class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   CameraPosition? _cameraPosition;
   late LatLng _initialPosition;
@@ -53,6 +53,8 @@ class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProvider
   int? _currentZoneId;
   late AnimationController _pinBounceController;
   late Animation<double> _pinBounceAnimation;
+  late AnimationController _badgeBounceController;
+  late Animation<double> _badgeBounceAnimation;
 
   @override
   void initState() {
@@ -82,6 +84,30 @@ class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProvider
       ),
     ]).animate(_pinBounceController);
 
+    // Initialize badge bounce animation (spring-like)
+    _badgeBounceController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _badgeBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.0, end: 1.2)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.2, end: 0.9)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.9, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 30,
+      ),
+    ]).animate(_badgeBounceController);
+
     Get.find<LocationController>().makeLoadingOff();
 
     // Show location permission overlay if coming from onboarding
@@ -106,7 +132,14 @@ class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProvider
   @override
   void dispose() {
     _pinBounceController.dispose();
+    _badgeBounceController.dispose();
     super.dispose();
+  }
+
+  /// Check if it's nighttime (6 PM to 6 AM)
+  bool _isNightTime() {
+    final hour = DateTime.now().hour;
+    return hour >= 18 || hour < 6;
   }
 
   @override
@@ -183,14 +216,15 @@ class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProvider
                               setState(() {
                                 _currentZoneId = newZoneId;
                               });
-                              // Animate pin when entering a valid zone
+                              // Animate pin and badge when entering a valid zone
                               if (newZoneId != null) {
                                 _pinBounceController.forward(from: 0.0);
+                                _badgeBounceController.forward(from: 0.0);
                               }
                             }
                           }
                         },
-                        style: Get.isDarkMode
+                        style: _isNightTime()
                             ? Get.find<ThemeController>().darkMap
                             : Get.find<ThemeController>().lightMap,
                         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
@@ -281,6 +315,83 @@ class _PickMapScreenState extends State<PickMapScreen> with SingleTickerProvider
                           ),
                         ),
                       ),
+
+                      // Zone Badge (centered, shifted up 100px)
+                      if (_currentZoneId != null)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: (MediaQuery.of(context).size.height / 2) - 100,
+                          child: IgnorePointer(
+                            child: Center(
+                              child: AnimatedBuilder(
+                                animation: _badgeBounceAnimation,
+                                builder: (context, child) {
+                                  return Transform.scale(
+                                    scale: _badgeBounceAnimation.value,
+                                    child: Opacity(
+                                      opacity: _badgeBounceAnimation.value.clamp(0.0, 1.0),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Main tooltip body
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: Dimensions.paddingSizeDefault,
+                                        vertical: Dimensions.paddingSizeSmall,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(100),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.15),
+                                            blurRadius: 15,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Text(
+                                        locationController.zoneList
+                                            ?.firstWhereOrNull((zone) => zone.id == _currentZoneId)
+                                            ?.displayName ?? '',
+                                        style: robotoBold.copyWith(
+                                          fontSize: Dimensions.fontSizeDefault,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                    // Arrow pointer
+                                    Transform.translate(
+                                      offset: const Offset(0, -6),
+                                      child: Transform.rotate(
+                                        angle: 0.785398, // 45 degrees in radians
+                                        child: Container(
+                                          width: 12,
+                                          height: 12,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(1, 1),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       if (!widget.fromSplash)
                         Positioned(
                           top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,

@@ -421,7 +421,7 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
                 child: SafeArea(
                   child: Row(
                     children: [
-                      // Quantity
+                      // Quantity Controls with Circular Buttons
                       Container(
                         decoration: BoxDecoration(
                           color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
@@ -429,8 +429,11 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
                         ),
                         child: Row(
                           children: [
-                            QuantityButton(
-                              onTap: () async {
+                            CircularBackButtonWidget(
+                              icon: Icons.remove,
+                              size: 40,
+                              iconSize: 20,
+                              onPressed: () async {
                                 if (productController.quantity! > 1) {
                                   productController.setQuantity(false, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign);
                                 } else if (productController.quantity == 1 && productController.cartIndex != -1) {
@@ -442,7 +445,6 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
                                   showCustomSnackBar('item_removed_from_cart'.tr, isError: false);
                                 }
                               },
-                              isIncrement: false,
                             ),
                             SizedBox(
                               width: 40,
@@ -453,27 +455,74 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            QuantityButton(
-                              onTap: () => productController.setQuantity(true, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign),
-                              isIncrement: true,
+                            CircularBackButtonWidget(
+                              icon: Icons.add,
+                              size: 40,
+                              iconSize: 20,
+                              onPressed: () => productController.setQuantity(true, product!.cartQuantityLimit, product!.stockType, product!.itemStock, widget.isCampaign),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                      // Add to Cart Button
+                      // Add to Order Button with Price
                       Expanded(
                         child: GetBuilder<CartController>(
                           builder: (cartController) {
-                            return CustomButtonWidget(
-                              radius: Dimensions.radiusDefault,
-                              isLoading: cartController.isLoading,
-                              buttonText: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) ? 'not_available_now'.tr
-                                  : widget.isCampaign ? 'order_now'.tr : (widget.cart != null || productController.cartIndex != -1) ? 'update_in_cart'.tr : 'add_to_cart'.tr,
-                              onPressed: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) || (widget.cart != null && productController.checkOutOfStockVariationSelected(product?.variations) != null) ? null : () async {
-                                _onButtonPressed(productController, cartController, priceWithVariation, priceWithDiscount, price, discount, discountType, addOnIdList, addOnsList, priceWithAddonsVariation);
-                              },
+                            final isDisabled = ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) ||
+                                               (widget.cart != null && productController.checkOutOfStockVariationSelected(product?.variations) != null);
+
+                            String buttonText = ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) ? 'not_available_now'.tr
+                                : widget.isCampaign ? 'order_now'.tr : (widget.cart != null || productController.cartIndex != -1) ? 'update_in_order'.tr : 'add_to_order'.tr;
+
+                            return Material(
+                              color: isDisabled ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              child: InkWell(
+                                onTap: isDisabled ? null : () async {
+                                  _onButtonPressed(productController, cartController, priceWithVariation, priceWithDiscount, price, discount, discountType, addOnIdList, addOnsList, priceWithAddonsVariation);
+                                },
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: Dimensions.paddingSizeDefault,
+                                    vertical: Dimensions.paddingSizeDefault,
+                                  ),
+                                  child: cartController.isLoading
+                                    ? Center(
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          // Button text (left)
+                                          Text(
+                                            buttonText,
+                                            style: robotoBold.copyWith(
+                                              color: Colors.white,
+                                              fontSize: Dimensions.fontSizeDefault,
+                                            ),
+                                          ),
+                                          // Animated price (right)
+                                          AnimatedTextTransition(
+                                            value: PriceConverter.convertPrice(priceWithAddonsVariationWithDiscount),
+                                            style: robotoBold.copyWith(
+                                              color: Colors.white,
+                                              fontSize: Dimensions.fontSizeDefault,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                ),
+                              ),
                             );
                           }
                         ),

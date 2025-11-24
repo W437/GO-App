@@ -127,7 +127,7 @@ class AppDataLoaderService {
       Get.find<CategoryController>().getCategoryList(true),
       Get.find<HomeController>().getBannerList(true),
       Get.find<CuisineController>().getCuisineList(),
-      Get.find<AdvertisementController>().getAdvertisementList(),
+      Get.find<AdvertisementController>().getAdvertisementList(reload: true),
       Get.find<StoryController>().getStories(reload: true),
       Get.find<RestaurantController>().getRestaurantList(0, true),
       Get.find<CampaignController>().getItemCampaignList(true),

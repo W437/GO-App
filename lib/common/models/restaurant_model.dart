@@ -62,6 +62,8 @@ class Restaurant {
   int? open;
   bool? active;
   String? deliveryTime;
+  int? minDeliveryTime;
+  int? maxDeliveryTime;
   List<int>? categoryIds;
   int? veg;
   int? nonVeg;
@@ -136,6 +138,8 @@ class Restaurant {
     this.open,
     this.active,
     this.deliveryTime,
+    this.minDeliveryTime,
+    this.maxDeliveryTime,
     this.categoryIds,
     this.veg,
     this.nonVeg,
@@ -220,6 +224,8 @@ class Restaurant {
     open = json['open'];
     active = json['active'];
     deliveryTime = json['delivery_time'];
+    minDeliveryTime = json['min_delivery_time'];
+    maxDeliveryTime = json['max_delivery_time'];
     veg = json['veg'];
     nonVeg = json['non_veg'];
     categoryIds = json['category_ids'] != null ? json['category_ids'].cast<int>() : [];
@@ -341,6 +347,8 @@ class Restaurant {
     data['veg'] = veg;
     data['non_veg'] = nonVeg;
     data['delivery_time'] = deliveryTime;
+    data['min_delivery_time'] = minDeliveryTime;
+    data['max_delivery_time'] = maxDeliveryTime;
     data['category_ids'] = categoryIds;
     if (discount != null) {
       data['discount'] = discount!.toJson();

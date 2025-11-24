@@ -12,6 +12,7 @@ import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/util/app_colors.dart';
 
 class RestaurantBottomSheetWidget extends StatefulWidget {
   final List<Restaurant> restaurants;
@@ -319,12 +320,12 @@ class _RestaurantBottomSheetWidgetState extends State<RestaurantBottomSheetWidge
                 color: isOpen ? Colors.green : Colors.red,
               ),
 
-              // Delivery Time
+              // Delivery Time (ETA) - brand green
               _buildDetailItem(
                 context: context,
                 icon: Icons.delivery_dining,
                 label: restaurant.deliveryTime ?? '30-40 min',
-                color: Theme.of(context).primaryColor,
+                color: AppColors.brandAccent,
               ),
 
               // Distance

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -35,82 +36,58 @@ class _OrderTogetherSheetState extends State<OrderTogetherSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(Dimensions.radiusExtraLarge),
-        ),
-      ),
       child: Stack(
         children: [
           // Main Content
           SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              Dimensions.paddingSizeLarge,
-              Dimensions.paddingSizeSmall, // Less top padding since handle is above
-              Dimensions.paddingSizeLarge,
-              Dimensions.paddingSizeLarge,
-            ),
+            padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Close Button (top left)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    onTap: () => Get.back(),
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
+                // Header Bar with X Button and Coming Soon Badge
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Close Button (left)
+                    CircularBackButtonWidget(
+                      icon: Icons.close,
+                      onPressed: () => Get.back(),
+                    ),
+                    // Coming Soon Badge (right)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Dimensions.paddingSizeDefault,
+                        vertical: Dimensions.paddingSizeExtraSmall,
+                      ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
                       ),
-                      child: Icon(
-                        Icons.close,
-                        size: 24,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                // Coming Soon Badge
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Dimensions.paddingSizeDefault,
-                      vertical: Dimensions.paddingSizeExtraSmall,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.star_outline,
-                          size: 16,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'COMING SOON',
-                          style: robotoMedium.copyWith(
-                            fontSize: Dimensions.fontSizeSmall,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.star_outline,
+                            size: 16,
                             color: Theme.of(context).primaryColor,
-                            letterSpacing: 0.5,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            'COMING SOON',
+                            style: robotoMedium.copyWith(
+                              fontSize: Dimensions.fontSizeSmall,
+                              color: Theme.of(context).primaryColor,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
+                const SizedBox(height: Dimensions.paddingSizeLarge),
 
                 // Restaurant Name
                 Text(

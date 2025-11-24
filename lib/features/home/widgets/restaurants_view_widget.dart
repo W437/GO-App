@@ -14,6 +14,7 @@ import 'package:godelivery_user/features/language/controllers/localization_contr
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:godelivery_user/util/app_colors.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
+import 'package:animated_emoji/animated_emoji.dart';
 
 class RestaurantsViewWidget extends StatelessWidget {
   final List<Restaurant?>? restaurants;
@@ -243,85 +245,63 @@ class RestaurantView extends StatelessWidget {
 
                   // Status bar at bottom with blur effect - always show
                   Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
+                    bottom: 12,
+                    right: 12,
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      ),
+                      borderRadius: BorderRadius.circular(100),
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.5),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              topRight: Radius.circular(12),
-                            ),
+                            borderRadius: BorderRadius.circular(100),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               // Rating
-                              if (restaurant.ratingCount != null && restaurant.ratingCount! > 0)
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.star_rounded,
-                                      size: 14,
-                                      color: const Color(0xFFFFB800),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      '${restaurant.avgRating?.toStringAsFixed(1) ?? "0.0"}',
-                                      style: robotoMedium.copyWith(
-                                        fontSize: 12,
-                                        color: Colors.white.withValues(alpha: 0.9),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      '(${restaurant.ratingCount})',
-                                      style: robotoRegular.copyWith(
-                                        fontSize: 11,
-                                        color: Colors.white.withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else
-                                const SizedBox(),
+                              if (restaurant.ratingCount != null && restaurant.ratingCount! > 0) ...[
+                                Icon(
+                                  Icons.star_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${restaurant.avgRating?.toStringAsFixed(1) ?? "0.0"}',
+                                  style: robotoMedium.copyWith(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '(${restaurant.ratingCount})',
+                                  style: robotoRegular.copyWith(
+                                    fontSize: 11,
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
 
                               // Open/Closed Status
-                              Flexible(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      isAvailable ? Icons.access_time : Icons.lock_clock,
-                                      size: 14,
-                                      color: isAvailable ? Colors.green : Colors.orange,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      child: Text(
-                                        isAvailable
-                                          ? 'closes_at'.tr + ' ${restaurant.availableTimeEnds ?? "23:00"}'
-                                          : restaurant.currentOpeningTime ??
-                                            'opens_at'.tr + ' ${restaurant.availableTimeStarts ?? "09:00"}',
-                                        style: robotoMedium.copyWith(
-                                          fontSize: 11,
-                                          color: isAvailable ? Colors.green : Colors.orange,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
+                              Icon(
+                                isAvailable ? Icons.access_time : Icons.lock_clock,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isAvailable
+                                  ? 'Closes at ${restaurant.availableTimeEnds ?? "23:00"}'
+                                  : 'Opens at ${restaurant.availableTimeStarts ?? "09:00"}',
+                                style: robotoMedium.copyWith(
+                                  fontSize: 11,
+                                  color: Colors.white,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -354,7 +334,7 @@ class RestaurantView extends StatelessWidget {
                               Text(
                                 restaurant.name ?? '',
                                 style: robotoMedium.copyWith(
-                                  fontSize: Dimensions.fontSizeDefault,
+                                  fontSize: Dimensions.fontSizeLarge,
                                   fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 1,
@@ -387,37 +367,44 @@ class RestaurantView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Right side: ETA badge
+                        // Right side: ETA badge - green when open, red when closed
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            color: isAvailable
+                              ? AppColors.brandAccent.withValues(alpha: 0.1)
+                              : AppColors.semanticError.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                restaurant.deliveryTime?.replaceAll('-min', '').replaceAll(' min', '') ?? '30-45',
-                                style: robotoMedium.copyWith(
-                                  fontSize: Dimensions.fontSizeDefault,
-                                  color: Theme.of(context).primaryColor,
-                                  height: 1.0,
-                                ),
-                                textAlign: TextAlign.center,
+                          child: isAvailable
+                            ? Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    restaurant.deliveryTime?.replaceAll('-min', '').replaceAll(' min', '') ?? '30-45',
+                                    style: robotoMedium.copyWith(
+                                      fontSize: Dimensions.fontSizeDefault,
+                                      color: AppColors.brandAccent,
+                                      height: 1.0,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    'min'.tr,
+                                    style: robotoRegular.copyWith(
+                                      fontSize: Dimensions.fontSizeSmall,
+                                      color: AppColors.brandAccent,
+                                      height: 1.2,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              )
+                            : AnimatedEmoji(
+                                AnimatedEmojis.sleep,
+                                size: 32,
                               ),
-                              Text(
-                                'min'.tr,
-                                style: robotoRegular.copyWith(
-                                  fontSize: Dimensions.fontSizeSmall,
-                                  color: Theme.of(context).primaryColor,
-                                  height: 1.2,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
                         ),
                       ],
                     ),
