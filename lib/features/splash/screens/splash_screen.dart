@@ -376,9 +376,8 @@ class SplashScreenState extends State<SplashScreen> {
                   // Progress indicator for data loading
                   GetBuilder<SplashController>(
                     builder: (splashController) {
-                      // Show progress and keep visible even at 100%
-                      if (splashController.loadingProgress > 0) {
-                        return SizedBox(
+                      // Always show progress bar (renders with logo)
+                      return SizedBox(
                           width: MediaQuery.of(context).size.width * 0.5,
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 300),
@@ -419,8 +418,6 @@ class SplashScreenState extends State<SplashScreen> {
                             },
                           ),
                         );
-                      }
-                      return const SizedBox.shrink();
                     },
                   ),
                 ],

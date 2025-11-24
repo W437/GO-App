@@ -87,10 +87,19 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   CameraPosition? _pendingGeocodePosition;  // Position to geocode when user releases
   Timer? _geocodeDebounceTimer;  // Debounce timer for geocoding
   MapAnimationMode _mapAnimationMode = MapAnimationMode.quick;  // Default to quick, will be set in initState
+  int? _savedZoneIdForAnimation;  // Zone ID to fly to directly during animation
 
   @override
   void initState() {
     super.initState();
+
+    // Check for saved zone ID early (before zones load) for animation targeting
+    final savedAddress = AddressHelper.getAddressFromSharedPref();
+    if (savedAddress != null && savedAddress.zoneId != null && savedAddress.zoneId != 0) {
+      _savedZoneIdForAnimation = savedAddress.zoneId;
+      _selectedZoneId = savedAddress.zoneId;  // Also pre-select it
+      print('🗺️ [PICK_MAP] Found saved zone ID for animation: $_savedZoneIdForAnimation');
+    }
 
     // Determine animation mode based on whether user has seen full animation
     _determineAnimationMode();
@@ -199,33 +208,23 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     _initialPosition = const LatLng(32.82461934938776, 35.14441039413214);
   }
 
-  /// Check if user has a saved address with zone and pre-select it
+  /// Check if user has a saved address with zone and fill in zone details
   void _checkAndSelectSavedZone() {
-    final savedAddress = AddressHelper.getAddressFromSharedPref();
-    if (savedAddress != null && savedAddress.zoneId != null && savedAddress.zoneId != 0) {
-      final locationController = Get.find<LocationController>();
-      final savedZoneId = savedAddress.zoneId!;
+    if (_selectedZoneId == null) return;  // No saved zone
 
-      // Find the zone in the list
-      final savedZone = locationController.zoneList.firstWhereOrNull(
-        (zone) => zone.id == savedZoneId,
-      );
+    final locationController = Get.find<LocationController>();
+    final savedZone = locationController.zoneList.firstWhereOrNull(
+      (zone) => zone.id == _selectedZoneId,
+    );
 
-      if (savedZone != null) {
-        print('🗺️ [PICK_MAP] Pre-selecting saved zone: ${savedZone.displayName ?? savedZone.name} (ID: $savedZoneId)');
-        setState(() {
-          _selectedZoneId = savedZoneId;
-          _selectedZoneName = savedZone.displayName ?? savedZone.name ?? 'Zone $savedZoneId';
-          if (savedZone.formattedCoordinates != null) {
-            _selectedZoneCenter = _calculateZoneCenter(savedZone.formattedCoordinates!);
-          }
-        });
-
-        // Zoom to the saved zone after map animation completes
-        if (_mapAnimationComplete) {
-          _moveToZoneCenter(savedZoneId, locationController.zoneList);
+    if (savedZone != null) {
+      print('🗺️ [PICK_MAP] Filling in saved zone details: ${savedZone.displayName ?? savedZone.name} (ID: $_selectedZoneId)');
+      setState(() {
+        _selectedZoneName = savedZone.displayName ?? savedZone.name ?? 'Zone $_selectedZoneId';
+        if (savedZone.formattedCoordinates != null) {
+          _selectedZoneCenter = _calculateZoneCenter(savedZone.formattedCoordinates!);
         }
-      }
+      });
     }
   }
 
@@ -349,6 +348,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           highlightedZoneId: _currentMode == MapMode.zoneSelection
                               ? _selectedZoneId
                               : _currentZoneId,
+                          savedZoneId: _savedZoneIdForAnimation,
                           zoneBaseColor: Theme.of(context).colorScheme.primary,
                           isDarkMode: false,  // Always use light/day mode
                           animationMode: _mapAnimationMode,
@@ -423,12 +423,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                             if (_mapAnimationMode == MapAnimationMode.full) {
                               _markFullAnimationAsSeen();
                             }
-                            // If a zone was pre-selected, zoom to it now
-                            if (_selectedZoneId != null) {
-                              Future.delayed(const Duration(milliseconds: 300), () {
-                                _moveToZoneCenter(_selectedZoneId!, locationController.zoneList);
-                              });
-                            }
+                            // Note: If savedZoneId was set, animation already flew directly to zone
+                            // No need to zoom again
                           },
                         ),
                         )

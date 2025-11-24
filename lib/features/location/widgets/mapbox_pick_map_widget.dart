@@ -31,6 +31,7 @@ class MapboxPickMapWidget extends StatefulWidget {
   final double maxZoom;
   final List<ZoneListModel> zones;
   final int? highlightedZoneId;
+  final int? savedZoneId;  // Zone to fly directly to (if user has a saved zone)
   final Color zoneBaseColor;
   final bool isDarkMode;
   final MapAnimationMode animationMode;
@@ -49,6 +50,7 @@ class MapboxPickMapWidget extends StatefulWidget {
     this.maxZoom = 14,
     this.zones = const [],
     this.highlightedZoneId,
+    this.savedZoneId,
     required this.zoneBaseColor,
     this.isDarkMode = false,
     this.animationMode = MapAnimationMode.full,
@@ -324,9 +326,22 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
   Future<void> _runQuickFlyInAnimation(MapboxMap mapboxMap) async {
     print('🗺️ [MAPBOX $_instanceId] Starting QUICK fly-in animation');
 
-    // Map already starts at Middle East position (set in initialCamera)
-    // Just fly to target
-    final flyToZoom = widget.initialZoom - 0.5;  // Close to final zoom
+    // Check if we have a saved zone to fly directly to
+    if (widget.savedZoneId != null && widget.zones.isNotEmpty) {
+      final savedZone = widget.zones.firstWhere(
+        (z) => z.id == widget.savedZoneId,
+        orElse: () => widget.zones.first,
+      );
+
+      if (savedZone.formattedCoordinates != null && savedZone.formattedCoordinates!.isNotEmpty) {
+        print('🗺️ [MAPBOX $_instanceId] Flying directly to saved zone: ${savedZone.displayName ?? savedZone.name}');
+        await _flyToZoneBounds(mapboxMap, savedZone);
+        return;
+      }
+    }
+
+    // No saved zone - fly to general area
+    final flyToZoom = widget.initialZoom - 0.5;
     print('🗺️ [MAPBOX $_instanceId] Quick flyTo animation (1500ms) to zoom=$flyToZoom');
     mapboxMap.flyTo(
       CameraOptions(
@@ -342,6 +357,48 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
     );
 
     await Future.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+
+    await _finalizeAnimation(mapboxMap);
+  }
+
+  /// Fly directly to a zone's bounds
+  Future<void> _flyToZoneBounds(MapboxMap mapboxMap, ZoneListModel zone) async {
+    // Calculate bounding box
+    double minLat = double.infinity;
+    double maxLat = double.negativeInfinity;
+    double minLng = double.infinity;
+    double maxLng = double.negativeInfinity;
+
+    for (final coord in zone.formattedCoordinates!) {
+      if (coord.lat != null && coord.lng != null) {
+        if (coord.lat! < minLat) minLat = coord.lat!;
+        if (coord.lat! > maxLat) maxLat = coord.lat!;
+        if (coord.lng! < minLng) minLng = coord.lng!;
+        if (coord.lng! > maxLng) maxLng = coord.lng!;
+      }
+    }
+
+    final coordinateBounds = CoordinateBounds(
+      southwest: Point(coordinates: Position(minLng, minLat)),
+      northeast: Point(coordinates: Position(maxLng, maxLat)),
+      infiniteBounds: false,
+    );
+
+    // Calculate camera for bounds with padding
+    final cameraOptions = await mapboxMap.cameraForCoordinateBounds(
+      coordinateBounds,
+      MbxEdgeInsets(top: 80, left: 60, bottom: 180, right: 60),
+      null, null, null, null,
+    );
+
+    // Fly to zone bounds
+    mapboxMap.flyTo(
+      cameraOptions,
+      MapAnimationOptions(duration: 1800, startDelay: 0),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 1800));
     if (!mounted) return;
 
     await _finalizeAnimation(mapboxMap);
