@@ -23,6 +23,7 @@ dependencies:
   geolocator: ^13.0.1
   google_maps_flutter: ^2.9.0
   google_maps_flutter_web: ^0.5.10
+  mapbox_maps_flutter: ^2.4.0
   carousel_slider: ^5.0.0
   shimmer_animation: ^2.2.1
   image_picker: ^1.1.2

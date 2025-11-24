@@ -217,38 +217,34 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Row(
                                 children: [
                                   Icon(
                                     Icons.access_time,
-                                    size: 12,
-                                    color: Colors.white.withOpacity(0.6),
+                                    size: 14,
+                                    color: Colors.white.withOpacity(0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     operatingHours,
                                     style: robotoRegular.copyWith(
-                                      fontSize: Dimensions.fontSizeExtraSmall,
-                                      color: Colors.white.withOpacity(0.6),
+                                      fontSize: Dimensions.fontSizeSmall,
+                                      color: Colors.white.withOpacity(0.7),
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Row(
-                                children: [
+                                  const SizedBox(width: 12),
                                   Icon(
                                     Icons.restaurant,
-                                    size: 12,
-                                    color: Colors.white.withOpacity(0.6),
+                                    size: 14,
+                                    color: Colors.white.withOpacity(0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '$restaurantCount ${'restaurants'.tr}',
                                     style: robotoRegular.copyWith(
-                                      fontSize: Dimensions.fontSizeExtraSmall,
-                                      color: Colors.white.withOpacity(0.6),
+                                      fontSize: Dimensions.fontSizeSmall,
+                                      color: Colors.white.withOpacity(0.7),
                                     ),
                                   ),
                                 ],

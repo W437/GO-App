@@ -169,6 +169,7 @@ class AppConstants {
   static const String notification = 'notification';
   static const String searchHistory = 'search_history';
   static const String intro = 'intro';
+  static const String hasSeenMapGlobeAnimation = 'has_seen_map_globe_animation';
   static const String notificationCount = 'notification_count';
   static const String notificationIdList = 'notification_id_list';
   static const String topic = 'all_zone_customer';

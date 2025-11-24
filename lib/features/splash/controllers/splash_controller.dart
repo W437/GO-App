@@ -358,25 +358,10 @@ class SplashController extends GetxController implements GetxService {
   }
 
   void _checkPermission(String page) async {
-
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    if(permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if(permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      Get.toNamed(RouteHelper.getPickMapRoute(page, false));
-    } else {
-      if(await _locationCheck()) {
-        await Get.find<LocationController>().getCurrentLocation(false).then((value) {
-          if (value.latitude != null) {
-            _onPickAddressButtonPressed(Get.find<LocationController>(), page);
-          }
-        });
-      } else {
-        Get.toNamed(RouteHelper.getPickMapRoute(page, false));
-      }
-    }
+    // Go directly to pick map screen - zone selection first approach
+    // The map screen starts in zone selection mode, user selects zone first
+    // No need to auto-validate GPS location against zones on startup
+    Get.toNamed(RouteHelper.getPickMapRoute(page, false));
   }
 
   Future<bool> _locationCheck() async {

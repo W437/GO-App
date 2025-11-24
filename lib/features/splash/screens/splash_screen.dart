@@ -39,16 +39,19 @@ class SplashScreenState extends State<SplashScreen> {
   bool _videoFailedToLoad = false;
   bool _skipPressed = false;
 
-  // Skip button configuration
-  static const int? skipButtonDelaySeconds = 2; // Set to null to disable skip button
+  // Video configuration - set to false to show logo only and navigate when data loads
+  static const bool _useVideo = false;
+
+  // Skip button configuration (only relevant when _useVideo is true)
+  static const int? skipButtonDelaySeconds = null; // Set to null to disable skip button
   bool _skipButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Enable skip button after delay (if configured)
-    if (skipButtonDelaySeconds != null) {
+    // Enable skip button after delay (if configured and using video)
+    if (_useVideo && skipButtonDelaySeconds != null) {
       Future.delayed(Duration(seconds: skipButtonDelaySeconds!), () {
         if (mounted) {
           setState(() {
@@ -58,7 +61,16 @@ class SplashScreenState extends State<SplashScreen> {
       });
     }
 
-    _initializeVideo();
+    // Only initialize video if enabled, otherwise mark as complete immediately
+    if (_useVideo) {
+      _initializeVideo();
+    } else {
+      // No video - create dummy controller and mark as complete
+      _videoController = VideoPlayerController.asset('');
+      _videoInitializationFuture = Future.value();
+      _videoCompleted = true;
+      _videoFailedToLoad = true;
+    }
 
     bool firstTime = true;
     _onConnectivityChanged = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
@@ -105,6 +117,10 @@ class SplashScreenState extends State<SplashScreen> {
 
     if (!configSuccess) {
       print('❌ [SPLASH] Config load failed during parallel load');
+      // If not using video, try routing immediately to show error
+      if (!_useVideo) {
+        _tryStartRouting();
+      }
       return; // Will be handled in _route()
     }
 
@@ -118,15 +134,22 @@ class SplashScreenState extends State<SplashScreen> {
       // We don't load data, but we don't mark it as failed either.
       // The _route method will handle the navigation based on config only.
     }
+
+    // If not using video, navigate as soon as data loads
+    if (!_useVideo) {
+      print('🚀 [SPLASH] No video mode - navigating now that data is loaded');
+      _tryStartRouting();
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
-
     _onConnectivityChanged?.cancel();
-    _videoController.removeListener(_videoListener);
+    if (_useVideo) {
+      _videoController.removeListener(_videoListener);
+    }
     _videoController.dispose();
+    super.dispose();
   }
 
   void _initializeVideo() {

@@ -33,6 +33,11 @@ class Environment {
   // Google Maps Configuration
   static String get googleMapsApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
+  // Mapbox Configuration
+  static String get mapboxToken => dotenv.env['MAPBOX_TOKEN'] ?? '';
+  static String get mapProvider => dotenv.env['MAP_PROVIDER'] ?? 'google'; // 'google' or 'mapbox'
+  static bool get useMapbox => mapProvider.toLowerCase() == 'mapbox';
+
   /// Check if running in development mode
   static bool get isDevelopment => baseUrl.contains('localhost') || baseUrl.contains('127.0.0.1');
 

@@ -184,11 +184,24 @@ class LocationController extends GetxController implements GetxService {
     }
   }
 
-  void saveAddressAndNavigate(AddressModel address, bool fromSignUp, String? route, bool canRoute, bool isDesktop) {
-    _prepareZoneData(address, fromSignUp, route, canRoute, isDesktop);
+  void saveAddressAndNavigate(AddressModel address, bool fromSignUp, String? route, bool canRoute, bool isDesktop, {ZoneResponseModel? zoneResponse}) {
+    _prepareZoneData(address, fromSignUp, route, canRoute, isDesktop, zoneResponse: zoneResponse);
   }
 
-  void _prepareZoneData(AddressModel address, bool fromSignUp, String? route, bool canRoute, bool isDesktop) {
+  void _prepareZoneData(AddressModel address, bool fromSignUp, String? route, bool canRoute, bool isDesktop, {ZoneResponseModel? zoneResponse}) {
+    // If zone response already provided, use it directly (avoid duplicate API call)
+    if (zoneResponse != null && zoneResponse.isSuccess) {
+      Get.find<CartController>().getCartDataOnline();
+      address.zoneId = zoneResponse.zoneIds[0];
+      address.zoneIds = [];
+      address.zoneIds!.addAll(zoneResponse.zoneIds);
+      address.zoneData = [];
+      address.zoneData!.addAll(zoneResponse.zoneData);
+      autoNavigate(address, fromSignUp, route, canRoute, isDesktop);
+      return;
+    }
+
+    // Otherwise fetch zone data
     getZone(address.latitude, address.longitude, false).then((response) async {
       if (response.isSuccess) {
         Get.find<CartController>().getCartDataOnline();
@@ -212,7 +225,8 @@ class LocationController extends GetxController implements GetxService {
     locationServiceInterface.handleTopicSubscription(AddressHelper.getAddressFromSharedPref(), address);
     await AddressHelper.saveAddressInSharedPref(address!);
     if(AuthHelper.isLoggedIn() && !AuthHelper.isGuestLoggedIn() ) {
-      await Get.find<FavouriteController>().getFavouriteList();
+      // Fire and forget - already called in app_navigator, just refresh in background
+      Get.find<FavouriteController>().getFavouriteList();
       updateZone();
     }
     if(route == 'splash' && Get.isDialogOpen!) {

@@ -130,7 +130,9 @@ class AppNavigator {
     print('🚀 [NAVIGATION] Setting up logged-in user');
 
     Get.find<AuthController>().updateToken();
-    await Get.find<FavouriteController>().getFavouriteList();
+
+    // Fire and forget - don't block navigation for favourites
+    Get.find<FavouriteController>().getFavouriteList();
 
     // Pre-load zones for instant display when user clicks location
     Get.find<LocationController>().getZoneList();

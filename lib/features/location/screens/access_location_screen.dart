@@ -89,17 +89,19 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
     _hasAutoNavigated = true;
 
     AddressModel address = await Get.find<LocationController>().getCurrentLocation(true);
-    ZoneResponseModel response = await Get.find<LocationController>().getZone(address.latitude, address.longitude, false);
-    if(response.isSuccess) {
+    ZoneResponseModel zoneResponse = await Get.find<LocationController>().getZone(address.latitude, address.longitude, false);
+    if(zoneResponse.isSuccess) {
       if(!Get.find<AuthController>().isGuestLoggedIn() || !Get.find<AuthController>().isLoggedIn()) {
         Get.find<AuthController>().guestLogin().then((response) {
           if(response.isSuccess) {
             Get.find<ProfileController>().setForceFullyUserEmpty();
-            Get.find<LocationController>().saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
+            // Pass zoneResponse to avoid duplicate API call
+            Get.find<LocationController>().saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context), zoneResponse: zoneResponse);
           }
         });
       } else {
-        Get.find<LocationController>().saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
+        // Pass zoneResponse to avoid duplicate API call
+        Get.find<LocationController>().saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context), zoneResponse: zoneResponse);
       }
     } else {
       showCustomSnackBar('service_not_available_in_current_location'.tr);

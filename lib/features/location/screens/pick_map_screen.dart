@@ -11,14 +11,19 @@ import 'package:godelivery_user/features/address/domain/models/address_model.dar
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
+import 'package:godelivery_user/features/location/helper/mapbox_zone_polygon_helper.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
+import 'package:godelivery_user/features/location/widgets/mapbox_pick_map_widget.dart';
+import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart';
 import 'package:godelivery_user/features/location/widgets/location_selection_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/location_permission_overlay.dart';
 import 'package:godelivery_user/features/location/widgets/zone_floating_badge.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
+import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -32,6 +37,7 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Map mode enum
 enum MapMode {
@@ -59,6 +65,7 @@ class PickMapScreen extends StatefulWidget {
 
 class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateMixin {
   GoogleMapController? _mapController;
+  final GlobalKey<MapboxPickMapWidgetState> _mapboxKey = GlobalKey<MapboxPickMapWidgetState>();
   CameraPosition? _cameraPosition;
   late LatLng _initialPosition;
   bool _showLocationPermissionOverlay = false;
@@ -75,10 +82,18 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   int? _selectedZoneId;  // For zone selection mode
   LatLng? _selectedZoneCenter;  // Center position of selected zone
   String? _selectedZoneName;  // Name of selected zone
+  bool _mapAnimationComplete = false;  // Track when globe animation is done
+  bool _isMapTouched = false;  // Track if user is touching the map
+  CameraPosition? _pendingGeocodePosition;  // Position to geocode when user releases
+  Timer? _geocodeDebounceTimer;  // Debounce timer for geocoding
+  MapAnimationMode _mapAnimationMode = MapAnimationMode.quick;  // Default to quick, will be set in initState
 
   @override
   void initState() {
     super.initState();
+
+    // Determine animation mode based on whether user has seen full animation
+    _determineAnimationMode();
 
     // Initialize pin bounce animation
     _pinBounceController = AnimationController(
@@ -171,7 +186,10 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
 
     // Call after build to avoid setState during build error
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<LocationController>().getZoneList();
+      Get.find<LocationController>().getZoneList().then((_) {
+        // After zones are loaded, check if user has a saved zone and pre-select it
+        _checkAndSelectSavedZone();
+      });
     });
 
     if(widget.fromAddAddress) {
@@ -181,6 +199,36 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     _initialPosition = const LatLng(32.82461934938776, 35.14441039413214);
   }
 
+  /// Check if user has a saved address with zone and pre-select it
+  void _checkAndSelectSavedZone() {
+    final savedAddress = AddressHelper.getAddressFromSharedPref();
+    if (savedAddress != null && savedAddress.zoneId != null && savedAddress.zoneId != 0) {
+      final locationController = Get.find<LocationController>();
+      final savedZoneId = savedAddress.zoneId!;
+
+      // Find the zone in the list
+      final savedZone = locationController.zoneList.firstWhereOrNull(
+        (zone) => zone.id == savedZoneId,
+      );
+
+      if (savedZone != null) {
+        print('🗺️ [PICK_MAP] Pre-selecting saved zone: ${savedZone.displayName ?? savedZone.name} (ID: $savedZoneId)');
+        setState(() {
+          _selectedZoneId = savedZoneId;
+          _selectedZoneName = savedZone.displayName ?? savedZone.name ?? 'Zone $savedZoneId';
+          if (savedZone.formattedCoordinates != null) {
+            _selectedZoneCenter = _calculateZoneCenter(savedZone.formattedCoordinates!);
+          }
+        });
+
+        // Zoom to the saved zone after map animation completes
+        if (_mapAnimationComplete) {
+          _moveToZoneCenter(savedZoneId, locationController.zoneList);
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _pinBounceController.dispose();
@@ -188,6 +236,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     _tapPromptWiggleController.dispose();
     _tapPromptBounceController.dispose();
     _tapPromptTimer?.cancel();
+    _geocodeDebounceTimer?.cancel();
     super.dispose();
   }
 
@@ -195,6 +244,59 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   bool _isNightTime() {
     final hour = DateTime.now().hour;
     return hour >= 18 || hour < 6;
+  }
+
+  /// Determine which animation mode to use based on whether user has seen full animation
+  void _determineAnimationMode() {
+    final prefs = Get.find<SharedPreferences>();
+    final hasSeenFullAnimation = prefs.getBool(AppConstants.hasSeenMapGlobeAnimation) ?? false;
+
+    if (hasSeenFullAnimation) {
+      // Returning user - use quick fly-in animation
+      _mapAnimationMode = MapAnimationMode.quick;
+    } else {
+      // First time user (after onboarding) - use full spinning globe animation
+      _mapAnimationMode = MapAnimationMode.full;
+    }
+    print('🗺️ [PICK_MAP] Animation mode: $_mapAnimationMode (hasSeenFull: $hasSeenFullAnimation)');
+  }
+
+  /// Mark that user has seen the full globe animation
+  void _markFullAnimationAsSeen() {
+    final prefs = Get.find<SharedPreferences>();
+    prefs.setBool(AppConstants.hasSeenMapGlobeAnimation, true);
+    print('🗺️ [PICK_MAP] Marked full animation as seen');
+  }
+
+  /// Handle geocoding when user releases the map (pin drop)
+  void _onMapTouchEnd() {
+    if (!_isMapTouched) return;
+
+    setState(() {
+      _isMapTouched = false;
+    });
+
+    // If there's a pending geocode position and we're in address mode, trigger geocode
+    if (_pendingGeocodePosition != null && _currentMode == MapMode.addressSelection) {
+      // Debounce to prevent rapid calls
+      _geocodeDebounceTimer?.cancel();
+      _geocodeDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+        if (_pendingGeocodePosition != null) {
+          final position = _pendingGeocodePosition!;
+          _pendingGeocodePosition = null;
+
+          // Check if inside a zone
+          final zoneId = ZonePolygonHelper.getZoneIdForPoint(
+            position.target,
+            Get.find<LocationController>().zoneList,
+          );
+
+          if (zoneId != null) {
+            Get.find<LocationController>().updatePosition(position, false);
+          }
+        }
+      });
+    }
   }
 
   /// Trigger the tap prompt animation
@@ -227,89 +329,191 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                 child: GetBuilder<LocationController>(builder: (locationController) {
                   return Stack(
                     children: [
-                      GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: _initialPosition,
-                          zoom: 10.43,  // Zoom level to show Northern Israel service area
-                        ),
-                        minMaxZoomPreference: const MinMaxZoomPreference(6.5, 14),  // Limited zoom for zone selection
-                        polygons: _zonePolygons(locationController, context),
-                        markers: <Marker>{},  // No markers - using overlay instead
-                        onMapCreated: (GoogleMapController mapController) {
-                          _mapController = mapController;
-
-                          // Map is for zone selection only, no automatic location requests
-                          // Initialize without setting any specific zone as current
-                          _currentZoneId = null;
-
-                          // Log initial map position
-                          print('════════════════════════════════════════════');
-                          print('🚀 INITIAL MAP POSITION & ZOOM LEVEL');
-                          print('────────────────────────────────────────────');
-                          print('Latitude:  ${_initialPosition.latitude}');
-                          print('Longitude: ${_initialPosition.longitude}');
-                          print('Zoom:      10.43');
-                          print('════════════════════════════════════════════');
-                        },
-                        zoomControlsEnabled: false,
-                        onCameraMove: (CameraPosition cameraPosition) {
-                          _cameraPosition = cameraPosition;
-                        },
-                        onCameraMoveStarted: () {
-                          locationController.disableButton();
-                        },
-                        onCameraIdle: () {
-                          // Defer state updates to avoid layout assertion errors
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            Get.find<LocationController>().updatePosition(_cameraPosition, false);
-                          });
-                          // Update the current zone when camera stops moving
-                          if (_cameraPosition != null) {
-                            // LOG MAP POSITION FOR REFINEMENT (commented out for production)
-                            // print('════════════════════════════════════════════');
-                            // print('📍 MAP POSITION & ZOOM LEVEL');
-                            // print('────────────────────────────────────────────');
-                            // print('Latitude:  ${_cameraPosition!.target.latitude}');
-                            // print('Longitude: ${_cameraPosition!.target.longitude}');
-                            // print('Zoom:      ${_cameraPosition!.zoom}');
-                            // print('────────────────────────────────────────────');
-                            // print('Copy this for _initialPosition:');
-                            // print('const LatLng(${_cameraPosition!.target.latitude}, ${_cameraPosition!.target.longitude})');
-                            // print('');
-                            // print('Copy this for zoom:');
-                            // print('zoom: ${_cameraPosition!.zoom},');
-                            // print('════════════════════════════════════════════');
-
-                            // Only update current zone in address mode
-                            if (_currentMode == MapMode.addressSelection) {
+                      // Conditional map rendering based on MAP_PROVIDER env
+                      if (Environment.useMapbox)
+                        Listener(
+                          onPointerDown: (_) {
+                            setState(() {
+                              _isMapTouched = true;
+                            });
+                          },
+                          onPointerUp: (_) => _onMapTouchEnd(),
+                          onPointerCancel: (_) => _onMapTouchEnd(),
+                          child: MapboxPickMapWidget(
+                          key: _mapboxKey,
+                          initialPosition: _initialPosition,
+                          initialZoom: 10.43,
+                          minZoom: 6.5,
+                          maxZoom: 14,
+                          zones: locationController.zoneList,
+                          highlightedZoneId: _currentMode == MapMode.zoneSelection
+                              ? _selectedZoneId
+                              : _currentZoneId,
+                          zoneBaseColor: Theme.of(context).colorScheme.primary,
+                          isDarkMode: false,  // Always use light/day mode
+                          animationMode: _mapAnimationMode,
+                          onMapCreated: () {
+                            _currentZoneId = null;
+                            print('════════════════════════════════════════════');
+                            print('🚀 MAPBOX MAP CREATED');
+                            print('────────────────────────────────────────────');
+                            print('Latitude:  ${_initialPosition.latitude}');
+                            print('Longitude: ${_initialPosition.longitude}');
+                            print('Zoom:      10.43');
+                            print('════════════════════════════════════════════');
+                          },
+                          onCameraMoveStarted: () {
+                            locationController.disableButton();
+                          },
+                          onCameraMove: (CameraPosition cameraPosition) {
+                            _cameraPosition = cameraPosition;
+                          },
+                          onCameraIdle: () {
+                            if (_cameraPosition != null && _currentMode == MapMode.addressSelection) {
+                              // Check if pinpoint is inside a zone first
                               final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
                                 _cameraPosition!.target,
                                 locationController.zoneList,
                               );
+
                               if (newZoneId != _currentZoneId) {
                                 setState(() {
                                   _currentZoneId = newZoneId;
                                 });
-                                // Animate pin and badge when entering a valid zone
                                 if (newZoneId != null) {
                                   _pinBounceController.forward(from: 0.0);
                                   _badgeBounceController.forward(from: 0.0);
                                 }
                               }
+
+                              // Store pending position - only geocode when user releases
+                              if (newZoneId != null) {
+                                _pendingGeocodePosition = _cameraPosition;
+                                // If user is not touching, trigger geocode immediately
+                                if (!_isMapTouched) {
+                                  _onMapTouchEnd();
+                                }
+                              } else {
+                                _pendingGeocodePosition = null;
+                              }
                             }
-                          }
-                        },
-                        style: _isNightTime()
-                            ? Get.find<ThemeController>().darkMap
-                            : Get.find<ThemeController>().lightMap,
-                        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                          Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
-                          Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
-                          Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer()),
-                          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-                          Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
-                        },
-                      ),
+                          },
+                          onZoneTap: (zoneId) {
+                            if (_currentMode == MapMode.zoneSelection) {
+                              final selectedZone = locationController.zoneList.firstWhereOrNull(
+                                (zone) => zone.id == zoneId,
+                              );
+                              if (selectedZone != null) {
+                                setState(() {
+                                  _selectedZoneId = zoneId;
+                                  _selectedZoneName = selectedZone.displayName ?? selectedZone.name ?? 'Zone $zoneId';
+                                  if (selectedZone.formattedCoordinates != null) {
+                                    _selectedZoneCenter = _calculateZoneCenter(selectedZone.formattedCoordinates!);
+                                  }
+                                });
+                              }
+                              _moveToZoneCenter(zoneId, locationController.zoneList);
+                            }
+                          },
+                          onAnimationComplete: () {
+                            setState(() {
+                              _mapAnimationComplete = true;
+                            });
+                            // Mark full animation as seen so next time we use quick animation
+                            if (_mapAnimationMode == MapAnimationMode.full) {
+                              _markFullAnimationAsSeen();
+                            }
+                            // If a zone was pre-selected, zoom to it now
+                            if (_selectedZoneId != null) {
+                              Future.delayed(const Duration(milliseconds: 300), () {
+                                _moveToZoneCenter(_selectedZoneId!, locationController.zoneList);
+                              });
+                            }
+                          },
+                        ),
+                        )
+                      else
+                        Listener(
+                          onPointerDown: (_) {
+                            setState(() {
+                              _isMapTouched = true;
+                            });
+                          },
+                          onPointerUp: (_) => _onMapTouchEnd(),
+                          onPointerCancel: (_) => _onMapTouchEnd(),
+                          child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: _initialPosition,
+                            zoom: 10.43,  // Zoom level to show Northern Israel service area
+                          ),
+                          minMaxZoomPreference: const MinMaxZoomPreference(6.5, 14),  // Limited zoom for zone selection
+                          polygons: _zonePolygons(locationController, context),
+                          markers: <Marker>{},  // No markers - using overlay instead
+                          onMapCreated: (GoogleMapController mapController) {
+                            _mapController = mapController;
+
+                            // Map is for zone selection only, no automatic location requests
+                            // Initialize without setting any specific zone as current
+                            _currentZoneId = null;
+
+                            // Log initial map position
+                            print('════════════════════════════════════════════');
+                            print('🚀 INITIAL MAP POSITION & ZOOM LEVEL');
+                            print('────────────────────────────────────────────');
+                            print('Latitude:  ${_initialPosition.latitude}');
+                            print('Longitude: ${_initialPosition.longitude}');
+                            print('Zoom:      10.43');
+                            print('════════════════════════════════════════════');
+                          },
+                          zoomControlsEnabled: false,
+                          onCameraMove: (CameraPosition cameraPosition) {
+                            _cameraPosition = cameraPosition;
+                          },
+                          onCameraMoveStarted: () {
+                            locationController.disableButton();
+                          },
+                          onCameraIdle: () {
+                            if (_cameraPosition != null && _currentMode == MapMode.addressSelection) {
+                              // Check if pinpoint is inside a zone first
+                              final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
+                                _cameraPosition!.target,
+                                locationController.zoneList,
+                              );
+
+                              if (newZoneId != _currentZoneId) {
+                                setState(() {
+                                  _currentZoneId = newZoneId;
+                                });
+                                if (newZoneId != null) {
+                                  _pinBounceController.forward(from: 0.0);
+                                  _badgeBounceController.forward(from: 0.0);
+                                }
+                              }
+
+                              // Store pending position - only geocode when user releases
+                              if (newZoneId != null) {
+                                _pendingGeocodePosition = _cameraPosition;
+                                // If user is not touching, trigger geocode immediately
+                                if (!_isMapTouched) {
+                                  _onMapTouchEnd();
+                                }
+                              } else {
+                                _pendingGeocodePosition = null;
+                              }
+                            }
+                          },
+                          style: _isNightTime()
+                              ? Get.find<ThemeController>().darkMap
+                              : Get.find<ThemeController>().lightMap,
+                          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                            Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
+                            Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
+                            Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer()),
+                            Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+                            Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+                          },
+                        ),
+                        ),
                       // Top gradient
                       Positioned(
                         top: 0,
@@ -419,6 +623,9 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
+                                      constraints: BoxConstraints(
+                                        maxWidth: MediaQuery.of(context).size.width - 48,
+                                      ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: Dimensions.paddingSizeDefault,
                                         vertical: Dimensions.paddingSizeSmall,
@@ -443,11 +650,15 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                             color: Theme.of(context).primaryColor,
                                           ),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            _getAddressWithoutCountry(locationController.pickAddress ?? ''),
-                                            style: robotoBold.copyWith(
-                                              fontSize: Dimensions.fontSizeDefault,
-                                              color: Colors.black,
+                                          Flexible(
+                                            child: Text(
+                                              _getAddressWithoutCountry(locationController.pickAddress ?? ''),
+                                              style: robotoBold.copyWith(
+                                                fontSize: Dimensions.fontSizeDefault,
+                                                color: Colors.black,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
                                             ),
                                           ),
                                         ],
@@ -482,8 +693,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                         ),
                       if (!widget.fromSplash)
                         Positioned(
-                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall,
-                          left: Dimensions.paddingSizeSmall,
+                          top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeDefault,
+                          left: Dimensions.paddingSizeDefault,
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(100),
@@ -523,15 +734,29 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           child: RichText(
                             text: TextSpan(
                               style: robotoMedium.copyWith(
-                                fontSize: 13,
+                                fontSize: 15,
                                 color: Colors.white.withOpacity(0.9),
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.5),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
                               ),
                               children: [
                                 TextSpan(
                                   text: '${locationController.zoneList?.length ?? 0}',
                                   style: robotoBold.copyWith(
-                                    fontSize: 14,
+                                    fontSize: 16,
                                     color: Theme.of(context).primaryColor,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.5),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 TextSpan(
@@ -542,84 +767,76 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           ),
                         ),
                       ),
-                      // Mode selector label
+                      // Mode toggle selector - fades in after map animation
                       Positioned(
-                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 68, // Above mode selector
+                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 88,
                         left: 0,
                         right: 0,
-                        child: Center(
-                          child: Text(
-                            'select_map_mode'.tr,
-                            style: robotoRegular.copyWith(
-                              fontSize: 11,
-                              color: Colors.white.withOpacity(0.5),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Mode toggle selector - positioned under label
-                      Positioned(
-                        top: MediaQuery.of(context).viewPadding.top + Dimensions.paddingSizeSmall + 84, // Below label
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Container(
-                            height: 35,
-                            width: 160,
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[800]!.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(100),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                // Sliding indicator
-                                AnimatedAlign(
-                                  alignment: _currentMode == MapMode.zoneSelection
-                                      ? Alignment.centerLeft
-                                      : Alignment.centerRight,
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeOutCubic,
-                                  child: Container(
-                                    width: 77,
-                                    height: 29,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF00BCD4),
-                                      borderRadius: BorderRadius.circular(100),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(0xFF00BCD4).withOpacity(0.3),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                // Tab Labels
-                                Row(
-                                  children: [
-                                    _buildModeButton(
-                                      mode: MapMode.zoneSelection,
-                                      icon: Icons.map,
-                                      label: 'Zone',
-                                    ),
-                                    _buildModeButton(
-                                      mode: MapMode.addressSelection,
-                                      icon: Icons.location_on,
-                                      label: 'Address',
+                        child: AnimatedOpacity(
+                          opacity: (!Environment.useMapbox || _mapAnimationComplete) ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeOut,
+                          child: Center(
+                            child: IgnorePointer(
+                              ignoring: Environment.useMapbox && !_mapAnimationComplete,
+                              child: Container(
+                                height: 35,
+                                width: 160,
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[800]!.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(100),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
-                              ],
+                                child: Stack(
+                                  children: [
+                                    // Sliding indicator
+                                    AnimatedAlign(
+                                      alignment: _currentMode == MapMode.zoneSelection
+                                          ? Alignment.centerLeft
+                                          : Alignment.centerRight,
+                                      duration: const Duration(milliseconds: 250),
+                                      curve: Curves.easeOutCubic,
+                                      child: Container(
+                                        width: 77,
+                                        height: 29,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF00BCD4),
+                                          borderRadius: BorderRadius.circular(100),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF00BCD4).withOpacity(0.3),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    // Tab Labels
+                                    Row(
+                                      children: [
+                                        _buildModeButton(
+                                          mode: MapMode.zoneSelection,
+                                          icon: Icons.map,
+                                          label: 'Zone',
+                                        ),
+                                        _buildModeButton(
+                                          mode: MapMode.addressSelection,
+                                          icon: Icons.location_on,
+                                          label: 'Address',
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -760,7 +977,11 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       });
 
       // Get current location and move map
-      if (_mapController != null) {
+      if (Environment.useMapbox) {
+        // For Mapbox, we'll handle this differently since LocationController expects GoogleMapController
+        // Just get the location and update camera via the Mapbox widget
+        Get.find<LocationController>().getCurrentLocation(false, mapController: null);
+      } else if (_mapController != null) {
         Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
       }
     }
@@ -810,15 +1031,15 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
         onUseCurrentLocation: null,  // Disabled - map is for zone selection only
         onLocationSelected: (address) {
           Get.back();
-          if (_mapController != null) {
+          final target = LatLng(
+            double.parse(address.latitude ?? '0'),
+            double.parse(address.longitude ?? '0'),
+          );
+          if (Environment.useMapbox) {
+            _mapboxKey.currentState?.moveCamera(target, zoom: 12);
+          } else if (_mapController != null) {
             _mapController!.moveCamera(CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: LatLng(
-                  double.parse(address.latitude ?? '0'),
-                  double.parse(address.longitude ?? '0'),
-                ),
-                zoom: 12,  // Zoom in closer when selecting a specific location
-              ),
+              CameraPosition(target: target, zoom: 12),
             ));
           }
         },
@@ -885,29 +1106,38 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     }
 
     if (zone != null && zone.formattedCoordinates != null && zone.formattedCoordinates!.isNotEmpty) {
-      // Calculate the center of the zone
-      double sumLat = 0;
-      double sumLng = 0;
+      // Calculate the bounding box of the zone
+      double minLat = double.infinity;
+      double maxLat = double.negativeInfinity;
+      double minLng = double.infinity;
+      double maxLng = double.negativeInfinity;
       int count = 0;
 
       for (final coord in zone.formattedCoordinates!) {
         if (coord.lat != null && coord.lng != null) {
-          sumLat += coord.lat!;
-          sumLng += coord.lng!;
+          minLat = min(minLat, coord.lat!);
+          maxLat = max(maxLat, coord.lat!);
+          minLng = min(minLng, coord.lng!);
+          maxLng = max(maxLng, coord.lng!);
           count++;
         }
       }
 
       if (count > 0) {
-        final centerLat = sumLat / count;
-        final centerLng = sumLng / count;
-
-        // Move the camera to the zone center without changing zoom
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLng(
-            LatLng(centerLat, centerLng),
-          ),
+        // Create bounds with padding
+        final bounds = LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
         );
+
+        // Zoom to fit the zone bounds with padding
+        if (Environment.useMapbox) {
+          _mapboxKey.currentState?.animateToBounds(bounds, padding: 60);
+        } else {
+          _mapController?.animateCamera(
+            CameraUpdate.newLatLngBounds(bounds, 60),
+          );
+        }
 
         // Update the current zone ID
         setState(() {
