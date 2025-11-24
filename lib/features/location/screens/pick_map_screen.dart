@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
@@ -68,8 +69,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   late Animation<double> _badgeBounceAnimation;
   late AnimationController _tapPromptWiggleController;
   late Animation<double> _tapPromptWiggleAnimation;
-  late AnimationController _tapPromptBounceController;
-  late Animation<double> _tapPromptBounceAnimation;
+  late AnimationController _tapPromptBounceController;  // Uses sin() directly for smooth wiggle
   Timer? _tapPromptTimer;
   MapMode _currentMode = MapMode.zoneSelection;  // Default to zone selection
   int? _selectedZoneId;  // For zone selection mode
@@ -130,32 +130,24 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
 
     // Initialize tap prompt animations
     _tapPromptWiggleController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
-    // Scale pop animation
+    // Scale pop animation with bouncy curve
     _tapPromptWiggleAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.12,
+      end: 1.15,
     ).animate(CurvedAnimation(
       parent: _tapPromptWiggleController,
-      curve: Curves.easeInOut,
+      curve: Curves.elasticOut,
     ));
 
-    // Wiggle rotation animation
+    // Swift bouncy wiggle rotation - uses sin() for natural oscillation
     _tapPromptBounceController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 350),
       vsync: this,
     );
-
-    _tapPromptBounceAnimation = Tween<double>(
-      begin: 0.0,
-      end: 0.08,
-    ).animate(CurvedAnimation(
-      parent: _tapPromptBounceController,
-      curve: Curves.easeInOutSine,
-    ));
 
     Get.find<LocationController>().makeLoadingOff();
 
@@ -212,10 +204,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       _tapPromptWiggleController.forward(from: 0.0).then((_) {
         _tapPromptWiggleController.reverse();
       });
-      // Wiggle rotation
-      _tapPromptBounceController.forward(from: 0.0).then((_) {
-        _tapPromptBounceController.reverse();
-      });
+      // Smooth wiggle rotation - uses sine wave so only forward needed
+      _tapPromptBounceController.forward(from: 0.0);
     }
   }
 
@@ -665,14 +655,17 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                 : AnimatedBuilder(
                                     animation: Listenable.merge([
                                       _tapPromptWiggleAnimation,
-                                      _tapPromptBounceAnimation,
+                                      _tapPromptBounceController,
                                     ]),
                                     builder: (context, child) {
+                                      // Swift bouncy wiggle: 1.5 oscillations with decay
+                                      final t = _tapPromptBounceController.value;
+                                      final decay = 1.0 - t; // Stronger at start, fades out
+                                      final wiggleAngle = sin(t * 3 * pi) * 0.12 * decay;
                                       return Transform.scale(
                                         scale: _tapPromptWiggleAnimation.value,
                                         child: Transform.rotate(
-                                          angle: _tapPromptBounceAnimation.value *
-                                              ((_tapPromptBounceController.value < 0.5) ? 1 : -1),
+                                          angle: wiggleAngle,
                                           child: child,
                                         ),
                                       );
