@@ -106,15 +106,18 @@ class _MapViewScreenState extends State<MapViewScreen> {
                       bool isSelected = restController.nearestRestaurantIndex == index;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                        child: RestaurantView(
-                          restaurant: widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index] : restController.restaurantModel!.restaurants![index],
-                          isSelected: isSelected,
-                          onTap: () {
-                            Get.toNamed(
-                              RouteHelper.getRestaurantRoute(widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index].id : restController.restaurantModel!.restaurants![index].id),
-                              arguments: RestaurantScreen(restaurant: widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index] : restController.restaurantModel!.restaurants![index]),
-                            );
-                          },
+                        child: SizedBox(
+                          height: 305,
+                          child: RestaurantView(
+                            restaurant: widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index] : restController.restaurantModel!.restaurants![index],
+                            isSelected: isSelected,
+                            onTap: () {
+                              Get.toNamed(
+                                RouteHelper.getRestaurantRoute(widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index].id : restController.restaurantModel!.restaurants![index].id),
+                                arguments: RestaurantScreen(restaurant: widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index] : restController.restaurantModel!.restaurants![index]),
+                              );
+                            },
+                          ),
                         ),
                       );
                     },

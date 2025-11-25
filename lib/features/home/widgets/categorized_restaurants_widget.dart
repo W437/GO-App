@@ -60,7 +60,10 @@ class CategorizedRestaurantsWidget extends StatelessWidget {
         height: Dimensions.paddingSizeLarge,
       ),
       itemBuilder: (context, index) {
-        return RestaurantView(restaurant: restaurants[index]);
+        return SizedBox(
+          height: 305,
+          child: RestaurantView(restaurant: restaurants[index]),
+        );
       },
     );
   }

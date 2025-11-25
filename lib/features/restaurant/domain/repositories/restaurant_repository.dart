@@ -107,6 +107,8 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
     final apiOffset = (offset ?? 0) == 0 ? 1 : offset! + 1;
     Response response = await apiClient.getData('${AppConstants.unifiedRestaurantUri}?preset=all&offset=$apiOffset&limit=${fromMap ? 20 : 25}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
     if (response.statusCode == 200) {
+      print('🔍 [RESTAURANT REPO] Raw API response keys: ${response.body?.keys?.toList()}');
+      print('🔍 [RESTAURANT REPO] total_size: ${response.body?['total_size']}, restaurants count: ${(response.body?['restaurants'] as List?)?.length ?? 'null'}');
       return RestaurantModel.fromJson(response.body);
     }
     return null;
@@ -200,6 +202,17 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
     HomeFeedModel? homeFeedModel;
     Response response = await apiClient.getData(AppConstants.homeFeedUri);
     if (response.statusCode == 200) {
+      // Debug: print categories and their restaurants
+      final categories = response.body['categories'] as List?;
+      if (categories != null) {
+        print('🏠 [HOME FEED] Categories count: ${categories.length}');
+        for (var cat in categories) {
+          final catName = cat['name'] ?? cat['title'] ?? 'Unknown';
+          final restaurants = cat['restaurants'] as List?;
+          final restaurantNames = restaurants?.map((r) => r['name']).toList() ?? [];
+          print('🏠 [HOME FEED] Category "$catName": $restaurantNames');
+        }
+      }
       homeFeedModel = HomeFeedModel.fromJson(response.body);
     }
     return homeFeedModel;
