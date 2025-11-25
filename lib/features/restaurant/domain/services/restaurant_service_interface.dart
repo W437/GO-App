@@ -3,6 +3,7 @@ import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:geolocator/geolocator.dart';
@@ -29,4 +30,6 @@ abstract class RestaurantServiceInterface {
   Future<ProductModel?> getRestaurantSearchProductList(String searchText, String? storeID, int offset, String type);
   bool isRestaurantClosed(DateTime dateTime, bool active, List<Schedules>? schedules);
   bool isRestaurantOpenNow(bool active, List<Schedules>? schedules);
+  Future<HomeFeedModel?> getHomeFeed();
+  Future<HomeFeedSectionResponse?> getHomeFeedSection(String section, {int? categoryId, int offset = 1});
 }

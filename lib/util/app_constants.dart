@@ -74,6 +74,8 @@ class AppConstants {
   static const String popularRestaurantUri = '/api/v1/restaurants/popular'; // Legacy - kept for compatibility
   static const String latestRestaurantUri = '/api/v1/restaurants/latest'; // Legacy - kept for compatibility
   static const String unifiedRestaurantUri = '/api/v1/restaurants/unified'; // New unified endpoint
+  static const String homeFeedUri = '/api/v1/restaurants/home-feed'; // Home feed with categories
+  static const String homeFeedSectionUri = '/api/v1/restaurants/home-feed/section'; // Home feed pagination
   static const String restaurantDetailsUri = '/api/v1/restaurants/details/';
   static const String basicCampaignUri = '/api/v1/campaigns/basic';
   static const String itemCampaignUri = '/api/v1/campaigns/item';

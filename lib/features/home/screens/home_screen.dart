@@ -21,6 +21,7 @@ import 'package:godelivery_user/features/home/widgets/categories_cuisines_tabbed
 import 'package:godelivery_user/features/home/widgets/enjoy_off_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/location_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/new_on_go_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/new_rest_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/order_again_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/popular_foods_nearby_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/theme1/item_campaign_widget1.dart';
@@ -224,6 +225,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             // HIDDEN: Section 6 - Today Trends (see docs/hidden/home_screen_hidden_sections.md)
                             // const TodayTrendsViewWidget(),
                             const SponsoredRestaurantsViewWidget(),
+                            const NewRestViewWidget(),
                             // HIDDEN: Section 8 - Order Again (see docs/hidden/home_screen_hidden_sections.md)
                             // _isLogin ? const OrderAgainViewWidget() : const SizedBox(),
                             // HIDDEN: Section 9 - Best Reviewed Food (see docs/hidden/home_screen_hidden_sections.md)

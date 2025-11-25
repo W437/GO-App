@@ -125,6 +125,7 @@ flutter:
     - assets/image/animations/
     - assets/image/policies/
     - assets/image/misc/
+    - assets/image/sponsored/
     - assets/language/
     - assets/map/
     - assets/brand/

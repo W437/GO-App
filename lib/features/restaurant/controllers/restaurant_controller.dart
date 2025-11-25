@@ -3,6 +3,7 @@ import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_w
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
+import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
@@ -125,6 +126,13 @@ class RestaurantController extends GetxController implements GetxService {
   int _nearestRestaurantIndex = -1;
   int get nearestRestaurantIndex => _nearestRestaurantIndex;
 
+  // Home Feed data
+  HomeFeedModel? _homeFeedModel;
+  HomeFeedModel? get homeFeedModel => _homeFeedModel;
+
+  // Pagination state for each section
+  final Map<String, int> _sectionOffsets = {};
+  final Map<String, bool> _sectionHasMore = {};
 
   void setNearestRestaurantIndex(int index, {bool notify = true}) {
     _nearestRestaurantIndex = index;
@@ -514,5 +522,105 @@ class RestaurantController extends GetxController implements GetxService {
 
   String? getDiscountType(Restaurant restaurant) => restaurant.discount != null ? restaurant.discount!.discountType : 'percent';
 
+  // ========== Home Feed Methods ==========
+
+  /// Get the initial home feed data
+  Future<void> getHomeFeed(bool reload) async {
+    // Use cached data if available
+    if (_homeFeedModel != null && !reload) {
+      print('✅ [RESTAURANT] Using cached home feed');
+      return;
+    }
+
+    if (reload) {
+      _homeFeedModel = null;
+      _sectionOffsets.clear();
+      _sectionHasMore.clear();
+      update();
+    }
+
+    print('🏠 [RESTAURANT] Fetching home feed...');
+    HomeFeedModel? homeFeedModel = await restaurantServiceInterface.getHomeFeed();
+
+    if (homeFeedModel != null) {
+      _homeFeedModel = homeFeedModel;
+
+      // Initialize pagination state for each section
+      if (homeFeedModel.newRestaurants != null) {
+        _sectionOffsets['new'] = homeFeedModel.newRestaurants!.offset ?? 1;
+        _sectionHasMore['new'] = homeFeedModel.newRestaurants!.hasMore ?? false;
+      }
+      if (homeFeedModel.popular != null) {
+        _sectionOffsets['popular'] = homeFeedModel.popular!.offset ?? 1;
+        _sectionHasMore['popular'] = homeFeedModel.popular!.hasMore ?? false;
+      }
+
+      // Initialize category pagination
+      if (homeFeedModel.categories != null) {
+        for (var category in homeFeedModel.categories!) {
+          if (category.id != null) {
+            _sectionOffsets['category_${category.id}'] = category.offset ?? 1;
+            _sectionHasMore['category_${category.id}'] = category.hasMore ?? false;
+          }
+        }
+      }
+
+      print('✅ [RESTAURANT] Home feed loaded: ${homeFeedModel.categories?.length ?? 0} categories');
+    } else {
+      print('❌ [RESTAURANT] Home feed is NULL');
+    }
+
+    update();
+  }
+
+  /// Load more restaurants for a section (pagination)
+  Future<void> loadMoreForSection(String section, {int? categoryId}) async {
+    String key = categoryId != null ? 'category_$categoryId' : section;
+
+    // Check if we have more data to load
+    if (_sectionHasMore[key] != true) {
+      print('ℹ️ [RESTAURANT] No more data for section: $key');
+      return;
+    }
+
+    int nextOffset = (_sectionOffsets[key] ?? 1) + 1;
+    print('📄 [RESTAURANT] Loading more for $key, offset: $nextOffset');
+
+    HomeFeedSectionResponse? response = await restaurantServiceInterface.getHomeFeedSection(
+      section,
+      categoryId: categoryId,
+      offset: nextOffset,
+    );
+
+    if (response != null && response.restaurants != null) {
+      // Update pagination state
+      _sectionOffsets[key] = response.offset ?? nextOffset;
+      _sectionHasMore[key] = response.hasMore ?? false;
+
+      // Append restaurants to the appropriate section
+      if (categoryId != null && _homeFeedModel?.categories != null) {
+        final categoryIndex = _homeFeedModel!.categories!.indexWhere((c) => c.id == categoryId);
+        if (categoryIndex != -1) {
+          _homeFeedModel!.categories![categoryIndex].restaurants?.addAll(response.restaurants!);
+        }
+      } else if (section == 'new' && _homeFeedModel?.newRestaurants != null) {
+        _homeFeedModel!.newRestaurants!.restaurants?.addAll(response.restaurants!);
+      } else if (section == 'popular' && _homeFeedModel?.popular != null) {
+        _homeFeedModel!.popular!.restaurants?.addAll(response.restaurants!);
+      }
+
+      print('✅ [RESTAURANT] Loaded ${response.restaurants!.length} more for $key');
+      update();
+    }
+  }
+
+  /// Check if a section has more data to load
+  bool hasMoreForSection(String section, {int? categoryId}) {
+    String key = categoryId != null ? 'category_$categoryId' : section;
+    return _sectionHasMore[key] ?? false;
+  }
+
+  /// Get categories from home feed
+  List<HomeFeedCategorySection>? get homeFeedCategories => _homeFeedModel?.categories;
 
 }

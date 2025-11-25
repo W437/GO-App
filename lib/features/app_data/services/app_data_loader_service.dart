@@ -3,8 +3,6 @@ import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
-import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
-import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.dart';
 import 'package:godelivery_user/features/story/controllers/story_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -127,21 +125,14 @@ class AppDataLoaderService {
       Get.find<CategoryController>().getCategoryList(true),
       Get.find<HomeController>().getBannerList(true),
       Get.find<CuisineController>().getCuisineList(forceRefresh: true),
-      Get.find<AdvertisementController>().getAdvertisementList(reload: true),
       Get.find<StoryController>().getStories(reload: true),
-      Get.find<RestaurantController>().getRestaurantList(0, true),
+      Get.find<RestaurantController>().getHomeFeed(true),
       Get.find<CampaignController>().getItemCampaignList(true),
     ]);
 
     // Refresh conditional data
-    if (config.popularRestaurant == 1) {
-      Get.find<RestaurantController>().getPopularRestaurantList(true, 'all', false);
-    }
     if (config.popularFood == 1) {
       Get.find<ProductController>().getPopularProductList(true, 'all', false);
-    }
-    if (config.newRestaurant == 1) {
-      Get.find<RestaurantController>().getLatestRestaurantList(true, 'all', false);
     }
 
     // Refresh auth data
@@ -220,14 +211,7 @@ class AppDataLoaderService {
           onProgress,
           onError,
         ),
-        _loadWithRetry(
-          'advertisements',
-          'Ads...',
-          () => Get.find<AdvertisementController>().getAdvertisementList(),
-          onProgress,
-          onError,
-        ),
-        _loadWithRetry(
+                _loadWithRetry(
           'stories',
           'Stories...',
           () => Get.find<StoryController>().getStories(reload: false),
@@ -242,16 +226,9 @@ class AppDataLoaderService {
           onError,
         ),
         _loadWithRetry(
-          'dine_in',
-          'Dine-in...',
-          () => Get.find<DineInController>().getDineInRestaurantList(0, false),
-          onProgress,
-          onError,
-        ),
-        _loadWithRetry(
-          'restaurants',
-          'Restaurants...',
-          () => Get.find<RestaurantController>().getRestaurantList(0, false),
+          'home_feed',
+          'Home feed...',
+          () => Get.find<RestaurantController>().getHomeFeed(false),
           onProgress,
           onError,
         ),
@@ -282,31 +259,11 @@ class AppDataLoaderService {
     final futures = <Future>[];
 
     // Add conditional data loads based on config
-    if (config.popularRestaurant == 1) {
-      futures.add(_loadWithRetry(
-        'popular_restaurants',
-        'Finding crowd favorites...',
-        () => Get.find<RestaurantController>().getPopularRestaurantList(false, 'all', false),
-        onProgress,
-        onError,
-      ));
-    }
-
     if (config.popularFood == 1) {
       futures.add(_loadWithRetry(
         'popular_products',
         'Picking trending dishes...',
         () => Get.find<ProductController>().getPopularProductList(false, 'all', false),
-        onProgress,
-        onError,
-      ));
-    }
-
-    if (config.newRestaurant == 1) {
-      futures.add(_loadWithRetry(
-        'latest_restaurants',
-        'Discovering new places...',
-        () => Get.find<RestaurantController>().getLatestRestaurantList(false, 'all', false),
         onProgress,
         onError,
       ));

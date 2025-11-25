@@ -21,6 +21,7 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:video_player/video_player.dart';
 import 'package:animated_emoji/animated_emoji.dart';
 import 'package:godelivery_user/util/app_colors.dart';
+import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 
 class SponsoredRestaurantsViewWidget extends StatefulWidget {
   const SponsoredRestaurantsViewWidget({super.key});
@@ -33,9 +34,11 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<AdvertisementController>(builder: (advertisementController) {
+    return GetBuilder<RestaurantController>(builder: (restaurantController) {
+      final advertised = restaurantController.homeFeedModel?.advertised;
+
       // Show shimmer while loading
-      if (advertisementController.advertisementList == null) {
+      if (restaurantController.homeFeedModel == null) {
         return const AdvertisementShimmer();
       }
 
@@ -149,12 +152,9 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
               const SizedBox(height: Dimensions.paddingSizeDefault),
 
               // Restaurant Cards - Horizontal List or Empty State
-              GetBuilder<RestaurantController>(
-                builder: (restaurantController) {
-                  List<Restaurant> restaurants = advertisementController.advertisementList!
-                      .where((ad) => ad.restaurant != null && ad.addType != 'video_promotion')
-                      .map((ad) => ad.restaurant!)
-                      .toList();
+              Builder(
+                builder: (context) {
+                  List<Restaurant> restaurants = advertised?.restaurants ?? [];
 
                   // Show empty state when no highlights
                   if (restaurants.isEmpty) {

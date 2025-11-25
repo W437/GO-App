@@ -1,6 +1,7 @@
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/repositories/restaurant_repository_interface.dart';
 import 'package:godelivery_user/util/app_constants.dart';
@@ -192,5 +193,31 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
   @override
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<HomeFeedModel?> getHomeFeed() async {
+    HomeFeedModel? homeFeedModel;
+    Response response = await apiClient.getData(AppConstants.homeFeedUri);
+    if (response.statusCode == 200) {
+      homeFeedModel = HomeFeedModel.fromJson(response.body);
+    }
+    return homeFeedModel;
+  }
+
+  @override
+  Future<HomeFeedSectionResponse?> getHomeFeedSection(String section, {int? categoryId, int offset = 1}) async {
+    HomeFeedSectionResponse? sectionResponse;
+    String url;
+    if (categoryId != null) {
+      url = '${AppConstants.homeFeedSectionUri}/category/$categoryId?offset=$offset';
+    } else {
+      url = '${AppConstants.homeFeedSectionUri}/$section?offset=$offset';
+    }
+    Response response = await apiClient.getData(url);
+    if (response.statusCode == 200) {
+      sectionResponse = HomeFeedSectionResponse.fromJson(response.body);
+    }
+    return sectionResponse;
   }
 }
