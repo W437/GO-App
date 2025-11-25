@@ -42,14 +42,11 @@ class AppNavigator {
     NotificationBodyModel? notification,
     DeepLinkBody? linkBody,
   }) async {
-    print('🚀 [APP_NAVIGATOR] navigateOnAppLaunch() called');
-
     // 1. Check for app update requirement
     double? minimumVersion = _getMinimumVersion();
     bool needsUpdate = AppConstants.appVersion < minimumVersion;
 
     if (needsUpdate) {
-      print('🚀 [APP_NAVIGATOR] Navigating to update screen (app update required)');
       Get.offNamed(RouteHelper.getUpdateRoute(true));
       return;
     }
@@ -57,7 +54,6 @@ class AppNavigator {
     // 2. Check for maintenance mode
     bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
     if (isInMaintenance) {
-      print('🚀 [APP_NAVIGATOR] Navigating to maintenance screen');
       Get.offNamed(RouteHelper.getUpdateRoute(false));
       return;
     }
@@ -65,14 +61,12 @@ class AppNavigator {
     // 3. Web-specific routing
     if (GetPlatform.isWeb) {
       if (Get.currentRoute.contains(RouteHelper.update) && !isInMaintenance) {
-        print('🚀 [APP_NAVIGATOR] Web: Navigating from update screen to initial');
         Get.offNamed(RouteHelper.getInitialRoute());
       }
       return;
     }
 
     // 4. Mobile navigation flow
-    print('🚀 [APP_NAVIGATOR] Starting mobile navigation flow');
     _handleMobileNavigation(notification, linkBody);
   }
 
@@ -81,45 +75,37 @@ class AppNavigator {
     NotificationBodyModel? notificationBody,
     DeepLinkBody? linkBody,
   ) {
-    print('🚀 [NAVIGATION] _handleMobileNavigation started');
-
     // Priority 1: Notification
     if (notificationBody != null && linkBody == null) {
-      print('🚀 [NAVIGATION] Route: notification');
       _navigateFromNotification(notificationBody);
       return;
     }
 
     // Priority 2: Deep link (if implemented)
     if (linkBody != null) {
-      print('🚀 [NAVIGATION] Route: deep link');
       _navigateFromDeepLink(linkBody);
       return;
     }
 
     // Priority 3: Logged-in user
     if (Get.find<AuthController>().isLoggedIn()) {
-      print('🚀 [NAVIGATION] Route: logged in user');
       _navigateLoggedInUser();
       return;
     }
 
     // Priority 4: First-time user (show onboarding)
     if (Get.find<SplashController>().showIntro()!) {
-      print('🚀 [NAVIGATION] Route: first time user (onboarding)');
       _navigateNewUser();
       return;
     }
 
     // Priority 5: Guest user (already logged in)
     if (Get.find<AuthController>().isGuestLoggedIn()) {
-      print('🚀 [NAVIGATION] Route: guest user (already logged in)');
       _navigateGuestUser();
       return;
     }
 
     // Priority 6: New guest user (login then navigate)
-    print('🚀 [NAVIGATION] Route: new guest user (logging in)');
     Get.find<AuthController>().guestLogin().then((_) {
       _navigateGuestUser();
     });
@@ -127,8 +113,6 @@ class AppNavigator {
 
   /// Navigate for logged-in user
   static Future<void> _navigateLoggedInUser() async {
-    print('🚀 [NAVIGATION] Setting up logged-in user');
-
     Get.find<AuthController>().updateToken();
 
     // Fire and forget - don't block navigation for favourites
@@ -138,37 +122,29 @@ class AppNavigator {
     Get.find<LocationController>().getZoneList();
 
     if (AddressHelper.getAddressFromSharedPref() != null) {
-      print('🚀 [NAVIGATION] User has address → home screen');
       Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
     } else {
-      print('🚀 [NAVIGATION] User needs address → location screen');
       Get.offNamed(RouteHelper.getAccessLocationRoute('splash'));
     }
   }
 
   /// Navigate for guest user
   static void _navigateGuestUser() {
-    print('🚀 [NAVIGATION] Setting up guest user');
-
     if (AddressHelper.getAddressFromSharedPref() != null) {
-      print('🚀 [NAVIGATION] Guest has address → home screen');
       Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
     } else {
-      print('🚀 [NAVIGATION] Guest needs address → location screen');
       Get.find<SplashController>().navigateToLocationScreen('splash', offNamed: true);
     }
   }
 
   /// Navigate for first-time user (onboarding)
   static void _navigateNewUser() {
-    print('🚀 [NAVIGATION] Showing onboarding for new user');
     // Use unified onboarding that includes language selection
     Get.offNamed(RouteHelper.getUnifiedOnboardingRoute());
   }
 
   /// Handle notification-based navigation
   static void _navigateFromNotification(NotificationBodyModel notification) {
-    print('🚀 [NAVIGATION] Navigating based on notification type: ${notification.notificationType}');
 
     switch (notification.notificationType) {
       case NotificationType.order:
@@ -204,7 +180,6 @@ class AppNavigator {
 
   /// Handle deep link navigation
   static void _navigateFromDeepLink(DeepLinkBody deepLink) {
-    print('🚀 [NAVIGATION] Navigating based on deep link');
     // Deep link navigation logic
     // (Implement based on your deep link structure)
   }
@@ -214,7 +189,6 @@ class AppNavigator {
   /// This is called when a maintenance notification is received
   /// while the app is running.
   static void navigateToMaintenance() {
-    print('🚀 [NAVIGATION] Navigating to maintenance mode');
     if (Get.currentRoute != RouteHelper.update) {
       Get.offNamed(RouteHelper.getUpdateRoute(false));
     }
@@ -225,7 +199,6 @@ class AppNavigator {
   /// This is called when the app detects it's below minimum version
   /// while running.
   static void navigateToUpdate() {
-    print('🚀 [NAVIGATION] Navigating to update screen');
     if (Get.currentRoute != RouteHelper.update) {
       Get.offNamed(RouteHelper.getUpdateRoute(true));
     }

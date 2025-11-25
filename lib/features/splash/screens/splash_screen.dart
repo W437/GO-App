@@ -28,15 +28,72 @@ class SplashScreen extends StatefulWidget {
   SplashScreenState createState() => SplashScreenState();
 }
 
-class SplashScreenState extends State<SplashScreen> {
+class SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey();
   StreamSubscription<List<ConnectivityResult>>? _onConnectivityChanged;
-  bool _hasTriggeredRoute = false;
+
+  // Minimum splash duration for branding
+  static const Duration _minSplashDuration = Duration(seconds: 2);
+  late final DateTime _splashStartTime;
+
+  // Animation for logo fill and bounce
+  late AnimationController _fillAnimationController;
+  late AnimationController _bounceAnimationController;
+  late Animation<double> _fillAnimation;
+  late Animation<double> _bounceAnimation;
 
   @override
   void initState() {
     super.initState();
+    _splashStartTime = DateTime.now();
 
+    // Fill animation - 1.3 seconds
+    _fillAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+    );
+
+    _fillAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fillAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Bounce animation - 0.35 seconds (1.3s to 1.65s) - fast and snappy
+    // Bounces up to 1.1 then smoothly back down to 1.0
+    _bounceAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+
+    _bounceAnimation = TweenSequence<double>([
+      // Go up to 1.1
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.1)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      // Come back down to 1.0
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.1, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 50,
+      ),
+    ]).animate(_bounceAnimationController);
+
+    // Start fill animation, then bounce when done
+    _fillAnimationController.forward().then((_) {
+      _bounceAnimationController.forward();
+    });
+
+    _setupConnectivityListener();
+    _initializeApp();
+    _startApp();
+  }
+
+  void _setupConnectivityListener() {
     bool firstTime = true;
     _onConnectivityChanged = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
       bool isConnected = result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.mobile);
@@ -49,169 +106,88 @@ class SplashScreenState extends State<SplashScreen> {
           content: Text(isConnected ? 'connected'.tr : 'no_connection'.tr, textAlign: TextAlign.center),
         ));
         if(isConnected) {
-          _handleConnectionRestored();
-        }else {
+          _startApp(); // Retry on reconnection
+        } else {
           Get.to(const NoInternetScreen());
         }
       }
-
       firstTime = false;
-
     });
+  }
 
+  void _initializeApp() {
     Get.find<SplashController>().initSharedData();
-    if(AddressHelper.getAddressFromSharedPref() != null && (AddressHelper.getAddressFromSharedPref()!.zoneIds == null
-        || AddressHelper.getAddressFromSharedPref()!.zoneData == null)) {
+
+    // Clean up invalid addresses
+    if(AddressHelper.getAddressFromSharedPref() != null &&
+       (AddressHelper.getAddressFromSharedPref()!.zoneIds == null ||
+        AddressHelper.getAddressFromSharedPref()!.zoneData == null)) {
       AddressHelper.clearAddressFromSharedPref();
     }
+
+    // Load cart for logged in users
     if(Get.find<AuthController>().isGuestLoggedIn() || Get.find<AuthController>().isLoggedIn()) {
       Get.find<CartController>().getCartDataOnline();
     }
-
-    // Start loading config and all data
-    _startDataLoading();
   }
 
-  /// Start data loading and navigate when complete
-  Future<void> _startDataLoading() async {
-    print('🚀 [SPLASH] Starting data loading...');
+  /// Single entry point for app startup
+  Future<void> _startApp() async {
     final splashController = Get.find<SplashController>();
 
-    // Load config first (required for everything else)
-    final configSuccess = await splashController.loadConfig();
-
-    if (!configSuccess) {
-      print('❌ [SPLASH] Config load failed');
-      _tryStartRouting();
+    // 1. Load config (required for everything)
+    final configLoaded = await splashController.loadConfig();
+    if (!configLoaded) {
+      await _ensureMinimumDuration();
+      _showNoInternet();
       return;
     }
 
-    // Load all data - BUT only if we are going to the dashboard
+    // 2. Load data if returning user
     if (splashController.shouldLoadData) {
-      print('🚀 [SPLASH] Returning user detected - Starting data load');
       await splashController.loadAllData(useCache: false);
-      print('✅ [SPLASH] Data loading complete');
-    } else {
-      print('🛑 [SPLASH] Fresh user detected - Skipping data load (will load in Dashboard)');
+      if (splashController.dataLoadingFailed) {
+        await _ensureMinimumDuration();
+        _showNoInternet();
+        return;
+      }
     }
 
-    // Navigate as soon as data loads
-    print('🚀 [SPLASH] Data loaded - navigating now');
-    _tryStartRouting();
+    // 3. Ensure minimum splash duration for branding
+    await _ensureMinimumDuration();
+
+    // 4. Navigate to appropriate screen
+    await AppNavigator.navigateOnAppLaunch(
+      notification: widget.notificationBody,
+      linkBody: widget.linkBody,
+    );
+  }
+
+  /// Ensure splash screen shows for minimum duration
+  Future<void> _ensureMinimumDuration() async {
+    final elapsed = DateTime.now().difference(_splashStartTime);
+    final remaining = _minSplashDuration - elapsed;
+
+    if (remaining > Duration.zero) {
+      await Future.delayed(remaining);
+    }
+  }
+
+  void _showNoInternet() {
+    Get.off(() => NoInternetScreen(
+      child: SplashScreen(
+        notificationBody: widget.notificationBody,
+        linkBody: widget.linkBody,
+      ),
+    ));
   }
 
   @override
   void dispose() {
     _onConnectivityChanged?.cancel();
+    _fillAnimationController.dispose();
+    _bounceAnimationController.dispose();
     super.dispose();
-  }
-
-  void _handleConnectionRestored() {
-    _tryStartRouting();
-  }
-
-  void _tryStartRouting() {
-    print('🚀 [SPLASH] _tryStartRouting called - hasTriggeredRoute: $_hasTriggeredRoute');
-    if (_hasTriggeredRoute) return;
-
-    _hasTriggeredRoute = true;
-
-    final hasConnection = Get.find<SplashController>().hasConnection;
-    print('🚀 [SPLASH] Connection status: $hasConnection');
-
-    if (!hasConnection) {
-      print('🚀 [SPLASH] No connection - navigating to no internet screen');
-      // Navigate to dedicated no internet screen
-      Get.off(() => NoInternetScreen(
-        child: SplashScreen(
-          notificationBody: widget.notificationBody,
-          linkBody: widget.linkBody,
-        ),
-      ));
-      return;
-    }
-
-    print('🚀 [SPLASH] Starting route to next screen');
-
-    // Add safety timeout - if routing takes more than 15 seconds, show no internet screen
-    Future.delayed(const Duration(seconds: 15), () {
-      if (Get.currentRoute == '/splash') {
-        print('🚀 [SPLASH] Routing timed out after 15 seconds - showing no internet screen');
-        Get.off(() => NoInternetScreen(
-          child: SplashScreen(
-            notificationBody: widget.notificationBody,
-            linkBody: widget.linkBody,
-          ),
-        ));
-      }
-    });
-
-    _route();
-  }
-
-  Future<void> _route() async {
-    print('🚀 [SPLASH] _route() called - checking data loading status');
-
-    final splashController = Get.find<SplashController>();
-
-    // Check if data loading already completed
-    if (splashController.dataLoadingComplete) {
-      print('✅ [SPLASH] Data already loaded - navigating immediately');
-      await AppNavigator.navigateOnAppLaunch(
-        notification: widget.notificationBody,
-        linkBody: widget.linkBody,
-      );
-      return;
-    }
-
-    // Check if we intentionally skipped loading (Fresh User)
-    if (!splashController.shouldLoadData) {
-      print('⏩ [SPLASH] Data load was skipped (Fresh User) - navigating immediately');
-      await AppNavigator.navigateOnAppLaunch(
-        notification: widget.notificationBody,
-        linkBody: widget.linkBody,
-      );
-      return;
-    }
-
-    // Check if data loading failed
-    if (splashController.dataLoadingFailed) {
-      print('❌ [SPLASH] Data loading failed - showing no internet screen');
-      Get.off(() => NoInternetScreen(
-        child: SplashScreen(
-          notificationBody: widget.notificationBody,
-          linkBody: widget.linkBody,
-        ),
-      ));
-      return;
-    }
-
-    // Data still loading - wait for it to complete
-    print('⏳ [SPLASH] Data still loading, waiting for completion...');
-
-    // Wait for data loading to complete
-    int attempts = 0;
-    while (!splashController.dataLoadingComplete && !splashController.dataLoadingFailed && attempts < 100) {
-      await Future.delayed(const Duration(milliseconds: 100));
-      attempts++;
-    }
-
-    // Check final status
-    if (splashController.dataLoadingComplete) {
-      print('✅ [SPLASH] Data loading completed - navigating');
-      await AppNavigator.navigateOnAppLaunch(
-        notification: widget.notificationBody,
-        linkBody: widget.linkBody,
-      );
-    } else {
-      print('❌ [SPLASH] Data loading failed or timed out - showing no internet screen');
-      Get.off(() => NoInternetScreen(
-        child: SplashScreen(
-          notificationBody: widget.notificationBody,
-          linkBody: widget.linkBody,
-        ),
-      ));
-    }
   }
 
   /// Build emojis behind the logo
@@ -250,12 +226,10 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('🚀 [SPLASH] Building splash screen');
     return Scaffold(
       backgroundColor: Colors.white,
       key: _globalKey,
       body: GetBuilder<SplashController>(builder: (splashController) {
-        print('🚀 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
         return _buildSplashContent();
       }),
     );
@@ -273,31 +247,39 @@ class SplashScreenState extends State<SplashScreen> {
         // Floating animated emojis
         ..._buildFloatingEmojis(context),
 
-        // Logo with liquid fill effect based on loading progress
-        GetBuilder<SplashController>(
-          builder: (splashController) {
-            return TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOut,
-              tween: Tween<double>(
-                begin: 0,
-                end: splashController.loadingProgress / 100,
-              ),
-              builder: (context, fillProgress, child) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Logo with liquid fill effect
-                      SizedBox(
-                        width: 200,
-                        child: Stack(
-                          children: [
-                            // Background: Muted/gray logo
-                            ColorFiltered(
+        // Logo with smooth fill and bounce animation
+        AnimatedBuilder(
+          animation: Listenable.merge([_fillAnimation, _bounceAnimation]),
+          builder: (context, child) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Logo with liquid fill effect and bounce scale
+                  Transform.scale(
+                    scale: _bounceAnimation.value,
+                    child: SizedBox(
+                      width: 200,
+                      child: Stack(
+                        children: [
+                          // Background: Muted/gray logo
+                          ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              Colors.grey.shade300,
+                              BlendMode.srcIn,
+                            ),
+                            child: Image.asset(
+                              'assets/image/hopa_white_logo.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          // Foreground: Blue logo clipped from bottom to top
+                          ClipRect(
+                            clipper: _LiquidFillClipper(_fillAnimation.value),
+                            child: ColorFiltered(
                               colorFilter: ColorFilter.mode(
-                                Colors.grey.shade300,
+                                Theme.of(context).primaryColor,
                                 BlendMode.srcIn,
                               ),
                               child: Image.asset(
@@ -305,38 +287,30 @@ class SplashScreenState extends State<SplashScreen> {
                                 fit: BoxFit.contain,
                               ),
                             ),
-                            // Foreground: Blue logo clipped from bottom to top
-                            ClipRect(
-                              clipper: _LiquidFillClipper(fillProgress),
-                              child: ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Theme.of(context).primaryColor,
-                                  BlendMode.srcIn,
-                                ),
-                                child: Image.asset(
-                                  'assets/image/hopa_white_logo.png',
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      // Loading message
-                      Text(
-                        splashController.loadingMessage,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Loading message (optional)
+                  GetBuilder<SplashController>(
+                    builder: (splashController) {
+                      return Text(
+                        splashController.loadingMessage.isEmpty
+                            ? ''
+                            : splashController.loadingMessage,
                         style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                         ),
                         textAlign: TextAlign.center,
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
+                ],
+              ),
             );
           },
         ),
