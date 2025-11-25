@@ -570,107 +570,133 @@ class WebRestaurantShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
+    final shimmerColor = Theme.of(context).hintColor.withValues(alpha: 0.1);
+    final shimmerHighlight = Theme.of(context).hintColor.withValues(alpha: 0.15);
+
+    return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-        color: Theme.of(context).shadowColor,
-        border: Border.all(color: Theme.of(context).shadowColor),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Get.isDarkMode
+                ? Colors.black.withValues(alpha: 0.4)
+                : Colors.grey.withValues(alpha: 0.1),
+            spreadRadius: 0,
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-        ),
-        child: Stack(clipBehavior: Clip.none, children: [
-
-            ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
-              child: Shimmer(
-                child: Container(
-                  height: 93, width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).shadowColor,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(Dimensions.radiusDefault),
-                      topRight: Radius.circular(Dimensions.radiusDefault),
-                    ),
-                  ),
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image placeholder
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            child: Shimmer(
+              color: shimmerHighlight,
+              child: Container(
+                height: 180,
+                width: double.infinity,
+                color: shimmerColor,
               ),
             ),
+          ),
 
-            Positioned(
-              top: 60, left: 10, right: isDineInRestaurant ? null : 0,
+          // Content placeholder
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
               child: Column(
-                crossAxisAlignment: isDineInRestaurant ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(2),
-                    height: 70, width: 70,
-                    decoration:  BoxDecoration(
-                      color: Theme.of(context).shadowColor,
-                      border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    ),
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    child: Shimmer(
-                      child: Container(height: 15, width: 170, decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor)),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    child: Shimmer(
-                      child: Container(height: 10, width: 220, decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor)),
-                    ),
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Title and description
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconWithTextRowWidget(
-                        icon: Icons.star_border, text: '0.0',
-                        color: Theme.of(context).shadowColor,
-                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                        child: ImageWithTextRowWidget(
-                          widget: Image.asset(Images.deliveryIcon, height: 20, width: 20, color: Theme.of(context).shadowColor),
-                          text: 'free'.tr,
-                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
+                      Shimmer(
+                        color: shimmerHighlight,
+                        child: Container(
+                          height: 16,
+                          width: 140,
+                          decoration: BoxDecoration(
+                            color: shimmerColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                      IconWithTextRowWidget(
-                        icon: Icons.access_time_outlined, text: '10-30 min',
-                        color: Theme.of(context).shadowColor,
-                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
+                      const SizedBox(height: 8),
+                      Shimmer(
+                        color: shimmerHighlight,
+                        child: Container(
+                          height: 12,
+                          width: 200,
+                          decoration: BoxDecoration(
+                            color: shimmerColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
 
+                  // Separator
+                  Container(
+                    height: 1,
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  ),
+
+                  // Bottom info
+                  Row(
+                    children: [
+                      Shimmer(
+                        color: shimmerHighlight,
+                        child: Container(
+                          height: 12,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            color: shimmerColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Shimmer(
+                        color: shimmerHighlight,
+                        child: Container(
+                          height: 12,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: shimmerColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Shimmer(
+                        color: shimmerHighlight,
+                        child: Container(
+                          height: 12,
+                          width: 45,
+                          decoration: BoxDecoration(
+                            color: shimmerColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-
-            Positioned(
-              top: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-              child: Icon(
-                Icons.favorite,  size: 20,
-                color: Theme.of(context).shadowColor,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

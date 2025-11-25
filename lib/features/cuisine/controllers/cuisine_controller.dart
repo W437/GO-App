@@ -33,11 +33,17 @@ class CuisineController extends GetxController implements GetxService {
     _cuisineRestaurantsModel = null;
   }
 
-  Future<void> getCuisineList() async {
-    // Use cached data if available
-    if (_cuisineModel != null) {
+  Future<void> getCuisineList({bool forceRefresh = false}) async {
+    // Use cached data if available and not forcing refresh
+    if (_cuisineModel != null && !forceRefresh) {
       print('✅ [CUISINE] Using cached data');
       return;
+    }
+
+    // Clear data to show shimmer when refreshing
+    if (forceRefresh) {
+      _cuisineModel = null;
+      update();
     }
 
     _selectedCuisines = [];

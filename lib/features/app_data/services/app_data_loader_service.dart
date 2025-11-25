@@ -126,7 +126,7 @@ class AppDataLoaderService {
     await Future.wait([
       Get.find<CategoryController>().getCategoryList(true),
       Get.find<HomeController>().getBannerList(true),
-      Get.find<CuisineController>().getCuisineList(),
+      Get.find<CuisineController>().getCuisineList(forceRefresh: true),
       Get.find<AdvertisementController>().getAdvertisementList(reload: true),
       Get.find<StoryController>().getStories(reload: true),
       Get.find<RestaurantController>().getRestaurantList(0, true),
@@ -216,7 +216,7 @@ class AppDataLoaderService {
         _loadWithRetry(
           'cuisines',
           'Cuisines...',
-          () => Get.find<CuisineController>().getCuisineList(),
+          () => Get.find<CuisineController>().getCuisineList(forceRefresh: true),
           onProgress,
           onError,
         ),

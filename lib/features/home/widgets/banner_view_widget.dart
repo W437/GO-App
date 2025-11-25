@@ -105,7 +105,57 @@ class _BannerViewWidgetState extends State<BannerViewWidget> {
         });
       }
 
-      return (homeController.bannerImageList != null && homeController.bannerImageList!.isEmpty) ? const SizedBox() : Container(
+      // Show empty state when no banners
+      if (homeController.bannerImageList != null && homeController.bannerImageList!.isEmpty) {
+        return Container(
+          height: GetPlatform.isDesktop ? 500 : 220,
+          margin: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).hintColor.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Theme.of(context).hintColor.withValues(alpha: 0.1),
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).hintColor.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.campaign_outlined,
+                    size: 32,
+                    color: Theme.of(context).hintColor.withValues(alpha: 0.5),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'no_promotions_available'.tr,
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'check_back_later'.tr,
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return Container(
         width: MediaQuery.of(context).size.width,
         clipBehavior: Clip.none, // Allow shadow to overflow
         child: homeController.bannerImageList != null ? Column(

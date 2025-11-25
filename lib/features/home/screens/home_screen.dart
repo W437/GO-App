@@ -265,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           padding: ResponsiveHelper.isDesktop(context)
                               ? EdgeInsets.zero
                               : EdgeInsets.only(
+                                  top: Dimensions.paddingSizeLarge,
                                   bottom: 65 +
                                       MediaQuery.of(context).padding.bottom +
                                       Dimensions.paddingSizeDefault,

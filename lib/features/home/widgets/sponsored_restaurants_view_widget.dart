@@ -10,16 +10,17 @@ import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
 import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/features/home/widgets/rest_sponsored_card.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:video_player/video_player.dart';
 import 'package:animated_emoji/animated_emoji.dart';
+import 'package:godelivery_user/util/app_colors.dart';
 
 class SponsoredRestaurantsViewWidget extends StatefulWidget {
   const SponsoredRestaurantsViewWidget({super.key});
@@ -39,365 +40,204 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
       }
 
       // Always show the section with header
-      return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'highlights_for_you'.tr,
-                        style: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeOverLarge,
-                          fontWeight: FontWeight.w800,
-                          height: 1.2,
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.05),
+              blurRadius: 24,
+              spreadRadius: 0,
+              offset: Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.08),
+              blurRadius: 0,
+              spreadRadius: 1,
+              offset: Offset(0, 0),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              // Blurred background image
+              Positioned.fill(
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  child: Image.asset(
+                    Get.isDarkMode
+                        ? 'assets/image/sponsored/bg_pattern_dark.png'
+                        : 'assets/image/sponsored/bg_pattern_light.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // Overlay (white in light mode, black in dark mode)
+              Positioned.fill(
+                child: Container(
+                  color: Get.isDarkMode
+                      ? Colors.black.withValues(alpha: 0.7)
+                      : Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+              // Fade gradient at top
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Get.isDarkMode
+                            ? Theme.of(context).scaffoldBackgroundColor
+                            : Colors.white,
+                        Get.isDarkMode
+                            ? Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0)
+                            : Colors.white.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Content
+              Padding(
+                padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge, bottom: Dimensions.paddingSizeSmall),
+                child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'highlights_for_you'.tr,
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeOverLarge,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        AnimatedEmoji(
+                          AnimatedEmojis.fire,
+                          size: 28,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Featured partner restaurants near you',
+                      style: robotoRegular.copyWith(
+                        color: Theme.of(context).hintColor,
+                        fontSize: Dimensions.fontSizeDefault,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+
+              // Restaurant Cards - Horizontal List or Empty State
+              GetBuilder<RestaurantController>(
+                builder: (restaurantController) {
+                  List<Restaurant> restaurants = advertisementController.advertisementList!
+                      .where((ad) => ad.restaurant != null && ad.addType != 'video_promotion')
+                      .map((ad) => ad.restaurant!)
+                      .toList();
+
+                  // Show empty state when no highlights
+                  if (restaurants.isEmpty) {
+                    return Container(
+                      height: 180,
+                      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).hintColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(context).hintColor.withValues(alpha: 0.1),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      AnimatedEmoji(
-                        AnimatedEmojis.fire,
-                        size: 28,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).hintColor.withValues(alpha: 0.08),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.auto_awesome_rounded,
+                                size: 32,
+                                color: Theme.of(context).hintColor.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'no_highlights_available'.tr,
+                              style: robotoMedium.copyWith(
+                                fontSize: Dimensions.fontSizeDefault,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'check_back_later'.tr,
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Featured partner restaurants near you',
-                    style: robotoRegular.copyWith(
-                      color: Theme.of(context).hintColor,
-                      fontSize: Dimensions.fontSizeDefault,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
+                    );
+                  }
 
-            // Restaurant Cards - Horizontal List or Empty State
-            GetBuilder<RestaurantController>(
-              builder: (restaurantController) {
-                List<Restaurant> restaurants = advertisementController.advertisementList!
-                    .where((ad) => ad.restaurant != null && ad.addType != 'video_promotion')
-                    .map((ad) => ad.restaurant!)
-                    .toList();
-
-                // Show empty state when no highlights
-                if (restaurants.isEmpty) {
-                  return Container(
-                    height: 180,
-                    margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).hintColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                  return SizedBox(
+                    height: 240, // Extra height for bottom shadow
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.only(
+                        left: Dimensions.paddingSizeDefault,
+                        right: Dimensions.paddingSizeDefault,
+                        bottom: 20, // Padding for shadow
                       ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).hintColor.withValues(alpha: 0.08),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 32,
-                              color: Theme.of(context).hintColor.withValues(alpha: 0.5),
-                            ),
+                      itemCount: restaurants.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 160,
+                          margin: EdgeInsets.only(
+                            right: index < restaurants.length - 1 ? Dimensions.paddingSizeDefault : 0,
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'no_highlights_available'.tr,
-                            style: robotoMedium.copyWith(
-                              fontSize: Dimensions.fontSizeDefault,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'check_back_later'.tr,
-                            style: robotoRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor,
-                            ),
-                          ),
-                        ],
-                      ),
+                          child: RestSponsoredCard(restaurant: restaurants[index]),
+                        );
+                      },
                     ),
                   );
-                }
-
-                return SizedBox(
-                  height: 240, // Extra height for bottom shadow
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(
-                      left: Dimensions.paddingSizeDefault,
-                      right: Dimensions.paddingSizeDefault,
-                      bottom: 20, // Padding for shadow
-                    ),
-                    itemCount: restaurants.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        width: 160,
-                        margin: EdgeInsets.only(
-                          right: index < restaurants.length - 1 ? Dimensions.paddingSizeDefault : 0,
-                        ),
-                        child: SponsoredRestaurantCard(restaurant: restaurants[index]),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ],
-      );
-    });
-  }
-}
-
-class SponsoredRestaurantCard extends StatelessWidget {
-  final Restaurant restaurant;
-  const SponsoredRestaurantCard({super.key, required this.restaurant});
-
-  @override
-  Widget build(BuildContext context) {
-    // If 'open' field is null, assume restaurant is open (backend returns incomplete data)
-    bool isAvailable = (restaurant.open == null || restaurant.open == 1) && (restaurant.active ?? false);
-
-    String openUntil = restaurant.currentOpeningTime ??
-                       (restaurant.restaurantOpeningTime != null
-                         ? DateConverter.convertTimeToTime(restaurant.restaurantOpeningTime!)
-                         : '23:00');
-
-    return CustomInkWellWidget(
-      onTap: () {
-        Get.toNamed(
-          RouteHelper.getRestaurantRoute(restaurant.id),
-          arguments: RestaurantScreen(restaurant: restaurant),
-        );
-      },
-      radius: 20,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Get.isDarkMode
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.grey.withValues(alpha: 0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                // Top - Cover Image with Gradual Blur (fills remaining space)
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Layer 1: Clear image (bottom layer)
-                        BlurhashImageWidget(
-                          imageUrl: restaurant.coverPhotoFullUrl ?? '',
-                          blurhash: restaurant.coverPhotoBlurhash,
-                          fit: BoxFit.cover,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-
-                        // Layer 2: Blurred image with gradient mask (top layer)
-                        ShaderMask(
-                          shaderCallback: (rect) {
-                            return const LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent, // Top stays clear
-                                Colors.black,       // Bottom gets blurred
-                              ],
-                              stops: [0.3, 1.0], // Blur starts at 30% down
-                            ).createShader(rect);
-                          },
-                          blendMode: BlendMode.dstIn,
-                          child: ImageFiltered(
-                            imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                            child: BlurhashImageWidget(
-                              imageUrl: restaurant.coverPhotoFullUrl ?? '',
-                              blurhash: restaurant.coverPhotoBlurhash,
-                              fit: BoxFit.cover,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Bottom - White Background (wraps content)
-                Container(
-                  padding: const EdgeInsets.fromLTRB(8, 32, 8, 8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                        // Restaurant Name (centered)
-                        Text(
-                          restaurant.name ?? '',
-                          style: robotoBold.copyWith(
-                            fontSize: Dimensions.fontSizeDefault,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 2),
-
-                        // Open Status
-                        if (isAvailable)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.schedule_rounded,
-                                  size: 10,
-                                  color: Colors.green,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  'Open until $openUntil',
-                                  style: robotoRegular.copyWith(
-                                    fontSize: 9,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'closed_now'.tr.toUpperCase(),
-                              style: robotoMedium.copyWith(
-                                fontSize: 9,
-                                color: Theme.of(context).colorScheme.error,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: 2),
-
-                        // Rating - Always show
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).hintColor.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.star_rounded,
-                                size: 12,
-                                color: const Color(0xFFFFB800),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${restaurant.avgRating?.toStringAsFixed(1) ?? "0.0"}',
-                                style: robotoBold.copyWith(
-                                  fontSize: 11,
-                                ),
-                              ),
-                              if (restaurant.ratingCount != null && restaurant.ratingCount! > 0) ...[
-                                const SizedBox(width: 2),
-                                Text(
-                                  '(${restaurant.ratingCount})',
-                                  style: robotoRegular.copyWith(
-                                    fontSize: 9,
-                                    color: Theme.of(context).hintColor,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                  ),
-                ),
-              ],
-            ),
-
-            // Centered Logo - Positioned at junction (overlapping image and content)
-            Positioned(
-              bottom: 72, // Position from bottom to overlap perfectly
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.25),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: BlurhashImageWidget(
-                      imageUrl: restaurant.logoFullUrl ?? '',
-                      blurhash: restaurant.logoBlurhash,
-                      fit: BoxFit.cover,
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                  ),
+                },
+              ),
+            ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -644,152 +484,149 @@ class AdvertisementShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue.withValues(alpha: 0.05),
-        ),
-        margin:  EdgeInsets.only(
-          top: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge * 3.5 : 0 ,
-          right: Get.find<LocalizationController>().isLtr && ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0,
-          left: !Get.find<LocalizationController>().isLtr && ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0,
-        ),
-        child: Padding( padding : const EdgeInsets.symmetric(vertical : Dimensions.paddingSizeDefault),
+    final shimmerBase = Theme.of(context).hintColor.withValues(alpha: 0.1);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header shimmer
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              const SizedBox(height: Dimensions.paddingSizeLarge,),
-
-              Container(height: 20, width: 200,
-                margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Theme.of(context).shadowColor
-                ),),
-
-              const SizedBox(height: Dimensions.paddingSizeSmall,),
-
-              Container(height: 15, width: 250,
-                margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).shadowColor,
-                ),),
-
-              const SizedBox(height: Dimensions.paddingSizeDefault * 2,),
-
-              SizedBox(
-                height: 250,
-                child: ListView.builder(
-                  itemCount: ResponsiveHelper.isDesktop(context) ? 3 : 1,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      width: ResponsiveHelper.isDesktop(context) ? (Dimensions.webMaxWidth - 20) / 3 : MediaQuery.of(context).size.width,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Padding(padding: const EdgeInsets.only(bottom: 0, left: 10, right: 10),
-                            child: Container(
-                              height: 250,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                color: Theme.of(context).shadowColor,
-                                border: Border.all(color: Theme.of(context).hintColor.withValues(alpha: 0.2),),
-                              ),
-                              padding: const EdgeInsets.only(bottom: 25),
-                              child: const Center(child: Icon(Icons.play_circle, color: Colors.white,size: 45,),),
-                            ),
-                          ),
-
-                          Positioned( bottom: 0, left: 0,right: 0, child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                color: Theme.of(context).cardColor,
-                                border: Border.all(color: Theme.of(context).shadowColor)
-                            ),
-                            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                            margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                            child: Column(children: [
-                              Row( children: [
-
-                                Expanded(
-                                  child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Container(
-                                      height: 17, width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        color: Theme.of(context).shadowColor,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: Dimensions.paddingSizeSmall,),
-                                    Container(
-                                      height: 17, width: 150,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        color: Theme.of(context).shadowColor,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: Dimensions.paddingSizeExtraSmall,),
-
-                                    Container(
-                                      height: 17, width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        color: Theme.of(context).shadowColor,
-                                      ),
-                                    )
-                                  ]),
-                                ),
-
-                                const SizedBox(width: Dimensions.paddingSizeLarge,),
-
-                                InkWell(
-                                  onTap: () => Get.back(),
-                                  child: Container(
-                                    margin: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
-                                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall + 5, vertical: Dimensions.paddingSizeSmall),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                      color: Theme.of(context).shadowColor,
-                                    ),
-                                    child:  Icon(Icons.arrow_forward_rounded, size: 20, color: Colors.white.withValues(alpha: 0.8),),
-                                  ),
-                                )
-                              ],)
-                            ],),
-                          ))
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: Dimensions.paddingSizeLarge * 2,),
-
-              Align(
-                alignment: Alignment.center,
-                child: AnimatedSmoothIndicator(
-                  activeIndex: 0,
-                  count: 3,
-                  effect: ExpandingDotsEffect(
-                    dotHeight: 7,
-                    dotWidth: 7,
-                    spacing: 5,
-                    activeDotColor: Theme.of(context).disabledColor,
-                    dotColor: Theme.of(context).hintColor.withValues(alpha: 0.6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    height: 22,
+                    width: 180,
+                    color: shimmerBase,
                   ),
                 ),
               ),
-              const SizedBox(height: Dimensions.paddingSizeExtraSmall,),
+              const SizedBox(height: 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    height: 14,
+                    width: 220,
+                    color: shimmerBase,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-      ),
+        const SizedBox(height: Dimensions.paddingSizeDefault),
+
+        // Cards shimmer - matches SponsoredRestaurantCard size
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(
+              left: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              bottom: 20,
+            ),
+            itemCount: 4,
+            itemBuilder: (context, index) {
+              return Container(
+                width: 160,
+                margin: EdgeInsets.only(
+                  right: index < 3 ? Dimensions.paddingSizeDefault : 0,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Get.isDarkMode
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.grey.withValues(alpha: 0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Top - Image placeholder
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        child: Shimmer(
+                          duration: const Duration(seconds: 2),
+                          child: Container(
+                            width: double.infinity,
+                            color: shimmerBase,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Bottom - Content placeholder
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(8, 32, 8, 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                      ),
+                      child: Column(
+                        children: [
+                          // Name
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Shimmer(
+                              duration: const Duration(seconds: 2),
+                              child: Container(
+                                height: 14,
+                                width: 100,
+                                color: shimmerBase,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          // Status badge
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Shimmer(
+                              duration: const Duration(seconds: 2),
+                              child: Container(
+                                height: 16,
+                                width: 80,
+                                color: shimmerBase,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Rating badge
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Shimmer(
+                              duration: const Duration(seconds: 2),
+                              child: Container(
+                                height: 16,
+                                width: 50,
+                                color: shimmerBase,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

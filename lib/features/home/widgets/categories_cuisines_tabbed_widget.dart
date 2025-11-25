@@ -253,7 +253,7 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
       builder: (cuisineController) {
         // Show shimmer while loading
         if (cuisineController.cuisineModel == null) {
-          return _buildShimmer();
+          return _buildCuisineShimmer();
         }
         // Show empty state if no cuisines
         if (cuisineController.cuisineModel!.cuisines == null ||
@@ -296,6 +296,8 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
   }
 
   Widget _buildShimmer() {
+    final shimmerBase = Theme.of(context).hintColor.withValues(alpha: 0.1);
+
     return ListView.builder(
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
@@ -310,28 +312,76 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
           ),
           child: Column(
             children: [
-              // Simple rounded square shimmer
-              Shimmer(
-                duration: const Duration(seconds: 2),
-                child: Container(
-                  width: ResponsiveHelper.isMobile(context) ? 70 : 90,
-                  height: ResponsiveHelper.isMobile(context) ? 70 : 90,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                    color: Colors.grey.shade300,
+              // Card shimmer - same size as category card (80x80)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    color: shimmerBase,
                   ),
                 ),
               ),
               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
               // Text shimmer
-              Shimmer(
-                duration: const Duration(seconds: 2),
-                child: Container(
-                  width: 50,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: Colors.grey.shade300,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    width: 60,
+                    height: 12,
+                    color: shimmerBase,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCuisineShimmer() {
+    final shimmerBase = Theme.of(context).hintColor.withValues(alpha: 0.1);
+
+    return ListView.builder(
+      shrinkWrap: true,
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+      itemCount: 8,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            right: Dimensions.paddingSizeDefault,
+            bottom: Dimensions.paddingSizeSmall,
+          ),
+          child: Column(
+            children: [
+              // Circular shimmer - same size as cuisine card (84x84)
+              ClipOval(
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    width: 84,
+                    height: 84,
+                    color: shimmerBase,
+                  ),
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              // Text shimmer
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    width: 60,
+                    height: 12,
+                    color: shimmerBase,
                   ),
                 ),
               ),

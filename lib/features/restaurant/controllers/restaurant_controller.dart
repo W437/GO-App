@@ -210,8 +210,12 @@ class RestaurantController extends GetxController implements GetxService {
     }
 
     if(reload) {
-      _restaurantModel = null;
-      update();
+      // Keep empty model if reloading with 0 restaurants (avoids shimmer flash)
+      final hadEmptyList = _restaurantModel?.restaurants?.isEmpty ?? false;
+      if (!hadEmptyList) {
+        _restaurantModel = null;
+        update();
+      }
     }
 
     RestaurantModel? restaurantModel = await restaurantServiceInterface.getRestaurantList(offset, _restaurantType, _topRated, _discount, _veg, _nonVeg, fromMap: fromMap);
