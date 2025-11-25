@@ -74,62 +74,68 @@ class LocationBarWidget extends StatelessWidget {
       collapse,
     )!;
 
+    final locationController = Get.find<LocationController>();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: GetBuilder<LocationController>(
-            builder: (_) {
-              return InkWell(
-                onTap: () => LocationSheetHelper.showSelectionSheet(context),
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'deliver_to'.tr,
-                      style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: Theme.of(context).hintColor,
-                      ),
+          child: Obx(() {
+            final zone = locationController.activeZone;
+            final displayText = zone?.displayName
+                ?? zone?.name
+                ?? AddressHelper.getAddressFromSharedPref()?.address
+                ?? 'select_location'.tr;
+
+            return InkWell(
+              onTap: () => LocationSheetHelper.showSelectionSheet(context),
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'deliver_to'.tr,
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).hintColor,
                     ),
-                    SizedBox(height: labelSpacing),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: Theme.of(context).primaryColor,
-                          size: iconSize,
-                        ),
-                        SizedBox(width: horizontalGap),
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: AutoScrollText(
-                                  text: AddressHelper.getAddressFromSharedPref()?.address ?? 'select_location'.tr,
-                                  style: robotoBold.copyWith(
-                                    fontSize: Dimensions.fontSizeDefault,
-                                    color: Theme.of(context).textTheme.bodyLarge!.color,
-                                  ),
+                  ),
+                  SizedBox(height: labelSpacing),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: Theme.of(context).primaryColor,
+                        size: iconSize,
+                      ),
+                      SizedBox(width: horizontalGap),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: AutoScrollText(
+                                text: displayText,
+                                style: robotoBold.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault,
+                                  color: Theme.of(context).textTheme.bodyLarge!.color,
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: Theme.of(context).textTheme.bodyLarge!.color,
-                                size: 20,
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                              size: 20,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
         ),
         const SizedBox(width: Dimensions.paddingSizeSmall),
         Row(

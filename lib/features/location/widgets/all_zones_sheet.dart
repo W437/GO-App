@@ -46,7 +46,17 @@ class AllZonesSheet extends StatelessWidget {
 
         // Zone list
         GetBuilder<LocationController>(builder: (locationController) {
-          return const ZoneListWidget(isBottomSheet: false);
+          return ZoneListWidget(
+            isBottomSheet: false,
+            onZoneSelected: (zone) async {
+              print('🌍 [ALL_ZONES_SHEET] Zone selected: ${zone.displayName ?? zone.name}');
+              // Close the sheet first
+              Get.back();
+              // Then change zone
+              await locationController.changeZone(zone);
+              print('🌍 [ALL_ZONES_SHEET] changeZone completed');
+            },
+          );
         }),
       ],
     );

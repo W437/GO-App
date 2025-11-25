@@ -511,15 +511,23 @@ class _LocationManagerSheetContent extends StatelessWidget {
   }
 
   void _handleShowServiceAreas(BuildContext context) {
-    CustomSheet.show(
-      context: context,
-      child: const AllZonesSheet(),
-      showHandle: true,
-      padding: const EdgeInsets.symmetric(
-        horizontal: Dimensions.paddingSizeExtraLarge,
-        vertical: Dimensions.paddingSizeDefault,
-      ),
-    );
+    // Close this sheet first
+    Get.back();
+
+    // Then show AllZonesSheet
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (Get.context != null) {
+        CustomSheet.show(
+          context: Get.context!,
+          child: const AllZonesSheet(),
+          showHandle: true,
+          padding: const EdgeInsets.symmetric(
+            horizontal: Dimensions.paddingSizeExtraLarge,
+            vertical: Dimensions.paddingSizeDefault,
+          ),
+        );
+      }
+    });
   }
 
   void _handleAddNewLocation(BuildContext context) {
@@ -529,12 +537,27 @@ class _LocationManagerSheetContent extends StatelessWidget {
       if (Get.context != null) {
         CustomFullSheet.show(
           context: Get.context!,
-          child: const PickMapScreen(
+          child: PickMapScreen(
             fromSignUp: false,
             fromSplash: false,
             fromAddAddress: false,
             canRoute: false,
             route: 'home',
+            onZoneSelected: (zone) async {
+              // Close the map sheet
+              Get.back();
+
+              // Change zone and refresh data (does NOT change delivery address)
+              await Get.find<LocationController>().changeZone(zone);
+
+              // Show confirmation snackbar
+              Get.snackbar(
+                'zone_updated'.tr,
+                zone.displayName ?? zone.name ?? 'Zone ${zone.id}',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 2),
+              );
+            },
           ),
         );
       }

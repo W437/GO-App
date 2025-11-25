@@ -41,42 +41,48 @@ class NewHomeHeaderWidget extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Location Picker on the left
+                // Location Picker on the left - uses Obx for reactive updates
                 Expanded(
-                  child: GetBuilder<LocationController>(
-                    builder: (locationController) {
-                      return InkWell(
-                        onTap: () => _showLocationSheet(context),
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.location_on_rounded,
-                              color: Theme.of(context).primaryColor,
-                              size: 24,
-                            ),
-                            const SizedBox(width: Dimensions.paddingSizeSmall),
-                            Expanded(
-                              child: AutoScrollText(
-                                text: AddressHelper.getAddressFromSharedPref()?.address ?? 'select_location'.tr,
-                                style: robotoBold.copyWith(
-                                  fontSize: Dimensions.fontSizeDefault,
-                                  color: Theme.of(context).textTheme.bodyLarge!.color,
-                                ),
+                  child: Obx(() {
+                    final locationController = Get.find<LocationController>();
+                    // Show active zone name if set, otherwise show address
+                    final displayText = locationController.activeZone?.displayName
+                        ?? locationController.activeZone?.name
+                        ?? AddressHelper.getAddressFromSharedPref()?.address
+                        ?? 'select_location'.tr;
+                    print('🏠 [HEADER] Building with: $displayText (activeZone: ${locationController.activeZone?.displayName})');
+
+                    return InkWell(
+                      onTap: () => _showLocationSheet(context),
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.location_on_rounded,
+                            color: Theme.of(context).primaryColor,
+                            size: 24,
+                          ),
+                          const SizedBox(width: Dimensions.paddingSizeSmall),
+                          Expanded(
+                            child: AutoScrollText(
+                              text: displayText,
+                              style: robotoBold.copyWith(
+                                fontSize: Dimensions.fontSizeDefault,
+                                color: Theme.of(context).textTheme.bodyLarge!.color,
                               ),
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Theme.of(context).textTheme.bodyLarge!.color,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: Theme.of(context).textTheme.bodyLarge!.color,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ),
 
                 const SizedBox(width: Dimensions.paddingSizeDefault),

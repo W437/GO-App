@@ -53,10 +53,15 @@ class PickMapScreen extends StatefulWidget {
   final String? route;
   final GoogleMapController? googleMapController;
   final bool showZonePolygons;
+  /// Callback when user confirms zone selection in zone mode.
+  /// If provided, this callback is called instead of returning via Get.back().
+  final Function(ZoneListModel zone)? onZoneSelected;
+
   const PickMapScreen({
     super.key, required this.fromSignUp, required this.fromAddAddress, required this.canRoute,
     required this.route, this.googleMapController, required this.fromSplash,
     this.showZonePolygons = true,
+    this.onZoneSelected,
   });
 
   @override
@@ -865,56 +870,61 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                     },
                                     onConfirm: () => _onZoneSelected(locationController),
                                   )
-                                : AnimatedBuilder(
-                                    animation: Listenable.merge([
-                                      _tapPromptWiggleAnimation,
-                                      _tapPromptBounceController,
-                                    ]),
-                                    builder: (context, child) {
-                                      // Swift bouncy wiggle: 1.5 oscillations with decay
-                                      final t = _tapPromptBounceController.value;
-                                      final decay = 1.0 - t; // Stronger at start, fades out
-                                      final wiggleAngle = sin(t * 3 * pi) * 0.12 * decay;
-                                      return Transform.scale(
-                                        scale: _tapPromptWiggleAnimation.value,
-                                        child: Transform.rotate(
-                                          angle: wiggleAngle,
-                                          child: child,
+                                : AnimatedOpacity(
+                                    opacity: (!Environment.useMapbox || _mapAnimationComplete) ? 1.0 : 0.0,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeOut,
+                                    child: AnimatedBuilder(
+                                      animation: Listenable.merge([
+                                        _tapPromptWiggleAnimation,
+                                        _tapPromptBounceController,
+                                      ]),
+                                      builder: (context, child) {
+                                        // Swift bouncy wiggle: 1.5 oscillations with decay
+                                        final t = _tapPromptBounceController.value;
+                                        final decay = 1.0 - t; // Stronger at start, fades out
+                                        final wiggleAngle = sin(t * 3 * pi) * 0.12 * decay;
+                                        return Transform.scale(
+                                          scale: _tapPromptWiggleAnimation.value,
+                                          child: Transform.rotate(
+                                            angle: wiggleAngle,
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(bottom: 40),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: Dimensions.paddingSizeExtraLarge,
+                                          vertical: Dimensions.paddingSizeLarge,
                                         ),
-                                      );
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.only(bottom: 40),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: Dimensions.paddingSizeExtraLarge,
-                                        vertical: Dimensions.paddingSizeLarge,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Tap your ',
-                                            style: robotoMedium.copyWith(
-                                              fontSize: Dimensions.fontSizeExtraLarge,
-                                              color: Colors.white.withOpacity(0.9),
-                                              letterSpacing: 0.3,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Tap your ',
+                                              style: robotoMedium.copyWith(
+                                                fontSize: Dimensions.fontSizeExtraLarge,
+                                                color: Colors.white.withOpacity(0.9),
+                                                letterSpacing: 0.3,
+                                              ),
                                             ),
-                                          ),
-                                          Icon(
-                                            Icons.location_on,
-                                            size: 28,
-                                            color: Theme.of(context).primaryColor,
-                                          ),
-                                          Text(
-                                            ' zone!',
-                                            style: robotoMedium.copyWith(
-                                              fontSize: Dimensions.fontSizeExtraLarge,
-                                              color: Colors.white.withOpacity(0.9),
-                                              letterSpacing: 0.3,
+                                            Icon(
+                                              Icons.location_on,
+                                              size: 28,
+                                              color: Theme.of(context).primaryColor,
                                             ),
-                                          ),
-                                        ],
+                                            Text(
+                                              ' zone!',
+                                              style: robotoMedium.copyWith(
+                                                fontSize: Dimensions.fontSizeExtraLarge,
+                                                color: Colors.white.withOpacity(0.9),
+                                                letterSpacing: 0.3,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1154,8 +1164,52 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       final selectedZone = locationController.zoneList
           ?.firstWhereOrNull((zone) => zone.id == _selectedZoneId);
       if (selectedZone != null) {
+        // Priority 1: Use callback if provided (home screen flow)
+        if (widget.onZoneSelected != null) {
+          widget.onZoneSelected!(selectedZone);
+          return;
+        }
+
+        // Priority 2: Onboarding flow - save zone and navigate to dashboard
+        if (widget.fromSplash || widget.route == 'splash') {
+          _handleOnboardingZoneSelection(selectedZone, locationController);
+          return;
+        }
+
+        // Default: return result via navigation
         Get.back(result: selectedZone);
       }
+    }
+  }
+
+  /// Handle zone selection during onboarding - save zone and navigate to home
+  Future<void> _handleOnboardingZoneSelection(
+    ZoneListModel zone,
+    LocationController locationController,
+  ) async {
+    // Show loading
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      // Save zone as address
+      await locationController.saveZoneAsAddress(zone, refreshData: false);
+
+      // Close loading dialog
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      // Navigate to home
+      Get.offAllNamed(RouteHelper.getInitialRoute());
+    } catch (e) {
+      // Close loading dialog
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      showCustomSnackBar('failed_to_save_zone'.tr);
     }
   }
 

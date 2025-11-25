@@ -323,25 +323,28 @@ class SplashScreenState extends State<SplashScreen> {
       // Fire emoji - right side
       Center(
         child: Transform.translate(
-          offset: const Offset(110, -35), // x: 110, y: -35
+          offset: const Offset(120, -35), // x: 110, y: -35
           child: Transform.rotate(
             angle: 15 * (pi / 180), // 15 degrees to the right
             child: const _FloatingEmoji(
               emoji: AnimatedEmojis.fire,
-              size: 50,
+              size: 58,
               delay: 0,
             ),
           ),
         ),
       ),
-      // Heart eyes emoji - above logo
+      // Heart eyes emoji - left side (party position)
       Center(
         child: Transform.translate(
-          offset: const Offset(0, -60), // centered x, above logo
-          child: const _FloatingEmoji(
-            emoji: AnimatedEmojis.heartEyes,
-            size: 50,
-            delay: 100,
+          offset: const Offset(-100, 25),
+          child: Transform.rotate(
+            angle: -15 * (pi / 180),
+            child: const _FloatingEmoji(
+              emoji: AnimatedEmojis.heartEyes,
+              size: 40,
+              delay: 100,
+            ),
           ),
         ),
       ),
@@ -577,44 +580,66 @@ class _FloatingEmoji extends StatefulWidget {
 }
 
 class _FloatingEmojiState extends State<_FloatingEmoji>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late AnimationController _floatController;
+  late AnimationController _popInController;
   late Animation<double> _floatAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+
+    // Pop-in animation controller (400ms bouncy scale)
+    _popInController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _popInController, curve: Curves.elasticOut),
+    );
+
+    // Float animation controller
+    _floatController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
 
     _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
 
-    // Start animation after delay
+    // Start pop-in after delay, then start floating
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) {
-        _controller.repeat(reverse: true);
+        _popInController.forward().then((_) {
+          if (mounted) {
+            _floatController.repeat(reverse: true);
+          }
+        });
       }
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _floatController.dispose();
+    _popInController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _floatAnimation,
+      animation: Listenable.merge([_floatAnimation, _scaleAnimation]),
       builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _floatAnimation.value),
-          child: child,
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Transform.translate(
+            offset: Offset(0, _floatAnimation.value),
+            child: child,
+          ),
         );
       },
       child: AnimatedEmoji(

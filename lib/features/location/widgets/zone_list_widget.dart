@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_loader_widget.dart';
-import 'package:godelivery_user/features/address/domain/models/address_model.dart';
-import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
-import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
-import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 class ZoneListWidget extends StatelessWidget {
   final bool isBottomSheet;
+  /// Optional callback when a zone is selected.
+  /// If provided, this is called instead of the default behavior.
+  /// If not provided, uses LocationController.changeZone() which
+  /// updates the active zone and refreshes all app data.
+  final Future<void> Function(ZoneListModel zone)? onZoneSelected;
 
-  const ZoneListWidget({super.key, this.isBottomSheet = false});
+  const ZoneListWidget({
+    super.key,
+    this.isBottomSheet = false,
+    this.onZoneSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +213,7 @@ class ZoneListWidget extends StatelessWidget {
       isFirst: isFirst,
       isLast: isLast,
       isBottomSheet: isBottomSheet,
+      onZoneSelected: onZoneSelected,
     );
   }
 }
@@ -220,6 +225,7 @@ class _ZoneListItemStateful extends StatefulWidget {
   final bool isFirst;
   final bool isLast;
   final bool isBottomSheet;
+  final Future<void> Function(ZoneListModel zone)? onZoneSelected;
 
   const _ZoneListItemStateful({
     required this.zone,
@@ -228,6 +234,7 @@ class _ZoneListItemStateful extends StatefulWidget {
     required this.isFirst,
     required this.isLast,
     required this.isBottomSheet,
+    this.onZoneSelected,
   });
 
   @override
@@ -255,44 +262,17 @@ class _ZoneListItemStatefulState extends State<_ZoneListItemStateful> {
         if (mounted) {
           setState(() => _isPressed = false);
 
-          widget.locationController.selectZone(widget.zone);
+          // Close bottom sheet if open
           if (widget.isBottomSheet) {
             Get.back();
           }
 
-          // Navigate after zone selection
-          Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
-
-          // Create an address from the zone's center point
-          if (widget.zone.formattedCoordinates != null && widget.zone.formattedCoordinates!.isNotEmpty) {
-            double totalLat = 0;
-            double totalLng = 0;
-            int count = widget.zone.formattedCoordinates!.length;
-
-            for (var coord in widget.zone.formattedCoordinates!) {
-              totalLat += coord.lat!;
-              totalLng += coord.lng!;
-            }
-
-            double centerLat = totalLat / count;
-            double centerLng = totalLng / count;
-
-            AddressModel address = AddressModel(
-              latitude: centerLat.toString(),
-              longitude: centerLng.toString(),
-              address: widget.zone.displayName ?? widget.zone.name ?? 'Selected Zone',
-              addressType: 'others',
-            );
-
-            if (!Get.find<AuthController>().isGuestLoggedIn() || !Get.find<AuthController>().isLoggedIn()) {
-              var response = await Get.find<AuthController>().guestLogin();
-              if (response.isSuccess) {
-                Get.find<ProfileController>().setForceFullyUserEmpty();
-                widget.locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
-              }
-            } else {
-              widget.locationController.saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context));
-            }
+          // Use callback if provided, otherwise use centralized changeZone
+          if (widget.onZoneSelected != null) {
+            await widget.onZoneSelected!(widget.zone);
+          } else {
+            // Default behavior: change zone and refresh data
+            await widget.locationController.changeZone(widget.zone);
           }
         }
       } : null,
