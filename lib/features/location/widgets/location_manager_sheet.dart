@@ -3,8 +3,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
-import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -534,33 +534,33 @@ class _LocationManagerSheetContent extends StatelessWidget {
     Get.back();
 
     Future.delayed(const Duration(milliseconds: 150), () {
-      // Use standard navigation instead of CustomFullSheet to avoid 3D transform
-      // issues that cause map tiles to render blurry
-      Get.toNamed(
-        RouteHelper.getPickMapRoute('home', false),
-        arguments: PickMapScreen(
-          fromSignUp: false,
-          fromSplash: false,
-          fromAddAddress: false,
-          canRoute: false,
-          route: 'home',
-          onZoneSelected: (zone) async {
-            // Close the map screen
-            Get.back();
+      if (Get.context != null) {
+        CustomFullSheet.show(
+          context: Get.context!,
+          child: PickMapScreen(
+            fromSignUp: false,
+            fromSplash: false,
+            fromAddAddress: false,
+            canRoute: false,
+            route: 'home',
+            onZoneSelected: (zone) async {
+              // Close the map sheet
+              Get.back();
 
-            // Change zone and refresh data (does NOT change delivery address)
-            await Get.find<LocationController>().changeZone(zone);
+              // Change zone and refresh data (does NOT change delivery address)
+              await Get.find<LocationController>().changeZone(zone);
 
-            // Show confirmation snackbar
-            Get.snackbar(
-              'zone_updated'.tr,
-              zone.displayName ?? zone.name ?? 'Zone ${zone.id}',
-              snackPosition: SnackPosition.BOTTOM,
-              duration: const Duration(seconds: 2),
-            );
-          },
-        ),
-      );
+              // Show confirmation snackbar
+              Get.snackbar(
+                'zone_updated'.tr,
+                zone.displayName ?? zone.name ?? 'Zone ${zone.id}',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 2),
+              );
+            },
+          ),
+        );
+      }
     });
   }
 }
