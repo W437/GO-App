@@ -216,28 +216,39 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             const BannerViewWidget(),
                             const BadWeatherWidget(),
                             const CategoriesCuisinesTabbedWidget(),
-                            const ItemCampaignWidget1(),
-                            const TodayTrendsViewWidget(),
+                            // HIDDEN: Section 5 - Item Campaign (see docs/hidden/home_screen_hidden_sections.md)
+                            // const ItemCampaignWidget1(),
+                            // HIDDEN: Section 6 - Today Trends (see docs/hidden/home_screen_hidden_sections.md)
+                            // const TodayTrendsViewWidget(),
                             const HighlightWidgetView(),
-                            _isLogin ? const OrderAgainViewWidget() : const SizedBox(),
-                            _configModel!.mostReviewedFoods == 1
-                                ? const BestReviewItemViewWidget(isPopular: false)
-                                : const SizedBox(),
-                            _configModel.dineInOrderOption! ? DineInWidget() : const SizedBox(),
-                            _configModel.popularRestaurant == 1
-                                ? const PopularRestaurantsViewWidget()
-                                : const SizedBox(),
-                            const ReferBannerViewWidget(),
-                            _isLogin
-                                ? const PopularRestaurantsViewWidget(isRecentlyViewed: true)
-                                : const SizedBox(),
-                            _configModel.popularFood == 1
-                                ? const PopularFoodNearbyViewWidget()
-                                : const SizedBox(),
-                            _configModel.newRestaurant == 1
-                                ? const NewOnGOViewWidget(isLatest: true)
-                                : const SizedBox(),
-                            const PromotionalBannerViewWidget(),
+                            // HIDDEN: Section 8 - Order Again (see docs/hidden/home_screen_hidden_sections.md)
+                            // _isLogin ? const OrderAgainViewWidget() : const SizedBox(),
+                            // HIDDEN: Section 9 - Best Reviewed Food (see docs/hidden/home_screen_hidden_sections.md)
+                            // _configModel!.mostReviewedFoods == 1
+                            //     ? const BestReviewItemViewWidget(isPopular: false)
+                            //     : const SizedBox(),
+                            // HIDDEN: Section 10 - Dine In (see docs/hidden/home_screen_hidden_sections.md)
+                            // _configModel.dineInOrderOption! ? DineInWidget() : const SizedBox(),
+                            // HIDDEN: Section 11 - Popular Restaurants (see docs/hidden/home_screen_hidden_sections.md)
+                            // _configModel.popularRestaurant == 1
+                            //     ? const PopularRestaurantsViewWidget()
+                            //     : const SizedBox(),
+                            // HIDDEN: Section 12 - Refer Banner (see docs/hidden/home_screen_hidden_sections.md)
+                            // const ReferBannerViewWidget(),
+                            // HIDDEN: Section 13 - Recently Viewed Restaurants (see docs/hidden/home_screen_hidden_sections.md)
+                            // _isLogin
+                            //     ? const PopularRestaurantsViewWidget(isRecentlyViewed: true)
+                            //     : const SizedBox(),
+                            // HIDDEN: Section 14 - Popular Food Nearby (see docs/hidden/home_screen_hidden_sections.md)
+                            // _configModel.popularFood == 1
+                            //     ? const PopularFoodNearbyViewWidget()
+                            //     : const SizedBox(),
+                            // HIDDEN: Section 15 - New on GO (see docs/hidden/home_screen_hidden_sections.md)
+                            // _configModel.newRestaurant == 1
+                            //     ? const NewOnGOViewWidget(isLatest: true)
+                            //     : const SizedBox(),
+                            // HIDDEN: Section 16 - Promotional Banner (see docs/hidden/home_screen_hidden_sections.md)
+                            // const PromotionalBannerViewWidget(),
                           ],
                         ),
                       ),

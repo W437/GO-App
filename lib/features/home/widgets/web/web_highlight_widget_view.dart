@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
-import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/rest_card_large.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/rest_card_large.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
 class DineInRestaurantShimmerWidget extends StatelessWidget {

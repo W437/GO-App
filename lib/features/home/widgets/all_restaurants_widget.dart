@@ -1,4 +1,4 @@
-import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/rest_card_large.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/common/widgets/adaptive/paginated_list_view_widget.dart';
 import 'package:flutter/material.dart';

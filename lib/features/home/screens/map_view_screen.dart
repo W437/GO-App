@@ -9,7 +9,7 @@ import 'package:godelivery_user/features/dine_in/controllers/dine_in_controller.
 import 'package:godelivery_user/features/home/widgets/google_map_widgets/restaurant_search_widget.dart';
 import 'package:godelivery_user/features/home/widgets/map_custom_info_window_widget.dart';
 import 'package:godelivery_user/features/home/widgets/google_map_widgets/restaurant_details_sheet_widget.dart';
-import 'package:godelivery_user/features/home/widgets/restaurants_view_widget.dart';
+import 'package:godelivery_user/features/home/widgets/rest_card_large.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
