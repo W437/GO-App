@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_tabbed_button.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/cuisine/controllers/cuisine_controller.dart';
@@ -47,55 +48,16 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
                 ),
               ),
               // Tab switcher
-              Container(
-                height: 35,
+              CustomTabbedButton(
+                items: [
+                  TabbedButtonItem(label: 'categories'.tr),
+                  TabbedButtonItem(label: 'cuisines'.tr),
+                ],
+                selectedIndex: _selectedTab,
+                onTabChanged: (index) => setState(() => _selectedTab = index),
+                style: TabbedButtonStyle.light,
                 width: 160,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                ),
-                child: Stack(
-                  children: [
-                    // Sliding indicator
-                    AnimatedAlign(
-                      alignment: _selectedTab == 0 ? Alignment.centerLeft : Alignment.centerRight,
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOutCubic,
-                      child: Container(
-                        width: 80,
-                        height: 35,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Tab Labels
-                    Row(
-                      children: [
-                        _buildTab(
-                          context: context,
-                          label: 'categories'.tr,
-                          isSelected: _selectedTab == 0,
-                          onTap: () => setState(() => _selectedTab = 0),
-                        ),
-                        _buildTab(
-                          context: context,
-                          label: 'cuisines'.tr,
-                          isSelected: _selectedTab == 1,
-                          onTap: () => setState(() => _selectedTab = 1),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                height: 35,
               ),
             ],
           ),
@@ -133,34 +95,6 @@ class _CategoriesCuisinesTabbedWidgetState extends State<CategoriesCuisinesTabbe
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTab({
-    required BuildContext context,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          alignment: Alignment.center,
-          child: AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
-            style: robotoBold.copyWith(
-              fontSize: Dimensions.fontSizeSmall,
-              color: isSelected
-                  ? Theme.of(context).textTheme.bodyLarge!.color
-                  : Theme.of(context).hintColor,
-            ),
-            child: Text(label),
-          ),
-        ),
-      ),
     );
   }
 

@@ -13,18 +13,15 @@ import 'package:godelivery_user/helper/navigation/app_navigator.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
 
 class SplashScreen extends StatefulWidget {
   final NotificationBodyModel? notificationBody;
   final DeepLinkBody? linkBody;
-  final bool muteVideo;
 
   const SplashScreen({
     super.key,
     required this.notificationBody,
     required this.linkBody,
-    this.muteVideo = false,
   });
 
   @override
@@ -34,45 +31,11 @@ class SplashScreen extends StatefulWidget {
 class SplashScreenState extends State<SplashScreen> {
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey();
   StreamSubscription<List<ConnectivityResult>>? _onConnectivityChanged;
-  late final VideoPlayerController _videoController;
-  late final Future<void> _videoInitializationFuture;
-  bool _videoCompleted = false;
   bool _hasTriggeredRoute = false;
-  bool _videoFailedToLoad = false;
-  bool _skipPressed = false;
-
-  // Video configuration - set to false to show logo only and navigate when data loads
-  static const bool _useVideo = false;
-
-  // Skip button configuration (only relevant when _useVideo is true)
-  static const int? skipButtonDelaySeconds = null; // Set to null to disable skip button
-  bool _skipButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
-
-    // Enable skip button after delay (if configured and using video)
-    if (_useVideo && skipButtonDelaySeconds != null) {
-      Future.delayed(Duration(seconds: skipButtonDelaySeconds!), () {
-        if (mounted) {
-          setState(() {
-            _skipButtonEnabled = true;
-          });
-        }
-      });
-    }
-
-    // Only initialize video if enabled, otherwise mark as complete immediately
-    if (_useVideo) {
-      _initializeVideo();
-    } else {
-      // No video - create dummy controller and mark as complete
-      _videoController = VideoPlayerController.asset('');
-      _videoInitializationFuture = Future.value();
-      _videoCompleted = true;
-      _videoFailedToLoad = true;
-    }
 
     bool firstTime = true;
     _onConnectivityChanged = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
@@ -105,104 +68,42 @@ class SplashScreenState extends State<SplashScreen> {
       Get.find<CartController>().getCartDataOnline();
     }
 
-    // Start loading config and all data in parallel with video
+    // Start loading config and all data
     _startDataLoading();
   }
 
-  /// Start data loading in parallel with video playback
+  /// Start data loading and navigate when complete
   Future<void> _startDataLoading() async {
-    print('🚀 [SPLASH] Starting parallel data loading...');
+    print('🚀 [SPLASH] Starting data loading...');
     final splashController = Get.find<SplashController>();
 
     // Load config first (required for everything else)
     final configSuccess = await splashController.loadConfig();
 
     if (!configSuccess) {
-      print('❌ [SPLASH] Config load failed during parallel load');
-      // If not using video, try routing immediately to show error
-      if (!_useVideo) {
-        _tryStartRouting();
-      }
-      return; // Will be handled in _route()
+      print('❌ [SPLASH] Config load failed');
+      _tryStartRouting();
+      return;
     }
 
-    // Load all data while video plays - BUT only if we are going to the dashboard
+    // Load all data - BUT only if we are going to the dashboard
     if (splashController.shouldLoadData) {
-      print('🚀 [SPLASH] Returning user detected - Starting parallel data load');
+      print('🚀 [SPLASH] Returning user detected - Starting data load');
       await splashController.loadAllData(useCache: false);
-      print('✅ [SPLASH] Parallel data loading complete');
+      print('✅ [SPLASH] Data loading complete');
     } else {
       print('🛑 [SPLASH] Fresh user detected - Skipping data load (will load in Dashboard)');
-      // We don't load data, but we don't mark it as failed either.
-      // The _route method will handle the navigation based on config only.
     }
 
-    // If not using video, navigate as soon as data loads
-    if (!_useVideo) {
-      print('🚀 [SPLASH] No video mode - navigating now that data is loaded');
-      _tryStartRouting();
-    }
+    // Navigate as soon as data loads
+    print('🚀 [SPLASH] Data loaded - navigating now');
+    _tryStartRouting();
   }
 
   @override
   void dispose() {
     _onConnectivityChanged?.cancel();
-    if (_useVideo) {
-      _videoController.removeListener(_videoListener);
-    }
-    _videoController.dispose();
     super.dispose();
-  }
-
-  void _initializeVideo() {
-    print('🎥 [SPLASH] Starting video initialization...');
-    _videoController = VideoPlayerController.asset('assets/video/hopa_intro.mp4');
-    _videoInitializationFuture = _videoController.initialize().then((_) async {
-      print('🎥 [SPLASH] Video initialized successfully');
-      print('🎥 [SPLASH] Video duration: ${_videoController.value.duration}');
-      print('🎥 [SPLASH] Video aspect ratio: ${_videoController.value.aspectRatio}');
-      print('🎥 [SPLASH] Video size: ${_videoController.value.size}');
-
-      if (!mounted) {
-        print('🎥 [SPLASH] Widget not mounted, skipping play');
-        return;
-      }
-
-      await _videoController.setLooping(false);
-      await _videoController.setVolume(widget.muteVideo ? 0.0 : 1.0);
-      print('🎥 [SPLASH] Starting video playback...');
-      await _videoController.play();
-      print('🎥 [SPLASH] Video play() called, isPlaying: ${_videoController.value.isPlaying}');
-      print('🎥 [SPLASH] Video muted: ${widget.muteVideo}, volume: ${_videoController.value.volume}');
-
-      _videoController.addListener(_videoListener);
-      if (mounted) {
-        setState(() {});
-      }
-    }).catchError((error) {
-      print('❌ [SPLASH] Video initialization failed: $error');
-      _videoFailedToLoad = true;
-      _handleVideoCompleted();
-    });
-  }
-
-  void _videoListener() {
-    if (!_videoController.value.isInitialized || _videoFailedToLoad) {
-      return;
-    }
-    final Duration duration = _videoController.value.duration;
-    final Duration position = _videoController.value.position;
-    if (!_videoCompleted && duration > Duration.zero && position >= duration - const Duration(milliseconds: 100)) {
-      _handleVideoCompleted();
-    }
-  }
-
-  void _handleVideoCompleted() {
-    if (_videoCompleted) return;
-    print('🎥 [SPLASH] Video completed');
-    _videoCompleted = true;
-    _videoController.removeListener(_videoListener);
-    _tryStartRouting();
   }
 
   void _handleConnectionRestored() {
@@ -210,38 +111,36 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   void _tryStartRouting() {
-    print('🎥 [SPLASH] _tryStartRouting called - hasTriggeredRoute: $_hasTriggeredRoute, videoCompleted: $_videoCompleted');
-    if (_hasTriggeredRoute || !_videoCompleted) return;
+    print('🚀 [SPLASH] _tryStartRouting called - hasTriggeredRoute: $_hasTriggeredRoute');
+    if (_hasTriggeredRoute) return;
 
     _hasTriggeredRoute = true;
 
     final hasConnection = Get.find<SplashController>().hasConnection;
-    print('🎥 [SPLASH] Connection status: $hasConnection');
+    print('🚀 [SPLASH] Connection status: $hasConnection');
 
     if (!hasConnection) {
-      print('🎥 [SPLASH] No connection - navigating to no internet screen');
+      print('🚀 [SPLASH] No connection - navigating to no internet screen');
       // Navigate to dedicated no internet screen
       Get.off(() => NoInternetScreen(
         child: SplashScreen(
           notificationBody: widget.notificationBody,
           linkBody: widget.linkBody,
-          muteVideo: widget.muteVideo,
         ),
       ));
       return;
     }
 
-    print('🎥 [SPLASH] Starting route to next screen');
+    print('🚀 [SPLASH] Starting route to next screen');
 
     // Add safety timeout - if routing takes more than 15 seconds, show no internet screen
     Future.delayed(const Duration(seconds: 15), () {
       if (Get.currentRoute == '/splash') {
-        print('🎥 [SPLASH] Routing timed out after 15 seconds - showing no internet screen');
+        print('🚀 [SPLASH] Routing timed out after 15 seconds - showing no internet screen');
         Get.off(() => NoInternetScreen(
           child: SplashScreen(
             notificationBody: widget.notificationBody,
             linkBody: widget.linkBody,
-            muteVideo: widget.muteVideo,
           ),
         ));
       }
@@ -255,9 +154,9 @@ class SplashScreenState extends State<SplashScreen> {
 
     final splashController = Get.find<SplashController>();
 
-    // Check if data loading already completed (from parallel load in initState)
+    // Check if data loading already completed
     if (splashController.dataLoadingComplete) {
-      print('✅ [SPLASH] Data already loaded in parallel - navigating immediately');
+      print('✅ [SPLASH] Data already loaded - navigating immediately');
       await AppNavigator.navigateOnAppLaunch(
         notification: widget.notificationBody,
         linkBody: widget.linkBody,
@@ -275,14 +174,13 @@ class SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    // Check if data loading failed during parallel load
+    // Check if data loading failed
     if (splashController.dataLoadingFailed) {
       print('❌ [SPLASH] Data loading failed - showing no internet screen');
       Get.off(() => NoInternetScreen(
         child: SplashScreen(
           notificationBody: widget.notificationBody,
           linkBody: widget.linkBody,
-          muteVideo: widget.muteVideo,
         ),
       ));
       return;
@@ -291,7 +189,7 @@ class SplashScreenState extends State<SplashScreen> {
     // Data still loading - wait for it to complete
     print('⏳ [SPLASH] Data still loading, waiting for completion...');
 
-    // Wait for data loading to complete (should be quick since it started in parallel)
+    // Wait for data loading to complete
     int attempts = 0;
     while (!splashController.dataLoadingComplete && !splashController.dataLoadingFailed && attempts < 100) {
       await Future.delayed(const Duration(milliseconds: 100));
@@ -311,7 +209,6 @@ class SplashScreenState extends State<SplashScreen> {
         child: SplashScreen(
           notificationBody: widget.notificationBody,
           linkBody: widget.linkBody,
-          muteVideo: widget.muteVideo,
         ),
       ));
     }
@@ -323,9 +220,9 @@ class SplashScreenState extends State<SplashScreen> {
       // Fire emoji - right side
       Center(
         child: Transform.translate(
-          offset: const Offset(120, -35), // x: 110, y: -35
+          offset: const Offset(120, -35),
           child: Transform.rotate(
-            angle: 15 * (pi / 180), // 15 degrees to the right
+            angle: 15 * (pi / 180),
             child: const _FloatingEmoji(
               emoji: AnimatedEmojis.fire,
               size: 58,
@@ -334,7 +231,7 @@ class SplashScreenState extends State<SplashScreen> {
           ),
         ),
       ),
-      // Heart eyes emoji - left side (party position)
+      // Heart eyes emoji - left side
       Center(
         child: Transform.translate(
           offset: const Offset(-100, 25),
@@ -353,169 +250,97 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('🎥 [SPLASH] Building splash screen - skipPressed: $_skipPressed');
+    print('🚀 [SPLASH] Building splash screen');
     return Scaffold(
       backgroundColor: Colors.white,
       key: _globalKey,
-      body: _skipPressed
-        ? const Center(child: CircularProgressIndicator())  // Show loading when skipped
-        : GetBuilder<SplashController>(builder: (splashController) {
-            print('🎥 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
-
-            // Always show video player - no overlay during video playback
-            // No internet check will happen after video completes in _tryStartRouting()
-            return _buildVideoPlayer();
-          }),
+      body: GetBuilder<SplashController>(builder: (splashController) {
+        print('🚀 [SPLASH] GetBuilder rebuilt - hasConnection: ${splashController.hasConnection}');
+        return _buildSplashContent();
+      }),
     );
   }
 
-  Widget _buildVideoPlayer() {
-    return FutureBuilder<void>(
-      future: _videoInitializationFuture,
-      builder: (context, snapshot) {
-        print('🎥 [SPLASH] FutureBuilder state: ${snapshot.connectionState}');
+  Widget _buildSplashContent() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // White background
+        Container(
+          color: Colors.white,
+        ),
 
-        final bool isVideoReady = snapshot.connectionState == ConnectionState.done &&
-                                   !_videoFailedToLoad &&
-                                   !snapshot.hasError;
+        // Floating animated emojis
+        ..._buildFloatingEmojis(context),
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            // White background
-            Container(
-              color: Colors.white,
-            ),
-
-            // Floating animated emojis
-            ..._buildFloatingEmojis(context),
-
-            // Logo with liquid fill effect based on loading progress
-            GetBuilder<SplashController>(
-              builder: (splashController) {
-                return TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOut,
-                  tween: Tween<double>(
-                    begin: 0,
-                    end: splashController.loadingProgress / 100,
-                  ),
-                  builder: (context, fillProgress, child) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Logo with liquid fill effect
-                          SizedBox(
-                            width: 200,
-                            child: Stack(
-                              children: [
-                                // Background: Muted/gray logo
-                                ColorFiltered(
-                                  colorFilter: ColorFilter.mode(
-                                    Colors.grey.shade300,
-                                    BlendMode.srcIn,
-                                  ),
-                                  child: Image.asset(
-                                    'assets/image/hopa_white_logo.png',
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                                // Foreground: Blue logo clipped from bottom to top
-                                ClipRect(
-                                  clipper: _LiquidFillClipper(fillProgress),
-                                  child: ColorFiltered(
-                                    colorFilter: ColorFilter.mode(
-                                      Theme.of(context).primaryColor,
-                                      BlendMode.srcIn,
-                                    ),
-                                    child: Image.asset(
-                                      'assets/image/hopa_white_logo.png',
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          // Loading message
-                          Text(
-                            splashController.loadingMessage,
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-
-            // Video player kept in logic but not displayed (for future use)
-            // Uncomment the block below to re-enable video:
-            /*
-            if (isVideoReady)
-              Container(
-                color: Colors.white,
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: _videoController.value.aspectRatio,
-                    child: VideoPlayer(_videoController),
-                  ),
-                ),
+        // Logo with liquid fill effect based on loading progress
+        GetBuilder<SplashController>(
+          builder: (splashController) {
+            return TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              tween: Tween<double>(
+                begin: 0,
+                end: splashController.loadingProgress / 100,
               ),
-            */
-
-            // Skip button at the bottom (only if enabled)
-            if (skipButtonDelaySeconds != null)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                    child: Center(
-                      child: AnimatedOpacity(
-                        opacity: _skipButtonEnabled ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 500),
-                        child: TextButton(
-                          onPressed: _skipButtonEnabled && !_hasTriggeredRoute ? () {
-                            print('🎥 [SPLASH] Skip button pressed - hiding splash immediately');
-                            setState(() {
-                              _skipPressed = true;
-                              _hasTriggeredRoute = true;
-                              _videoCompleted = true;
-                            });
-                            // Stop video
-                            _videoController.pause();
-                            // Navigate
-                            _route();
-                          } : null,
-                          child: Text(
-                            'skip'.tr,
-                            style: TextStyle(
-                              color: _skipButtonEnabled ? Colors.grey.shade400 : Colors.transparent,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+              builder: (context, fillProgress, child) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Logo with liquid fill effect
+                      SizedBox(
+                        width: 200,
+                        child: Stack(
+                          children: [
+                            // Background: Muted/gray logo
+                            ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                Colors.grey.shade300,
+                                BlendMode.srcIn,
+                              ),
+                              child: Image.asset(
+                                'assets/image/hopa_white_logo.png',
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                          ),
+                            // Foreground: Blue logo clipped from bottom to top
+                            ClipRect(
+                              clipper: _LiquidFillClipper(fillProgress),
+                              child: ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  Theme.of(context).primaryColor,
+                                  BlendMode.srcIn,
+                                ),
+                                child: Image.asset(
+                                  'assets/image/hopa_white_logo.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      // Loading message
+                      Text(
+                        splashController.loadingMessage,
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ),
-              ),
-          ],
-        );
-      },
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 }

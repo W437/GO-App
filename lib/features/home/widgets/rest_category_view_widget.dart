@@ -52,6 +52,7 @@ class RestCategoryViewWidget extends StatelessWidget {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
             itemCount: categories.length,
             separatorBuilder: (context, index) => const SizedBox(
               height: Dimensions.paddingSizeExtraLarge,

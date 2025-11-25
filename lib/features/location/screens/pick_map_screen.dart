@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_tabbed_button.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
@@ -780,63 +781,27 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           child: Center(
                             child: IgnorePointer(
                               ignoring: Environment.useMapbox && !_mapAnimationComplete,
-                              child: Container(
-                                height: 35,
+                              child: CustomTabbedButton(
+                                items: const [
+                                  TabbedButtonItem(label: 'Zone', icon: Icons.map),
+                                  TabbedButtonItem(label: 'Address', icon: Icons.location_on),
+                                ],
+                                selectedIndex: _currentMode == MapMode.zoneSelection ? 0 : 1,
+                                onTabChanged: (index) {
+                                  setState(() {
+                                    _currentMode = index == 0 ? MapMode.zoneSelection : MapMode.addressSelection;
+                                    if (_currentMode == MapMode.zoneSelection) {
+                                      // Reset zone selection
+                                      _currentZoneId = null;
+                                      _selectedZoneId = null;
+                                      _selectedZoneName = null;
+                                      _selectedZoneCenter = null;
+                                    }
+                                  });
+                                },
+                                style: TabbedButtonStyle.dark,
                                 width: 160,
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[800]!.withOpacity(0.9),
-                                  borderRadius: BorderRadius.circular(100),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Stack(
-                                  children: [
-                                    // Sliding indicator
-                                    AnimatedAlign(
-                                      alignment: _currentMode == MapMode.zoneSelection
-                                          ? Alignment.centerLeft
-                                          : Alignment.centerRight,
-                                      duration: const Duration(milliseconds: 250),
-                                      curve: Curves.easeOutCubic,
-                                      child: Container(
-                                        width: 77,
-                                        height: 29,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF00BCD4),
-                                          borderRadius: BorderRadius.circular(100),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0xFF00BCD4).withOpacity(0.3),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    // Tab Labels
-                                    Row(
-                                      children: [
-                                        _buildModeButton(
-                                          mode: MapMode.zoneSelection,
-                                          icon: Icons.map,
-                                          label: 'Zone',
-                                        ),
-                                        _buildModeButton(
-                                          mode: MapMode.addressSelection,
-                                          icon: Icons.location_on,
-                                          label: 'Address',
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                height: 35,
                               ),
                             ),
                           ),
@@ -1259,52 +1224,4 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildModeButton({
-    required MapMode mode,
-    required IconData icon,
-    required String label,
-  }) {
-    final bool isSelected = _currentMode == mode;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _currentMode = mode;
-            if (mode == MapMode.zoneSelection) {
-              // Reset zone selection
-              _currentZoneId = null;
-              _selectedZoneId = null;
-              _selectedZoneName = null;
-              _selectedZoneCenter = null;
-            }
-          });
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 14,
-                color: isSelected ? Colors.white : Colors.white60,
-              ),
-              const SizedBox(width: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                style: robotoMedium.copyWith(
-                  fontSize: Dimensions.fontSizeSmall,
-                  color: isSelected ? Colors.white : Colors.white60,
-                ),
-                child: Text(label),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

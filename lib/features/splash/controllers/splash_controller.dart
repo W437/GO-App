@@ -118,18 +118,6 @@ class SplashController extends GetxController implements GetxService {
         _configModel = config;
         _hasConnection = true;
 
-        // 🔍 DEBUG: Print loaded config
-        print('═══════════════════════════════════════════════════════════');
-        print('🔍 [CONFIG DEBUG] Configuration loaded successfully!');
-        print('   Business Name: ${_configModel!.businessName ?? "N/A"}');
-        if(_configModel!.centralizeLoginSetup != null) {
-          print('📱 [CONFIG DEBUG] Centralize Login Setup:');
-          print('   Manual Login: ${_configModel!.centralizeLoginSetup!.manualLoginStatus}');
-          print('   OTP Login: ${_configModel!.centralizeLoginSetup!.otpLoginStatus}');
-          print('   Social Login: ${_configModel!.centralizeLoginSetup!.socialLoginStatus}');
-        }
-        print('═══════════════════════════════════════════════════════════');
-
         update();
         _onRemoveLoader();
         return true;
