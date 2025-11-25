@@ -107,13 +107,12 @@ class _BannerViewWidgetState extends State<BannerViewWidget> {
 
       return (homeController.bannerImageList != null && homeController.bannerImageList!.isEmpty) ? const SizedBox() : Container(
         width: MediaQuery.of(context).size.width,
-        padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
         clipBehavior: Clip.none, // Allow shadow to overflow
         child: homeController.bannerImageList != null ? Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              padding: const EdgeInsets.only(bottom: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,

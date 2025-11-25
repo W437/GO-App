@@ -47,13 +47,39 @@ class RestaurantsViewWidget extends StatelessWidget {
           return RestaurantView(restaurant: restaurants![index]!);
         },
       ) : Center(child: Padding(
-        padding: const EdgeInsets.only(top: Dimensions.paddingSizeOverLarge),
+        padding: const EdgeInsets.symmetric(vertical: 60, horizontal: Dimensions.paddingSizeDefault),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 110),
-            const CustomAssetImageWidget(Images.emptyRestaurant, height: 80, width: 80),
-            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-            Text('there_is_no_restaurant'.tr, style: robotoMedium.copyWith(color: Theme.of(context).disabledColor)),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).hintColor.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.restaurant_menu_rounded,
+                size: 56,
+                color: Theme.of(context).hintColor.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'no_restaurants_found'.tr,
+              style: robotoMedium.copyWith(
+                fontSize: Dimensions.fontSizeLarge,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'try_different_location'.tr,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
+                color: Theme.of(context).hintColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       )) : GridView.builder(

@@ -7,12 +7,11 @@ import 'package:godelivery_user/features/home/controllers/advertisement_controll
 import 'package:godelivery_user/features/home/widgets/cashback_dialog_widget.dart';
 import 'package:godelivery_user/features/home/widgets/cashback_logo_widget.dart';
 import 'package:godelivery_user/features/home/widgets/dine_in_widget.dart';
-import 'package:godelivery_user/features/home/widgets/highlight_widget_view.dart';
+import 'package:godelivery_user/features/home/widgets/sponsored_restaurants_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/refer_bottom_sheet_widget.dart';
 import 'package:godelivery_user/features/product/controllers/campaign_controller.dart';
 import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/home/screens/web_home_screen.dart';
-import 'package:godelivery_user/features/home/widgets/all_restaurant_filter_widget.dart';
 import 'package:godelivery_user/features/home/widgets/all_restaurants_widget.dart';
 import 'package:godelivery_user/features/home/widgets/bad_weather_widget.dart';
 import 'package:godelivery_user/features/home/widgets/banner_view_widget.dart';
@@ -212,15 +211,19 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
                             const StoryStripWidget(),
+                            const SizedBox(height: Dimensions.paddingSizeDefault),
                             const BannerViewWidget(),
+                            const SizedBox(height: Dimensions.paddingSizeLarge),
                             const BadWeatherWidget(),
                             const CategoriesCuisinesTabbedWidget(),
+                            const SizedBox(height: Dimensions.paddingSizeLarge),
                             // HIDDEN: Section 5 - Item Campaign (see docs/hidden/home_screen_hidden_sections.md)
                             // const ItemCampaignWidget1(),
                             // HIDDEN: Section 6 - Today Trends (see docs/hidden/home_screen_hidden_sections.md)
                             // const TodayTrendsViewWidget(),
-                            const HighlightWidgetView(),
+                            const SponsoredRestaurantsViewWidget(),
                             // HIDDEN: Section 8 - Order Again (see docs/hidden/home_screen_hidden_sections.md)
                             // _isLogin ? const OrderAgainViewWidget() : const SizedBox(),
                             // HIDDEN: Section 9 - Best Reviewed Food (see docs/hidden/home_screen_hidden_sections.md)
@@ -252,14 +255,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           ],
                         ),
                       ),
-                    ),
-                  ),
-
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: SliverDelegate(
-                      height: 90,
-                      child: const AllRestaurantFilterWidget(),
                     ),
                   ),
 

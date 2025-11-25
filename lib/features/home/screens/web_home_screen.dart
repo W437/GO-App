@@ -1,5 +1,4 @@
 import 'package:godelivery_user/features/home/controllers/home_controller.dart';
-import 'package:godelivery_user/features/home/widgets/all_restaurant_filter_widget.dart';
 import 'package:godelivery_user/features/home/widgets/all_restaurants_widget.dart';
 import 'package:godelivery_user/features/home/widgets/bad_weather_widget.dart';
 import 'package:godelivery_user/features/home/widgets/best_review_item_view_widget.dart';
@@ -99,15 +98,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               ]),
             ))
         ),
-
-
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: SliverDelegate(
-            child: const AllRestaurantFilterWidget(),
-          ),
-        ),
-
 
 
         SliverToBoxAdapter(child: Center(child: Column(

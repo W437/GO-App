@@ -239,6 +239,11 @@ class RestaurantController extends GetxController implements GetxService {
       update();
     } else {
       print('❌ [RESTAURANT CONTROLLER] Restaurant model is NULL!');
+      // Set empty model to stop shimmer and show empty state
+      if (offset == 0) {
+        _restaurantModel = RestaurantModel(totalSize: 0, offset: 0, restaurants: []);
+      }
+      update();
     }
   }
 

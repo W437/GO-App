@@ -21,21 +21,25 @@ import 'package:godelivery_user/util/styles.dart';
 import 'package:video_player/video_player.dart';
 import 'package:animated_emoji/animated_emoji.dart';
 
-class HighlightWidgetView extends StatefulWidget {
-  const HighlightWidgetView({super.key});
+class SponsoredRestaurantsViewWidget extends StatefulWidget {
+  const SponsoredRestaurantsViewWidget({super.key});
 
   @override
-  State<HighlightWidgetView> createState() => _HighlightWidgetViewState();
+  State<SponsoredRestaurantsViewWidget> createState() => _SponsoredRestaurantsViewWidgetState();
 }
 
-class _HighlightWidgetViewState extends State<HighlightWidgetView> {
+class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsViewWidget> {
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdvertisementController>(builder: (advertisementController) {
-      return advertisementController.advertisementList != null && advertisementController.advertisementList!.isNotEmpty ? Container(
-        margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeLarge),
-        child: Column(
+      // Show shimmer while loading
+      if (advertisementController.advertisementList == null) {
+        return const AdvertisementShimmer();
+      }
+
+      // Always show the section with header
+      return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Section Header
@@ -74,44 +78,90 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
             ),
             const SizedBox(height: Dimensions.paddingSizeDefault),
 
-            // Restaurant Cards - Horizontal List
+            // Restaurant Cards - Horizontal List or Empty State
             GetBuilder<RestaurantController>(
               builder: (restaurantController) {
-                // Get restaurants from advertisements
-                if (advertisementController.advertisementList == null) {
-                  return const SizedBox.shrink();
-                }
-
                 List<Restaurant> restaurants = advertisementController.advertisementList!
                     .where((ad) => ad.restaurant != null && ad.addType != 'video_promotion')
                     .map((ad) => ad.restaurant!)
                     .toList();
 
-                return restaurants.isNotEmpty
-                  ? SizedBox(
-                      height: 220,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                        itemCount: restaurants.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            width: 160,
-                            margin: EdgeInsets.only(
-                              right: index < restaurants.length - 1 ? Dimensions.paddingSizeDefault : 0,
-                            ),
-                            child: SponsoredRestaurantCard(restaurant: restaurants[index]),
-                          );
-                        },
+                // Show empty state when no highlights
+                if (restaurants.isEmpty) {
+                  return Container(
+                    height: 180,
+                    margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).hintColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Theme.of(context).hintColor.withValues(alpha: 0.1),
                       ),
-                    )
-                  : const SizedBox();
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).hintColor.withValues(alpha: 0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.auto_awesome_rounded,
+                              size: 32,
+                              color: Theme.of(context).hintColor.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'no_highlights_available'.tr,
+                            style: robotoMedium.copyWith(
+                              fontSize: Dimensions.fontSizeDefault,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'check_back_later'.tr,
+                            style: robotoRegular.copyWith(
+                              fontSize: Dimensions.fontSizeSmall,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return SizedBox(
+                  height: 240, // Extra height for bottom shadow
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.only(
+                      left: Dimensions.paddingSizeDefault,
+                      right: Dimensions.paddingSizeDefault,
+                      bottom: 20, // Padding for shadow
+                    ),
+                    itemCount: restaurants.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        width: 160,
+                        margin: EdgeInsets.only(
+                          right: index < restaurants.length - 1 ? Dimensions.paddingSizeDefault : 0,
+                        ),
+                        child: SponsoredRestaurantCard(restaurant: restaurants[index]),
+                      );
+                    },
+                  ),
+                );
               },
             ),
           ],
-        ),
-      ) : advertisementController.advertisementList == null ? const AdvertisementShimmer() : const SizedBox();
+      );
     });
   }
 }
