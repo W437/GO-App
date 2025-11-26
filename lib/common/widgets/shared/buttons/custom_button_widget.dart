@@ -21,6 +21,7 @@ class CustomButtonWidget extends StatefulWidget {
   final Color? iconColor;
   final double? iconSize;
   final bool isLoading;
+  final bool autoLoading; // Automatically manage loading state for async onPressed
   final bool isBold;
   final bool isCircular;
   final Widget? child;
@@ -43,6 +44,7 @@ class CustomButtonWidget extends StatefulWidget {
     this.iconColor,
     this.iconSize,
     this.isLoading = false,
+    this.autoLoading = true,
     this.isBold = true,
     this.isCircular = false,
     this.child,
@@ -59,6 +61,9 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
   late Animation<double> _pressAnimation;
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
+  bool _isInternalLoading = false;
+
+  bool get _isLoading => widget.isLoading || _isInternalLoading;
 
   @override
   void initState() {
@@ -105,6 +110,31 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
     super.dispose();
   }
 
+  Future<void> _handleTap() async {
+    if (_isLoading || widget.onPressed == null) return;
+
+    // Start bounce animation
+    if (!_bounceController.isAnimating) {
+      _bounceController.forward(from: 0.0);
+    }
+
+    final result = widget.onPressed!.call();
+
+    // If onPressed returns a Future and autoLoading is enabled, manage loading state
+    if (result is Future && widget.autoLoading) {
+      if (mounted) {
+        setState(() => _isInternalLoading = true);
+      }
+      try {
+        await result;
+      } finally {
+        if (mounted) {
+          setState(() => _isInternalLoading = false);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // For circular buttons (icon-only)
@@ -121,16 +151,10 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
             );
           },
           child: GestureDetector(
-            onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => _pressController.forward() : null,
+            onTapDown: widget.onPressed != null && !_isLoading ? (_) => _pressController.forward() : null,
             onTapUp: (_) => _pressController.reverse(),
             onTapCancel: () => _pressController.reverse(),
-            onTap: widget.isLoading ? null : () {
-              // Only start bounce if not already animating (prevent double-click reset)
-              if (!_bounceController.isAnimating) {
-                _bounceController.forward(from: 0.0);
-              }
-              widget.onPressed?.call();
-            },
+            onTap: _isLoading ? null : _handleTap,
             child: Container(
               width: size,
               height: size,
@@ -144,13 +168,24 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
                 border: widget.border,
               ),
               child: Center(
-                child: widget.child ?? (widget.icon != null
-                  ? Icon(
-                      widget.icon,
-                      color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
-                      size: widget.iconSize ?? 24,
+                child: _isLoading
+                  ? SizedBox(
+                      width: (widget.iconSize ?? 24) * 0.8,
+                      height: (widget.iconSize ?? 24) * 0.8,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                        ),
+                      ),
                     )
-                  : null),
+                  : widget.child ?? (widget.icon != null
+                    ? Icon(
+                        widget.icon,
+                        color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                        size: widget.iconSize ?? 24,
+                      )
+                    : null),
               ),
             ),
           ),
@@ -160,15 +195,10 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
 
     // For regular buttons
     Widget buttonCore = GestureDetector(
-      onTapDown: widget.onPressed != null && !widget.isLoading ? (_) => _pressController.forward() : null,
+      onTapDown: widget.onPressed != null && !_isLoading ? (_) => _pressController.forward() : null,
       onTapUp: (_) => _pressController.reverse(),
       onTapCancel: () => _pressController.reverse(),
-      onTap: widget.isLoading ? null : () {
-        if (!_bounceController.isAnimating) {
-          _bounceController.forward(from: 0.0);
-        }
-        widget.onPressed?.call();
-      },
+      onTap: _isLoading ? null : _handleTap,
       child: Container(
         width: widget.expand ? double.infinity : widget.width,
         decoration: BoxDecoration(
@@ -182,7 +212,7 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
           minHeight: widget.height ?? 56,
         ),
         child: widget.child ?? Center(
-          child: widget.isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+          child: _isLoading ? Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
             const SizedBox(
               height: 15, width: 15,
               child: CircularProgressIndicator(

@@ -346,6 +346,11 @@ class LocationController extends GetxController implements GetxService {
     _pickAddress = _address;
   }
 
+  void clearPickAddress() {
+    _pickAddress = '';
+    update();
+  }
+
   void setMapController(GoogleMapController mapController) {
     _mapController = mapController;
   }

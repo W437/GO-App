@@ -11,7 +11,6 @@ import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/verification/controllers/verification_controller.dart';
 import 'package:godelivery_user/features/verification/domein/model/verification_data_model.dart';
 import 'package:godelivery_user/features/verification/screens/new_pass_screen.dart';
-import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -91,143 +90,158 @@ class _InlineVerificationStepState extends State<InlineVerificationStep> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<VerificationController>(builder: (verificationController) {
-      return SingleChildScrollView(
-        controller: _scrollController,
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Back button row
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                onPressed: widget.onBack,
-                icon: const Icon(Icons.arrow_back),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Illustration
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+            ),
+            child: Center(
+              child: Icon(
+                _email != null ? Icons.mail_outline_rounded : Icons.message_rounded,
+                size: 70,
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
               ),
             ),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-            // Illustration area
-            Container(
-              width: context.width > 700 ? 350 : context.width * 0.85,
-              height: context.width > 700 ? 280 : 220,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                    Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+          Text(
+            'check_your_messages'.tr,
+            style: robotoBold.copyWith(
+              fontSize: Dimensions.fontSizeOverLarge,
+              color: Theme.of(context).textTheme.bodyLarge!.color,
+            ),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+            child: Text(
+              _email != null
+                ? 'verification_email_message'.tr
+                : 'verification_phone_message'.tr,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
+                color: Theme.of(context).disabledColor,
               ),
-              child: Center(
-                child: Column(
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeExtraLarge * 1.5),
+
+          // Pin code field
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+            child: PinCodeTextField(
+              length: 6,
+              appContext: context,
+              keyboardType: TextInputType.number,
+              animationType: AnimationType.fade,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              pinTheme: PinTheme(
+                shape: PinCodeFieldShape.box,
+                fieldHeight: 56,
+                fieldWidth: 46,
+                borderWidth: 1.5,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                selectedColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                selectedFillColor: Theme.of(context).cardColor,
+                activeFillColor: Theme.of(context).cardColor,
+                inactiveFillColor: Theme.of(context).cardColor,
+              ),
+              cursorColor: Theme.of(context).primaryColor,
+              animationDuration: const Duration(milliseconds: 150),
+              enableActiveFill: true,
+              textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
+              onChanged: (value) => verificationController.updateVerificationCode(value, canUpdate: false),
+              beforeTextPaste: (text) => true,
+            ),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeExtraLarge * 2),
+
+          // Bottom action section
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Dimensions.paddingSizeDefault,
+              vertical: Dimensions.paddingSizeDefault,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomButtonWidget(
+                  buttonText: 'verify'.tr,
+                  isLoading: verificationController.isLoading,
+                  onPressed: verificationController.verificationCode.length < 6
+                      ? null
+                      : () => _verifyOtp(context, verificationController),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.mail_outline_rounded,
-                      size: context.width > 700 ? 80 : 60,
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                    Text(
+                      'didnt_receive_code'.tr,
+                      style: robotoRegular.copyWith(
+                        color: Theme.of(context).disabledColor,
+                        fontSize: Dimensions.fontSizeSmall,
+                      ),
                     ),
-                    const SizedBox(height: 20),
-                    Icon(
-                      Icons.security_rounded,
-                      size: context.width > 700 ? 40 : 30,
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                    const SizedBox(width: 4),
+                    TextButton(
+                      onPressed: _seconds == 0
+                          ? () async {
+                              _startTimer();
+                              await _resendOtp();
+                            }
+                          : null,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        _seconds == 0
+                            ? 'resend_code'.tr
+                            : '0:${_seconds.toString().padLeft(2, '0')}',
+                        style: robotoMedium.copyWith(
+                          color: _seconds == 0
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).disabledColor,
+                          fontSize: Dimensions.fontSizeSmall,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 40),
-
-            Text(
-              'Check your messages',
-              style: robotoBold.copyWith(
-                fontSize: Dimensions.fontSizeOverLarge + 2,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
-
-            SizedBox(
-              width: context.width > 700 ? 400 : context.width * 0.8,
-              child: Text(
-                _email != null
-                  ? 'We\'ve sent a 6-digit code to your email. Please enter it below.'
-                  : 'We\'ve sent a 6-digit code to your phone. Please enter it below.',
-                style: robotoRegular.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
-                  color: Theme.of(context).disabledColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-
-            Container(
-              constraints: BoxConstraints(
-                maxWidth: context.width > 700 ? 450 : context.width * 0.95,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-              child: PinCodeTextField(
-                length: 6,
-                appContext: context,
-                keyboardType: TextInputType.number,
-                animationType: AnimationType.fade,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                pinTheme: PinTheme(
-                  shape: PinCodeFieldShape.box,
-                  fieldHeight: context.width > 400 ? 60 : 48,
-                  fieldWidth: context.width > 400 ? 50 : 38,
-                  borderWidth: 1.5,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                  selectedColor: Theme.of(context).primaryColor,
-                  activeColor: Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                  inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.4),
-                  selectedFillColor: Theme.of(context).cardColor,
-                  activeFillColor: Theme.of(context).cardColor,
-                  inactiveFillColor: Theme.of(context).cardColor,
-                ),
-                cursorColor: Theme.of(context).primaryColor,
-                animationDuration: const Duration(milliseconds: 150),
-                enableActiveFill: true,
-                textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
-                onChanged: (value) => verificationController.updateVerificationCode(value, canUpdate: false),
-                beforeTextPaste: (text) => true,
-              ),
-            ),
-
-            const SizedBox(height: Dimensions.paddingSizeDefault),
-
-            CustomButtonWidget(
-              buttonText: 'Verify',
-              isLoading: verificationController.isLoading,
-              onPressed: () => _verifyOtp(context, verificationController),
-            ),
-
-            const SizedBox(height: Dimensions.paddingSizeSmall),
-
-            TextButton(
-              onPressed: _seconds == 0
-                  ? () async {
-                      _startTimer();
-                      await _resendOtp();
-                    }
-                  : null,
-              child: Text(
-                _seconds == 0
-                    ? 'Resend code'
-                    : '${'resend_code_in'.tr} 0:${_seconds.toString().padLeft(2, '0')}',
-                style: robotoRegular.copyWith(
-                  color: _seconds == 0 ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     });
   }
@@ -298,7 +312,6 @@ class VerificationScreenState extends State<VerificationScreen> {
   String? _email;
   Timer? _timer;
   int _seconds = 0;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -327,7 +340,6 @@ class VerificationScreenState extends State<VerificationScreen> {
   @override
   void dispose() {
     super.dispose();
-
     _timer?.cancel();
   }
 
@@ -336,152 +348,145 @@ class VerificationScreenState extends State<VerificationScreen> {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
       appBar: isDesktop ? null : UnifiedHeaderWidget(
-        title: _email != null ? 'Email Verification' : 'Phone Verification',
+        title: _email != null ? 'email_verification'.tr : 'phone_verification'.tr,
         showBackButton: true,
         centerTitle: true,
         showBorder: true,
       ),
       backgroundColor: isDesktop ? Colors.transparent : null,
-      body: SafeArea(child: Center(child: SingleChildScrollView(
-        controller: _scrollController,
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-        child: Center(child: Container(
-          width: context.width > 700 ? 500 : context.width,
-          padding: context.width > 700 ? const EdgeInsets.all(Dimensions.paddingSizeDefault) : null,
-          decoration: context.width > 700 ? BoxDecoration(
-            color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-          ) : null,
-          child: GetBuilder<VerificationController>(builder: (verificationController) {
-            return Column(children: [
+      body: GetBuilder<VerificationController>(builder: (verificationController) {
+        return Column(
+          children: [
+            // Main content area - centered in viewport
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isDesktop)
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(
+                              onPressed: () => Get.back(),
+                              icon: const Icon(Icons.clear),
+                            ),
+                          ),
 
-              isDesktop ? Align(
-                alignment: Alignment.topRight,
-                child: IconButton(onPressed: ()=> Get.back(), icon: const Icon(Icons.clear)),
-              ) : const SizedBox(),
+                        // Illustration
+                        Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                                Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              _email != null ? Icons.mail_outline_rounded : Icons.message_rounded,
+                              size: 70,
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-              isDesktop ? Padding(
-                padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
-                child: Text(
-                  'otp_verification'.tr, style: robotoRegular,
-                ),
-              ) : const SizedBox(),
+                        Text(
+                          'check_your_messages'.tr,
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeOverLarge,
+                            color: Theme.of(context).textTheme.bodyLarge!.color,
+                          ),
+                        ),
+                        const SizedBox(height: Dimensions.paddingSizeSmall),
 
-              // Larger illustration with background container - placeholder
-              Container(
-                width: context.width > 700 ? 350 : context.width * 0.85,
-                height: context.width > 700 ? 280 : 220,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                      Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.mail_outline_rounded,
-                        size: context.width > 700 ? 80 : 60,
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.6),
-                      ),
-                      const SizedBox(height: 20),
-                      Icon(
-                        Icons.security_rounded,
-                        size: context.width > 700 ? 40 : 30,
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+                          child: Text(
+                            _email != null
+                              ? 'verification_email_message'.tr
+                              : 'verification_phone_message'.tr,
+                            style: robotoRegular.copyWith(
+                              fontSize: Dimensions.fontSizeDefault,
+                              color: Theme.of(context).disabledColor,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: Dimensions.paddingSizeExtraLarge * 1.5),
+
+                        // Pin code field
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                          child: PinCodeTextField(
+                            length: 6,
+                            appContext: context,
+                            keyboardType: TextInputType.number,
+                            animationType: AnimationType.fade,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              fieldHeight: 56,
+                              fieldWidth: 46,
+                              borderWidth: 1.5,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              selectedColor: Theme.of(context).primaryColor,
+                              activeColor: Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                              inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                              selectedFillColor: Theme.of(context).cardColor,
+                              activeFillColor: Theme.of(context).cardColor,
+                              inactiveFillColor: Theme.of(context).cardColor,
+                            ),
+                            cursorColor: Theme.of(context).primaryColor,
+                            animationDuration: const Duration(milliseconds: 150),
+                            enableActiveFill: true,
+                            textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
+                            onChanged: verificationController.updateVerificationCode,
+                            beforeTextPaste: (text) => true,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 50),
+            ),
 
-              // Bold heading
-              Text(
-                'Check your messages',
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeOverLarge + 4,
-                  color: Theme.of(context).textTheme.bodyLarge!.color,
+            // Bottom action section
+            Container(
+              padding: EdgeInsets.fromLTRB(
+                Dimensions.paddingSizeDefault,
+                Dimensions.paddingSizeDefault,
+                Dimensions.paddingSizeDefault,
+                Dimensions.paddingSizeDefault + MediaQuery.of(context).padding.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    width: 0.5,
+                  ),
                 ),
               ),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-
-              // Subtitle text
-              SizedBox(
-                width: context.width > 700 ? 400 : context.width * 0.8,
-                child: Text(
-                  _email != null
-                    ? 'We\'ve sent a 6-digit code to your email. Please enter it below.'
-                    : 'We\'ve sent a 6-digit code to your phone. Please enter it below.',
-                  style: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: Theme.of(context).disabledColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              Container(
-                constraints: BoxConstraints(
-                  maxWidth: context.width > 700 ? 450 : context.width * 0.95,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 40
-                ),
-                child: PinCodeTextField(
-                  length: 6,
-                  appContext: context,
-                  keyboardType: TextInputType.number,
-                  animationType: AnimationType.fade,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  separatorBuilder: (context, index) => const SizedBox(width: 8),
-                  pinTheme: PinTheme(
-                    shape: PinCodeFieldShape.box,
-                    fieldHeight: context.width > 400 ? 60 : 48,
-                    fieldWidth: context.width > 400 ? 50 : 38,
-                    borderWidth: 1.5,
-                    borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                    selectedColor: Theme.of(context).primaryColor,
-                    selectedFillColor: Theme.of(context).cardColor,
-                    inactiveFillColor: Theme.of(context).cardColor,
-                    inactiveColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                    activeColor: Theme.of(context).primaryColor.withValues(alpha: 0.6),
-                    activeFillColor: Theme.of(context).cardColor,
-                    inactiveBorderWidth: 1.5,
-                    selectedBorderWidth: 2,
-                    disabledBorderWidth: 1.5,
-                    errorBorderWidth: 1.5,
-                    activeBorderWidth: 1.5,
-                  ),
-                  textStyle: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeLarge,
-                    color: Theme.of(context).textTheme.bodyLarge!.color,
-                  ),
-                  animationDuration: const Duration(milliseconds: 300),
-                  backgroundColor: Colors.transparent,
-                  enableActiveFill: true,
-                  onChanged: verificationController.updateVerificationCode,
-                  beforeTextPaste: (text) => true,
-                ),
-              ),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-
-              GetBuilder<ProfileController>(
-                  builder: (profileController) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: isDesktop ? 50 : context.width > 400 ? 30 : 20),
-                      child: CustomButtonWidget(
-                        buttonText: 'Verify',
-                        height: 55,
-                        fontSize: Dimensions.fontSizeDefault + 1,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GetBuilder<ProfileController>(
+                    builder: (profileController) {
+                      return CustomButtonWidget(
+                        buttonText: 'verify'.tr,
                         isLoading: verificationController.isLoading || profileController.isLoading,
                         onPressed: verificationController.verificationCode.length < 6 ? null : () {
                           if(widget.firebaseSession != null && widget.userModel == null) {
@@ -539,59 +544,58 @@ class VerificationScreenState extends State<VerificationScreen> {
                             });
                           }
                         },
-                      ),
-                    );
-                  }
-              ),
-              const SizedBox(height: Dimensions.paddingSizeLarge * 2),
+                      );
+                    }
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: isDesktop ? 50 : context.width > 400 ? 30 : 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Didn\'t receive a code? ',
-                      style: robotoRegular.copyWith(
-                        color: Theme.of(context).disabledColor,
-                        fontSize: Dimensions.fontSizeDefault,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'didnt_receive_code'.tr,
+                        style: robotoRegular.copyWith(
+                          color: Theme.of(context).disabledColor,
+                          fontSize: Dimensions.fontSizeSmall,
+                        ),
                       ),
-                    ),
-                    _seconds > 0
-                      ? Text(
-                          'Resend code in 0:${_seconds.toString().padLeft(2, '0')}',
+                      const SizedBox(width: 4),
+                      TextButton(
+                        onPressed: _seconds == 0
+                            ? () async {
+                                if(widget.firebaseSession != null) {
+                                  await Get.find<AuthController>().firebaseVerifyPhoneNumber(_number!, widget.token, widget.loginType, fromSignUp: widget.fromSignUp, canRoute: false);
+                                  _startTimer();
+                                } else {
+                                  _resendOtp();
+                                }
+                              }
+                            : null,
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          _seconds == 0
+                              ? 'resend_code'.tr
+                              : '0:${_seconds.toString().padLeft(2, '0')}',
                           style: robotoMedium.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: Dimensions.fontSizeDefault,
-                          ),
-                        )
-                      : InkWell(
-                          onTap: () async {
-                            if(widget.firebaseSession != null) {
-                              await Get.find<AuthController>().firebaseVerifyPhoneNumber(_number!, widget.token, widget.loginType, fromSignUp: widget.fromSignUp, canRoute: false);
-                              _startTimer();
-                            } else {
-                              _resendOtp();
-                            }
-                          },
-                          child: Text(
-                            'Resend code',
-                            style: robotoMedium.copyWith(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: Dimensions.fontSizeDefault,
-                              decoration: TextDecoration.underline,
-                            ),
+                            color: _seconds == 0
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).disabledColor,
+                            fontSize: Dimensions.fontSizeSmall,
                           ),
                         ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: Dimensions.paddingSizeLarge),
-
-            ]);
-          }),
-        )),
-      ))),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -627,7 +631,6 @@ class VerificationScreenState extends State<VerificationScreen> {
           Get.toNamed(RouteHelper.getResetPasswordRoute(phone: _number, email: _email, token: Get.find<VerificationController>().verificationCode, page: 'reset-password'));
         }
       } else {
-        // Just close the verification screen - user is now logged in
         Get.back();
       }
     }

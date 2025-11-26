@@ -38,6 +38,9 @@ class Environment {
   static String get mapProvider => dotenv.env['MAP_PROVIDER'] ?? 'google'; // 'google' or 'mapbox'
   static bool get useMapbox => mapProvider.toLowerCase() == 'mapbox';
 
+  // Debug Configuration
+  static bool get debugMode => dotenv.env['DEBUG_MODE']?.toLowerCase() == 'true';
+
   /// Check if running in development mode
   static bool get isDevelopment => baseUrl.contains('localhost') || baseUrl.contains('127.0.0.1');
 

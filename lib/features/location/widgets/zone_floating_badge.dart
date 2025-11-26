@@ -175,9 +175,9 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
               borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
               border: Border.all(
                 color: isUserCurrentZone
-                    ? Colors.greenAccent.withOpacity(0.6)
+                    ? Theme.of(context).primaryColor
                     : Colors.white.withOpacity(0.1),
-                width: isUserCurrentZone ? 2 : 1,
+                width: isUserCurrentZone ? 3 : 1,
               ),
             ),
             child: Column(
@@ -299,49 +299,6 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                // Bottom section with full-width buttons
-                Row(
-                  children: [
-                    // Map/Zones button
-                    Expanded(
-                      flex: 1,
-                      child: CustomButtonWidget(
-                        height: 36,
-                        buttonText: 'Zones',
-                        icon: Icons.map_outlined,
-                        iconSize: 16,
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: Colors.white.withOpacity(0.15),
-                        textColor: Colors.white.withOpacity(0.9),
-                        onPressed: () {
-                          CustomSheet.show(
-                            context: context,
-                            child: const AllZonesSheet(),
-                            showHandle: true,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Dimensions.paddingSizeExtraLarge,
-                              vertical: Dimensions.paddingSizeDefault,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Confirm button - disabled if user's current zone or closed
-                    Expanded(
-                      flex: 2,
-                      child: CustomButtonWidget(
-                        height: 36,
-                        buttonText: isUserCurrentZone
-                            ? 'current_zone'.tr
-                            : 'confirm_zone_selection'.tr,
-                        fontSize: Dimensions.fontSizeSmall,
-                        onPressed: (isOpen && !isUserCurrentZone) ? widget.onConfirm : null,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -357,19 +314,28 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
       return const SizedBox.shrink();
     }
 
+    // Get current zone info for buttons
+    final currentZone = widget.zones.isNotEmpty && _currentIndex < widget.zones.length
+        ? widget.zones[_currentIndex]
+        : widget.selectedZone!;
+    final isOpen = currentZone.status == 1;
+    final isUserCurrentZone = widget.userSavedZoneId != null && currentZone.id == widget.userSavedZoneId;
+
     // Show zone badge with swipe functionality
     return SlideTransition(
       position: _slideAnimation,
       child: ScaleTransition(
         scale: _scaleAnimation,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: Container(
+          margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             // Swipeable badge
             widget.zones.length <= 1
                 ? _buildZoneBadge(widget.selectedZone!)
                 : SizedBox(
-                    height: 130, // Height for badge only
+                    height: 90, // Reduced height since buttons are outside
                     child: PageView.builder(
                       controller: _pageController,
                       physics: const BouncingScrollPhysics(),
@@ -390,7 +356,9 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                           animation: _pageController!,
                           builder: (context, child) {
                             double scale = 1.0;
-                            if (_pageController!.position.haveDimensions) {
+                            if (_pageController!.hasClients &&
+                                _pageController!.positions.length == 1 &&
+                                _pageController!.position.haveDimensions) {
                               final page = _pageController!.page ?? _currentIndex.toDouble();
                               final distanceFromCurrent = (page - index).abs();
                               // Scale from 0.9 to 1.0 with slight bounce when settling
@@ -437,7 +405,51 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                   ),
                 ),
               ),
-          ],
+            // Action buttons below badge
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+              child: Row(
+                children: [
+                  // Map/Zones button
+                  Expanded(
+                    flex: 1,
+                    child: CustomButtonWidget(
+                      height: 46,
+                      buttonText: 'Zones',
+                      icon: Icons.map_outlined,
+                      color: Colors.white.withOpacity(0.15),
+                      textColor: Colors.white.withOpacity(0.9),
+                      onPressed: () {
+                        CustomSheet.show(
+                          context: context,
+                          child: const AllZonesSheet(),
+                          showHandle: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Dimensions.paddingSizeExtraLarge,
+                            vertical: Dimensions.paddingSizeDefault,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Confirm button - disabled if user's current zone or closed
+                  Expanded(
+                    flex: 2,
+                    child: CustomButtonWidget(
+                      height: 46,
+                      buttonText: isUserCurrentZone
+                          ? 'current_zone'.tr
+                          : 'confirm_zone_selection'.tr,
+                      onPressed: (isOpen && !isUserCurrentZone) ? widget.onConfirm : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ],
+          ),
         ),
       ),
     );

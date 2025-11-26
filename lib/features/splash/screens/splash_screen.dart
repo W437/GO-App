@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:animated_emoji/animated_emoji.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_internet_screen_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
@@ -104,12 +105,10 @@ class SplashScreenState extends State<SplashScreen> with TickerProviderStateMixi
       bool isConnected = result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.mobile);
 
       if(!firstTime) {
-        ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
-        ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
-          backgroundColor: isConnected ? Colors.green : Colors.red,
-          duration: Duration(seconds: isConnected ? 3 : 6000),
-          content: Text(isConnected ? 'connected'.tr : 'no_connection'.tr, textAlign: TextAlign.center),
-        ));
+        showCustomSnackBar(
+          isConnected ? 'connected'.tr : 'no_connection'.tr,
+          isError: !isConnected,
+        );
         if(isConnected) {
           _startApp(); // Retry on reconnection
         } else {

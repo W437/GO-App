@@ -98,33 +98,10 @@ class SignInScreenState extends State<SignInScreen> {
                                (Dimensions.paddingSizeLarge * 2), // Container padding
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Avatar/Logo
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'H!',
-                            style: robotoBold.copyWith(
-                              fontSize: 36,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-
                       SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
-
-                      const SizedBox(height: 60),
                     ],
                   ),
                 ),

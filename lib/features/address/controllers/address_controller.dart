@@ -58,6 +58,20 @@ class AddressController extends GetxController implements GetxService {
     return responseModel;
   }
 
+  /// Add address locally (for guest users - not synced to backend)
+  void addAddressLocally(AddressModel address) {
+    _addressList ??= [];
+    // Check if address already exists
+    final alreadyExists = _addressList!.any(
+      (a) => a.id == address.id ||
+             (a.latitude == address.latitude && a.longitude == address.longitude)
+    );
+    if (!alreadyExists) {
+      _addressList!.insert(0, address);
+    }
+    update();
+  }
+
   // Future<bool> saveAddressLocally(AddressModel address) async {
   //   ResponseModel responseModel = await addressService.add(address);
   //   return responseModel.isSuccess;

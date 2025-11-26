@@ -10,6 +10,7 @@ import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
+import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
@@ -93,10 +94,10 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   String? _selectedZoneName;  // Name of selected zone
   bool _mapAnimationComplete = false;  // Track when globe animation is done
   bool _isMapTouched = false;  // Track if user is touching the map
-  CameraPosition? _pendingGeocodePosition;  // Position to geocode when user releases
   Timer? _geocodeDebounceTimer;  // Debounce timer for geocoding
   MapAnimationMode _mapAnimationMode = MapAnimationMode.quick;  // Default to quick, will be set in initState
   int? _savedZoneIdForAnimation;  // Zone ID to fly to directly during animation
+  List<AddressModel> _cachedCombinedAddressList = [];  // Cached combined address list to prevent constant rebuilds
 
   @override
   void initState() {
@@ -197,27 +198,19 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       curve: Curves.elasticOut,
     ));
 
-    // Swift bouncy wiggle rotation - uses sin() for natural oscillation
+    // Gentle float animation - continuous vertical bob
     _tapPromptBounceController = AnimationController(
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
     Get.find<LocationController>().makeLoadingOff();
 
-    // Start animations after build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Trigger first animation immediately
-      if (_currentMode == MapMode.zoneSelection && _selectedZoneId == null) {
-        _triggerTapPromptAnimation();
+    // Start float animation after build (delayed to ensure widget is ready)
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted && _currentMode == MapMode.zoneSelection && _selectedZoneId == null) {
+        _tapPromptBounceController.repeat(reverse: true);
       }
-
-      // Start the repeating timer every 3 seconds
-      _tapPromptTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-        if (_currentMode == MapMode.zoneSelection && _selectedZoneId == null) {
-          _triggerTapPromptAnimation();
-        }
-      });
     });
 
     // No location permissions needed - map is for zone selection only
@@ -299,32 +292,40 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
 
   /// Handle geocoding when user releases the map (pin drop)
   void _onMapTouchEnd() {
-    if (!_isMapTouched) return;
-
     setState(() {
       _isMapTouched = false;
     });
 
-    // If there's a pending geocode position and we're in address mode, trigger geocode
-    if (_pendingGeocodePosition != null && _currentMode == MapMode.addressSelection) {
-      // Debounce to prevent rapid calls
+    // Trigger geocode when user releases touch (if in address adding mode)
+    if (_cameraPosition != null && _currentMode == MapMode.addressSelection && _isAddingNewAddress) {
       _geocodeDebounceTimer?.cancel();
       _geocodeDebounceTimer = Timer(const Duration(milliseconds: 300), () {
-        if (_pendingGeocodePosition != null) {
-          final position = _pendingGeocodePosition!;
-          _pendingGeocodePosition = null;
-
-          // Check if inside a zone
-          final zoneId = ZonePolygonHelper.getZoneIdForPoint(
-            position.target,
-            Get.find<LocationController>().zoneList,
-          );
-
-          if (zoneId != null) {
-            Get.find<LocationController>().updatePosition(position, false);
-          }
-        }
+        _triggerGeocode();
+        _pinBounceController.forward(from: 0.0);
+        _badgeBounceController.forward(from: 0.0);
       });
+    }
+  }
+
+  /// Trigger geocoding for the current camera position
+  void _triggerGeocode() {
+    if (_cameraPosition == null || _currentMode != MapMode.addressSelection || !_isAddingNewAddress) {
+      return;
+    }
+
+    final position = _cameraPosition!;
+
+    // Check if inside a zone
+    final zoneId = ZonePolygonHelper.getZoneIdForPoint(
+      position.target,
+      Get.find<LocationController>().zoneList,
+    );
+
+    if (zoneId != null) {
+      Get.find<LocationController>().updatePosition(position, false);
+    } else {
+      // Clear address if pin is outside all zones (hides tooltip)
+      Get.find<LocationController>().clearPickAddress();
     }
   }
 
@@ -377,10 +378,10 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           zones: locationController.zoneList,
                           highlightedZoneId: _currentMode == MapMode.zoneSelection
                               ? _selectedZoneId
-                              : (_isAddingNewAddress ? _currentZoneId : AddressHelper.getAddressFromSharedPref()?.zoneId),
+                              : AddressHelper.getAddressFromSharedPref()?.zoneId,  // Always show user's saved zone in address mode
                           savedZoneId: _savedZoneIdForAnimation,
                           savedAddresses: _currentMode == MapMode.addressSelection
-                              ? (Get.find<AddressController>().addressList ?? [])
+                              ? _buildCombinedAddressList()
                               : [],
                           zoneBaseColor: Theme.of(context).colorScheme.primary,
                           isDarkMode: false,  // Always use light/day mode
@@ -403,31 +404,16 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           },
                           onCameraIdle: () {
                             if (_cameraPosition != null && _currentMode == MapMode.addressSelection && _isAddingNewAddress) {
-                              // Check if pinpoint is inside a zone first
-                              final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
-                                _cameraPosition!.target,
-                                locationController.zoneList,
-                              );
-
-                              if (newZoneId != _currentZoneId) {
-                                setState(() {
-                                  _currentZoneId = newZoneId;
-                                });
-                                if (newZoneId != null) {
+                              // Only geocode if user has released touch
+                              if (!_isMapTouched) {
+                                // Cancel any pending geocode and debounce
+                                _geocodeDebounceTimer?.cancel();
+                                _geocodeDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+                                  _triggerGeocode();
+                                  // Bounce animations when geocode triggers
                                   _pinBounceController.forward(from: 0.0);
                                   _badgeBounceController.forward(from: 0.0);
-                                }
-                              }
-
-                              // Store pending position - only geocode when user releases
-                              if (newZoneId != null) {
-                                _pendingGeocodePosition = _cameraPosition;
-                                // If user is not touching, trigger geocode immediately
-                                if (!_isMapTouched) {
-                                  _onMapTouchEnd();
-                                }
-                              } else {
-                                _pendingGeocodePosition = null;
+                                });
                               }
                             }
                           },
@@ -505,31 +491,16 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           },
                           onCameraIdle: () {
                             if (_cameraPosition != null && _currentMode == MapMode.addressSelection && _isAddingNewAddress) {
-                              // Check if pinpoint is inside a zone first
-                              final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
-                                _cameraPosition!.target,
-                                locationController.zoneList,
-                              );
-
-                              if (newZoneId != _currentZoneId) {
-                                setState(() {
-                                  _currentZoneId = newZoneId;
-                                });
-                                if (newZoneId != null) {
+                              // Only geocode if user has released touch
+                              if (!_isMapTouched) {
+                                // Cancel any pending geocode and debounce
+                                _geocodeDebounceTimer?.cancel();
+                                _geocodeDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+                                  _triggerGeocode();
+                                  // Bounce animations when geocode triggers
                                   _pinBounceController.forward(from: 0.0);
                                   _badgeBounceController.forward(from: 0.0);
-                                }
-                              }
-
-                              // Store pending position - only geocode when user releases
-                              if (newZoneId != null) {
-                                _pendingGeocodePosition = _cameraPosition;
-                                // If user is not touching, trigger geocode immediately
-                                if (!_isMapTouched) {
-                                  _onMapTouchEnd();
-                                }
-                              } else {
-                                _pendingGeocodePosition = null;
+                                });
                               }
                             }
                           },
@@ -767,7 +738,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           child: RichText(
                             text: TextSpan(
                               style: robotoMedium.copyWith(
-                                fontSize: 15,
+                                fontSize: 16,
                                 color: Colors.white.withOpacity(0.9),
                                 shadows: [
                                   Shadow(
@@ -781,7 +752,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                 TextSpan(
                                   text: '${locationController.zoneList?.length ?? 0}',
                                   style: robotoBold.copyWith(
-                                    fontSize: 16,
+                                    fontSize: 17,
                                     color: Theme.of(context).primaryColor,
                                     shadows: [
                                       Shadow(
@@ -845,7 +816,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                       // User's current saved zone display - above the floating badge in Zone mode
                       if (_currentMode == MapMode.zoneSelection)
                         Positioned(
-                          bottom: 178, // Position closer to the zone badge with small spacing
+                          bottom: 220, // Position above zone badge + buttons
                           left: 0,
                           right: 0,
                           child: Center(
@@ -890,19 +861,16 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                     duration: const Duration(milliseconds: 500),
                                     curve: Curves.easeOut,
                                     child: AnimatedBuilder(
-                                      animation: Listenable.merge([
-                                        _tapPromptWiggleAnimation,
-                                        _tapPromptBounceController,
-                                      ]),
+                                      animation: _tapPromptBounceController,
                                       builder: (context, child) {
-                                        // Swift bouncy wiggle: 1.5 oscillations with decay
+                                        // Gentle float: vertical bob with subtle scale
                                         final t = _tapPromptBounceController.value;
-                                        final decay = 1.0 - t; // Stronger at start, fades out
-                                        final wiggleAngle = sin(t * 3 * pi) * 0.12 * decay;
-                                        return Transform.scale(
-                                          scale: _tapPromptWiggleAnimation.value,
-                                          child: Transform.rotate(
-                                            angle: wiggleAngle,
+                                        final floatOffset = -8.0 * Curves.easeInOut.transform(t);
+                                        final scale = 1.0 + (0.02 * Curves.easeInOut.transform(t));
+                                        return Transform.translate(
+                                          offset: Offset(0, floatOffset),
+                                          child: Transform.scale(
+                                            scale: scale,
                                             child: child,
                                           ),
                                         );
@@ -920,22 +888,41 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                             Text(
                                               'Tap your ',
                                               style: robotoMedium.copyWith(
-                                                fontSize: Dimensions.fontSizeExtraLarge,
+                                                fontSize: 20,
                                                 color: Colors.white.withOpacity(0.9),
-                                                letterSpacing: 0.3,
+                                                shadows: [
+                                                  Shadow(
+                                                    color: Colors.black.withOpacity(0.5),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 1),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             Icon(
                                               Icons.location_on,
-                                              size: 28,
+                                              size: 26,
                                               color: Theme.of(context).primaryColor,
+                                              shadows: [
+                                                Shadow(
+                                                  color: Colors.black.withOpacity(0.5),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 1),
+                                                ),
+                                              ],
                                             ),
                                             Text(
-                                              ' zone!',
+                                              ' zone to get started!',
                                               style: robotoMedium.copyWith(
-                                                fontSize: Dimensions.fontSizeExtraLarge,
+                                                fontSize: 20,
                                                 color: Colors.white.withOpacity(0.9),
-                                                letterSpacing: 0.3,
+                                                shadows: [
+                                                  Shadow(
+                                                    color: Colors.black.withOpacity(0.5),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 1),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
@@ -947,53 +934,76 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                         ),
                       // Floating address badge for address mode
                       if (_currentMode == MapMode.addressSelection)
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: SafeArea(
-                            child: AddressFloatingBadge(
-                              key: const ValueKey('address_floating_badge'),
-                              selectedAddress: AddressHelper.getAddressFromSharedPref(),
-                              addresses: Get.find<AddressController>().addressList ?? [],
-                              onAddressChanged: (address) {
-                                if (address != null) {
-                                  // Exit adding mode
-                                  setState(() {
-                                    _isAddingNewAddress = false;
-                                  });
+                        GetBuilder<AddressController>(
+                          builder: (addressController) {
+                            final addresses = _buildCombinedAddressList();
+                            final savedAddress = AddressHelper.getAddressFromSharedPref();
 
-                                  // Smoothly fly to address location
-                                  final lat = double.tryParse(address.latitude ?? '');
-                                  final lng = double.tryParse(address.longitude ?? '');
-
-                                  if (lat != null && lng != null) {
-                                    if (Environment.useMapbox) {
-                                      _mapboxKey.currentState?.animateCamera(
-                                        LatLng(lat, lng),
-                                        zoom: 15,
-                                      );
-                                    } else {
-                                      _mapController?.animateCamera(
-                                        CameraUpdate.newCameraPosition(
-                                          CameraPosition(
-                                            target: LatLng(lat, lng),
-                                            zoom: 15,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                } else {
-                                  // Null means "Add New Address" card - enter adding mode
+                            // Auto-enable adding mode if no addresses exist
+                            if (addresses.isEmpty && !_isAddingNewAddress) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
                                   setState(() {
                                     _isAddingNewAddress = true;
                                   });
                                 }
-                              },
-                              onAddNewAddress: () => _onPickAddressButtonPressed(locationController),
-                            ),
-                          ),
+                              });
+                            }
+                            return Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: SafeArea(
+                                child: AddressFloatingBadge(
+                                  key: ValueKey('address_floating_badge_${addresses.length}'),
+                                  selectedAddress: savedAddress,
+                                  addresses: addresses,
+                                  onAddressChanged: (address) {
+                                    if (address != null) {
+                                      // Exit adding mode
+                                      setState(() {
+                                        _isAddingNewAddress = false;
+                                      });
+
+                                      // Smoothly fly to address location
+                                      final lat = double.tryParse(address.latitude ?? '');
+                                      final lng = double.tryParse(address.longitude ?? '');
+
+                                      if (lat != null && lng != null) {
+                                        if (Environment.useMapbox) {
+                                          _mapboxKey.currentState?.animateCamera(
+                                            LatLng(lat, lng),
+                                            zoom: 15,
+                                          );
+                                        } else {
+                                          _mapController?.animateCamera(
+                                            CameraUpdate.newCameraPosition(
+                                              CameraPosition(
+                                                target: LatLng(lat, lng),
+                                                zoom: 15,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    } else {
+                                      // Null means "Add New Address" card - enter adding mode
+                                      setState(() {
+                                        _isAddingNewAddress = true;
+                                      });
+                                    }
+                                  },
+                                  onAddressSelected: (address) async {
+                                    // Save address to shared preferences
+                                    AddressHelper.saveAddressInSharedPref(address);
+                                    // Trigger rebuild to update UI
+                                    setState(() {});
+                                  },
+                                  onAddNewAddress: () => _onPickAddressButtonPressed(locationController),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       // Location permissions not needed - map is for zone selection only
                     ],
@@ -1034,26 +1044,130 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     }
   }
 
-  void _onPickAddressButtonPressed(LocationController locationController) {
-    if(locationController.pickPosition.latitude != 0 && locationController.pickAddress!.isNotEmpty) {
-      if(widget.fromAddAddress) {
-        if(widget.googleMapController != null) {
-          widget.googleMapController!.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(
-            locationController.pickPosition.latitude, locationController.pickPosition.longitude,
-          ), zoom: 17)));
-          locationController.addAddressData();
-        }
-        Get.back();
-      }else {
-        AddressModel address = AddressModel(
-          latitude: locationController.pickPosition.latitude.toString(),
-          longitude: locationController.pickPosition.longitude.toString(),
-          addressType: 'others', address: locationController.pickAddress,
-        );
-        locationController.saveAddressAndNavigate(address, widget.fromSignUp, widget.route, widget.canRoute, ResponsiveHelper.isDesktop(Get.context));
-      }
-    }else {
+  Future<void> _onPickAddressButtonPressed(LocationController locationController) async {
+    if (locationController.pickPosition.latitude == 0 || locationController.pickAddress == null || locationController.pickAddress!.isEmpty) {
       showCustomSnackBar('pick_an_address'.tr);
+      return;
+    }
+
+    // Get zone ID for the current position
+    final zoneId = ZonePolygonHelper.getZoneIdForPoint(
+      LatLng(locationController.pickPosition.latitude, locationController.pickPosition.longitude),
+      locationController.zoneList,
+    );
+
+    if (zoneId == null) {
+      showCustomSnackBar('please_select_a_location_inside_a_zone'.tr);
+      return;
+    }
+
+    // Create address model
+    final address = AddressModel(
+      latitude: locationController.pickPosition.latitude.toString(),
+      longitude: locationController.pickPosition.longitude.toString(),
+      addressType: 'others',
+      address: locationController.pickAddress,
+      zoneId: zoneId,
+    );
+
+    // Check if user is logged in
+    final authController = Get.find<AuthController>();
+    final addressController = Get.find<AddressController>();
+
+    if (!authController.isLoggedIn()) {
+      // For guest users, save address locally
+      await AddressHelper.saveAddressInSharedPref(address);
+
+      // Also add to AddressController so GetBuilder widgets update
+      addressController.addAddressLocally(address);
+
+      // Clear the pick address (hides tooltip) and exit adding mode
+      locationController.clearPickAddress();
+
+      // Exit adding mode and update UI
+      if (mounted) {
+        setState(() {
+          _isAddingNewAddress = false;
+        });
+      }
+
+      // Animate camera to the new address
+      final lat = double.tryParse(address.latitude ?? '');
+      final lng = double.tryParse(address.longitude ?? '');
+      if (lat != null && lng != null) {
+        if (Environment.useMapbox) {
+          _mapboxKey.currentState?.animateCamera(
+            LatLng(lat, lng),
+            zoom: 15,
+          );
+        } else {
+          _mapController?.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: LatLng(lat, lng),
+                zoom: 15,
+              ),
+            ),
+          );
+        }
+      }
+
+      showCustomSnackBar('address_saved'.tr, isError: false);
+      return;
+    }
+
+    // Save address to backend for logged-in users
+    final response = await addressController.addAddress(address, false, zoneId);
+
+    if (response.isSuccess) {
+      // Refresh address list
+      await addressController.getAddressList();
+
+      // Save as current address
+      final savedAddresses = addressController.addressList ?? [];
+      if (savedAddresses.isNotEmpty) {
+        // Find the newly added address (should be the one matching our coordinates)
+        final newAddress = savedAddresses.firstWhereOrNull(
+          (a) => a.latitude == address.latitude && a.longitude == address.longitude,
+        ) ?? savedAddresses.last;
+
+        await AddressHelper.saveAddressInSharedPref(newAddress);
+      }
+
+      // Clear the pick address (hides tooltip)
+      locationController.clearPickAddress();
+
+      // Exit adding mode and update UI
+      if (mounted) {
+        setState(() {
+          _isAddingNewAddress = false;
+        });
+      }
+
+      // Animate camera to the new address
+      final lat = double.tryParse(address.latitude ?? '');
+      final lng = double.tryParse(address.longitude ?? '');
+      if (lat != null && lng != null) {
+        if (Environment.useMapbox) {
+          _mapboxKey.currentState?.animateCamera(
+            LatLng(lat, lng),
+            zoom: 15,
+          );
+        } else {
+          _mapController?.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: LatLng(lat, lng),
+                zoom: 15,
+              ),
+            ),
+          );
+        }
+      }
+
+      showCustomSnackBar('address_added_successfully'.tr, isError: false);
+    } else {
+      showCustomSnackBar(response.message ?? 'failed_to_add_address'.tr);
     }
   }
 
@@ -1089,7 +1203,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       fillOpacity: 0.15,  // Slightly reduced for better balance with thinner strokes
       highlightedZoneId: _currentMode == MapMode.zoneSelection
           ? _selectedZoneId  // Highlight selected zone in zone mode
-          : (isAddingNewAddress ? _currentZoneId : AddressHelper.getAddressFromSharedPref()?.zoneId),  // Highlight user's zone or current zone when adding
+          : AddressHelper.getAddressFromSharedPref()?.zoneId,  // Always show user's saved zone in address mode
       useEnhancedStyle: true,
       onZoneTap: (zoneId) {
         if (_currentMode == MapMode.zoneSelection) {
@@ -1099,6 +1213,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
           );
 
           if (selectedZone != null) {
+            // Stop the float animation when zone is selected
+            _tapPromptBounceController.stop();
             setState(() {
               _selectedZoneId = zoneId;
               _selectedZoneName = selectedZone.displayName ?? selectedZone.name ?? 'Zone $zoneId';
@@ -1192,6 +1308,45 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   }
 
 
+  /// Build combined address list from controller and SharedPreferences
+  /// Updates cache only when addresses actually change
+  List<AddressModel> _buildCombinedAddressList() {
+    final controllerAddresses = Get.find<AddressController>().addressList ?? [];
+    final savedAddress = AddressHelper.getAddressFromSharedPref();
+
+    List<AddressModel> newList = [...controllerAddresses];
+    if (savedAddress != null && savedAddress.latitude != null) {
+      final alreadyInList = controllerAddresses.any(
+        (a) => a.id == savedAddress.id ||
+               (a.latitude == savedAddress.latitude && a.longitude == savedAddress.longitude)
+      );
+      if (!alreadyInList) {
+        newList.insert(0, savedAddress);
+      }
+    }
+
+    // Only update cache if list actually changed
+    if (_cachedCombinedAddressList.length != newList.length ||
+        !_listsEqual(_cachedCombinedAddressList, newList)) {
+      _cachedCombinedAddressList = newList;
+    }
+
+    return _cachedCombinedAddressList;
+  }
+
+  /// Check if two address lists are equal (by comparing IDs and coordinates)
+  bool _listsEqual(List<AddressModel> list1, List<AddressModel> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i].id != list2[i].id ||
+          list1[i].latitude != list2[i].latitude ||
+          list1[i].longitude != list2[i].longitude) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   String _getAddressWithoutCountry(String address) {
     if (address.isEmpty) return '';
     final addressParts = address.split(',');
@@ -1202,21 +1357,12 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
 
   /// Get display text combining zone name and address (e.g., "Shefa-Amr - 123 Main St")
   String _getDisplayAddress(String address) {
-    final locationController = Get.find<LocationController>();
-    final zoneName = locationController.activeZone?.displayName ??
-                     locationController.activeZone?.name;
-    final cleanAddress = _getAddressWithoutCountry(address);
-
-    if (zoneName != null && zoneName.isNotEmpty && cleanAddress.isNotEmpty) {
-      return '$zoneName - $cleanAddress';
-    }
-    return cleanAddress;
+    return _getAddressWithoutCountry(address);
   }
 
   /// Build markers for saved addresses in Address mode
   Set<Marker> _buildSavedAddressMarkers(LocationController locationController) {
-    final addressController = Get.find<AddressController>();
-    final addresses = addressController.addressList ?? [];
+    final addresses = _buildCombinedAddressList();
     final markers = <Marker>{};
 
     for (final address in addresses) {
@@ -1227,7 +1373,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
         if (lat != null && lng != null) {
           markers.add(
             Marker(
-              markerId: MarkerId('address_${address.id}'),
+              markerId: MarkerId('address_${address.id ?? address.latitude}'),
               position: LatLng(lat, lng),
               infoWindow: InfoWindow(
                 title: address.addressType?.tr ?? 'address'.tr,

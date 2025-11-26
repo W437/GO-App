@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -12,6 +13,7 @@ class AddressFloatingBadge extends StatefulWidget {
   final AddressModel? selectedAddress;
   final List<AddressModel> addresses;
   final Function(AddressModel?) onAddressChanged;
+  final Future<void> Function(AddressModel) onAddressSelected; // Called when user confirms selection
   final VoidCallback onAddNewAddress;
 
   const AddressFloatingBadge({
@@ -19,6 +21,7 @@ class AddressFloatingBadge extends StatefulWidget {
     required this.selectedAddress,
     required this.addresses,
     required this.onAddressChanged,
+    required this.onAddressSelected,
     required this.onAddNewAddress,
   });
 
@@ -151,37 +154,20 @@ class _AddressFloatingBadgeState extends State<AddressFloatingBadge>
               const SizedBox(height: Dimensions.paddingSizeSmall),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isAddNewPage
-                        ? widget.onAddNewAddress
-                        : (isCurrentAddress
-                            ? null
-                            : () {
-                                AddressHelper.saveAddressInSharedPref(currentAddress!);
-                                Get.back();
-                                showCustomSnackBar(currentAddress.address ?? 'address_selected'.tr, isError: false);
-                              }),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isCurrentAddress && !isAddNewPage
-                          ? Colors.grey.withValues(alpha: 0.3)
-                          : Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      ),
-                      disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
-                      disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
-                    ),
-                    child: Text(
-                      isAddNewPage
-                          ? 'confirm_new_address'.tr
-                          : (isCurrentAddress ? 'current_address'.tr : 'select_address'.tr),
-                      style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                    ),
-                  ),
+                child: CustomButtonWidget(
+                  height: 46,
+                  buttonText: isAddNewPage
+                      ? 'add_new_address'.tr
+                      : (isCurrentAddress ? 'current_address'.tr : 'select_address'.tr),
+                  fontSize: Dimensions.fontSizeDefault,
+                  onPressed: isAddNewPage
+                      ? widget.onAddNewAddress
+                      : (isCurrentAddress
+                          ? null
+                          : () async {
+                              await widget.onAddressSelected(currentAddress!);
+                              showCustomSnackBar(currentAddress.address ?? 'address_selected'.tr, isError: false);
+                            }),
                 ),
               ),
             ],
@@ -202,13 +188,13 @@ class _AddressFloatingBadgeState extends State<AddressFloatingBadge>
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: isActive ? 20 : 6,
-          height: 6,
+          width: isActive ? 8 : 6,
+          height: isActive ? 8 : 6,
           decoration: BoxDecoration(
             color: isActive
                 ? Colors.white
                 : Colors.white.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(3),
+            shape: BoxShape.circle,
           ),
         );
       }),
@@ -226,9 +212,9 @@ class _AddressFloatingBadgeState extends State<AddressFloatingBadge>
         borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
         border: Border.all(
           color: isCurrentAddress
-              ? Colors.greenAccent.withValues(alpha: 0.6)
+              ? Theme.of(context).primaryColor
               : Colors.white.withValues(alpha: 0.1),
-          width: isCurrentAddress ? 2 : 1,
+          width: isCurrentAddress ? 3 : 1,
         ),
       ),
       child: Column(
@@ -286,7 +272,7 @@ class _AddressFloatingBadgeState extends State<AddressFloatingBadge>
   Widget _buildAddNewAddressCard(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
       decoration: BoxDecoration(
         color: Colors.grey[800]!.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
@@ -295,12 +281,11 @@ class _AddressFloatingBadgeState extends State<AddressFloatingBadge>
           width: 2,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
@@ -308,27 +293,18 @@ class _AddressFloatingBadgeState extends State<AddressFloatingBadge>
             child: const Icon(
               Icons.add_location_alt_rounded,
               color: Colors.white,
-              size: 24,
+              size: 22,
             ),
           ),
-
-          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-          Text(
-            'add_new_address'.tr,
-            style: robotoBold.copyWith(
-              fontSize: Dimensions.fontSizeSmall,
-              color: Colors.white,
+          const SizedBox(width: Dimensions.paddingSizeSmall),
+          Expanded(
+            child: Text(
+              'Pin a location on the map to add your first address!',
+              style: robotoMedium.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
             ),
-          ),
-
-          Text(
-            'pin_location_on_map'.tr,
-            style: robotoRegular.copyWith(
-              fontSize: 10,
-              color: Colors.white.withValues(alpha: 0.7),
-            ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

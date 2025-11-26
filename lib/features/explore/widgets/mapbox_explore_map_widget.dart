@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
+import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/config/environment.dart';
@@ -43,8 +44,8 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
 
   // Track annotations for tap handling
   final Map<String, int> _annotationToRestaurantIndex = {};
-  Uint8List? _restaurantMarkerBytes;
   Uint8List? _userLocationMarkerBytes;
+  final Map<int, Uint8List> _logoMarkerCache = {}; // Cache logo markers by restaurant ID
   bool _mapReady = false;
   bool _styleReady = false;
   Timer? _idleTimer;
@@ -84,9 +85,8 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
 
   Future<void> _loadMarkerImages() async {
     try {
-      // Create emoji markers
+      // Create user location marker (pin emoji)
       _userLocationMarkerBytes = await _createEmojiMarkerIcon('📍', size: 120);
-      _restaurantMarkerBytes = await _createEmojiMarkerIcon('🍎', size: 120);
     } catch (e) {
       debugPrint('Error creating marker images: $e');
     }
@@ -111,6 +111,86 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
       textPainter.width.toInt(),
       textPainter.height.toInt(),
     );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  /// Create a circular logo marker with stroke
+  Future<Uint8List> _createLogoMarkerIcon(String? logoUrl) async {
+    const double size = 120;
+    const double radius = size / 2;
+    const double strokeWidth = 4;
+
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+
+    ui.Image? logoImage;
+
+    // Try to download and decode logo
+    if (logoUrl != null && logoUrl.isNotEmpty) {
+      try {
+        final response = await http.get(Uri.parse(logoUrl)).timeout(
+          const Duration(seconds: 3),
+        );
+        if (response.statusCode == 200) {
+          final codec = await ui.instantiateImageCodec(response.bodyBytes);
+          final frame = await codec.getNextFrame();
+          logoImage = frame.image;
+        }
+      } catch (e) {
+        debugPrint('Error loading logo: $e');
+      }
+    }
+
+    // Draw white circle background
+    final bgPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(radius, radius), radius - strokeWidth / 2, bgPaint);
+
+    // Draw logo or fallback emoji
+    if (logoImage != null) {
+      // Clip to circle and draw logo
+      canvas.save();
+      canvas.clipPath(
+        Path()..addOval(Rect.fromCircle(
+          center: Offset(radius, radius),
+          radius: radius - strokeWidth - 2,
+        )),
+      );
+      canvas.drawImageRect(
+        logoImage,
+        Rect.fromLTWH(0, 0, logoImage.width.toDouble(), logoImage.height.toDouble()),
+        Rect.fromCircle(center: Offset(radius, radius), radius: radius - strokeWidth - 2),
+        Paint(),
+      );
+      canvas.restore();
+    } else {
+      // Fallback to apple emoji
+      final textPainter = TextPainter(textDirection: TextDirection.ltr);
+      textPainter.text = TextSpan(
+        text: '🍎',
+        style: const TextStyle(fontSize: 60),
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(
+          radius - textPainter.width / 2,
+          radius - textPainter.height / 2,
+        ),
+      );
+    }
+
+    // Draw muted stroke (gray border)
+    final strokePaint = Paint()
+      ..color = Colors.grey.withValues(alpha: 0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(Offset(radius, radius), radius - strokeWidth / 2, strokePaint);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(size.toInt(), size.toInt());
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
@@ -212,12 +292,18 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
         );
       }
 
-      // Add restaurant markers
-      if (widget.exploreController.filteredRestaurants != null &&
-          _restaurantMarkerBytes != null) {
+      // Add restaurant markers with logos
+      if (widget.exploreController.filteredRestaurants != null) {
         for (int i = 0; i < widget.exploreController.filteredRestaurants!.length; i++) {
           final restaurant = widget.exploreController.filteredRestaurants![i];
           if (restaurant.latitude != null && restaurant.longitude != null) {
+            // Get or create cached logo marker
+            Uint8List? markerBytes = _logoMarkerCache[restaurant.id];
+            if (markerBytes == null) {
+              markerBytes = await _createLogoMarkerIcon(restaurant.logoFullUrl);
+              _logoMarkerCache[restaurant.id!] = markerBytes;
+            }
+
             final annotation = await _markerManager!.create(
               PointAnnotationOptions(
                 geometry: Point(
@@ -226,8 +312,8 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
                     double.parse(restaurant.latitude!),
                   ),
                 ),
-                image: _restaurantMarkerBytes,
-                iconSize: 0.5,
+                image: markerBytes,
+                iconSize: 0.6,
               ),
             );
 

@@ -2,6 +2,7 @@
 /// Provides styled error and success messages with consistent appearance
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast.dart';
@@ -69,7 +70,7 @@ Future<void> _removeCurrentToast() async {
   _currentToastState = null;
 }
 
-// Truly non-blocking toast overlay widget
+// Truly non-blocking toast overlay widget with Wolt-style drag-to-dismiss
 class _NonBlockingToastOverlay extends StatefulWidget {
   final String message;
   final bool isError;
@@ -87,16 +88,28 @@ class _NonBlockingToastOverlay extends StatefulWidget {
 }
 
 class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
+  late AnimationController _snapBackController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  // Drag state
+  Offset _dragOffset = Offset.zero;
+  bool _isDragging = false;
+  double _manualOpacity = 1.0;
+  static const double _dismissThreshold = 100.0;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _snapBackController = AnimationController(
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
@@ -124,30 +137,131 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
   @override
   void dispose() {
     _animationController.dispose();
+    _snapBackController.dispose();
     super.dispose();
   }
 
-  Future<void> animateOut() async {
-    await _animationController.reverse();
+  Future<void> animateOut({Offset? targetOffset}) async {
+    if (targetOffset != null) {
+      // Animate to the drag direction
+      await _animationController.reverse();
+    } else {
+      await _animationController.reverse();
+    }
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    setState(() {
+      _isDragging = true;
+      _dragOffset += details.delta;
+    });
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    final distance = math.sqrt(_dragOffset.dx * _dragOffset.dx + _dragOffset.dy * _dragOffset.dy);
+
+    if (distance > _dismissThreshold) {
+      // Dismiss - animate off screen in drag direction
+      final direction = _dragOffset / distance;
+      final targetOffset = direction * 400.0;
+
+      setState(() {
+        _isDragging = false;
+      });
+
+      // Use snap-back controller for dismiss animation
+      final Animation<Offset> dismissAnimation = Tween<Offset>(
+        begin: _dragOffset,
+        end: targetOffset,
+      ).animate(CurvedAnimation(
+        parent: _snapBackController,
+        curve: Curves.easeOutCubic,
+      ));
+
+      final Animation<double> fadeOutAnimation = Tween<double>(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(CurvedAnimation(
+        parent: _snapBackController,
+        curve: Curves.easeOut,
+      ));
+
+      dismissAnimation.addListener(() {
+        if (mounted) {
+          setState(() {
+            _dragOffset = dismissAnimation.value;
+            _manualOpacity = fadeOutAnimation.value;
+          });
+        }
+      });
+
+      _snapBackController.forward(from: 0.0).then((_) {
+        widget.onDismiss();
+      });
+    } else {
+      // Snap back to center using separate controller
+      final Animation<Offset> snapAnimation = Tween<Offset>(
+        begin: _dragOffset,
+        end: Offset.zero,
+      ).animate(CurvedAnimation(
+        parent: _snapBackController,
+        curve: Curves.easeOutBack,
+      ));
+
+      snapAnimation.addListener(() {
+        if (mounted) {
+          setState(() {
+            _dragOffset = snapAnimation.value;
+          });
+        }
+      });
+
+      setState(() {
+        _isDragging = false;
+        _manualOpacity = 1.0;
+      });
+
+      _snapBackController.forward(from: 0.0);
+    }
+  }
+
+  double _calculateRotation() {
+    // Rotation based on horizontal drag, max ±15 degrees
+    const maxRotation = 15.0 * (math.pi / 180); // 15 degrees in radians
+    const fullDragDistance = 200.0; // Distance for max rotation
+
+    final normalized = (_dragOffset.dx / fullDragDistance).clamp(-1.0, 1.0);
+    return normalized * maxRotation;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Position the toast at the top center without blocking anything
+    final rotation = _calculateRotation();
+
     return Positioned(
       top: MediaQuery.of(context).padding.top + 20,
       left: 0,
       right: 0,
-      child: IgnorePointer(
-        // Toast is not interactive - just a notification
+      child: GestureDetector(
+        onPanUpdate: _onPanUpdate,
+        onPanEnd: _onPanEnd,
         child: SlideTransition(
           position: _slideAnimation,
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: Center(
-              child: CustomToast(
-                text: widget.message,
-                isError: widget.isError,
+            child: Opacity(
+              opacity: _manualOpacity,
+              child: Transform.translate(
+                offset: _dragOffset,
+                child: Transform.rotate(
+                  angle: rotation,
+                  child: Center(
+                    child: CustomToast(
+                      text: widget.message,
+                      isError: widget.isError,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

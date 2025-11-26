@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/adaptive/cart/cart_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/mobile/bouncy_bottom_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
+import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/screens/sign_in_screen.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
@@ -509,6 +511,56 @@ class _MenuScreenState extends State<MenuScreen> {
                     ) : const SizedBox(),
                   ]),
                   const SizedBox(height: 20),
+
+                  // Debug Section (only visible when DEBUG_MODE=true in .env)
+                  if (Environment.debugMode)
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20, bottom: 12),
+                        child: Text(
+                          'DEBUG TOOLS',
+                          style: robotoMedium.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Colors.orange,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+
+                      ModernMenuButtonWidget(
+                        icon: Icons.check_circle,
+                        iconBackgroundColor: Colors.green.withValues(alpha: 0.2),
+                        iconColor: Colors.green,
+                        title: 'Test Custom Toast (Success)',
+                        showChevron: false,
+                        onTap: () {
+                          showCustomSnackBar('This is a success toast message!', isError: false);
+                        },
+                      ),
+                      ModernMenuButtonWidget(
+                        icon: Icons.error,
+                        iconBackgroundColor: Colors.red.withValues(alpha: 0.2),
+                        iconColor: Colors.red,
+                        title: 'Test Custom Toast (Error)',
+                        showChevron: false,
+                        onTap: () {
+                          showCustomSnackBar('This is an error toast message!', isError: true);
+                        },
+                      ),
+                      ModernMenuButtonWidget(
+                        icon: Icons.shopping_cart,
+                        iconBackgroundColor: Colors.blue.withValues(alpha: 0.2),
+                        iconColor: Colors.blue,
+                        title: 'Test Cart Snackbar (Old)',
+                        showChevron: false,
+                        onTap: () {
+                          showCartSnackBarWidget();
+                        },
+                      ),
+                    ]),
+
+                  if (Environment.debugMode)
+                    const SizedBox(height: 20),
 
                   // Logout/Sign In Button
                   ModernMenuButtonWidget(

@@ -259,8 +259,20 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
   Widget _buildSavedAddresses(BuildContext context) {
     return GetBuilder<AddressController>(
       builder: (addressController) {
-        final addresses = addressController.addressList ?? [];
-        final currentAddress = AddressHelper.getAddressFromSharedPref();
+        final controllerAddresses = addressController.addressList ?? [];
+        final savedAddress = AddressHelper.getAddressFromSharedPref();
+
+        // Build combined address list - include saved address if not in controller list
+        List<AddressModel> addresses = [...controllerAddresses];
+        if (savedAddress != null && savedAddress.latitude != null) {
+          final alreadyInList = controllerAddresses.any(
+            (a) => a.id == savedAddress.id ||
+                   (a.latitude == savedAddress.latitude && a.longitude == savedAddress.longitude)
+          );
+          if (!alreadyInList) {
+            addresses.insert(0, savedAddress);
+          }
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +285,8 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
             // Saved addresses
             if (addresses.isNotEmpty) ...[
               ...addresses.take(5).map((address) {
-                final isSelected = currentAddress?.id == address.id;
+                final isSelected = savedAddress?.id == address.id ||
+                    (savedAddress?.latitude == address.latitude && savedAddress?.longitude == address.longitude);
                 return _buildAddressItem(context, address, isSelected);
               }),
             ] else

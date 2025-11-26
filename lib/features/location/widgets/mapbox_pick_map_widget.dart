@@ -764,6 +764,12 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
         oldWidget.highlightedZoneId != widget.highlightedZoneId) {
       _updateZonePolygons();
     }
+
+    // Update address markers if savedAddresses changed
+    if (oldWidget.savedAddresses != widget.savedAddresses ||
+        oldWidget.savedAddresses.length != widget.savedAddresses.length) {
+      _updateAddressMarkers();
+    }
   }
 
   @override
