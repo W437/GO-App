@@ -30,54 +30,35 @@ class CompactRestaurantWidget extends StatelessWidget {
       },
       radius: Dimensions.radiusDefault,
       child: SizedBox(
-        width: 120,
+        width: 80,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  child: CustomImageWidget(
-                    image: '${restaurant.logoFullUrl}',
-                    height: 120,
-                    width: 120,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    ),
-                    child: Text(
-                      'new'.tr,
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeExtraSmall,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+              child: CustomImageWidget(
+                image: '${restaurant.logoFullUrl}',
+                height: 80,
+                width: 80,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: Dimensions.paddingSizeSmall),
             Text(
               restaurant.name ?? '',
-              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
             Text(
               cuisines,
-              style: robotoRegular.copyWith(
+              style: robotoMedium.copyWith(
                 fontSize: Dimensions.fontSizeSmall,
-                color: Theme.of(context).disabledColor,
+                color: Theme.of(context).hintColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

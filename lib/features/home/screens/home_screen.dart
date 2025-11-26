@@ -20,7 +20,6 @@ import 'package:godelivery_user/features/home/widgets/cuisine_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/categories_cuisines_tabbed_widget.dart';
 import 'package:godelivery_user/features/home/widgets/enjoy_off_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/location_banner_view_widget.dart';
-import 'package:godelivery_user/features/home/widgets/new_on_go_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/new_rest_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/order_again_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/popular_foods_nearby_view_widget.dart';
@@ -28,7 +27,6 @@ import 'package:godelivery_user/features/home/widgets/theme1/item_campaign_widge
 import 'package:godelivery_user/features/home/widgets/popular_restaurants_view_widget.dart';
 import 'package:godelivery_user/features/home/widgets/refer_banner_view_widget.dart';
 import 'package:godelivery_user/features/home/screens/theme1_home_screen.dart';
-import 'package:godelivery_user/features/home/screens/theme2_home_screen.dart';
 import 'package:godelivery_user/features/home/widgets/simple_app_bar_widget.dart';
 import 'package:godelivery_user/features/home/widgets/simple_search_location_widget.dart';
 import 'package:godelivery_user/features/home/widgets/gradient_header_widget.dart';
@@ -293,8 +291,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
         final SplashController splashController = Get.find<SplashController>();
         if (ResponsiveHelper.isDesktop(context)) {
           bodyContent = WebHomeScreen(scrollController: _scrollController);
-        } else if (splashController.configModel!.theme == 3) {
-          bodyContent = Theme2HomeScreen(scrollController: _scrollController);
         } else if (splashController.configModel!.theme == 2) {
           bodyContent = Theme1HomeScreen(scrollController: _scrollController);
         } else {

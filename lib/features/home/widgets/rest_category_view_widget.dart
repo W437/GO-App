@@ -1,3 +1,4 @@
+import 'package:animated_emoji/animated_emoji.dart';
 import 'package:godelivery_user/features/home/widgets/categorized_restaurants_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -31,19 +32,28 @@ class RestCategoryViewWidget extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Title: "Explore"
+          // Section Title: "All Restaurants"
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: ResponsiveHelper.isDesktop(context)
                   ? 0
                   : Dimensions.paddingSizeDefault,
             ),
-            child: Text(
-              'explore'.tr,
-              style: robotoBold.copyWith(
-                fontSize: Dimensions.fontSizeOverLarge + 4,
-                fontWeight: FontWeight.w800,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  'all_restaurants'.tr,
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeOverLarge + 4,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AnimatedEmoji(
+                  AnimatedEmojis.yum,
+                  size: 28,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),

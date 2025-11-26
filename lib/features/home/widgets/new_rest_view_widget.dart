@@ -1,6 +1,7 @@
-import 'package:godelivery_user/features/home/widgets/compact_restaurant_widget.dart';
+import 'package:godelivery_user/features/home/widgets/rest_new_card.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
+import 'package:godelivery_user/util/app_colors.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -32,14 +33,25 @@ class NewRestViewWidget extends StatelessWidget {
           vertical: ResponsiveHelper.isMobile(context)
               ? Dimensions.paddingSizeDefault
               : Dimensions.paddingSizeLarge,
+          horizontal: 2,
         ),
         child: Container(
           width: Dimensions.webMaxWidth,
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
+            gradient: AppColors.gradientFrost,
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+            boxShadow: [
+              BoxShadow(
+                color: Get.isDarkMode
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.grey.withValues(alpha: 0.15),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
@@ -75,7 +87,7 @@ class NewRestViewWidget extends StatelessWidget {
 
               // Restaurant Cards - Horizontal List
               SizedBox(
-                height: 190,
+                height: 145,
                 child: ListView.builder(
                   padding: const EdgeInsets.only(
                     left: Dimensions.paddingSizeDefault,
@@ -119,10 +131,20 @@ class NewRestViewWidget extends StatelessWidget {
       child: Container(
         width: Dimensions.webMaxWidth,
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
+          gradient: AppColors.gradientFrost,
+          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+          boxShadow: [
+            BoxShadow(
+              color: Get.isDarkMode
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header shimmer
@@ -142,7 +164,7 @@ class NewRestViewWidget extends StatelessWidget {
 
             // Cards shimmer
             SizedBox(
-              height: 190,
+              height: 145,
               child: ListView.builder(
                 padding: const EdgeInsets.only(
                   left: Dimensions.paddingSizeDefault,

@@ -82,8 +82,8 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
               Positioned.fill(
                 child: Container(
                   color: Get.isDarkMode
-                      ? Colors.black.withValues(alpha: 0.7)
-                      : Colors.white.withValues(alpha: 0.7),
+                      ? Colors.black.withValues(alpha: 0.8)
+                      : Colors.white.withValues(alpha: 0.8),
                 ),
               ),
               // Fade gradient at top
