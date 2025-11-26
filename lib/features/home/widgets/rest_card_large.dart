@@ -341,13 +341,13 @@ class RestaurantView extends StatelessWidget {
             ),
 
             // Content Section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     // Restaurant Name, Description and ETA
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -556,6 +556,7 @@ class RestaurantView extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
           ],
         ),
       ),

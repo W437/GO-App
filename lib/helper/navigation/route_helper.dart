@@ -435,6 +435,7 @@ class RouteHelper {
       customTransition: _ThreeDGetTransition(),
       transitionDuration: const Duration(milliseconds: 500),
       opaque: false,
+      popGesture: true,
     ),
     GetPage(
       name: restaurantDetails,

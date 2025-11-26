@@ -126,8 +126,8 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
                         Text(
                           'highlights_for_you'.tr,
                           style: robotoBold.copyWith(
-                            fontSize: Dimensions.fontSizeOverLarge,
-                            fontWeight: FontWeight.w800,
+                            fontSize: Dimensions.fontSizeLarge,
+                            fontWeight: FontWeight.w600,
                             height: 1.2,
                           ),
                         ),
