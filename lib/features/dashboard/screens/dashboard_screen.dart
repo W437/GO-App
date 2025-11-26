@@ -67,7 +67,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
     );
     _animation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOutCubic, // Quick start, smooth end
     );
     _animationController.value = 1.0;
 
@@ -355,19 +355,14 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   }
 
   double _calculateOverlayScale(double progress) {
-    const double scaleEndProgress = 0.8;
-    const double minScale = 0.9;
-    const double maxScale = 1.0;
+    const double minScale = 0.7; // Start at 70%
+    const double maxScale = 1.0; // End at normal size
 
     final clamped = progress.clamp(0.0, 1.0);
 
-    if (clamped <= scaleEndProgress) {
-      final normalized = clamped / scaleEndProgress;
-      final eased = Curves.easeOutQuad.transform(normalized);
-      return lerpDouble(minScale, maxScale, eased)!;
-    }
-
-    return maxScale;
+    // Jelly-smooth spring bounce with continuous elasticOut curve
+    final eased = Curves.elasticOut.transform(clamped);
+    return lerpDouble(minScale, maxScale, eased)!;
   }
 
   void _setPage(int pageIndex, [Offset? tapPosition]) {
