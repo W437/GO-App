@@ -1,7 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:godelivery_user/api/api_checker.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/home/screens/home_screen.dart';
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';

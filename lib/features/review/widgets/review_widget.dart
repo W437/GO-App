@@ -1,6 +1,6 @@
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/review_model.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/rating_bar_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/readmore_widget.dart';

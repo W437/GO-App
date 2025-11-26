@@ -4,7 +4,7 @@ import 'package:godelivery_user/features/coupon/domain/models/customer_coupon_mo
 import 'package:godelivery_user/features/coupon/domain/services/coupon_service_interface.dart';
 import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/helper/converters/price_converter.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:get/get.dart';
 
 class CouponController extends GetxController implements GetxService {

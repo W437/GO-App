@@ -6,7 +6,7 @@ import 'package:godelivery_user/features/auth/widgets/min_max_time_picker_widget
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

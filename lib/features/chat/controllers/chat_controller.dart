@@ -14,7 +14,7 @@ import 'package:godelivery_user/features/chat/enums/user_type_enum.dart';
 import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/utilities/image_size_checker.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';

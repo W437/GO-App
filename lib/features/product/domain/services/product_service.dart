@@ -2,7 +2,7 @@ import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/product/domain/repositories/product_repository_interface.dart';
 import 'package:godelivery_user/features/product/domain/services/product_service_interface.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

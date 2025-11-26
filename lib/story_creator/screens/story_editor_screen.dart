@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:video_player/video_player.dart';
 
 import '../config/story_creator_config.dart';
@@ -170,9 +171,7 @@ class _StoryEditorScreenState extends State<StoryEditorScreen> {
       Navigator.of(context).pop(true);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload story: $error')),
-      );
+      showCustomSnackBar('Failed to upload story: $error', isError: true);
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);

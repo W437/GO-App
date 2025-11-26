@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:ui';
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';

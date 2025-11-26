@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:animated_emoji/animated_emoji.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/no_internet_screen_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';

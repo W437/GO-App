@@ -1,19 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/auth/widgets/sign_in/sign_in_view.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/language/widgets/language_card_widget.dart';
 import 'package:godelivery_user/features/onboard/controllers/onboard_controller.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
-import 'package:godelivery_user/helper/business_logic/address_helper.dart';
-import 'package:godelivery_user/helper/utilities/notification_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
-import 'package:godelivery_user/main.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -29,6 +25,7 @@ class UnifiedOnboardingScreen extends StatefulWidget {
 
 class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
   final PageController _pageController = PageController();
+  static const int _totalPages = 6;
   int _currentPage = 0;
 
   @override
@@ -44,17 +41,15 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 4) {
+    if (_currentPage < _totalPages - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-    } else {
-      _finishOnboarding();
     }
   }
 
-  void _finishOnboarding() async {
+  void _continueAsGuest() async {
     Get.find<SplashController>().disableIntro();
 
     await Get.find<AuthController>().guestLogin();
@@ -77,6 +72,9 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
               setState(() {
                 _currentPage = index;
               });
+              if (index == _totalPages - 1) {
+                Get.find<SplashController>().disableIntro();
+              }
             },
             children: [
               // Page 0: Language Selection
@@ -87,6 +85,9 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
               // Pages 2-4: Onboarding steps
               ...List.generate(3, (index) => SafeArea(child: _buildOnboardingPage(index))),
+
+              // Page 5: Sign in
+              SafeArea(child: _buildSignInPage()),
             ],
           ),
 
@@ -110,7 +111,7 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                     ),
                     child: SmoothPageIndicator(
                       controller: _pageController,
-                      count: 5,
+                      count: _totalPages,
                       effect: SwapEffect(
                         dotHeight: 8,
                         dotWidth: 8,
@@ -133,7 +134,7 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                   child: GetBuilder<LocalizationController>(
                     builder: (localizationController) {
                       return CustomButtonWidget(
-                        buttonText: _currentPage == 4 ? 'get_started'.tr : 'next'.tr,
+                        buttonText: _currentPage == _totalPages - 1 ? 'skip'.tr : 'next'.tr,
                         onPressed: () {
                           // Validate language selection on first page
                           if (_currentPage == 0) {
@@ -142,7 +143,11 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                               return;
                             }
                           }
-                          _nextPage();
+                          if (_currentPage == _totalPages - 1) {
+                            _continueAsGuest();
+                          } else {
+                            _nextPage();
+                          }
                         },
                       );
                     },
@@ -338,6 +343,80 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
     );
   }
 
+  // Sign-in Page
+  Widget _buildSignInPage() {
+    final double baseHeight = MediaQuery.of(context).size.height * 0.65;
+    final double formHeight = baseHeight < 420 ? 420 : baseHeight;
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          Dimensions.paddingSizeLarge,
+          Dimensions.paddingSizeLarge,
+          Dimensions.paddingSizeLarge,
+          140, // Bottom padding for overlay buttons
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'login_to_continue'.tr,
+              style: robotoBold.copyWith(
+                fontSize: 28,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+            Text(
+              'now_you_are_in_guest_mode_please_login_to_view_all_the_features'.tr,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeSmall,
+                color: Theme.of(context).hintColor,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeLarge),
+            Container(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: formHeight,
+            child: SignInView(
+              exitFromApp: false,
+              backFromThis: false,
+              isOtpViewEnable: (isEnable) => Get.find<AuthController>().enableOtpView(enable: isEnable),
+            ),
+          ),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+        Center(
+          child: TextButton(
+                onPressed: _continueAsGuest,
+                child: Text(
+                  'skip'.tr,
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // Onboarding Step Page
   Widget _buildOnboardingPage(int index) {
     return GetBuilder<LocalizationController>(
@@ -361,54 +440,54 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              // Illustration - Placeholder
-              Container(
-                width: MediaQuery.of(context).size.width * 0.6,
-                height: MediaQuery.of(context).size.height * 0.35,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                    width: 2,
+                  // Illustration - Placeholder
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    height: MediaQuery.of(context).size.height * 0.35,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 80,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                      ),
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.image_outlined,
-                    size: 80,
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+
+                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                  // Title
+                  Text(
+                    onBoardingController.onBoardingList![index].title,
+                    style: robotoBold.copyWith(
+                      fontSize: 28,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
 
-              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  const SizedBox(height: Dimensions.paddingSizeDefault),
 
-              // Title
-              Text(
-                onBoardingController.onBoardingList![index].title,
-                style: robotoBold.copyWith(
-                  fontSize: 28,
-                  color: Theme.of(context).primaryColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-
-              // Description
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                child: Text(
-                  onBoardingController.onBoardingList![index].description,
-                  style: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: Theme.of(context).disabledColor,
-                    height: 1.5,
+                  // Description
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                    child: Text(
+                      onBoardingController.onBoardingList![index].description,
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: Theme.of(context).disabledColor,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
                 ],
               ),
             );

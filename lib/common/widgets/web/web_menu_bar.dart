@@ -1,7 +1,7 @@
 /// Web menu bar widget with language selector, theme toggle and navigation menu
 /// Provides header navigation for desktop browsers with location display and user actions
 import 'package:flutter/cupertino.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';

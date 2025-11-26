@@ -12,7 +12,7 @@ import 'package:godelivery_user/features/location/domain/services/location_servi
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/business_logic/auth_helper.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';

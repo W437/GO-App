@@ -350,11 +350,12 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   }
 
   double _calculateOverlayScale(double progress) {
-    const double minScale = 0.8; // Start at 80%
+    const double minScale = 0.87; // Start at 87%
     const double maxScale = 1.0; // End at normal size
 
     final clamped = progress.clamp(0.0, 1.0);
-    return lerpDouble(minScale, maxScale, clamped)!;
+    final eased = Curves.easeOut.transform(clamped);
+    return lerpDouble(minScale, maxScale, eased)!;
   }
 
   void _setPage(int pageIndex, [Offset? tapPosition]) {

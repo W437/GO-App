@@ -3,7 +3,7 @@ import 'package:godelivery_user/features/profile/domain/models/update_user_model
 import 'package:godelivery_user/features/profile/domain/models/userinfo_model.dart';
 import 'package:godelivery_user/features/profile/domain/repositories/profile_repository_interface.dart';
 import 'package:godelivery_user/features/profile/domain/services/profile_service_interface.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 

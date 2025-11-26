@@ -3,7 +3,7 @@ import 'package:godelivery_user/common/models/online_cart_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/adaptive/cart/cart_snackbar_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/cart/domain/models/restaurant_cart_model.dart';
