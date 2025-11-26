@@ -350,23 +350,6 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
       builder: (context, constraints) {
         return Stack(
           children: [
-            // Skip in top-right
-            Positioned(
-              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
-              right: Dimensions.paddingSizeLarge,
-              child: CustomButtonWidget(
-                onPressed: _continueAsGuest,
-                buttonText: 'skip'.tr,
-                color: Theme.of(context).disabledColor.withValues(alpha: 0.15),
-                textColor: Theme.of(context).hintColor,
-                radius: Dimensions.radiusLarge,
-                height: 36,
-                width: null,
-                isBold: false,
-                expand: false,
-              ),
-            ),
-
             // Sign-in content anchored near bottom
             SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(
@@ -395,6 +378,24 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                     const SizedBox(height: 32),
                   ],
                 ),
+              ),
+            ),
+
+            // Skip button in top-right (must be after ScrollView to be on top)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              child: CustomButtonWidget(
+                onPressed: _continueAsGuest,
+                buttonText: 'skip'.tr,
+                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                textColor: Theme.of(context).hintColor,
+                radius: Dimensions.radiusLarge,
+                height: 40,
+                width: 80,
+                isBold: false,
+                expand: false,
+                fontSize: Dimensions.fontSizeDefault,
               ),
             ),
           ],
