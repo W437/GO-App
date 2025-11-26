@@ -1,6 +1,7 @@
 import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/api/api_client.dart';
+import 'package:godelivery_user/features/explore/domain/models/map_explore_response.dart';
 import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/repositories/restaurant_repository_interface.dart';
@@ -232,5 +233,15 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
       sectionResponse = HomeFeedSectionResponse.fromJson(response.body);
     }
     return sectionResponse;
+  }
+
+  @override
+  Future<MapExploreResponse?> getMapExploreRestaurants() async {
+    Response response = await apiClient.getData(AppConstants.mapExploreUri);
+    if (response.statusCode == 200) {
+      print('🗺️ [MAP EXPLORE] API response - total_count: ${response.body?['total_count']}, restaurants: ${(response.body?['restaurants'] as List?)?.length ?? 0}');
+      return MapExploreResponse.fromJson(response.body);
+    }
+    return null;
   }
 }

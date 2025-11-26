@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart' show Geolocator, LocationPermission;
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/location/helper/mapbox_zone_polygon_helper.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/helper/ui/map_utils.dart';
 
 /// Animation mode for the map intro
@@ -32,6 +36,7 @@ class MapboxPickMapWidget extends StatefulWidget {
   final List<ZoneListModel> zones;
   final int? highlightedZoneId;
   final int? savedZoneId;  // Zone to fly directly to (if user has a saved zone)
+  final List<AddressModel> savedAddresses;  // Saved addresses to show as markers
   final Color zoneBaseColor;
   final bool isDarkMode;
   final MapAnimationMode animationMode;
@@ -51,6 +56,7 @@ class MapboxPickMapWidget extends StatefulWidget {
     this.zones = const [],
     this.highlightedZoneId,
     this.savedZoneId,
+    this.savedAddresses = const [],
     required this.zoneBaseColor,
     this.isDarkMode = false,
     this.animationMode = MapAnimationMode.full,
@@ -71,6 +77,7 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
   PolygonAnnotationManager? _polygonManager;
   PolylineAnnotationManager? _polylineManager;  // For zone border strokes
   PolylineAnnotationManager? _stripeManager;    // For diagonal stripe pattern
+  PointAnnotationManager? _addressMarkerManager;  // For saved address markers
   bool _isMoving = false;
   Timer? _idleTimer;
   bool _hasAnimated = false;
@@ -173,9 +180,13 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
     _polygonManager = await mapboxMap.annotations.createPolygonAnnotationManager();
     _polylineManager = await mapboxMap.annotations.createPolylineAnnotationManager();
     _stripeManager = await mapboxMap.annotations.createPolylineAnnotationManager();
+    _addressMarkerManager = await mapboxMap.annotations.createPointAnnotationManager();
 
     // Add zone polygons and strokes
     await _updateZonePolygons();
+
+    // Add address markers
+    await _updateAddressMarkers();
 
     _mapReady = true;
     print('🗺️ [MAPBOX $_instanceId] mapReady=true');
@@ -590,10 +601,80 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
     }
   }
 
+  /// Create a marker icon image from an emoji
+  Future<Uint8List> _createEmojiMarkerIcon(String emoji, {double size = 100}) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+
+    // Draw emoji
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    textPainter.text = TextSpan(
+      text: emoji,
+      style: TextStyle(
+        fontSize: size,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset.zero);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(
+      (textPainter.width).toInt(),
+      (textPainter.height).toInt(),
+    );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  /// Update address markers
+  Future<void> _updateAddressMarkers() async {
+    if (_addressMarkerManager == null) return;
+
+    // Clear existing markers
+    await _addressMarkerManager!.deleteAll();
+
+    if (widget.savedAddresses.isEmpty) return;
+
+    // Create marker icon using emoji
+    final markerIcon = await _createEmojiMarkerIcon('📍', size: 80);
+
+    final markerOptions = <PointAnnotationOptions>[];
+
+    for (final address in widget.savedAddresses) {
+      if (address.latitude != null && address.longitude != null) {
+        final lat = double.tryParse(address.latitude!);
+        final lng = double.tryParse(address.longitude!);
+
+        if (lat != null && lng != null) {
+          markerOptions.add(
+            PointAnnotationOptions(
+              geometry: Point(coordinates: Position(lng, lat)),
+              image: markerIcon,
+              iconSize: 1.0,
+              iconAnchor: IconAnchor.BOTTOM,
+            ),
+          );
+        }
+      }
+    }
+
+    if (markerOptions.isNotEmpty) {
+      await _addressMarkerManager!.createMulti(markerOptions);
+      print('📍 [MAPBOX] Added ${markerOptions.length} address markers');
+    }
+  }
+
   /// Update polygons when zones or highlighted zone changes
   void updatePolygons(List<ZoneListModel> zones, int? highlightedZoneId) {
     if (_polygonManager != null) {
       _updateZonePolygons();
+    }
+  }
+
+  /// Update address markers when addresses change
+  void updateAddressMarkers(List<AddressModel> addresses) {
+    if (_addressMarkerManager != null) {
+      _updateAddressMarkers();
     }
   }
 

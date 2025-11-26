@@ -3,6 +3,7 @@ import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_w
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
+import 'package:godelivery_user/features/explore/domain/models/map_explore_response.dart';
 import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
@@ -623,4 +624,8 @@ class RestaurantController extends GetxController implements GetxService {
   /// Get categories from home feed
   List<HomeFeedCategorySection>? get homeFeedCategories => _homeFeedModel?.categories;
 
+  /// Get restaurants for map explore screen
+  Future<MapExploreResponse?> getMapExploreRestaurants() async {
+    return await restaurantServiceInterface.getMapExploreRestaurants();
+  }
 }

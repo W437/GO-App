@@ -141,8 +141,9 @@ class ExploreController extends GetxController implements GetxService {
       update();
     }
 
-    await restaurantController.getRestaurantList(1, reload, fromMap: true);
-    _nearbyRestaurants = restaurantController.restaurantModel?.restaurants;
+    final response = await restaurantController.getMapExploreRestaurants();
+    _nearbyRestaurants = response?.restaurants;
+    print('🗺️ [EXPLORE] Loaded ${_nearbyRestaurants?.length ?? 0} restaurants from map-explore API');
     _applyFiltersAndSort(); // Apply filters and sort immediately
 
     _isLoading = false;

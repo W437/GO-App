@@ -21,6 +21,7 @@ import 'package:godelivery_user/features/location/widgets/zone_list_widget.dart'
 import 'package:godelivery_user/features/location/widgets/location_manager_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/location_permission_overlay.dart';
 import 'package:godelivery_user/features/location/widgets/zone_floating_badge.dart';
+import 'package:godelivery_user/features/location/widgets/address_floating_badge.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
@@ -86,6 +87,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   late AnimationController _tapPromptBounceController;  // Uses sin() directly for smooth wiggle
   Timer? _tapPromptTimer;
   late MapMode _currentMode;  // Set in initState based on address state
+  bool _isAddingNewAddress = false;  // Track if user is in "add new address" mode
   int? _selectedZoneId;  // For zone selection mode
   LatLng? _selectedZoneCenter;  // Center position of selected zone
   String? _selectedZoneName;  // Name of selected zone
@@ -112,6 +114,18 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     if (AddressHelper.hasRealAddress()) {
       _currentMode = MapMode.addressSelection;
       print('🗺️ [PICK_MAP] User has real address - starting in Address mode');
+
+      // If user has address with coordinates, fly to it instead of zone
+      if (savedAddress != null &&
+          savedAddress.latitude != null &&
+          savedAddress.longitude != null) {
+        final lat = double.tryParse(savedAddress.latitude!);
+        final lng = double.tryParse(savedAddress.longitude!);
+        if (lat != null && lng != null) {
+          _initialPosition = LatLng(lat, lng);
+          print('🗺️ [PICK_MAP] Flying to saved address: $lat, $lng');
+        }
+      }
     } else {
       _currentMode = MapMode.zoneSelection;
       print('🗺️ [PICK_MAP] No real address - starting in Zone mode');
@@ -363,8 +377,11 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           zones: locationController.zoneList,
                           highlightedZoneId: _currentMode == MapMode.zoneSelection
                               ? _selectedZoneId
-                              : _currentZoneId,
+                              : (_isAddingNewAddress ? _currentZoneId : AddressHelper.getAddressFromSharedPref()?.zoneId),
                           savedZoneId: _savedZoneIdForAnimation,
+                          savedAddresses: _currentMode == MapMode.addressSelection
+                              ? (Get.find<AddressController>().addressList ?? [])
+                              : [],
                           zoneBaseColor: Theme.of(context).colorScheme.primary,
                           isDarkMode: false,  // Always use light/day mode
                           animationMode: _mapAnimationMode,
@@ -385,7 +402,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                             _cameraPosition = cameraPosition;
                           },
                           onCameraIdle: () {
-                            if (_cameraPosition != null && _currentMode == MapMode.addressSelection) {
+                            if (_cameraPosition != null && _currentMode == MapMode.addressSelection && _isAddingNewAddress) {
                               // Check if pinpoint is inside a zone first
                               final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
                                 _cameraPosition!.target,
@@ -459,7 +476,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                             zoom: 10.43,  // Zoom level to show Northern Israel service area
                           ),
                           minMaxZoomPreference: const MinMaxZoomPreference(6.5, 14),  // Limited zoom for zone selection
-                          polygons: _zonePolygons(locationController, context),
+                          polygons: _zonePolygons(locationController, context, _isAddingNewAddress),
                           markers: _currentMode == MapMode.addressSelection
                               ? _buildSavedAddressMarkers(locationController)
                               : <Marker>{},
@@ -487,7 +504,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                             locationController.disableButton();
                           },
                           onCameraIdle: () {
-                            if (_cameraPosition != null && _currentMode == MapMode.addressSelection) {
+                            if (_cameraPosition != null && _currentMode == MapMode.addressSelection && _isAddingNewAddress) {
                               // Check if pinpoint is inside a zone first
                               final newZoneId = ZonePolygonHelper.getZoneIdForPoint(
                                 _cameraPosition!.target,
@@ -582,7 +599,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                       ),
                       // Zone badge overlay - disabled for now in zone mode
                       // Pin marker - only show in address selection mode
-                      if (_currentMode == MapMode.addressSelection)
+                      // Pin icon - only show when adding new address
+                      if (_currentMode == MapMode.addressSelection && _isAddingNewAddress)
                         IgnorePointer(
                           child: Center(
                             child: AnimatedBuilder(
@@ -612,8 +630,9 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           ),
                         ),
 
-                      // Address Badge for address mode only (floating above pin)
+                      // Address Badge for address mode only (floating above pin) - only when adding new address
                       if (_currentMode == MapMode.addressSelection &&
+                          _isAddingNewAddress &&
                           locationController.pickAddress != null &&
                           locationController.pickAddress!.isNotEmpty)
                         Positioned(
@@ -926,27 +945,53 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                   ),
                           ),
                         ),
-                      // Address confirmation button for address mode
+                      // Floating address badge for address mode
                       if (_currentMode == MapMode.addressSelection)
                         Positioned(
                           bottom: 0,
                           left: 0,
                           right: 0,
                           child: SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                Dimensions.paddingSizeExtraLarge,
-                                0,
-                                Dimensions.paddingSizeExtraLarge,
-                                Dimensions.paddingSizeDefault,
-                              ),
-                              child: CustomButtonWidget(
-                                buttonText: 'confirm_delivery_address'.tr,
-                                isLoading: locationController.isLoading,
-                                onPressed: (locationController.buttonDisabled || locationController.loading || !locationController.inZone)
-                                    ? null
-                                    : () => _onPickAddressButtonPressed(locationController),
-                              ),
+                            child: AddressFloatingBadge(
+                              key: const ValueKey('address_floating_badge'),
+                              selectedAddress: AddressHelper.getAddressFromSharedPref(),
+                              addresses: Get.find<AddressController>().addressList ?? [],
+                              onAddressChanged: (address) {
+                                if (address != null) {
+                                  // Exit adding mode
+                                  setState(() {
+                                    _isAddingNewAddress = false;
+                                  });
+
+                                  // Smoothly fly to address location
+                                  final lat = double.tryParse(address.latitude ?? '');
+                                  final lng = double.tryParse(address.longitude ?? '');
+
+                                  if (lat != null && lng != null) {
+                                    if (Environment.useMapbox) {
+                                      _mapboxKey.currentState?.animateCamera(
+                                        LatLng(lat, lng),
+                                        zoom: 15,
+                                      );
+                                    } else {
+                                      _mapController?.animateCamera(
+                                        CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                            target: LatLng(lat, lng),
+                                            zoom: 15,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                } else {
+                                  // Null means "Add New Address" card - enter adding mode
+                                  setState(() {
+                                    _isAddingNewAddress = true;
+                                  });
+                                }
+                              },
+                              onAddNewAddress: () => _onPickAddressButtonPressed(locationController),
                             ),
                           ),
                         ),
@@ -1030,7 +1075,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     LocationManagerSheet.show(context);
   }
 
-  Set<Polygon> _zonePolygons(LocationController controller, BuildContext context) {
+  Set<Polygon> _zonePolygons(LocationController controller, BuildContext context, bool isAddingNewAddress) {
     if (!widget.showZonePolygons || controller.zoneList.isEmpty) {
       return <Polygon>{};
     }
@@ -1044,7 +1089,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       fillOpacity: 0.15,  // Slightly reduced for better balance with thinner strokes
       highlightedZoneId: _currentMode == MapMode.zoneSelection
           ? _selectedZoneId  // Highlight selected zone in zone mode
-          : _currentZoneId,  // Highlight current zone in address mode
+          : (isAddingNewAddress ? _currentZoneId : AddressHelper.getAddressFromSharedPref()?.zoneId),  // Highlight user's zone or current zone when adding
       useEnhancedStyle: true,
       onZoneTap: (zoneId) {
         if (_currentMode == MapMode.zoneSelection) {

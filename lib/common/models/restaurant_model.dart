@@ -223,13 +223,15 @@ class Restaurant {
     ratingCount = json['rating_count'];
     selfDeliverySystem = json['self_delivery_system'];
     posSystem = json['pos_system'];
-    open = json['open'];
+    // Handle both int and bool for 'open' field (map-explore returns bool, others return int)
+    open = json['open'] is bool ? (json['open'] ? 1 : 0) : json['open'];
     active = json['active'];
     deliveryTime = json['delivery_time'];
     minDeliveryTime = json['min_delivery_time'];
     maxDeliveryTime = json['max_delivery_time'];
-    veg = json['veg'];
-    nonVeg = json['non_veg'];
+    // Handle both int and bool for 'veg'/'non_veg' fields (map-explore returns bool, others return int)
+    veg = json['veg'] is bool ? (json['veg'] ? 1 : 0) : json['veg'];
+    nonVeg = json['non_veg'] is bool ? (json['non_veg'] ? 1 : 0) : json['non_veg'];
     categoryIds = json['category_ids'] != null ? json['category_ids'].cast<int>() : [];
     discount = json['discount'] != null ? Discount.fromJson(json['discount']) : null;
     if (json['schedules'] != null) {

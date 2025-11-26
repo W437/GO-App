@@ -2,6 +2,7 @@ import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/category/domain/models/category_model.dart';
+import 'package:godelivery_user/features/explore/domain/models/map_explore_response.dart';
 import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
@@ -208,5 +209,10 @@ class RestaurantService implements RestaurantServiceInterface {
   @override
   Future<HomeFeedSectionResponse?> getHomeFeedSection(String section, {int? categoryId, int offset = 1}) async {
     return await restaurantRepositoryInterface.getHomeFeedSection(section, categoryId: categoryId, offset: offset);
+  }
+
+  @override
+  Future<MapExploreResponse?> getMapExploreRestaurants() async {
+    return await restaurantRepositoryInterface.getMapExploreRestaurants();
   }
 }

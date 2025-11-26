@@ -167,11 +167,11 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
       child: ClipRRect(
         borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.grey[800]!.withOpacity(0.4),
+              color: Colors.grey[800]!.withOpacity(0.7),
               borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
               border: Border.all(
                 color: isUserCurrentZone
@@ -266,34 +266,6 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // "Your Zone" badge when this is user's saved zone
-                          if (isUserCurrentZone)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              margin: const EdgeInsets.only(right: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.greenAccent.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle,
-                                    size: 10,
-                                    color: Colors.greenAccent,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'your_zone'.tr,
-                                    style: robotoMedium.copyWith(
-                                      fontSize: 10,
-                                      color: Colors.greenAccent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           // Active/Closed status
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

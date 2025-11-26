@@ -13,7 +13,7 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
-import 'package:godelivery_user/features/dashboard/widgets/address_bottom_sheet.dart';
+import 'package:godelivery_user/features/location/widgets/location_manager_sheet.dart';
 import 'package:godelivery_user/features/dashboard/widgets/bottom_nav_item.dart';
 import 'package:godelivery_user/features/dashboard/widgets/circular_reveal_clipper.dart';
 import 'package:godelivery_user/features/dashboard/widgets/running_order_view_widget.dart';
@@ -148,7 +148,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
     active = await Get.find<DashboardController>().checkLocationActive();
     if(widget.fromSplash && Get.find<DashboardController>().showLocationSuggestion && active){
       Future.delayed(const Duration(seconds: 1), () {
-        AddressBottomSheet.show(Get.context!).then((value) {
+        LocationManagerSheet.show(Get.context!).then((value) {
           Get.find<DashboardController>().hideSuggestedLocation();
           setState(() {});
         });

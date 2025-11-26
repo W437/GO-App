@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
@@ -15,7 +16,6 @@ import 'package:godelivery_user/features/splash/controllers/splash_controller.da
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/helper/ui/map_utils.dart';
 import 'package:godelivery_user/util/dimensions.dart';
-import 'package:godelivery_user/util/images.dart';
 
 class MapboxExploreMapWidget extends StatefulWidget {
   final ExploreController exploreController;
@@ -84,16 +84,35 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
 
   Future<void> _loadMarkerImages() async {
     try {
-      // Load restaurant marker
-      final restaurantData = await rootBundle.load(Images.mapPin);
-      _restaurantMarkerBytes = restaurantData.buffer.asUint8List();
-
-      // Load user location marker
-      final userLocationData = await rootBundle.load(Images.pickLocationMapPin);
-      _userLocationMarkerBytes = userLocationData.buffer.asUint8List();
+      // Create emoji markers
+      _userLocationMarkerBytes = await _createEmojiMarkerIcon('📍', size: 120);
+      _restaurantMarkerBytes = await _createEmojiMarkerIcon('🍎', size: 120);
     } catch (e) {
-      debugPrint('Error loading marker images: $e');
+      debugPrint('Error creating marker images: $e');
     }
+  }
+
+  /// Create a marker icon image from an emoji
+  Future<Uint8List> _createEmojiMarkerIcon(String emoji, {double size = 100}) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+
+    // Draw emoji
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    textPainter.text = TextSpan(
+      text: emoji,
+      style: TextStyle(fontSize: size),
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset.zero);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(
+      textPainter.width.toInt(),
+      textPainter.height.toInt(),
+    );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
   }
 
   void _onMapCreated(MapboxMap mapboxMap) async {
