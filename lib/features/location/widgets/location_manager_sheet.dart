@@ -88,28 +88,30 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
         const Divider(height: 1),
 
         // Content
-        Flexible(
-          child: GetBuilder<LocationController>(
-            builder: (locationController) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Saved addresses (includes current location option)
-                    _buildSavedAddresses(context),
+        GetBuilder<LocationController>(
+          builder: (locationController) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                Dimensions.paddingSizeDefault,
+                Dimensions.paddingSizeDefault,
+                Dimensions.paddingSizeDefault,
+                Dimensions.paddingSizeDefault + MediaQuery.of(context).padding.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Saved addresses list
+                  _buildSavedAddresses(context),
 
-                    const SizedBox(height: Dimensions.paddingSizeDefault),
+                  const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                    // Explore Hopa! Zones button
-                    _buildExploreZonesButton(context),
-
-                    const SizedBox(height: Dimensions.paddingSizeDefault),
-                  ],
-                ),
-              );
-            },
-          ),
+                  // Explore Hopa! Zones button
+                  _buildExploreZonesButton(context),
+                ],
+              ),
+            );
+          },
         ),
       ],
     );

@@ -131,11 +131,11 @@ class _CustomSheetState extends State<CustomSheet> with TickerProviderStateMixin
     super.initState();
     _dismissController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 150),
     );
     _dismissAnimation = CurvedAnimation(
       parent: _dismissController,
-      curve: Curves.fastOutSlowIn,
+      curve: Curves.easeInCubic,
     );
 
     _snapBackController = AnimationController(
@@ -258,9 +258,12 @@ class _CustomSheetState extends State<CustomSheet> with TickerProviderStateMixin
                     child: Container(
                       width: 40,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
+                      margin: const EdgeInsets.only(
+                        top: Dimensions.paddingSizeDefault,
+                        bottom: Dimensions.paddingSizeDefault,
+                      ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                        color: Theme.of(context).hintColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
