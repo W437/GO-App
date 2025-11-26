@@ -22,15 +22,44 @@ class LocationService implements LocationServiceInterface{
   Future<Position> getPosition(LatLng? defaultLatLng, LatLng configLatLng) async {
     Position myPosition;
     try {
+      print('📍 [LOCATION] Requesting permission...');
       await Geolocator.requestPermission();
-      Position newLocalData = await Geolocator.getCurrentPosition();
+
+      print('📍 [LOCATION] Getting current position...');
+      final stopwatch = Stopwatch()..start();
+
+      // Try to get last known position first (instant)
+      Position? lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        final age = DateTime.now().difference(lastKnown.timestamp);
+        print('📍 [LOCATION] Last known position (age: ${age.inSeconds}s): ${lastKnown.latitude}, ${lastKnown.longitude}');
+
+        // If last known position is less than 2 minutes old, use it immediately
+        if (age.inMinutes < 2) {
+          print('📍 [LOCATION] Using recent last known position (${stopwatch.elapsedMilliseconds}ms)');
+          return lastKnown;
+        }
+      }
+
+      // Get fresh position with high accuracy
+      Position newLocalData = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15), // Timeout after 15 seconds
+        ),
+      );
+
+      print('📍 [LOCATION] Got current position in ${stopwatch.elapsedMilliseconds}ms');
+      print('📍 [LOCATION] Current: ${newLocalData.latitude}, ${newLocalData.longitude}');
+      stopwatch.stop();
+
       myPosition = newLocalData;
-    }catch(e) {
+    } catch(e) {
+      print('📍 [LOCATION] Error getting position: $e');
       myPosition = Position(
         latitude: defaultLatLng != null ? defaultLatLng.latitude : configLatLng.latitude,
         longitude: defaultLatLng != null ? defaultLatLng.longitude : configLatLng.longitude,
         timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1, altitudeAccuracy: 1, headingAccuracy: 1,
-
       );
     }
     return myPosition;

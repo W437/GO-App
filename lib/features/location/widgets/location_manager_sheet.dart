@@ -3,12 +3,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/screens/pick_map_screen.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:godelivery_user/common/widgets/shared/feedback/custom_snackbar_widget.dart';
+import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
@@ -19,30 +22,13 @@ class LocationManagerSheet extends StatefulWidget {
 
   /// Show the location manager bottom sheet
   static Future<void> show(BuildContext context) async {
-    final controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: Navigator.of(context),
-    );
-
-    final animation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
-    );
-
-    controller.forward();
-
-    await showModalBottomSheet(
+    CustomSheet.show(
       context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      transitionAnimationController: controller,
-      builder: (context) => _LocationManagerSheetContent(animation: animation),
+      child: const _LocationManagerSheetContent(),
+      showHandle: true,
+      padding: EdgeInsets.zero,
+      enableDrag: true,
     );
-
-    await controller.reverse();
-    controller.dispose();
   }
 
   @override
@@ -58,9 +44,7 @@ class _LocationManagerSheetState extends State<LocationManagerSheet> {
 
 /// Content of the location manager sheet
 class _LocationManagerSheetContent extends StatefulWidget {
-  final Animation<double> animation;
-
-  const _LocationManagerSheetContent({required this.animation});
+  const _LocationManagerSheetContent();
 
   @override
   State<_LocationManagerSheetContent> createState() => _LocationManagerSheetContentState();
@@ -71,187 +55,202 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.animation,
-      builder: (context, child) {
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.85,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(Dimensions.radiusExtraLarge),
-              topRight: Radius.circular(Dimensions.radiusExtraLarge),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'choose_your_location'.tr,
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeExtraLarge,
+                    color: Theme.of(context).textTheme.bodyLarge!.color,
+                  ),
+                ),
+              ),
+              RoundedIconButtonWidget(
+                icon: Icons.close_rounded,
+                onPressed: () => Get.back(),
+                size: 36,
+                iconSize: 20,
+                backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
+                pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.2),
+                iconColor: Theme.of(context).textTheme.bodyLarge!.color,
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle indicator
-              Container(
-                margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+        ),
 
-              // Header
-              Padding(
+        const Divider(height: 1),
+
+        // Content
+        Flexible(
+          child: GetBuilder<LocationController>(
+            builder: (locationController) {
+              return SingleChildScrollView(
                 padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'choose_your_location'.tr,
-                        style: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeExtraLarge,
-                          color: Theme.of(context).textTheme.bodyLarge!.color,
-                        ),
-                      ),
-                    ),
-                    RoundedIconButtonWidget(
-                      icon: Icons.close_rounded,
-                      onPressed: () => Get.back(),
-                      size: 36,
-                      iconSize: 20,
-                      backgroundColor: Theme.of(context).hintColor.withValues(alpha: 0.1),
-                      pressedColor: Theme.of(context).hintColor.withValues(alpha: 0.2),
-                      iconColor: Theme.of(context).textTheme.bodyLarge!.color,
-                    ),
+                    // Saved addresses (includes current location option)
+                    _buildSavedAddresses(context),
+
+                    const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                    // Explore Hopa! Zones button
+                    _buildExploreZonesButton(context),
+
+                    const SizedBox(height: Dimensions.paddingSizeDefault),
                   ],
                 ),
-              ),
-
-              const Divider(height: 1),
-
-              // Content
-              Flexible(
-                child: GetBuilder<LocationController>(
-                  builder: (locationController) {
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Current location option
-                          _buildCurrentLocationOption(context),
-
-                          const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                          // Saved addresses
-                          _buildSavedAddresses(context),
-
-                          const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                          // Explore Hopa! Zones button
-                          _buildExploreZonesButton(context),
-
-                          const SizedBox(height: Dimensions.paddingSizeDefault),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
   Widget _buildCurrentLocationOption(BuildContext context) {
     final currentAddress = AddressHelper.getAddressFromSharedPref();
     final isSelected = currentAddress?.addressType == 'current';
+    final locationController = Get.find<LocationController>();
+    final locationResult = locationController.lastCurrentLocationResult;
+    final inZone = locationController.lastCurrentLocationInZone;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _isLoadingCurrentLocation ? null : () => _handleUseCurrentLocation(context),
-        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-        child: Container(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-            border: Border.all(
-              color: isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
-                : Colors.transparent,
-              width: 2,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Result badge - shows after getting location with smooth animation
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child: locationResult != null
+              ? AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: 1.0,
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Dimensions.paddingSizeSmall,
+                      vertical: Dimensions.paddingSizeSmall,
+                    ),
+                    decoration: BoxDecoration(
+                      color: inZone
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      border: Border.all(
+                        color: inZone
+                            ? Colors.green.withValues(alpha: 0.3)
+                            : Colors.orange.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          inZone
+                              ? Icons.check_circle_outline_rounded
+                              : Icons.warning_amber_rounded,
+                          color: inZone ? Colors.green : Colors.orange,
+                          size: 18,
+                        ),
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                locationResult,
+                                style: robotoMedium.copyWith(
+                                  fontSize: Dimensions.fontSizeSmall,
+                                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (!inZone)
+                                Text(
+                                  'not_in_service_area'.tr,
+                                  style: robotoRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeExtraSmall,
+                                    color: Colors.orange,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        // Close button to dismiss result
+                        GestureDetector(
+                          onTap: () {
+                            locationController.clearCurrentLocationResult();
+                          },
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: Theme.of(context).hintColor,
+                            size: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+
+        // Get location button
+        CustomButtonWidget(
+          onPressed: _isLoadingCurrentLocation ? null : () => _handleUseCurrentLocation(context),
+          transparent: true,
+          height: 44,
+          radius: Dimensions.radiusDefault,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+            child: Row(
+              children: [
+                if (_isLoadingCurrentLocation)
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  )
+                else
+                  Icon(
+                    Icons.my_location_rounded,
+                    color: Theme.of(context).primaryColor,
+                    size: 20,
+                  ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Expanded(
+                  child: Text(
+                    _isLoadingCurrentLocation ? 'getting_location'.tr : 'use_current_location'.tr,
+                    style: robotoMedium.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                if (isSelected && locationResult == null && !_isLoadingCurrentLocation)
+                  Icon(
+                    Icons.check_rounded,
+                    color: Theme.of(context).primaryColor,
+                    size: 20,
+                  ),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                ),
-                child: _isLoadingCurrentLocation
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.my_location_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-              ),
-              const SizedBox(width: Dimensions.paddingSizeDefault),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _isLoadingCurrentLocation
-                          ? 'getting_location'.tr
-                          : 'current_location'.tr,
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeDefault,
-                        color: Theme.of(context).textTheme.bodyLarge!.color,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _isLoadingCurrentLocation
-                          ? 'please_wait'.tr
-                          : 'app_will_use_your_current_location'.tr,
-                      style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isSelected && !_isLoadingCurrentLocation)
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
-                ),
-            ],
-          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -259,153 +258,104 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
     return GetBuilder<AddressController>(
       builder: (addressController) {
         final addresses = addressController.addressList ?? [];
-
-        if (addresses.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        final currentAddress = AddressHelper.getAddressFromSharedPref();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                left: Dimensions.paddingSizeExtraSmall,
-                bottom: Dimensions.paddingSizeSmall,
-              ),
-              child: Text(
-                'saved_addresses'.tr,
-                style: robotoMedium.copyWith(
-                  fontSize: Dimensions.fontSizeSmall,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-            ),
-            ...addresses.take(3).map((address) {
-              final currentAddress = AddressHelper.getAddressFromSharedPref();
-              final isSelected = currentAddress?.id == address.id;
+            // Current location option
+            _buildCurrentLocationOption(context),
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _handleSelectAddress(context, address),
-                    borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                    child: Container(
-                      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                          ? Theme.of(context).primaryColor.withValues(alpha: 0.05)
-                          : Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                        border: Border.all(
-                          color: isSelected
-                            ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
-                            : Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                          width: isSelected ? 2 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                            ),
-                            child: Icon(
-                              _getAddressIcon(address.addressType ?? 'other'),
-                              color: Theme.of(context).hintColor,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: Dimensions.paddingSizeDefault),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  address.addressType?.tr ?? 'other'.tr,
-                                  style: robotoBold.copyWith(
-                                    fontSize: Dimensions.fontSizeDefault,
-                                    color: Theme.of(context).textTheme.bodyLarge!.color,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  address.address ?? '',
-                                  style: robotoRegular.copyWith(
-                                    fontSize: Dimensions.fontSizeSmall,
-                                    color: Theme.of(context).hintColor,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isSelected)
-                            Icon(
-                              Icons.check_circle,
-                              color: Theme.of(context).primaryColor,
-                              size: 24,
-                            ),
-                        ],
-                      ),
-                    ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+
+            // Saved addresses
+            if (addresses.isNotEmpty) ...[
+              ...addresses.take(5).map((address) {
+                final isSelected = currentAddress?.id == address.id;
+                return _buildAddressItem(context, address, isSelected);
+              }),
+            ] else
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Dimensions.paddingSizeExtraSmall,
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
+                child: Text(
+                  'no_saved_addresses'.tr,
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).hintColor,
                   ),
                 ),
-              );
-            }),
+              ),
           ],
         );
       },
     );
   }
 
-  Widget _buildExploreZonesButton(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _handleExploreZones(context),
-        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: Dimensions.paddingSizeDefault + 4,
-            horizontal: Dimensions.paddingSizeDefault,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+  Widget _buildAddressItem(BuildContext context, AddressModel address, bool isSelected) {
+    return CustomButtonWidget(
+      onPressed: () => _handleSelectAddress(context, address),
+      transparent: true,
+      height: 52,
+      radius: Dimensions.radiusDefault,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+        child: Row(
+          children: [
+            Icon(
+              _getAddressIcon(address.addressType ?? 'other'),
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).hintColor,
+              size: 20,
+            ),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    address.addressType?.tr ?? 'other'.tr,
+                    style: robotoMedium.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                  ),
+                  Text(
+                    address.address ?? '',
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeExtraSmall,
+                      color: Theme.of(context).hintColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.explore_rounded,
-                color: Colors.white,
-                size: 24,
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_rounded,
+                color: Theme.of(context).primaryColor,
+                size: 20,
               ),
-              const SizedBox(width: Dimensions.paddingSizeSmall),
-              Text(
-                'explore_hopa_zones'.tr,
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildExploreZonesButton(BuildContext context) {
+    return CustomButtonWidget(
+      onPressed: () => _handleExploreZones(context),
+      buttonText: 'explore_hopa_zones'.tr,
+      icon: Icons.explore_rounded,
+      radius: Dimensions.radiusDefault,
     );
   }
 
@@ -428,10 +378,7 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
     }
 
     if (permission == LocationPermission.denied) {
-      Get.snackbar(
-        'permission_required'.tr,
-        'location_permission_required'.tr,
-      );
+      showCustomSnackBar('location_permission_required'.tr, isError: true);
     } else if (permission == LocationPermission.deniedForever) {
       Get.dialog(const PermissionDialog());
     } else {
@@ -456,33 +403,21 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
           _isLoadingCurrentLocation = false;
         });
 
+        // Store result for display in controller (persists across sheet reopens)
+        final isInZone = addressModel.zoneId != null && addressModel.zoneId != 0;
+        Get.find<LocationController>().setCurrentLocationResult(addressModel.address, isInZone);
+
         // Check if location is in a valid zone
-        if (addressModel.zoneId != null && addressModel.zoneId != 0) {
+        if (isInZone) {
           // Save to SharedPreferences
           addressModel.addressType = 'current';
           AddressHelper.saveAddressInSharedPref(addressModel);
 
           // Close sheet and show success
           Get.back();
-          Get.snackbar(
-            'location_set'.tr,
-            addressModel.address ?? 'current_location'.tr,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-          );
-        } else {
-          // Location not in service zone
-          Get.snackbar(
-            'location_not_available'.tr,
-            'current_location_not_in_zone'.tr,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-          );
+          showCustomSnackBar(addressModel.address ?? 'location_set'.tr, isError: false);
         }
+        // If not in zone, the result badge will show the error state
       } catch (e) {
         print('❌ [CURRENT_LOCATION] Error: $e');
         if (!mounted) return;
@@ -491,13 +426,7 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
           _isLoadingCurrentLocation = false;
         });
 
-        Get.snackbar(
-          'error'.tr,
-          'failed_to_get_location'.tr,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        showCustomSnackBar('failed_to_get_location'.tr, isError: true);
       }
     }
   }

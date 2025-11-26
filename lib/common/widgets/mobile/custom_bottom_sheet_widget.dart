@@ -14,6 +14,7 @@ void showCustomBottomSheet({required Widget child, double? maxHeight}) {
   final curvedAnimation = CurvedAnimation(
     parent: controller,
     curve: Curves.easeOutBack,
+    reverseCurve: Curves.fastOutSlowIn,
   );
 
   controller.forward();

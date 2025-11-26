@@ -76,6 +76,25 @@ class LocationController extends GetxController implements GetxService {
   final Rx<ZoneListModel?> _activeZone = Rx<ZoneListModel?>(null);
   ZoneListModel? get activeZone => _activeZone.value;
 
+  /// Last current location result for display in location sheet
+  String? _lastCurrentLocationResult;
+  String? get lastCurrentLocationResult => _lastCurrentLocationResult;
+
+  bool _lastCurrentLocationInZone = false;
+  bool get lastCurrentLocationInZone => _lastCurrentLocationInZone;
+
+  void setCurrentLocationResult(String? address, bool inZone) {
+    _lastCurrentLocationResult = address;
+    _lastCurrentLocationInZone = inZone;
+    update();
+  }
+
+  void clearCurrentLocationResult() {
+    _lastCurrentLocationResult = null;
+    _lastCurrentLocationInZone = false;
+    update();
+  }
+
   bool _updateAddressData = true;
   bool _changeAddress = true;
 
@@ -95,14 +114,47 @@ class LocationController extends GetxController implements GetxService {
     fromAddress ? _position = myPosition : _pickPosition = myPosition;
 
     locationServiceInterface.handleMapAnimation(mapController, myPosition);
+
+    // Get address from geocode API
     String addressFromGeocode = await getAddressFromGeocode(LatLng(myPosition.latitude, myPosition.longitude));
     fromAddress ? _address = addressFromGeocode : _pickAddress = addressFromGeocode;
-    ZoneResponseModel responseModel = await getZone(myPosition.latitude.toString(), myPosition.longitude.toString(), true, showSnackBar: showSnackBar);
-    _buttonDisabled = !responseModel.isSuccess;
+
+    // Check zone locally using polygon helper (no API call needed)
+    final latLng = LatLng(myPosition.latitude, myPosition.longitude);
+    final zoneId = ZonePolygonHelper.getZoneIdForPoint(latLng, _zoneList);
+    final isInZone = zoneId != null;
+
+    print('📍 [ZONE_CHECK] Local zone check: lat=${myPosition.latitude}, lng=${myPosition.longitude}');
+    print('📍 [ZONE_CHECK] Zone ID: $zoneId, In Zone: $isInZone');
+
+    // Get zone data if in zone
+    ZoneData? zoneData;
+    if (isInZone) {
+      final zone = _zoneList.firstWhereOrNull((z) => z.id == zoneId);
+      if (zone != null) {
+        zoneData = ZoneData(
+          id: zone.id,
+          status: zone.status,
+          minimumShippingCharge: zone.minimumShippingCharge,
+          perKmShippingCharge: zone.perKmShippingCharge,
+          maximumShippingCharge: zone.maximumShippingCharge,
+          maxCodOrderAmount: zone.maxCodOrderAmount,
+        );
+      }
+    }
+
+    _inZone = isInZone;
+    _zoneID = zoneId ?? 0;
+    _buttonDisabled = !isInZone;
+
     addressModel = AddressModel(
-      latitude: myPosition.latitude.toString(), longitude: myPosition.longitude.toString(), addressType: 'others',
-      zoneId: responseModel.isSuccess ? responseModel.zoneIds[0] : 0, zoneIds: responseModel.zoneIds,
-      address: addressFromGeocode, zoneData: responseModel.zoneData,
+      latitude: myPosition.latitude.toString(),
+      longitude: myPosition.longitude.toString(),
+      addressType: 'others',
+      zoneId: zoneId ?? 0,
+      zoneIds: zoneId != null ? [zoneId] : [],
+      address: addressFromGeocode,
+      zoneData: zoneData != null ? [zoneData] : [],
     );
     _loading = false;
     update();
