@@ -41,4 +41,14 @@ class AddressHelper {
     return true;
   }
 
+  /// Check if user has a real address saved (not just zone selection)
+  /// Returns true if address exists and is NOT a zone-only selection
+  static bool hasRealAddress() {
+    final address = getAddressFromSharedPref();
+    return address != null &&
+           address.addressType != 'zone' &&
+           address.address != null &&
+           address.address!.isNotEmpty;
+  }
+
 }

@@ -66,7 +66,7 @@ class LocationRepo implements LocationRepoInterface {
 
   @override
   Future<Response> updateZone() async {
-    return await apiClient.getData(AppConstants.updateZoneUri);
+    return await apiClient.putData(AppConstants.updateZoneUri, {});
   }
 
   @override

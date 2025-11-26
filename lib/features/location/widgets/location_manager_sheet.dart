@@ -3,13 +3,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
-import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
-import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/screens/pick_map_screen.dart';
-import 'package:godelivery_user/features/location/widgets/all_zones_sheet.dart';
 import 'package:godelivery_user/features/location/widgets/permission_dialog.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -60,15 +57,22 @@ class _LocationManagerSheetState extends State<LocationManagerSheet> {
 }
 
 /// Content of the location manager sheet
-class _LocationManagerSheetContent extends StatelessWidget {
+class _LocationManagerSheetContent extends StatefulWidget {
   final Animation<double> animation;
 
   const _LocationManagerSheetContent({required this.animation});
 
   @override
+  State<_LocationManagerSheetContent> createState() => _LocationManagerSheetContentState();
+}
+
+class _LocationManagerSheetContentState extends State<_LocationManagerSheetContent> {
+  bool _isLoadingCurrentLocation = false;
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: animation,
+      animation: widget.animation,
       builder: (context, child) {
         return Container(
           constraints: BoxConstraints(
@@ -150,13 +154,8 @@ class _LocationManagerSheetContent extends StatelessWidget {
 
                           const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                          // Explore service areas
-                          _buildServiceAreasButton(context),
-
-                          const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                          // Add new location button
-                          _buildAddLocationButton(context),
+                          // Explore Hopa! Zones button
+                          _buildExploreZonesButton(context),
 
                           const SizedBox(height: Dimensions.paddingSizeDefault),
                         ],
@@ -179,7 +178,7 @@ class _LocationManagerSheetContent extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _handleUseCurrentLocation(context),
+        onTap: _isLoadingCurrentLocation ? null : () => _handleUseCurrentLocation(context),
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
         child: Container(
           padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -202,11 +201,19 @@ class _LocationManagerSheetContent extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                 ),
-                child: const Icon(
-                  Icons.my_location_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: _isLoadingCurrentLocation
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.my_location_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
               ),
               const SizedBox(width: Dimensions.paddingSizeDefault),
               Expanded(
@@ -214,7 +221,9 @@ class _LocationManagerSheetContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'current_location'.tr,
+                      _isLoadingCurrentLocation
+                          ? 'getting_location'.tr
+                          : 'current_location'.tr,
                       style: robotoBold.copyWith(
                         fontSize: Dimensions.fontSizeDefault,
                         color: Theme.of(context).textTheme.bodyLarge!.color,
@@ -222,7 +231,9 @@ class _LocationManagerSheetContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'app_will_use_your_current_location'.tr,
+                      _isLoadingCurrentLocation
+                          ? 'please_wait'.tr
+                          : 'app_will_use_your_current_location'.tr,
                       style: robotoRegular.copyWith(
                         fontSize: Dimensions.fontSizeSmall,
                         color: Theme.of(context).hintColor,
@@ -231,7 +242,7 @@ class _LocationManagerSheetContent extends StatelessWidget {
                   ],
                 ),
               ),
-              if (isSelected)
+              if (isSelected && !_isLoadingCurrentLocation)
                 Icon(
                   Icons.check_circle,
                   color: Theme.of(context).primaryColor,
@@ -353,77 +364,11 @@ class _LocationManagerSheetContent extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceAreasButton(BuildContext context) {
+  Widget _buildExploreZonesButton(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _handleShowServiceAreas(context),
-        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-        child: Container(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-            border: Border.all(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                ),
-                child: Icon(
-                  Icons.public_rounded,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: Dimensions.paddingSizeDefault),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'explore_our_service_areas'.tr,
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeDefault,
-                        color: Theme.of(context).textTheme.bodyLarge!.color,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'see_where_we_are_operating'.tr,
-                      style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Theme.of(context).hintColor,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddLocationButton(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _handleAddNewLocation(context),
+        onTap: () => _handleExploreZones(context),
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
         child: Container(
           padding: const EdgeInsets.symmetric(
@@ -445,13 +390,13 @@ class _LocationManagerSheetContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                Icons.add_location_alt_rounded,
+                Icons.explore_rounded,
                 color: Colors.white,
                 size: 24,
               ),
               const SizedBox(width: Dimensions.paddingSizeSmall),
               Text(
-                'add_new_location'.tr,
+                'explore_hopa_zones'.tr,
                 style: robotoBold.copyWith(
                   fontSize: Dimensions.fontSizeDefault,
                   color: Colors.white,
@@ -490,8 +435,70 @@ class _LocationManagerSheetContent extends StatelessWidget {
     } else if (permission == LocationPermission.deniedForever) {
       Get.dialog(const PermissionDialog());
     } else {
-      Get.back();
-      Get.find<LocationController>().getCurrentLocation(true);
+      // Show loading state
+      setState(() {
+        _isLoadingCurrentLocation = true;
+      });
+
+      try {
+        // Get current location and await result
+        final addressModel = await Get.find<LocationController>().getCurrentLocation(true);
+
+        print('📍 [CURRENT_LOCATION] Result:');
+        print('   Address: ${addressModel.address}');
+        print('   Lat: ${addressModel.latitude}, Lng: ${addressModel.longitude}');
+        print('   Zone ID: ${addressModel.zoneId}');
+        print('   In Zone: ${addressModel.zoneId != null && addressModel.zoneId != 0}');
+
+        if (!mounted) return;
+
+        setState(() {
+          _isLoadingCurrentLocation = false;
+        });
+
+        // Check if location is in a valid zone
+        if (addressModel.zoneId != null && addressModel.zoneId != 0) {
+          // Save to SharedPreferences
+          addressModel.addressType = 'current';
+          AddressHelper.saveAddressInSharedPref(addressModel);
+
+          // Close sheet and show success
+          Get.back();
+          Get.snackbar(
+            'location_set'.tr,
+            addressModel.address ?? 'current_location'.tr,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        } else {
+          // Location not in service zone
+          Get.snackbar(
+            'location_not_available'.tr,
+            'current_location_not_in_zone'.tr,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      } catch (e) {
+        print('❌ [CURRENT_LOCATION] Error: $e');
+        if (!mounted) return;
+
+        setState(() {
+          _isLoadingCurrentLocation = false;
+        });
+
+        Get.snackbar(
+          'error'.tr,
+          'failed_to_get_location'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
   }
 
@@ -510,57 +517,37 @@ class _LocationManagerSheetContent extends StatelessWidget {
     );
   }
 
-  void _handleShowServiceAreas(BuildContext context) {
-    // Close this sheet first
-    Get.back();
-
-    // Then show AllZonesSheet
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (Get.context != null) {
-        CustomSheet.show(
-          context: Get.context!,
-          child: const AllZonesSheet(),
-          showHandle: true,
-          padding: const EdgeInsets.symmetric(
-            horizontal: Dimensions.paddingSizeExtraLarge,
-            vertical: Dimensions.paddingSizeDefault,
-          ),
-        );
-      }
-    });
-  }
-
-  void _handleAddNewLocation(BuildContext context) {
+  void _handleExploreZones(BuildContext context) {
     Get.back();
 
     Future.delayed(const Duration(milliseconds: 150), () {
-      if (Get.context != null) {
-        CustomFullSheet.show(
-          context: Get.context!,
-          child: PickMapScreen(
-            fromSignUp: false,
-            fromSplash: false,
-            fromAddAddress: false,
-            canRoute: false,
-            route: 'home',
-            onZoneSelected: (zone) async {
-              // Close the map sheet
-              Get.back();
+      // Navigate to PickMapScreen as a normal screen
+      Get.to(
+        () => PickMapScreen(
+          fromSignUp: false,
+          fromSplash: false,
+          fromAddAddress: false,
+          canRoute: false,
+          route: 'home',
+          onZoneSelected: (zone) async {
+            // Close the map screen
+            Get.back();
 
-              // Change zone and refresh data (does NOT change delivery address)
-              await Get.find<LocationController>().changeZone(zone);
+            // Change zone and refresh data (does NOT change delivery address)
+            await Get.find<LocationController>().changeZone(zone);
 
-              // Show confirmation snackbar
-              Get.snackbar(
-                'zone_updated'.tr,
-                zone.displayName ?? zone.name ?? 'Zone ${zone.id}',
-                snackPosition: SnackPosition.BOTTOM,
-                duration: const Duration(seconds: 2),
-              );
-            },
-          ),
-        );
-      }
+            // Show confirmation snackbar
+            Get.snackbar(
+              'zone_updated'.tr,
+              zone.displayName ?? zone.name ?? 'Zone ${zone.id}',
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 2),
+            );
+          },
+        ),
+        transition: Transition.rightToLeft,
+        duration: const Duration(milliseconds: 300),
+      );
     });
   }
 }

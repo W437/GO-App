@@ -13,6 +13,7 @@ class ZoneFloatingBadge extends StatefulWidget {
   final List<ZoneListModel> zones;
   final Function(ZoneListModel?) onZoneChanged;
   final VoidCallback onConfirm;
+  final int? userSavedZoneId; // User's currently saved zone ID
 
   const ZoneFloatingBadge({
     super.key,
@@ -20,6 +21,7 @@ class ZoneFloatingBadge extends StatefulWidget {
     required this.zones,
     required this.onZoneChanged,
     required this.onConfirm,
+    this.userSavedZoneId,
   });
 
   @override
@@ -158,6 +160,7 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
     const operatingHours = '10:00 AM - 11:00 PM';
     const restaurantCount = 28;
     final isOpen = zone.status == 1;
+    final isUserCurrentZone = widget.userSavedZoneId != null && zone.id == widget.userSavedZoneId;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -171,8 +174,10 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
               color: Colors.grey[800]!.withOpacity(0.4),
               borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
+                color: isUserCurrentZone
+                    ? Colors.greenAccent.withOpacity(0.6)
+                    : Colors.white.withOpacity(0.1),
+                width: isUserCurrentZone ? 2 : 1,
               ),
             ),
             child: Column(
@@ -258,32 +263,66 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                     Positioned(
                       top: 0,
                       right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: isOpen
-                              ? Colors.greenAccent.withOpacity(0.2)
-                              : Colors.redAccent.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.circle,
-                              size: 6,
-                              color: isOpen ? Colors.greenAccent : Colors.redAccent,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              isOpen ? 'Active' : 'Closed',
-                              style: robotoMedium.copyWith(
-                                fontSize: 10,
-                                color: isOpen ? Colors.greenAccent : Colors.redAccent,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // "Your Zone" badge when this is user's saved zone
+                          if (isUserCurrentZone)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              margin: const EdgeInsets.only(right: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.greenAccent.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    size: 10,
+                                    color: Colors.greenAccent,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'your_zone'.tr,
+                                    style: robotoMedium.copyWith(
+                                      fontSize: 10,
+                                      color: Colors.greenAccent,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          // Active/Closed status
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: isOpen
+                                  ? Colors.greenAccent.withOpacity(0.2)
+                                  : Colors.redAccent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 6,
+                                  color: isOpen ? Colors.greenAccent : Colors.redAccent,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isOpen ? 'Active' : 'Closed',
+                                  style: robotoMedium.copyWith(
+                                    fontSize: 10,
+                                    color: isOpen ? Colors.greenAccent : Colors.redAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -317,14 +356,16 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Confirm button
+                    // Confirm button - disabled if user's current zone or closed
                     Expanded(
                       flex: 2,
                       child: CustomButtonWidget(
                         height: 36,
-                        buttonText: 'Confirm Zone Selection',
+                        buttonText: isUserCurrentZone
+                            ? 'current_zone'.tr
+                            : 'confirm_zone_selection'.tr,
                         fontSize: Dimensions.fontSizeSmall,
-                        onPressed: isOpen ? widget.onConfirm : null,
+                        onPressed: (isOpen && !isUserCurrentZone) ? widget.onConfirm : null,
                       ),
                     ),
                   ],

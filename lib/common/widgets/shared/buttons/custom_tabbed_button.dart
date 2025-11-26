@@ -6,10 +6,12 @@ import 'package:godelivery_user/util/styles.dart';
 class TabbedButtonItem {
   final String label;
   final IconData? icon;
+  final bool showBadge;
 
   const TabbedButtonItem({
     required this.label,
     this.icon,
+    this.showBadge = false,
   });
 }
 
@@ -198,45 +200,114 @@ class CustomTabbedButton extends StatelessWidget {
     required Color? unselectedColor,
     required bool showIcon,
   }) {
+    final tabContent = showIcon && item.icon != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                item.icon,
+                size: 14,
+                color: isSelected ? selectedColor : unselectedColor,
+              ),
+              const SizedBox(width: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                style: robotoMedium.copyWith(
+                  fontSize: Dimensions.fontSizeSmall,
+                  color: isSelected ? selectedColor : unselectedColor,
+                ),
+                child: Text(item.label),
+              ),
+            ],
+          )
+        : AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            style: robotoBold.copyWith(
+              fontSize: Dimensions.fontSizeSmall,
+              color: isSelected ? selectedColor : unselectedColor,
+            ),
+            child: Text(item.label),
+          );
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Container(
-          alignment: Alignment.center,
-          child: showIcon && item.icon != null
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      item.icon,
-                      size: 14,
-                      color: isSelected ? selectedColor : unselectedColor,
-                    ),
-                    const SizedBox(width: 4),
-                    AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOutCubic,
-                      style: robotoMedium.copyWith(
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: isSelected ? selectedColor : unselectedColor,
-                      ),
-                      child: Text(item.label),
-                    ),
-                  ],
-                )
-              : AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeSmall,
-                    color: isSelected ? selectedColor : unselectedColor,
-                  ),
-                  child: Text(item.label),
-                ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              child: tabContent,
+            ),
+            if (item.showBadge && !isSelected)
+              const Positioned(
+                top: -2,
+                right: 4,
+                child: _PulsingBadge(),
+              ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// A pulsing red badge indicator widget
+class _PulsingBadge extends StatefulWidget {
+  const _PulsingBadge();
+
+  @override
+  State<_PulsingBadge> createState() => _PulsingBadgeState();
+}
+
+class _PulsingBadgeState extends State<_PulsingBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: Colors.red.withValues(alpha: _animation.value),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withValues(alpha: _animation.value * 0.5),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

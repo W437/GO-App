@@ -84,7 +84,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
   late Animation<double> _tapPromptWiggleAnimation;
   late AnimationController _tapPromptBounceController;  // Uses sin() directly for smooth wiggle
   Timer? _tapPromptTimer;
-  MapMode _currentMode = MapMode.zoneSelection;  // Default to zone selection
+  late MapMode _currentMode;  // Set in initState based on address state
   int? _selectedZoneId;  // For zone selection mode
   LatLng? _selectedZoneCenter;  // Center position of selected zone
   String? _selectedZoneName;  // Name of selected zone
@@ -105,6 +105,15 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       _savedZoneIdForAnimation = savedAddress.zoneId;
       _selectedZoneId = savedAddress.zoneId;  // Also pre-select it
       print('🗺️ [PICK_MAP] Found saved zone ID for animation: $_savedZoneIdForAnimation');
+    }
+
+    // Determine initial mode based on whether user has a "real" address
+    if (AddressHelper.hasRealAddress()) {
+      _currentMode = MapMode.addressSelection;
+      print('🗺️ [PICK_MAP] User has real address - starting in Address mode');
+    } else {
+      _currentMode = MapMode.zoneSelection;
+      print('🗺️ [PICK_MAP] No real address - starting in Zone mode');
     }
 
     // Determine animation mode based on whether user has seen full animation
@@ -654,7 +663,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                           const SizedBox(width: 8),
                                           Flexible(
                                             child: Text(
-                                              _getAddressWithoutCountry(locationController.pickAddress ?? ''),
+                                              _getDisplayAddress(locationController.pickAddress ?? ''),
                                               style: robotoBold.copyWith(
                                                 fontSize: Dimensions.fontSizeDefault,
                                                 color: Colors.black,
@@ -782,9 +791,13 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                             child: IgnorePointer(
                               ignoring: Environment.useMapbox && !_mapAnimationComplete,
                               child: CustomTabbedButton(
-                                items: const [
-                                  TabbedButtonItem(label: 'Zone', icon: Icons.map),
-                                  TabbedButtonItem(label: 'Address', icon: Icons.location_on),
+                                items: [
+                                  const TabbedButtonItem(label: 'Zone', icon: Icons.map),
+                                  TabbedButtonItem(
+                                    label: 'Address',
+                                    icon: Icons.location_on,
+                                    showBadge: !AddressHelper.hasRealAddress(),
+                                  ),
                                 ],
                                 selectedIndex: _currentMode == MapMode.zoneSelection ? 0 : 1,
                                 onTabChanged: (index) {
@@ -807,6 +820,20 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           ),
                         ),
                       ),
+                      // User's current saved zone display - above the floating badge in Zone mode
+                      if (_currentMode == MapMode.zoneSelection)
+                        Positioned(
+                          bottom: 178, // Position closer to the zone badge with small spacing
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: AnimatedOpacity(
+                              opacity: _mapAnimationComplete ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 400),
+                              child: _buildCurrentZoneBadge(context, locationController),
+                            ),
+                          ),
+                        ),
                       // Bottom controls based on mode
                       if (_currentMode == MapMode.zoneSelection)
                         Positioned(
@@ -821,6 +848,7 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                                       (zone) => zone.id == _selectedZoneId,
                                     ),
                                     zones: locationController.zoneList ?? [],
+                                    userSavedZoneId: AddressHelper.getAddressFromSharedPref()?.zoneId,
                                     onZoneChanged: (zone) {
                                       if (zone != null) {
                                         // Don't rebuild immediately, just update the selection
@@ -1122,6 +1150,123 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     return addressParts.length > 1
         ? addressParts.sublist(0, addressParts.length - 1).join(',').trim()
         : address;
+  }
+
+  /// Get display text combining zone name and address (e.g., "Shefa-Amr - 123 Main St")
+  String _getDisplayAddress(String address) {
+    final locationController = Get.find<LocationController>();
+    final zoneName = locationController.activeZone?.displayName ??
+                     locationController.activeZone?.name;
+    final cleanAddress = _getAddressWithoutCountry(address);
+
+    if (zoneName != null && zoneName.isNotEmpty && cleanAddress.isNotEmpty) {
+      return '$zoneName - $cleanAddress';
+    }
+    return cleanAddress;
+  }
+
+  /// Build badge showing user's current saved zone or empty state
+  Widget _buildCurrentZoneBadge(BuildContext context, LocationController locationController) {
+    // Get user's saved zone from SharedPreferences
+    final savedAddress = AddressHelper.getAddressFromSharedPref();
+    final savedZoneId = savedAddress?.zoneId;
+
+    // Find zone name from zone list
+    String? savedZoneName;
+    if (savedZoneId != null && savedZoneId != 0) {
+      final savedZone = locationController.zoneList.firstWhereOrNull(
+        (zone) => zone.id == savedZoneId,
+      );
+      savedZoneName = savedZone?.displayName ?? savedZone?.name;
+    }
+
+    // If user has a saved zone, show it
+    if (savedZoneName != null && savedZoneName.isNotEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Dimensions.paddingSizeSmall,
+          vertical: Dimensions.paddingSizeExtraSmall,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.grey[800]!.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.location_city_rounded,
+              size: 12,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'your_zone'.tr,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeExtraSmall,
+                color: Colors.white.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              savedZoneName,
+              style: robotoMedium.copyWith(
+                fontSize: Dimensions.fontSizeSmall,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Empty state - no zone saved
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Dimensions.paddingSizeSmall,
+        vertical: Dimensions.paddingSizeExtraSmall,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.grey[800]!.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(
+          color: Colors.amber.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            size: 12,
+            color: Colors.amber[400],
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'no_zone_selected'.tr,
+            style: robotoMedium.copyWith(
+              fontSize: Dimensions.fontSizeExtraSmall,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _onZoneSelected(LocationController locationController) {

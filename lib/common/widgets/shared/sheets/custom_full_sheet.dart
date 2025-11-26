@@ -187,12 +187,10 @@ class _CustomFullSheetState extends State<CustomFullSheet> with TickerProviderSt
   }
 
   void _handleDragStart(DragStartDetails details) {
-    // Only allow drag from top 100px of sheet
-    if (details.localPosition.dy <= 100) {
-      setState(() {
-        _isDragging = true;
-      });
-    }
+    // Drag is now restricted to the handle area by widget structure
+    setState(() {
+      _isDragging = true;
+    });
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -267,38 +265,46 @@ class _CustomFullSheetState extends State<CustomFullSheet> with TickerProviderSt
     final dragProgress = (_dragOffset / 100.0).clamp(0.0, 1.0);
     final currentRadius = maxRadius * dragProgress;
 
-    return GestureDetector(
-      onVerticalDragStart: _handleDragStart,
-      onVerticalDragUpdate: _handleDragUpdate,
-      onVerticalDragEnd: _handleDragEnd,
-      child: Transform.translate(
-        offset: Offset(0, _dragOffset), // Use _dragOffset directly (updated by both drag and animations)
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(currentRadius),
-          ),
-          child: SizedBox(
-            height: sheetHeight,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Optional drag handle
-                if (widget.showDragHandle)
-                  Container(
-                    margin: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                if (widget.showDragHandle) const SizedBox(height: Dimensions.paddingSizeSmall),
+    return Transform.translate(
+      offset: Offset(0, _dragOffset), // Use _dragOffset directly (updated by both drag and animations)
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(currentRadius),
+        ),
+        child: SizedBox(
+          height: sheetHeight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle area - only this area is draggable to dismiss
+              GestureDetector(
+                onVerticalDragStart: _handleDragStart,
+                onVerticalDragUpdate: _handleDragUpdate,
+                onVerticalDragEnd: _handleDragEnd,
+                behavior: HitTestBehavior.translucent,
+                child: Container(
+                  width: double.infinity,
+                  height: widget.showDragHandle ? 24 : 0,
+                  color: Colors.transparent,
+                  child: widget.showDragHandle
+                      ? Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+              ),
 
-                // Sheet content - child is responsible for its own styling
-                Expanded(child: widget.child),
-              ],
-            ),
+              // Sheet content - child is responsible for its own styling
+              Expanded(child: widget.child),
+            ],
           ),
         ),
       ),
