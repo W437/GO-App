@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast.dart';
+import 'package:godelivery_user/util/dimensions.dart';
 
 // Global overlay entry manager
 OverlayEntry? _currentToastEntry;
@@ -123,7 +124,7 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
     ));
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.5),
+      begin: const Offset(0, 0.5),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _animationController,
@@ -151,6 +152,11 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
+    if (!_isDragging) {
+      // Pause timer when drag starts
+      _dismissTimer?.cancel();
+    }
+
     setState(() {
       _isDragging = true;
       _dragOffset += details.delta;
@@ -162,19 +168,28 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
 
     if (distance > _dismissThreshold) {
       // Dismiss - animate off screen in drag direction
-      final direction = _dragOffset / distance;
-      final targetOffset = direction * 400.0;
+      // Calculate direction and extend it further off screen
+      final direction = Offset(
+        _dragOffset.dx / distance,
+        _dragOffset.dy / distance,
+      );
+      final targetOffset = direction * 600.0; // Increased from 400
 
       setState(() {
         _isDragging = false;
       });
 
-      // Use snap-back controller for dismiss animation
+      // Create new animation controller for smooth dismiss
+      final dismissController = AnimationController(
+        duration: const Duration(milliseconds: 300),
+        vsync: this,
+      );
+
       final Animation<Offset> dismissAnimation = Tween<Offset>(
         begin: _dragOffset,
         end: targetOffset,
       ).animate(CurvedAnimation(
-        parent: _snapBackController,
+        parent: dismissController,
         curve: Curves.easeOutCubic,
       ));
 
@@ -182,7 +197,7 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
         begin: 1.0,
         end: 0.0,
       ).animate(CurvedAnimation(
-        parent: _snapBackController,
+        parent: dismissController,
         curve: Curves.easeOut,
       ));
 
@@ -195,7 +210,8 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
         }
       });
 
-      _snapBackController.forward(from: 0.0).then((_) {
+      dismissController.forward().then((_) {
+        dismissController.dispose();
         widget.onDismiss();
       });
     } else {
@@ -222,7 +238,23 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
       });
 
       _snapBackController.forward(from: 0.0);
+
+      // Resume auto-dismiss timer after snap back completes
+      _snapBackController.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _restartDismissTimer();
+        }
+      });
     }
+  }
+
+  void _restartDismissTimer() {
+    _dismissTimer?.cancel();
+    _dismissTimer = Timer(const Duration(seconds: 3), () async {
+      if (_currentToastState == this) {
+        await _removeCurrentToast();
+      }
+    });
   }
 
   double _calculateRotation() {
@@ -239,9 +271,9 @@ class _NonBlockingToastOverlayState extends State<_NonBlockingToastOverlay>
     final rotation = _calculateRotation();
 
     return Positioned(
-      top: MediaQuery.of(context).padding.top + 20,
-      left: 0,
-      right: 0,
+      bottom: 100, // Nav (65px) + gap (35px)
+      left: Dimensions.paddingSizeSmall,
+      right: Dimensions.paddingSizeSmall,
       child: GestureDetector(
         onPanUpdate: _onPanUpdate,
         onPanEnd: _onPanEnd,
