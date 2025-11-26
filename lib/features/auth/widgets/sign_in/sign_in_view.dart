@@ -20,13 +20,23 @@ import 'package:godelivery_user/helper/business_logic/centralize_login_helper.da
 import 'package:godelivery_user/helper/utilities/custom_validator.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
+import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/styles.dart';
 
 class SignInView extends StatefulWidget {
   final bool exitFromApp;
   final bool backFromThis;
   final bool fromResetPassword;
   final Function(bool val)? isOtpViewEnable;
-  const SignInView({super.key, required this.exitFromApp, required this.backFromThis, this.fromResetPassword = false, this.isOtpViewEnable});
+  final bool embeddedLayout;
+  const SignInView({
+    super.key,
+    required this.exitFromApp,
+    required this.backFromThis,
+    this.fromResetPassword = false,
+    this.isOtpViewEnable,
+    this.embeddedLayout = false,
+  });
 
   @override
   State<SignInView> createState() => _SignInViewState();
@@ -89,9 +99,17 @@ class _SignInViewState extends State<SignInView> {
     return GetBuilder<AuthController>(builder: (authController) {
       return Builder(builder: (rootCtx) {
         _rootContext = rootCtx;
+        Widget navigator = _buildAuthNavigator(authController);
+        if (widget.embeddedLayout) {
+          navigator = Padding(
+            padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+            child: navigator,
+          );
+        }
+
         return Form(
           key: _formKeyLogin,
-          child: _buildAuthNavigator(authController),
+          child: navigator,
         );
       });
     });
@@ -122,6 +140,7 @@ class _SignInViewState extends State<SignInView> {
               fromSignUp: true,
               fromForgetPassword: false,
               firebaseSession: null,
+              embeddedLayout: widget.embeddedLayout,
               onBack: () => _authNavigatorKey.currentState?.maybePop(),
               onVerified: () {
                 // Close entire auth flow

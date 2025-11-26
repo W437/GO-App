@@ -42,7 +42,7 @@ class RestaurantsCardWidget extends StatelessWidget {
       children: [
         CustomInkWellWidget(
           onTap: () {
-            RouteHelper.openWithThreeD(RestaurantScreen(restaurant: restaurant));
+            Get.toNamed(RouteHelper.getRestaurantRoute(restaurant.id));
           },
           radius: Dimensions.radiusLarge,
           child: Container(

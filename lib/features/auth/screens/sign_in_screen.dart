@@ -88,24 +88,29 @@ class SignInScreenState extends State<SignInScreen> {
                 color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                 boxShadow: ResponsiveHelper.isDesktop(context) ? null : [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, blurRadius: 5, spreadRadius: 1)],
               ) : null,
-              child: SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height -
-                               MediaQuery.of(context).padding.top -
-                               MediaQuery.of(context).padding.bottom -
-                               (widget.exitFromApp ? 0 : 56) - // AppBar height (UnifiedHeaderWidget preferredSize)
-                               (Dimensions.paddingSizeLarge * 2), // Container padding
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
-                    ],
-                  ),
-                ),
-              ),
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: MediaQuery.of(context).size.height -
+                                       MediaQuery.of(context).padding.top -
+                                       MediaQuery.of(context).padding.bottom -
+                                       (widget.exitFromApp ? 0 : 56) - // AppBar height (UnifiedHeaderWidget preferredSize)
+                                       (Dimensions.paddingSizeLarge * 2), // Container padding
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SignInView(
+                                exitFromApp: widget.exitFromApp,
+                                backFromThis: widget.backFromThis,
+                                fromResetPassword: widget.fromResetPassword,
+                                isOtpViewEnable: (v){},
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
             ),
           ),
         ),
@@ -114,4 +119,3 @@ class SignInScreenState extends State<SignInScreen> {
   }
 
 }
-

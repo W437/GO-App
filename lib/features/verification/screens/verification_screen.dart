@@ -34,6 +34,7 @@ class InlineVerificationStep extends StatefulWidget {
   final String? firebaseSession;
   final VoidCallback onBack;
   final VoidCallback onVerified;
+  final bool embeddedLayout;
 
   const InlineVerificationStep({
     super.key,
@@ -45,6 +46,7 @@ class InlineVerificationStep extends StatefulWidget {
     this.firebaseSession,
     required this.onBack,
     required this.onVerified,
+    this.embeddedLayout = false,
   });
 
   @override
@@ -89,6 +91,8 @@ class _InlineVerificationStepState extends State<InlineVerificationStep> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEmbedded = widget.embeddedLayout;
+
     return GetBuilder<VerificationController>(builder: (verificationController) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -175,70 +179,80 @@ class _InlineVerificationStepState extends State<InlineVerificationStep> {
           const SizedBox(height: Dimensions.paddingSizeExtraLarge * 2),
 
           // Bottom action section
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Dimensions.paddingSizeDefault,
-              vertical: Dimensions.paddingSizeDefault,
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              Dimensions.paddingSizeDefault,
+              Dimensions.paddingSizeDefault,
+              Dimensions.paddingSizeDefault,
+              isEmbedded ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeDefault,
             ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                  width: 0.5,
-                ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimensions.paddingSizeDefault,
+                vertical: Dimensions.paddingSizeDefault,
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomButtonWidget(
-                  buttonText: 'verify'.tr,
-                  isLoading: verificationController.isLoading,
-                  onPressed: verificationController.verificationCode.length < 6
-                      ? null
-                      : () => _verifyOtp(context, verificationController),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'didnt_receive_code'.tr,
-                      style: robotoRegular.copyWith(
-                        color: Theme.of(context).disabledColor,
-                        fontSize: Dimensions.fontSizeSmall,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    TextButton(
-                      onPressed: _seconds == 0
-                          ? () async {
-                              _startTimer();
-                              await _resendOtp();
-                            }
-                          : null,
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        _seconds == 0
-                            ? 'resend_code'.tr
-                            : '0:${_seconds.toString().padLeft(2, '0')}',
-                        style: robotoMedium.copyWith(
-                          color: _seconds == 0
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).disabledColor,
-                          fontSize: Dimensions.fontSizeSmall,
+              decoration: isEmbedded
+                  ? null
+                  : BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      border: Border(
+                        top: BorderSide(
+                          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                          width: 0.5,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomButtonWidget(
+                    buttonText: 'verify'.tr,
+                    isLoading: verificationController.isLoading,
+                    onPressed: verificationController.verificationCode.length < 6
+                        ? null
+                        : () => _verifyOtp(context, verificationController),
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'didnt_receive_code'.tr,
+                        style: robotoRegular.copyWith(
+                          color: Theme.of(context).disabledColor,
+                          fontSize: Dimensions.fontSizeSmall,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      TextButton(
+                        onPressed: _seconds == 0
+                            ? () async {
+                                _startTimer();
+                                await _resendOtp();
+                              }
+                            : null,
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          _seconds == 0
+                              ? 'resend_code'.tr
+                              : '0:${_seconds.toString().padLeft(2, '0')}',
+                          style: robotoMedium.copyWith(
+                            color: _seconds == 0
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).disabledColor,
+                            fontSize: Dimensions.fontSizeSmall,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

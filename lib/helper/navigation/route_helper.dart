@@ -39,7 +39,6 @@ import 'package:godelivery_user/features/order/screens/order_details_screen.dart
 import 'package:godelivery_user/features/order/screens/order_screen.dart';
 import 'package:godelivery_user/features/order/screens/order_tracking_screen.dart';
 import 'package:godelivery_user/features/order/screens/refund_request_screen.dart';
-import 'package:godelivery_user/helper/navigation/three_d_page_route.dart';
 import 'package:godelivery_user/features/profile/domain/models/update_user_model.dart';
 import 'package:godelivery_user/features/profile/screens/profile_screen.dart';
 import 'package:godelivery_user/features/profile/screens/update_profile_screen.dart';
@@ -59,7 +58,6 @@ import 'package:godelivery_user/features/address/domain/models/address_model.dar
 import 'package:godelivery_user/features/product/domain/models/basic_campaign_model.dart';
 import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/common/models/product_model.dart';
-import 'package:godelivery_user/helper/navigation/three_d_page_route.dart';
 import 'dart:math';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/address/screens/add_address_screen.dart';
@@ -341,11 +339,6 @@ class RouteHelper {
   static String getDineInRestaurantScreen() => dineInRestaurant;
   static String getStoryViewerRoute(int initialIndex) => '$storyViewer?index=$initialIndex';
   static String getMartRoute() => mart;
-
-  /// Helper to open a page with the 3D transition while keeping the previous route stationary.
-  static Future<T?> openWithThreeD<T>(Widget page) {
-    return Navigator.of(Get.context!).push<T>(ThreeDPageRoute(page: page));
-  }
 
   static List<GetPage> routes = [
     GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 2, fromSplash: (Get.parameters['from-splash'] == 'true'))), popGesture: false),
@@ -645,7 +638,13 @@ class RouteHelper {
     )),
     GetPage(name: favourite, page: () => getRoute(const FavouriteScreen())),
     GetPage(name: explore, page: () => getRoute(const ExploreScreen())),
-    GetPage(name: flappyBirdGame, page: () => getRoute(const FlappyBirdGameScreen())),
+    GetPage(
+      name: flappyBirdGame,
+      page: () => getRoute(const FlappyBirdGameScreen()),
+      customTransition: _ThreeDGetTransition(),
+      transitionDuration: const Duration(milliseconds: 500),
+      opaque: false,
+    ),
     GetPage(name: newUserSetupScreen, page: () => NewUserSetupScreen(
       name: Get.parameters['name']!, loginType: Get.parameters['login_type']!,
       phone: Get.parameters['phone'] != '' && Get.parameters['phone'] != 'null' ? Get.parameters['phone']!.replaceAll(' ', '+') : null,
@@ -746,9 +745,9 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody> {
 
     // Parameters for 3D effect.
     const double startTranslateXRatio = 1.1;
-    const double startScale = 1.1; // Start larger, scale down to 1.0
-    const double startYAngle = 8.0 * pi / 180;
-    const double startZAngle = 1.5 * pi / 180;
+    const double startScale = 1.5; // Start larger, scale down to 1.0
+    const double startYAngle = -50.0 * pi / 180;
+    const double startZAngle = 0.0 * pi / 180;
 
     final size = MediaQuery.of(context).size;
     final width = size.width;
@@ -762,7 +761,7 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody> {
     final double yAngle = startYAngle * totalProgress;
     final double zAngle = startZAngle * totalProgress;
 
-    final double currentScale = 1.0; // Keep at full scale
+    final double currentScale = startScale + (1.0 - startScale) * effectiveProgress;
 
     final double cornerRadius = 24.0 * totalProgress;
     final double shadowOpacity = (effectiveProgress * 0.5).clamp(0.0, 0.3);

@@ -100,24 +100,27 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                 // Page indicators
                 Padding(
                   padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: SmoothPageIndicator(
-                      controller: _pageController,
-                      count: _totalPages,
-                      effect: SwapEffect(
-                        dotHeight: 8,
-                        dotWidth: 8,
-                        spacing: 8,
-                        activeDotColor: Theme.of(context).primaryColor,
-                        dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: SmoothPageIndicator(
+                        controller: _pageController,
+                        count: _totalPages,
+                        effect: SwapEffect(
+                          dotHeight: 8,
+                          dotWidth: 8,
+                          spacing: 8,
+                          activeDotColor: Theme.of(context).primaryColor,
+                          dotColor: Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                        ),
                       ),
                     ),
                   ),
@@ -131,27 +134,25 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
                     Dimensions.paddingSizeExtraLarge,
                     Dimensions.paddingSizeDefault,
                   ),
-                  child: GetBuilder<LocalizationController>(
-                    builder: (localizationController) {
-                      return CustomButtonWidget(
-                        buttonText: _currentPage == _totalPages - 1 ? 'skip'.tr : 'next'.tr,
-                        onPressed: () {
-                          // Validate language selection on first page
-                          if (_currentPage == 0) {
-                            if (localizationController.selectedLanguageIndex == -1) {
-                              showCustomSnackBar('select_a_language'.tr);
-                              return;
-                            }
-                          }
-                          if (_currentPage == _totalPages - 1) {
-                            _continueAsGuest();
-                          } else {
-                            _nextPage();
-                          }
-                        },
-                      );
-                    },
-                  ),
+                  child: _currentPage == _totalPages - 1
+                      ? const SizedBox.shrink()
+                      : GetBuilder<LocalizationController>(
+                          builder: (localizationController) {
+                            return CustomButtonWidget(
+                              buttonText: 'next'.tr,
+                              onPressed: () {
+                                // Validate language selection on first page
+                                if (_currentPage == 0) {
+                                  if (localizationController.selectedLanguageIndex == -1) {
+                                    showCustomSnackBar('select_a_language'.tr);
+                                    return;
+                                  }
+                                }
+                                _nextPage();
+                              },
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -345,75 +346,60 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
   // Sign-in Page
   Widget _buildSignInPage() {
-    final double baseHeight = MediaQuery.of(context).size.height * 0.65;
-    final double formHeight = baseHeight < 420 ? 420 : baseHeight;
-
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Dimensions.paddingSizeLarge,
-          Dimensions.paddingSizeLarge,
-          Dimensions.paddingSizeLarge,
-          140, // Bottom padding for overlay buttons
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
           children: [
-            Text(
-              'login_to_continue'.tr,
-              style: robotoBold.copyWith(
-                fontSize: 28,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeSmall),
-            Text(
-              'now_you_are_in_guest_mode_please_login_to_view_all_the_features'.tr,
-              style: robotoRegular.copyWith(
-                fontSize: Dimensions.fontSizeSmall,
-                color: Theme.of(context).hintColor,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeLarge),
-            Container(
-              padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: SizedBox(
-            height: formHeight,
-            child: SignInView(
-              exitFromApp: false,
-              backFromThis: false,
-              isOtpViewEnable: (isEnable) => Get.find<AuthController>().enableOtpView(enable: isEnable),
-            ),
-          ),
-        ),
-        const SizedBox(height: Dimensions.paddingSizeLarge),
-        Center(
-          child: TextButton(
+            // Skip in top-right
+            Positioned(
+              top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeLarge,
+              right: Dimensions.paddingSizeLarge,
+              child: CustomButtonWidget(
                 onPressed: _continueAsGuest,
-                child: Text(
-                  'skip'.tr,
-                  style: robotoMedium.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                buttonText: 'skip'.tr,
+                color: Theme.of(context).disabledColor.withValues(alpha: 0.15),
+                textColor: Theme.of(context).hintColor,
+                radius: Dimensions.radiusLarge,
+                height: 36,
+                width: null,
+                isBold: false,
+                expand: false,
+              ),
+            ),
+
+            // Sign-in content anchored near bottom
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                Dimensions.paddingSizeLarge,
+                Dimensions.paddingSizeExtraLarge,
+                Dimensions.paddingSizeLarge,
+                140, // Bottom padding for overlay buttons
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight -
+                      140, // account for bottom padding so centering works
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: SignInView(
+                        exitFromApp: false,
+                        backFromThis: false,
+                        embeddedLayout: true,
+                        isOtpViewEnable: (isEnable) => Get.find<AuthController>().enableOtpView(enable: isEnable),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
