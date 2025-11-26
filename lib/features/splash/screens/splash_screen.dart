@@ -8,7 +8,12 @@ import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/notification/domain/models/notification_body_model.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/splash/domain/models/deep_link_body.dart';
+import 'package:godelivery_user/features/location/controllers/location_controller.dart';
+import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
+import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
+import 'package:godelivery_user/features/address/domain/models/address_model.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:godelivery_user/helper/navigation/app_navigator.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:flutter/material.dart';
@@ -118,11 +123,64 @@ class SplashScreenState extends State<SplashScreen> with TickerProviderStateMixi
   void _initializeApp() {
     Get.find<SplashController>().initSharedData();
 
-    // Clean up invalid addresses
-    if(AddressHelper.getAddressFromSharedPref() != null &&
-       (AddressHelper.getAddressFromSharedPref()!.zoneIds == null ||
-        AddressHelper.getAddressFromSharedPref()!.zoneData == null)) {
-      AddressHelper.clearAddressFromSharedPref();
+    // Validate and repair addresses with missing zone data
+    final savedAddress = AddressHelper.getAddressFromSharedPref();
+    if (savedAddress != null &&
+        (savedAddress.zoneIds == null || savedAddress.zoneData == null) &&
+        savedAddress.latitude != null &&
+        savedAddress.longitude != null) {
+
+      print('⚠️ [SPLASH] Address has missing zone data - attempting to repair');
+
+      // Try to repair zone data using local polygon check
+      final locationController = Get.find<LocationController>();
+      if (locationController.zoneList.isNotEmpty) {
+        final lat = double.tryParse(savedAddress.latitude!);
+        final lng = double.tryParse(savedAddress.longitude!);
+
+        if (lat != null && lng != null) {
+          final zoneId = ZonePolygonHelper.getZoneIdForPoint(
+            LatLng(lat, lng),
+            locationController.zoneList,
+          );
+
+          if (zoneId != null) {
+            // Found zone - repair the address
+            final zone = locationController.zoneList.firstWhereOrNull((z) => z.id == zoneId);
+            if (zone != null) {
+              savedAddress.zoneId = zoneId;
+              savedAddress.zoneIds = [zoneId];
+              savedAddress.zoneData = [
+                ZoneData(
+                  id: zone.id,
+                  status: zone.status,
+                  minimumShippingCharge: zone.minimumShippingCharge,
+                  perKmShippingCharge: zone.perKmShippingCharge,
+                  maximumShippingCharge: zone.maximumShippingCharge,
+                  maxCodOrderAmount: zone.maxCodOrderAmount,
+                ),
+              ];
+              AddressHelper.saveAddressInSharedPref(savedAddress);
+              print('✅ [SPLASH] Address zone data repaired - Zone ID: $zoneId');
+            } else {
+              // Zone not found in list - clear address
+              print('❌ [SPLASH] Zone not found in list - clearing address');
+              AddressHelper.clearAddressFromSharedPref();
+            }
+          } else {
+            // Address is outside all zones - clear it
+            print('❌ [SPLASH] Address outside all zones - clearing address');
+            AddressHelper.clearAddressFromSharedPref();
+          }
+        } else {
+          // Invalid coordinates - clear address
+          print('❌ [SPLASH] Invalid coordinates - clearing address');
+          AddressHelper.clearAddressFromSharedPref();
+        }
+      } else {
+        // Zone list not loaded yet - will be validated later
+        print('⚠️ [SPLASH] Zone list not loaded - validation deferred');
+      }
     }
 
     // Load cart for logged in users

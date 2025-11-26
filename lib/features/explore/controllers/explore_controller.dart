@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -37,6 +39,9 @@ class ExploreController extends GetxController implements GetxService {
 
   GoogleMapController? _mapController;
   GoogleMapController? get mapController => _mapController;
+
+  mapbox.MapboxMap? _mapboxMap;
+  mapbox.MapboxMap? get mapboxMap => _mapboxMap;
 
   List<Restaurant>? _nearbyRestaurants;
   List<Restaurant>? get nearbyRestaurants => _nearbyRestaurants;
@@ -126,6 +131,10 @@ class ExploreController extends GetxController implements GetxService {
     _mapController = controller;
   }
 
+  void setMapboxMap(mapbox.MapboxMap map) {
+    _mapboxMap = map;
+  }
+
   Future<void> getNearbyRestaurants({bool reload = false}) async {
     if (reload) {
       _isLoading = true;
@@ -173,13 +182,21 @@ class ExploreController extends GetxController implements GetxService {
   }
 
   void animateToRestaurant(Restaurant restaurant) {
-    if (_mapController != null) {
+    final lat = double.parse(restaurant.latitude ?? '0');
+    final lng = double.parse(restaurant.longitude ?? '0');
+
+    if (Environment.useMapbox && _mapboxMap != null) {
+      _mapboxMap!.flyTo(
+        mapbox.CameraOptions(
+          center: mapbox.Point(coordinates: mapbox.Position(lng, lat)),
+          zoom: 16.0,
+        ),
+        mapbox.MapAnimationOptions(duration: 300),
+      );
+    } else if (_mapController != null) {
       _mapController!.animateCamera(
         CameraUpdate.newLatLngZoom(
-          LatLng(
-            double.parse(restaurant.latitude ?? '0'),
-            double.parse(restaurant.longitude ?? '0'),
-          ),
+          LatLng(lat, lng),
           16.0,
         ),
       );
@@ -562,6 +579,7 @@ class ExploreController extends GetxController implements GetxService {
   @override
   void onClose() {
     _mapController?.dispose();
+    _mapboxMap = null;
     _mapPositionSaveTimer?.cancel();
     super.onClose();
   }

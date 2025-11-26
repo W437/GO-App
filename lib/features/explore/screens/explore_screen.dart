@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
 import 'package:godelivery_user/features/explore/widgets/draggable_restaurant_sheet.dart';
-import 'package:godelivery_user/features/explore/widgets/explore_map_view_widget.dart';
+import 'package:godelivery_user/features/explore/widgets/explore_map_factory.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -143,7 +143,7 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
                     child: child,
                   );
                 },
-                child: ExploreMapViewWidget(
+                child: ExploreMapFactory(
                   exploreController: exploreController,
                   onFullscreenToggle: () => _toggleFullscreen(exploreController),
                   topButtonsAnimation: _topButtonsAnimation,

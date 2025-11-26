@@ -103,8 +103,8 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
   @override
   Future<RestaurantModel?> getList({int? offset, String? filterBy, int? topRated, int? discount, int? veg, int? nonVeg, bool fromMap = false}) async {
     // Use new unified endpoint with preset=all
-    // Convert offset: frontend uses 0-based, unified API uses 1-based
-    final apiOffset = (offset ?? 0) == 0 ? 1 : offset! + 1;
+    // API uses 1-based pagination, ensure minimum of 1
+    final apiOffset = (offset ?? 1) < 1 ? 1 : offset ?? 1;
     Response response = await apiClient.getData('${AppConstants.unifiedRestaurantUri}?preset=all&offset=$apiOffset&limit=${fromMap ? 20 : 25}&filter_data=$filterBy&top_rated=$topRated&discount=$discount&veg=$veg&non_veg=$nonVeg');
     if (response.statusCode == 200) {
       print('🔍 [RESTAURANT REPO] Raw API response keys: ${response.body?.keys?.toList()}');

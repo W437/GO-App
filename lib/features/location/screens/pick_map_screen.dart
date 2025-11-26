@@ -9,6 +9,7 @@ import 'package:godelivery_user/common/widgets/mobile/draggable_bottom_sheet_wid
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/features/address/domain/models/address_model.dart';
+import 'package:godelivery_user/features/address/controllers/address_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_list_model.dart';
 import 'package:godelivery_user/features/location/helper/zone_polygon_helper.dart';
@@ -459,7 +460,9 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
                           ),
                           minMaxZoomPreference: const MinMaxZoomPreference(6.5, 14),  // Limited zoom for zone selection
                           polygons: _zonePolygons(locationController, context),
-                          markers: <Marker>{},  // No markers - using overlay instead
+                          markers: _currentMode == MapMode.addressSelection
+                              ? _buildSavedAddressMarkers(locationController)
+                              : <Marker>{},
                           onMapCreated: (GoogleMapController mapController) {
                             _mapController = mapController;
 
@@ -1163,6 +1166,38 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       return '$zoneName - $cleanAddress';
     }
     return cleanAddress;
+  }
+
+  /// Build markers for saved addresses in Address mode
+  Set<Marker> _buildSavedAddressMarkers(LocationController locationController) {
+    final addressController = Get.find<AddressController>();
+    final addresses = addressController.addressList ?? [];
+    final markers = <Marker>{};
+
+    for (final address in addresses) {
+      if (address.latitude != null && address.longitude != null) {
+        final lat = double.tryParse(address.latitude!);
+        final lng = double.tryParse(address.longitude!);
+
+        if (lat != null && lng != null) {
+          markers.add(
+            Marker(
+              markerId: MarkerId('address_${address.id}'),
+              position: LatLng(lat, lng),
+              infoWindow: InfoWindow(
+                title: address.addressType?.tr ?? 'address'.tr,
+                snippet: address.address,
+              ),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueAzure,
+              ),
+            ),
+          );
+        }
+      }
+    }
+
+    return markers;
   }
 
   /// Build badge showing user's current saved zone or empty state
