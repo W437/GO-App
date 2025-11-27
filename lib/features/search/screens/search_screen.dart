@@ -82,6 +82,7 @@ class SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _searchTextEditingController.dispose();
     scrollController.dispose();
+    Get.find<search.SearchController>().setSearchMode(false, canUpdate: false);
     super.dispose();
   }
 
