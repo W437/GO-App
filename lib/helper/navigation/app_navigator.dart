@@ -87,25 +87,28 @@ class AppNavigator {
       return;
     }
 
-    // Priority 3: Logged-in user
+    // Priority 3: Logged-in user (has token)
     if (Get.find<AuthController>().isLoggedIn()) {
       _navigateLoggedInUser();
       return;
     }
 
     // Priority 4: First-time user (show onboarding)
+    // This check ensures users complete onboarding before proceeding
     if (Get.find<SplashController>().showIntro()!) {
       _navigateNewUser();
       return;
     }
 
     // Priority 5: Guest user (already logged in)
+    // Note: At this point, intro is complete (intro flag = false)
     if (Get.find<AuthController>().isGuestLoggedIn()) {
       _navigateGuestUser();
       return;
     }
 
     // Priority 6: New guest user (login then navigate)
+    // This should rarely happen - only if intro flag is false but no auth exists
     Get.find<AuthController>().guestLogin().then((_) {
       _navigateGuestUser();
     });

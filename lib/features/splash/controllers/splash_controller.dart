@@ -72,15 +72,20 @@ class SplashController extends GetxController implements GetxService {
   DateTime get currentTime => DateTime.now();
 
   /// Check if we should load data during splash
-  /// Returns true ONLY if the user is a returning user (Intro done + Address saved)
+  /// Returns true ONLY if the user is a returning user (Intro done + Valid Address with Zone)
   /// This prevents wasting bandwidth for fresh installs who need to go through onboarding
   bool get shouldLoadData {
     final bool introShown = showIntro() ?? true; // Default to true (show intro) if null
-    final bool hasAddress = AddressHelper.getAddressFromSharedPref() != null;
-    
-    // If intro is NOT shown (meaning it's done) AND we have an address,
+
+    // Use hasRealAddress which validates:
+    // 1. Address exists
+    // 2. Has valid zone data (not just zone selection)
+    // 3. Has actual address string (not empty)
+    final bool hasValidAddress = AddressHelper.hasRealAddress();
+
+    // If intro is NOT shown (meaning it's done) AND we have a valid address with zone,
     // then it's a returning user who goes straight to home. Load data!
-    return !introShown && hasAddress;
+    return !introShown && hasValidAddress;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -294,6 +299,9 @@ class SplashController extends GetxController implements GetxService {
   }
 
   Future<void> navigateToLocationScreen(String page, {bool offNamed = false, bool offAll = false}) async {
+    // User has successfully authenticated (either sign-in or verification), mark onboarding complete
+    disableIntro();
+
     bool fromSignup = page == RouteHelper.signUp;
     bool fromHome = page == 'home';
     if(!fromHome && AddressHelper.getAddressFromSharedPref() != null) {

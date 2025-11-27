@@ -56,7 +56,7 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
 
     // Send the user straight to the interactive map selector so they can
     // grant location permission and pick a zone immediately after onboarding.
-    Get.offNamed(RouteHelper.getPickMapRoute(RouteHelper.onBoarding, false));
+    Get.offNamed(RouteHelper.getPickMapRoute(RouteHelper.unifiedOnboarding, false));
   }
 
   @override
@@ -72,9 +72,8 @@ class _UnifiedOnboardingScreenState extends State<UnifiedOnboardingScreen> {
               setState(() {
                 _currentPage = index;
               });
-              if (index == _totalPages - 1) {
-                Get.find<SplashController>().disableIntro();
-              }
+              // Note: disableIntro() is now called ONLY after successful authentication
+              // (either guest login or sign-in), not just on reaching the final page
             },
             children: [
               // Page 0: Language Selection

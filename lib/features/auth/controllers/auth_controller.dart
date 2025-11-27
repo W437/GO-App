@@ -205,6 +205,24 @@ class AuthController extends GetxController implements GetxService {
     return authServiceInterface.isGuestLoggedIn() && !authServiceInterface.isLoggedIn();
   }
 
+  /// Check if user is authenticated (either as logged-in user OR guest)
+  ///
+  /// Use this method when you need to know if ANY form of authentication exists.
+  /// This is useful for:
+  /// - Showing authenticated-only content
+  /// - Checking if onboarding completion resulted in authentication
+  /// - Verifying user can access protected features
+  ///
+  /// Returns true if either:
+  /// - User has a valid token (isLoggedIn = true), OR
+  /// - User has a guest ID (isGuestLoggedIn = true)
+  ///
+  /// Note: Do NOT use this for navigation logic in AppNavigator.
+  /// Navigation needs to distinguish between logged-in vs guest for different flows.
+  bool isAuthenticated() {
+    return isLoggedIn() || isGuestLoggedIn();
+  }
+
   Future<void> socialLogout() async {
     await authServiceInterface.socialLogout();
   }
