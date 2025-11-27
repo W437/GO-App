@@ -424,9 +424,20 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
 
         // Check if location is in a valid zone
         if (isInZone) {
-          // Save to SharedPreferences
-          addressModel.addressType = 'current';
-          AddressHelper.saveAddressInSharedPref(addressModel);
+          // Find the zone from zone list
+          final locationController = Get.find<LocationController>();
+          final zone = locationController.zoneList.firstWhereOrNull(
+            (z) => z.id == addressModel.zoneId,
+          );
+
+          if (zone != null) {
+            // Change zone - this saves to SharedPrefs, updates API, refreshes home data
+            await locationController.changeZone(zone);
+          } else {
+            // Fallback: just save to SharedPreferences if zone not found in list
+            addressModel.addressType = 'current';
+            AddressHelper.saveAddressInSharedPref(addressModel);
+          }
 
           // Close sheet and show success
           Get.back();
