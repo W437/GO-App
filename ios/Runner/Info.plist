@@ -29,7 +29,8 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+				<!-- GOOGLE SIGN-IN: Uncomment and replace YOUR_CLIENT_ID with actual Google OAuth iOS client ID -->
+				<!-- <string>com.googleusercontent.apps.YOUR_CLIENT_ID</string> -->
 				<string>fb452131619626499</string>
 			</array>
 		</dict>

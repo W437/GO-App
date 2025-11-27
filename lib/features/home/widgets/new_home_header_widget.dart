@@ -45,12 +45,17 @@ class NewHomeHeaderWidget extends StatelessWidget {
                 Expanded(
                   child: Obx(() {
                     final locationController = Get.find<LocationController>();
-                    // Show active zone name if set, otherwise show address
-                    final displayText = locationController.activeZone?.displayName
-                        ?? locationController.activeZone?.name
-                        ?? AddressHelper.getAddressFromSharedPref()?.address
-                        ?? 'select_location'.tr;
-                    print('🏠 [HEADER] Building with: $displayText (activeZone: ${locationController.activeZone?.displayName})');
+                    final savedAddress = AddressHelper.getAddressFromSharedPref();
+                    final isCurrentLocation = savedAddress?.addressType == 'current';
+
+                    // For current location: show street address
+                    // For zone selection: show zone name
+                    final displayText = isCurrentLocation
+                        ? (savedAddress?.address ?? 'select_location'.tr)
+                        : (locationController.activeZone?.displayName
+                            ?? locationController.activeZone?.name
+                            ?? savedAddress?.address
+                            ?? 'select_location'.tr);
 
                     return InkWell(
                       onTap: () => _showLocationSheet(context),
@@ -59,18 +64,32 @@ class NewHomeHeaderWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.location_on_rounded,
+                            isCurrentLocation ? Icons.my_location_rounded : Icons.location_on_rounded,
                             color: Theme.of(context).primaryColor,
                             size: 24,
                           ),
                           const SizedBox(width: Dimensions.paddingSizeSmall),
                           Expanded(
-                            child: AutoScrollText(
-                              text: displayText,
-                              style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeDefault,
-                                color: Theme.of(context).textTheme.bodyLarge!.color,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AutoScrollText(
+                                  text: displayText,
+                                  style: robotoBold.copyWith(
+                                    fontSize: Dimensions.fontSizeDefault,
+                                    color: Theme.of(context).textTheme.bodyLarge!.color,
+                                  ),
+                                ),
+                                if (isCurrentLocation)
+                                  Text(
+                                    'current_location'.tr,
+                                    style: robotoRegular.copyWith(
+                                      fontSize: Dimensions.fontSizeExtraSmall,
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                           const SizedBox(width: 4),

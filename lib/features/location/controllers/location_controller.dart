@@ -503,4 +503,31 @@ class LocationController extends GetxController implements GetxService {
     print('🌍 [ZONE] Changed to: ${zone.displayName ?? zone.name ?? "ID: ${zone.id}"}');
     await saveZoneAsAddress(zone, refreshData: true);
   }
+
+  /// Save current location as address, keeping the street address but updating zone info.
+  /// Used when user clicks "Use Current Location" - preserves the geocoded street address.
+  Future<void> saveCurrentLocationAsAddress(AddressModel addressModel, ZoneListModel zone) async {
+    print('📍 [CURRENT_LOCATION] Saving: ${addressModel.address} in zone ${zone.displayName ?? zone.name}');
+
+    // Set active zone for API purposes
+    _activeZone.value = zone;
+
+    // Handle topic subscription
+    locationServiceInterface.handleTopicSubscription(
+      AddressHelper.getAddressFromSharedPref(),
+      addressModel,
+    );
+
+    // Save address to shared preferences (keeps the street address)
+    await AddressHelper.saveAddressInSharedPref(addressModel);
+
+    // Update API header with new zone
+    await updateZone();
+
+    // Refresh home data
+    HomeScreen.loadData(true);
+    Get.find<CheckoutController>().clearPrevData();
+
+    update();
+  }
 }

@@ -431,12 +431,13 @@ class _LocationManagerSheetContentState extends State<_LocationManagerSheetConte
           );
 
           if (zone != null) {
-            // Change zone - this saves to SharedPrefs, updates API, refreshes home data
-            await locationController.changeZone(zone);
+            // Save current location with street address (not zone name)
+            addressModel.addressType = 'current';
+            await locationController.saveCurrentLocationAsAddress(addressModel, zone);
           } else {
             // Fallback: just save to SharedPreferences if zone not found in list
             addressModel.addressType = 'current';
-            AddressHelper.saveAddressInSharedPref(addressModel);
+            await AddressHelper.saveAddressInSharedPref(addressModel);
           }
 
           // Close sheet and show success
