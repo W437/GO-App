@@ -117,9 +117,17 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
 
   /// Create a circular logo marker with stroke
   Future<Uint8List> _createLogoMarkerIcon(String? logoUrl) async {
-    const double size = 120;
-    const double radius = size / 2;
-    const double strokeWidth = 4;
+    const double markerSize = 240;
+    const double radius = markerSize / 2;
+    const double innerStrokeWidth = 3;
+    const double outerStrokeWidth = 3;
+    const double shadowBlur = 12;
+    const double shadowOffset = 6;
+
+    // Add padding for shadow
+    const double padding = shadowBlur + shadowOffset;
+    const double canvasSize = markerSize + (padding * 2);
+    const double centerOffset = padding + radius;
 
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
@@ -142,11 +150,22 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
       }
     }
 
+    // Draw drop shadow
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.3)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, shadowBlur)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+      Offset(centerOffset + shadowOffset / 2, centerOffset + shadowOffset),
+      radius,
+      shadowPaint,
+    );
+
     // Draw white circle background
     final bgPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(radius, radius), radius - strokeWidth / 2, bgPaint);
+    canvas.drawCircle(Offset(centerOffset, centerOffset), radius, bgPaint);
 
     // Draw logo or fallback emoji
     if (logoImage != null) {
@@ -154,14 +173,14 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
       canvas.save();
       canvas.clipPath(
         Path()..addOval(Rect.fromCircle(
-          center: Offset(radius, radius),
-          radius: radius - strokeWidth - 2,
+          center: Offset(centerOffset, centerOffset),
+          radius: radius - innerStrokeWidth - outerStrokeWidth - 2,
         )),
       );
       canvas.drawImageRect(
         logoImage,
         Rect.fromLTWH(0, 0, logoImage.width.toDouble(), logoImage.height.toDouble()),
-        Rect.fromCircle(center: Offset(radius, radius), radius: radius - strokeWidth - 2),
+        Rect.fromCircle(center: Offset(centerOffset, centerOffset), radius: radius - innerStrokeWidth - outerStrokeWidth - 2),
         Paint(),
       );
       canvas.restore();
@@ -176,21 +195,36 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
       textPainter.paint(
         canvas,
         Offset(
-          radius - textPainter.width / 2,
-          radius - textPainter.height / 2,
+          centerOffset - textPainter.width / 2,
+          centerOffset - textPainter.height / 2,
         ),
       );
     }
 
-    // Draw muted stroke (gray border)
-    final strokePaint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.3)
+    // Draw inner white stroke (3px)
+    final innerStrokePaint = Paint()
+      ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    canvas.drawCircle(Offset(radius, radius), radius - strokeWidth / 2, strokePaint);
+      ..strokeWidth = innerStrokeWidth;
+    canvas.drawCircle(
+      Offset(centerOffset, centerOffset),
+      radius - innerStrokeWidth / 2,
+      innerStrokePaint,
+    );
+
+    // Draw outer muted stroke (3px)
+    final outerStrokePaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = outerStrokeWidth;
+    canvas.drawCircle(
+      Offset(centerOffset, centerOffset),
+      radius - innerStrokeWidth - outerStrokeWidth / 2,
+      outerStrokePaint,
+    );
 
     final picture = pictureRecorder.endRecording();
-    final image = await picture.toImage(size.toInt(), size.toInt());
+    final image = await picture.toImage(canvasSize.toInt(), canvasSize.toInt());
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }

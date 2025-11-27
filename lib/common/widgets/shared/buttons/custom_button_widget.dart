@@ -222,19 +222,23 @@ class _CustomButtonWidgetState extends State<CustomButtonWidget> with TickerProv
             ),
             const SizedBox(width: Dimensions.paddingSizeSmall),
 
-            Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white)),
+            Flexible(
+              child: Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white), overflow: TextOverflow.ellipsis),
+            ),
           ]) : Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
             widget.icon != null ? Padding(
               padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
               child: Icon(widget.icon, color: widget.iconColor ?? (widget.transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
             ) : const SizedBox(),
-            widget.buttonText != null ? Text(widget.buttonText!, textAlign: TextAlign.center,  style: widget.isBold ? robotoBold.copyWith(
-                color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
-                fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
-              ) : robotoRegular.copyWith(
-                color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
-                fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
-              )
+            widget.buttonText != null ? Flexible(
+              child: Text(widget.buttonText!, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, style: widget.isBold ? robotoBold.copyWith(
+                  color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
+                  fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
+                ) : robotoRegular.copyWith(
+                  color: widget.textColor ?? (widget.transparent ? Theme.of(context).primaryColor : Colors.white),
+                  fontSize: widget.fontSize ?? Dimensions.fontSizeLarge,
+                )
+              ),
             ) : const SizedBox(),
           ]),
         ),
