@@ -329,22 +329,10 @@ class CatalogData {
         requiresAuth: true,
       ),
 
-      // Onboard Module (3 screens)
-      CatalogItemModel(
-        itemName: 'Onboarding Screen',
-        filePath: 'lib/features/onboard/screens/onboarding_screen.dart',
-        category: ItemCategory.screen,
-        module: 'Onboard',
-      ),
+      // Onboard Module (1 screen)
       CatalogItemModel(
         itemName: 'Unified Onboarding Screen',
         filePath: 'lib/features/onboard/screens/unified_onboarding_screen.dart',
-        category: ItemCategory.screen,
-        module: 'Onboard',
-      ),
-      CatalogItemModel(
-        itemName: 'Welcome Screen',
-        filePath: 'lib/features/onboard/screens/welcome_screen.dart',
         category: ItemCategory.screen,
         module: 'Onboard',
       ),

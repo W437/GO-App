@@ -282,14 +282,8 @@ class DeveloperCatalogController extends GetxController {
         break;
 
       // Onboarding screens
-      case 'lib/features/onboard/screens/onboarding_screen.dart':
-        Get.toNamed(RouteHelper.getOnBoardingRoute());
-        break;
       case 'lib/features/onboard/screens/unified_onboarding_screen.dart':
         Get.toNamed(RouteHelper.unifiedOnboarding);
-        break;
-      case 'lib/features/onboard/screens/welcome_screen.dart':
-        Get.toNamed(RouteHelper.welcome);
         break;
 
       // Order screens

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -46,73 +45,21 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
+          gradient: AppColors.gradientFrost,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.05),
-              blurRadius: 24,
-              spreadRadius: 0,
-              offset: Offset(0, 6),
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.08),
-              blurRadius: 0,
-              spreadRadius: 1,
-              offset: Offset(0, 0),
+              color: Get.isDarkMode
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            children: [
-              // Blurred background image
-              Positioned.fill(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                  child: Image.asset(
-                    Get.isDarkMode
-                        ? 'assets/image/sponsored/bg_pattern_dark.png'
-                        : 'assets/image/sponsored/bg_pattern_light.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              // Overlay (white in light mode, black in dark mode)
-              Positioned.fill(
-                child: Container(
-                  color: Get.isDarkMode
-                      ? Colors.black.withValues(alpha: 0.8)
-                      : Colors.white.withValues(alpha: 0.8),
-                ),
-              ),
-              // Fade gradient at top
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Get.isDarkMode
-                            ? Theme.of(context).scaffoldBackgroundColor
-                            : Colors.white,
-                        Get.isDarkMode
-                            ? Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0)
-                            : Colors.white.withValues(alpha: 0),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Content
-              Padding(
-                padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge, bottom: Dimensions.paddingSizeSmall),
-                child: Column(
+        child: Padding(
+          padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge, bottom: Dimensions.paddingSizeSmall),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
@@ -229,9 +176,6 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
                     ),
                   );
                 },
-              ),
-            ],
-                ),
               ),
             ],
           ),
