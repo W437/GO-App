@@ -79,6 +79,13 @@ class SearchScreenState extends State<SearchScreen> {
   }
 
   @override
+  void dispose() {
+    _searchTextEditingController.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     return PopScope(

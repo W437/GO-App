@@ -40,6 +40,13 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
   }
 
   @override
+  void dispose() {
+    _tabController?.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
