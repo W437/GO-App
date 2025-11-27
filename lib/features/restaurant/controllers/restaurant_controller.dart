@@ -367,15 +367,32 @@ class RestaurantController extends GetxController implements GetxService {
 
   Future<Restaurant?> getRestaurantDetails(Restaurant restaurant, {bool fromCart = false, String slug = ''}) async {
     _categoryIndex = 0;
-    if(restaurant.name != null) {
+
+    // Always fetch from API if:
+    // 1. Restaurant has no name (only ID passed) - we need full details
+    // 2. Restaurant has no schedules - we need full details including hours
+    final bool needsFullDetails = restaurant.name == null ||
+                                   restaurant.schedules == null ||
+                                   restaurant.schedules!.isEmpty;
+
+    if(!needsFullDetails) {
       _restaurant = restaurant;
-    }else {
+    } else {
       _isLoading = true;
-      _restaurant = null;
-      _restaurant = await restaurantServiceInterface.getRestaurantDetails(restaurant.id.toString(), slug, Get.find<LocalizationController>().locale.languageCode);
-      if(_restaurant != null && _restaurant!.latitude != null){
-        await _setRequiredDataAfterRestaurantGet(slug, fromCart);
+      // Don't clear existing restaurant data to avoid UI flicker
+      final Restaurant? fetchedRestaurant = await restaurantServiceInterface.getRestaurantDetails(
+        restaurant.id.toString(),
+        slug,
+        Get.find<LocalizationController>().locale.languageCode
+      );
+
+      if (fetchedRestaurant != null) {
+        _restaurant = fetchedRestaurant;
+        if(_restaurant!.latitude != null){
+          await _setRequiredDataAfterRestaurantGet(slug, fromCart);
+        }
       }
+
       Get.find<CheckoutController>().setOrderType(
         (_restaurant != null && _restaurant!.delivery != null) ? _restaurant!.delivery! ? 'delivery' : 'take_away' : 'delivery', notify: false,
       );

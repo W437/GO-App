@@ -170,8 +170,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     final bool hasCorrectProducts = restController.restaurantProducts != null &&
                                      restController.restaurantProducts!.isNotEmpty &&
                                      restController.restaurantProducts!.first.restaurantId == widget.restaurant!.id;
-    final bool hasRestaurantDetails = restController.restaurant != null &&
-                                     restController.restaurant!.schedules != null;
+    // Must have full restaurant details including schedules
+    final bool hasRestaurantDetails = isSameRestaurant &&
+                                     restController.restaurant != null &&
+                                     restController.restaurant!.schedules != null &&
+                                     restController.restaurant!.schedules!.isNotEmpty;
 
     // Step 1: Fetch lightweight menu sections first (fast, shows sticky header immediately)
     if (!isSameRestaurant) {
@@ -256,38 +259,92 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
     _previousScrollOffset = offset;
 
-    // Logic to detect active category based on scroll position
+    // Logic to detect active section/category based on scroll position
     // Skip auto-detection during manual/programmatic scrolls (prevents flickering)
     if (!_isManualScrolling) {
-      // Check if we're at the top - activate "All" category
-      if (offset <= 100.0) {
-        if (_activeCategoryId != 0) {
-          setState(() {
-            _activeCategoryId = 0; // "All" category
-          });
-        }
-      } else {
-        // Calculate 50% viewport trigger point (middle of screen)
-        final double viewportHeight = MediaQuery.of(context).size.height;
-        final double midpoint = viewportHeight / 2;
-        const double tolerance = 50.0; // Tolerance range for activation
+      final restController = Get.find<RestaurantController>();
 
-        // We iterate through keys and check which one is at the midpoint
-        for (var entry in _categorySectionKeys.entries) {
-          final key = entry.value;
-          final context = key.currentContext;
-          if (context != null) {
-            final box = context.findRenderObject() as RenderBox;
-            final position = box.localToGlobal(Offset.zero);
-            // Check if the section is near the viewport midpoint (50%)
-            if (position.dy >= (midpoint - tolerance) && position.dy <= (midpoint + tolerance)) {
-              if (_activeCategoryId != entry.key) {
-                setState(() {
-                  _activeCategoryId = entry.key;
-                });
-              }
-              break;
+      // NEW: Handle menu sections (new API)
+      if (restController.isUsingSections) {
+        _detectActiveSectionOnScroll(offset);
+      } else {
+        // LEGACY: Handle categories
+        _detectActiveCategoryOnScroll(offset);
+      }
+    }
+  }
+
+  /// NEW: Detect active menu section based on scroll position
+  void _detectActiveSectionOnScroll(double offset) {
+    // Find which section is currently centered in viewport
+    final double viewportHeight = MediaQuery.of(context).size.height;
+    final double viewportCenter = viewportHeight / 2; // Center of screen
+
+    int? bestSectionId;
+    double bestDistance = double.infinity;
+
+    for (var entry in _categorySectionKeys.entries) {
+      final key = entry.value;
+      final ctx = key.currentContext;
+      if (ctx != null) {
+        final box = ctx.findRenderObject() as RenderBox?;
+        if (box != null && box.hasSize) {
+          final position = box.localToGlobal(Offset.zero);
+          final sectionTop = position.dy;
+          final sectionCenter = sectionTop + (box.size.height / 2);
+
+          // Check distance from section center to viewport center
+          final distance = (sectionCenter - viewportCenter).abs();
+
+          // Section should be visible on screen
+          if (sectionTop < viewportHeight && sectionTop > -box.size.height) {
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestSectionId = entry.key;
             }
+          }
+        }
+      }
+    }
+
+    // Update active section if changed
+    if (bestSectionId != null && _activeSectionId != bestSectionId) {
+      setState(() {
+        _activeSectionId = bestSectionId;
+      });
+    }
+  }
+
+  /// LEGACY: Detect active category based on scroll position
+  void _detectActiveCategoryOnScroll(double offset) {
+    // Check if we're at the top - activate "All" category
+    if (offset <= 100.0) {
+      if (_activeCategoryId != 0) {
+        setState(() {
+          _activeCategoryId = 0; // "All" category
+        });
+      }
+    } else {
+      // Calculate 50% viewport trigger point (middle of screen)
+      final double viewportHeight = MediaQuery.of(context).size.height;
+      final double midpoint = viewportHeight / 2;
+      const double tolerance = 50.0; // Tolerance range for activation
+
+      // We iterate through keys and check which one is at the midpoint
+      for (var entry in _categorySectionKeys.entries) {
+        final key = entry.value;
+        final ctx = key.currentContext;
+        if (ctx != null) {
+          final box = ctx.findRenderObject() as RenderBox;
+          final position = box.localToGlobal(Offset.zero);
+          // Check if the section is near the viewport midpoint (50%)
+          if (position.dy >= (midpoint - tolerance) && position.dy <= (midpoint + tolerance)) {
+            if (_activeCategoryId != entry.key) {
+              setState(() {
+                _activeCategoryId = entry.key;
+              });
+            }
+            break;
           }
         }
       }
@@ -408,44 +465,92 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       return;
     }
 
-    // Find the category containing this product
     final restController = Get.find<RestaurantController>();
-    final products = restController.restaurantProducts;
 
-    print('   products loaded: ${products != null}');
-    print('   products count: ${products?.length ?? 0}');
+    // NEW: Check if using menu sections (new API structure)
+    if (restController.isUsingSections) {
+      final menuSections = restController.visibleMenuSections;
 
-    if (products == null) {
-      // Data not loaded yet, try again after a short delay
-      print('⚠️ Products not loaded yet, retrying in 300ms...');
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) _scrollToProduct(productId);
-      return;
+      print('   Using menu sections: true');
+      print('   sections loaded: ${menuSections != null}');
+      print('   sections count: ${menuSections?.length ?? 0}');
+
+      if (menuSections == null || menuSections.isEmpty) {
+        // Data not loaded yet, try again after a short delay
+        print('⚠️ Menu sections not loaded yet, retrying in 300ms...');
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (mounted) _scrollToProduct(productId);
+        return;
+      }
+
+      // Find the section containing this product
+      MenuSection? targetSection;
+      Product? targetProduct;
+
+      for (final section in menuSections) {
+        if (section.products != null) {
+          final product = section.products!.firstWhereOrNull((p) => p.id == productId);
+          if (product != null) {
+            targetSection = section;
+            targetProduct = product;
+            break;
+          }
+        }
+      }
+
+      if (targetSection == null || targetProduct == null) {
+        print('⚠️ Product not found in any section for ID: $productId');
+        return;
+      }
+
+      print('   Found product: ${targetProduct.name}');
+      print('   Section ID: ${targetSection.id}, Section Name: ${targetSection.name}');
+      print('✅ Calling _handleSectionTap(${targetSection.id})');
+
+      // Scroll vertically to center the section in the viewport
+      await _handleSectionTap(targetSection.id!);
+
+      print('✅ Section scroll complete, triggering wiggle for product $productId');
+    } else {
+      // LEGACY: Use category-based products
+      final products = restController.restaurantProducts;
+
+      print('   Using menu sections: false (legacy)');
+      print('   products loaded: ${products != null}');
+      print('   products count: ${products?.length ?? 0}');
+
+      if (products == null) {
+        // Data not loaded yet, try again after a short delay
+        print('⚠️ Products not loaded yet, retrying in 300ms...');
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (mounted) _scrollToProduct(productId);
+        return;
+      }
+
+      // Find the product
+      final product = products.firstWhereOrNull((p) => p.id == productId);
+      if (product == null) {
+        print('⚠️ Product not found for ID: $productId');
+        return;
+      }
+
+      // Get the first category ID for this product
+      final categoryId = product.categoryId;
+      print('   Found product: ${product.name}');
+      print('   Category ID: $categoryId');
+
+      if (categoryId == null) {
+        print('⚠️ Product has no category');
+        return;
+      }
+
+      print('✅ Calling _handleCategoryTap($categoryId)');
+
+      // Scroll vertically to center the category section in the viewport
+      await _handleCategoryTap(categoryId);
+
+      print('✅ Category scroll complete, triggering wiggle for product $productId');
     }
-
-    // Find the product
-    final product = products.firstWhereOrNull((p) => p.id == productId);
-    if (product == null) {
-      print('⚠️ Product not found for ID: $productId');
-      return;
-    }
-
-    // Get the first category ID for this product
-    final categoryId = product.categoryId;
-    print('   Found product: ${product.name}');
-    print('   Category ID: $categoryId');
-
-    if (categoryId == null) {
-      print('⚠️ Product has no category');
-      return;
-    }
-
-    print('✅ Calling _handleCategoryTap($categoryId)');
-
-    // Scroll vertically to center the category section in the viewport
-    await _handleCategoryTap(categoryId);
-
-    print('✅ Category scroll complete, triggering wiggle for product $productId');
 
     // Trigger both wiggle and overlay animations for the product
     if (mounted) {
@@ -569,7 +674,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
           key: _categorySectionKeys[sectionId],
           padding: const EdgeInsets.fromLTRB(
             Dimensions.paddingSizeDefault,
-            Dimensions.paddingSizeLarge,
+            Dimensions.paddingSizeExtraLarge, // More spacing between sections
             Dimensions.paddingSizeDefault,
             Dimensions.paddingSizeSmall,
           ),
@@ -599,12 +704,17 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       // Section Products - Horizontal Scroll (regular widget, not sliver)
       widgets.add(
         SizedBox(
-          height: 280,
+          height: 220, // Card height ~200 + padding for shadows
           child: ListView.builder(
             controller: horizontalController,
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+            clipBehavior: Clip.none, // Allow shadows to render outside bounds
+            padding: const EdgeInsets.only(
+              left: Dimensions.paddingSizeDefault,
+              right: Dimensions.paddingSizeDefault,
+              bottom: Dimensions.paddingSizeSmall, // Bottom padding for shadow
+            ),
             itemCount: section.products!.length,
             itemBuilder: (context, index) {
               final product = section.products![index];
@@ -612,8 +722,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                 padding: EdgeInsets.only(
                   right: index < section.products!.length - 1 ? Dimensions.paddingSizeDefault : 0,
                 ),
-                child: RestaurantProductHorizontalCard(
-                  product: product,
+                child: SizedBox(
+                  height: 200, // Smaller, more compact card height
+                  child: RestaurantProductHorizontalCard(
+                    product: product,
+                  ),
                 ),
               );
             },

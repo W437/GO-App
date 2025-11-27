@@ -6,6 +6,7 @@ import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/domain/centralize_login_enum.dart';
+import 'package:godelivery_user/features/profile/controllers/profile_controller.dart';
 import 'package:godelivery_user/features/auth/domain/models/auth_response_model.dart';
 import 'package:godelivery_user/features/auth/domain/models/social_log_in_body_model.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
@@ -145,6 +146,8 @@ class ExistingUserBottomSheet extends StatelessWidget {
         Get.toNamed(RouteHelper.getNewUserSetupScreen(name: userModel.name??'', loginType: loginType, phone: number, email: email));
       }
     } else if(response.isSuccess && response.authResponseModel!.isPersonalInfo!) {
+      // Fetch user profile info after successful login for existing users
+      Get.find<ProfileController>().getUserInfo();
       Get.offAllNamed(RouteHelper.getAccessLocationRoute('sign-in'));
     } else {
       Future.delayed(const Duration(milliseconds: 600), () {

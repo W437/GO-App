@@ -75,9 +75,7 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
                       Text('•', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
                       const SizedBox(width: 8),
                       Text(
-                        restaurant.schedules != null && restaurant.schedules!.isNotEmpty
-                          ? 'Closes at ${restaurant.schedules![0].closingTime}'
-                          : 'Loading hours...', // Show loading state instead of N/A
+                        _getTodayHoursText(restaurant),
                         style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
                       ),
                       const SizedBox(width: 8),
@@ -219,5 +217,29 @@ class RestaurantDetailsSectionWidget extends StatelessWidget {
       ),
     );
 
+  }
+
+  /// Get today's operating hours text
+  /// Returns "Open HH:MM - HH:MM" or "Closed today" or "Loading hours..."
+  String _getTodayHoursText(Restaurant restaurant) {
+    if (restaurant.schedules == null || restaurant.schedules!.isEmpty) {
+      return 'Loading hours...';
+    }
+
+    // Get today's day of week (DateTime.weekday: 1=Monday, 7=Sunday)
+    // API uses: 0=Sunday, 1=Monday, ..., 6=Saturday
+    final now = DateTime.now();
+    final todayApiDay = now.weekday == 7 ? 0 : now.weekday; // Convert to API format
+
+    // Find today's schedule
+    final todaySchedule = restaurant.schedules!.firstWhereOrNull(
+      (s) => s.day == todayApiDay,
+    );
+
+    if (todaySchedule == null) {
+      return 'Closed today';
+    }
+
+    return '${todaySchedule.openingTime} - ${todaySchedule.closingTime}';
   }
 }
