@@ -13,6 +13,11 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
   late GameState gameState;
   late AnimationController animationController;
 
+  // Frame rate independence
+  DateTime? _lastFrameTime;
+  double _deltaTime = 1.0 / 60.0; // Default to 60fps
+  static const double _targetFps = 60.0;
+
   // Game status
   bool gameStarted = false;
   bool gameOver = false;
@@ -122,10 +127,22 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
   void _gameLoop() {
     if (gameOver || isPaused || awaitTapToContinue) return;
 
+    // Calculate deltaTime for frame-rate independence
+    final now = DateTime.now();
+    if (_lastFrameTime != null) {
+      _deltaTime = now.difference(_lastFrameTime!).inMicroseconds / 1000000.0;
+      // Clamp to prevent huge jumps (e.g., when app resumes from background)
+      _deltaTime = _deltaTime.clamp(0.0, 0.05);
+    }
+    _lastFrameTime = now;
+
+    // Calculate time multiplier (1.0 at 60fps, 0.5 at 120fps, etc.)
+    final timeScale = _deltaTime * _targetFps;
+
     // Handle dying state - let bird fall to ground
     if (isDying) {
-      gameState.bird.velocity += GameConstants.gravity;
-      gameState.bird.y += gameState.bird.velocity;
+      gameState.bird.velocity += GameConstants.gravity * timeScale;
+      gameState.bird.y += gameState.bird.velocity * timeScale;
 
       // Update bird rotation while falling
       final targetRotation = gameState.bird.velocity * 0.02;
@@ -155,12 +172,12 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     // Update scrolling offsets
     final pizzaStack = GameLogic.getPizzaStack(gameState);
     final actualPipeSpeed = GameLogic.computePizzaSpeed(pizzaStack);
-    gameState.bgOffset = (gameState.bgOffset + actualPipeSpeed * 0.1) % (400 * 1.5);
-    gameState.floorOffset = (gameState.floorOffset + actualPipeSpeed) % 336;
+    gameState.bgOffset = (gameState.bgOffset + actualPipeSpeed * 0.1 * timeScale) % (400 * 1.5);
+    gameState.floorOffset = (gameState.floorOffset + actualPipeSpeed * timeScale) % 336;
 
-    // Update bird physics
-    gameState.bird.velocity += GameConstants.gravity;
-    gameState.bird.y += gameState.bird.velocity;
+    // Update bird physics with frame-rate independence
+    gameState.bird.velocity += GameConstants.gravity * timeScale;
+    gameState.bird.y += gameState.bird.velocity * timeScale;
 
     // Clamp bird position
     if (gameState.bird.y < 20) {
@@ -194,7 +211,7 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     }
 
     for (var pipe in gameState.pipes) {
-      pipe.x -= actualPipeSpeed;
+      pipe.x -= actualPipeSpeed * timeScale;
     }
 
     // Add new pipes
@@ -212,7 +229,7 @@ class GameController extends GetxController with GetSingleTickerProviderStateMix
     gameState.pipes.removeWhere((p) => p.x < -GameConstants.pipeWidth);
 
     // Update powerups
-    GameLogic.updatePowerUpsOnField(gameState, actualPipeSpeed, birdX, birdY);
+    GameLogic.updatePowerUpsOnField(gameState, actualPipeSpeed * timeScale, birdX, birdY);
 
     // Check pipe collisions and scoring
     for (var pipe in gameState.pipes) {
