@@ -515,6 +515,9 @@ class LocationController extends GetxController implements GetxService {
     // Calculate zone center for API coordinates
     final center = _getZoneCenter(zone);
 
+    // Save zone to SharedPreferences so it persists across screen reopens
+    await saveZoneAsAddress(zone, refreshData: false);
+
     // Update API header with new zone
     final apiClient = Get.find<ApiClient>();
     final sharedPreferences = Get.find<SharedPreferences>();

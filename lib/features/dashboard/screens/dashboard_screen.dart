@@ -178,65 +178,65 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
         bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
 
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
-            ? const SizedBox() : Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+            ? const SizedBox() : Padding(
+              padding: EdgeInsets.only(
+                left: 5,
+                right: 5,
+                bottom: MediaQuery.of(context).padding.bottom + 8,
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                    color: Theme.of(context).cardColor.withValues(alpha: 0.90),
-                    child: SizedBox(
-                      height: 65,
-                      child: Row(
-                children: [
-                  BottomNavItem(
-                    iconPath: 'assets/image/ui/explore_icon.png',
-                    label: 'Explore',
-                    isSelected: _pageIndex == 0,
-                    onTap: (details) => _setPage(0, details.globalPosition),
-                  ),
-                  BottomNavItem(
-                    iconData: Icons.storefront_outlined,
-                    label: 'Mart',
-                    isSelected: _pageIndex == 1,
-                    onTap: (details) => _setPage(1, details.globalPosition),
-                  ),
-                  BottomNavItem(
-                    iconPath: 'assets/image/ui/home_icon.png',
-                    label: 'Home',
-                    isSelected: _pageIndex == 2,
-                    onTap: (details) => _setPage(2, details.globalPosition),
-                  ),
-                  BottomNavItem(
-                    iconPath: 'assets/image/ui/orders_icon.png',
-                    label: 'Orders',
-                    isSelected: _pageIndex == 3,
-                    onTap: (details) => _setPage(3, details.globalPosition),
-                  ),
-                  BottomNavItem(
-                    iconPath: 'assets/image/ui/profile_icon.png',
-                    label: 'Menu',
-                    isSelected: _pageIndex == 4,
-                    onTap: (details) => _setPage(4, details.globalPosition),
-                  ),
-                ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      color: Theme.of(context).cardColor.withValues(alpha: 0.90),
+                      child: SizedBox(
+                        height: 65,
+                        child: Row(
+                          children: [
+                            BottomNavItem(
+                              iconPath: 'assets/image/ui/explore_icon.png',
+                              label: 'Explore',
+                              isSelected: _pageIndex == 0,
+                              onTap: (details) => _setPage(0, details.globalPosition),
+                            ),
+                            BottomNavItem(
+                              iconData: Icons.storefront_outlined,
+                              label: 'Mart',
+                              isSelected: _pageIndex == 1,
+                              onTap: (details) => _setPage(1, details.globalPosition),
+                            ),
+                            BottomNavItem(
+                              iconPath: 'assets/image/ui/home_icon.png',
+                              label: 'Home',
+                              isSelected: _pageIndex == 2,
+                              onTap: (details) => _setPage(2, details.globalPosition),
+                            ),
+                            BottomNavItem(
+                              iconPath: 'assets/image/ui/orders_icon.png',
+                              label: 'Orders',
+                              isSelected: _pageIndex == 3,
+                              onTap: (details) => _setPage(3, details.globalPosition),
+                            ),
+                            BottomNavItem(
+                              iconPath: 'assets/image/ui/profile_icon.png',
+                              label: 'Menu',
+                              isSelected: _pageIndex == 4,
+                              onTap: (details) => _setPage(4, details.globalPosition),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
