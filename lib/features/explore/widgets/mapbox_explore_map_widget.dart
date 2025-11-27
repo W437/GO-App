@@ -11,7 +11,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
-import 'package:godelivery_user/features/explore/widgets/restaurant_bottom_sheet_widget.dart';
+import 'package:godelivery_user/features/explore/widgets/explore_rest_floating_badge.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/features/splash/controllers/splash_controller.dart';
 import 'package:godelivery_user/helper/business_logic/address_helper.dart';
@@ -402,35 +402,49 @@ class _MapboxExploreMapWidgetState extends State<MapboxExploreMapWidget> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => RestaurantBottomSheetWidget(
-        restaurants: restaurants,
-        initialIndex: initialIndex,
-        onClose: () {
+      barrierColor: Colors.transparent, // Remove background overlay
+      builder: (context) => GestureDetector(
+        onTap: () {
+          // Close on tap outside
           widget.exploreController.clearSelectedRestaurant();
           Navigator.pop(context);
         },
-        onRestaurantChanged: (index) {
-          // Update controller selection when user swipes
-          widget.exploreController.selectRestaurant(index);
+        child: Container(
+          color: Colors.transparent,
+          child: GestureDetector(
+            onTap: () {}, // Prevent taps on badge from closing
+            child: ExploreRestFloatingBadge(
+              restaurants: restaurants,
+              initialIndex: initialIndex,
+              onClose: () {
+                widget.exploreController.clearSelectedRestaurant();
+                Navigator.pop(context);
+              },
+              onRestaurantChanged: (index) {
+                // Update controller selection when user swipes
+                widget.exploreController.selectRestaurant(index);
 
-          // Animate map to the new restaurant
-          final restaurant = restaurants[index];
-          if (_mapboxMap != null &&
-              restaurant.latitude != null &&
-              restaurant.longitude != null) {
-            _mapboxMap!.flyTo(
-              CameraOptions(
-                center: Point(
-                  coordinates: Position(
-                    double.parse(restaurant.longitude!),
-                    double.parse(restaurant.latitude!),
-                  ),
-                ),
-              ),
-              MapAnimationOptions(duration: 300),
-            );
-          }
-        },
+                // Animate map to the new restaurant
+                final restaurant = restaurants[index];
+                if (_mapboxMap != null &&
+                    restaurant.latitude != null &&
+                    restaurant.longitude != null) {
+                  _mapboxMap!.flyTo(
+                    CameraOptions(
+                      center: Point(
+                        coordinates: Position(
+                          double.parse(restaurant.longitude!),
+                          double.parse(restaurant.latitude!),
+                        ),
+                      ),
+                    ),
+                    MapAnimationOptions(duration: 300),
+                  );
+                }
+              },
+            ),
+          ),
+        ),
       ),
     );
   }

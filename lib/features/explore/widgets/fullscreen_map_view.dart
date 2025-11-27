@@ -8,7 +8,7 @@ import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/explore/controllers/explore_controller.dart';
-import 'package:godelivery_user/features/explore/widgets/restaurant_bottom_sheet_widget.dart';
+import 'package:godelivery_user/features/explore/widgets/explore_rest_floating_badge.dart';
 import 'package:godelivery_user/features/splash/controllers/theme_controller.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 
@@ -100,7 +100,7 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => RestaurantBottomSheetWidget(
+      builder: (context) => ExploreRestFloatingBadge(
         restaurant: restaurant,
         onClose: () {
           widget.controller.clearSelectedRestaurant();
