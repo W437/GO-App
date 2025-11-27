@@ -14,6 +14,9 @@ class BottomNavItem extends StatefulWidget {
 
 class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  bool _isPressed = false;
+  TapDownDetails? _tapDownDetails;
+  int? _activePointerId; // Track which pointer is pressing this button
 
   @override
   void initState() {
@@ -38,13 +41,62 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
     super.dispose();
   }
 
+  void _handlePointerDown(PointerDownEvent event) {
+    _activePointerId = event.pointer;
+    setState(() {
+      _isPressed = true;
+      _tapDownDetails = TapDownDetails(
+        globalPosition: event.position,
+        localPosition: event.localPosition,
+        kind: event.kind,
+      );
+    });
+  }
+
+  void _handlePointerUp(PointerUpEvent event) {
+    if (event.pointer == _activePointerId) {
+      if (_isPressed && _tapDownDetails != null) {
+        widget.onTap?.call(_tapDownDetails!);
+      }
+      _resetPressState();
+    }
+  }
+
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (event.pointer == _activePointerId) {
+      _resetPressState();
+    }
+  }
+
+  void _resetPressState() {
+    setState(() {
+      _isPressed = false;
+      _tapDownDetails = null;
+      _activePointerId = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+    final hintColor = Theme.of(context).hintColor;
+
+    // Determine icon color: pressed or selected = primary, otherwise hint
+    final iconColor = (_isPressed || widget.isSelected)
+        ? primaryColor
+        : hintColor.withValues(alpha: 0.4);
+
+    // Determine label color
+    final labelColor = (_isPressed || widget.isSelected)
+        ? primaryColor
+        : hintColor.withValues(alpha: 0.45);
+
     return Expanded(
-      child: GestureDetector(
-        onTapDown: (details) {
-          widget.onTap?.call(details);
-        },
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        onPointerUp: _handlePointerUp,
+        onPointerCancel: _handlePointerCancel,
+        behavior: HitTestBehavior.opaque,
         child: Container(
           color: Colors.transparent,
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -68,24 +120,26 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                     rotation = 0.1 - (value - 0.75) * 4 * 0.1; // 0.1 to 0
                   }
 
-                  // Create scale effect
-                  double scale = 1.0;
+                  // Create scale effect for wiggle animation
+                  double wiggleScale = 1.0;
                   if (value < 0.5) {
-                    scale = 1.0 + (value * 2 * 0.2); // 1.0 to 1.2
+                    wiggleScale = 1.0 + (value * 2 * 0.2); // 1.0 to 1.2
                   } else {
-                    scale = 1.2 - ((value - 0.5) * 2 * 0.2); // 1.2 to 1.0
+                    wiggleScale = 1.2 - ((value - 0.5) * 2 * 0.2); // 1.2 to 1.0
                   }
 
+                  // Press feedback scale (5% pop)
+                  final pressScale = _isPressed ? 1.05 : 1.0;
+                  final totalScale = wiggleScale * pressScale;
+
                   return Transform.scale(
-                    scale: scale,
+                    scale: totalScale,
                     child: Transform.rotate(
                       angle: rotation,
                       child: widget.iconPath != null
                           ? ColorFiltered(
                               colorFilter: ColorFilter.mode(
-                                widget.isSelected
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).hintColor.withValues(alpha: 0.4),
+                                iconColor,
                                 BlendMode.srcIn,
                               ),
                               child: Image.asset(
@@ -96,9 +150,7 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                             )
                           : Icon(
                               widget.iconData!,
-                              color: widget.isSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Theme.of(context).hintColor.withValues(alpha: 0.4),
+                              color: iconColor,
                               size: 28.8,
                             ),
                     ),
@@ -111,10 +163,8 @@ class _BottomNavItemState extends State<BottomNavItem> with SingleTickerProvider
                   widget.label,
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: widget.isSelected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).hintColor.withValues(alpha: 0.45),
+                    fontWeight: (_isPressed || widget.isSelected) ? FontWeight.w600 : FontWeight.w500,
+                    color: labelColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

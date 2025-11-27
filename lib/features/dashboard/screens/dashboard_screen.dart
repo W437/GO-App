@@ -53,7 +53,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   late AnimationController _animationController;
   late Animation<double> _animation;
   Offset? _tapPosition;
-  bool _isAnimating = false;
+  bool _navLocked = false; // Simple synchronous lock
   late final DashboardNavigationCallback _navigationCallback;
 
   @override
@@ -69,6 +69,13 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       curve: Curves.easeOutCubic, // Quick start, smooth end
     );
     _animationController.value = 1.0;
+
+    // Rebuild when animation completes so isAnimating check updates
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {}); // Trigger rebuild to update isSwitching/displayIndex
+      }
+    });
 
     _isLogin = Get.find<AuthController>().isLoggedIn();
 
@@ -243,7 +250,7 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
             List<OrderModel> runningOrder = orderController.runningOrderList != null ? orderController.runningOrderList! : [];
 
             List<OrderModel> reversOrder =  List.from(runningOrder.reversed);
-            final isSwitching = _isAnimating && _previousPageIndex != _pageIndex;
+            final isSwitching = _navLocked && _previousPageIndex != _pageIndex;
             final displayIndex = isSwitching ? _previousPageIndex : _pageIndex;
 
             return ExpandableBottomSheet(
@@ -359,12 +366,19 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
   }
 
   void _setPage(int pageIndex, [Offset? tapPosition]) {
+    // FIRST: Check lock synchronously before anything else
+    if (_navLocked) return;
+
+    // SECOND: Set lock immediately (synchronous, before any async code)
+    _navLocked = true;
+
     // If clicking explore tab while already on explore and in fullscreen mode, exit fullscreen
     if (pageIndex == 0 && _pageIndex == 0) {
       final exploreController = Get.find<ExploreController>();
       if (exploreController.isFullscreenMode) {
         exploreController.exitFullscreenMode();
       }
+      _navLocked = false; // Unlock before returning
       return;
     }
 
@@ -376,22 +390,21 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       }
     }
 
-    if (pageIndex == _pageIndex) return;
+    if (pageIndex == _pageIndex) {
+      _navLocked = false; // Unlock before returning
+      return;
+    }
 
     setState(() {
       _previousPageIndex = _pageIndex;
-      _pageIndex = pageIndex; // Update immediately for button feedback
+      _pageIndex = pageIndex;
       _tapPosition = tapPosition;
-      _isAnimating = true;
     });
 
-    // Start animation
-    _animationController.forward(from: 0.0).then((_) {
-      if (mounted) {
-        setState(() {
-          _isAnimating = false;
-        });
-      }
+    // Start animation and unlock when complete (whenComplete fires regardless of how animation ends)
+    _animationController.forward(from: 0.0).whenComplete(() {
+      _navLocked = false;
+      if (mounted) setState(() {});
     });
   }
 

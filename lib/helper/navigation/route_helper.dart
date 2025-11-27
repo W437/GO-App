@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/images/image_viewer_screen_widget.dart';
 import 'package:godelivery_user/common/widgets/adaptive/empty_states/not_found_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
+import 'package:godelivery_user/common/widgets/shared/swipe_back_wrapper.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/auth/screens/new_user_setup_screen.dart';
 import 'package:godelivery_user/features/business/screens/subscription_payment_screen.dart';
@@ -427,7 +428,7 @@ class RouteHelper {
       customTransition: _ThreeDGetTransition(),
       transitionDuration: const Duration(milliseconds: 500),
       opaque: false,
-      popGesture: true,
+      popGesture: false, // Disabled: 3D transition incompatible with interactive gestures
     ),
     GetPage(
       name: restaurantDetails,
@@ -437,7 +438,7 @@ class RouteHelper {
       customTransition: _ThreeDGetTransition(),
       transitionDuration: const Duration(milliseconds: 500),
       opaque: false,
-      popGesture: true,
+      popGesture: false, // Disabled: 3D transition incompatible with interactive gestures
     ),
     GetPage(name: orderDetails, page: () {
       return getRoute(Get.arguments ?? OrderDetailsScreen(
@@ -637,6 +638,7 @@ class RouteHelper {
       customTransition: _ThreeDGetTransition(),
       transitionDuration: const Duration(milliseconds: 500),
       opaque: false,
+      popGesture: false, // Disabled: 3D transition with custom swipe-back
     ),
     GetPage(name: newUserSetupScreen, page: () => NewUserSetupScreen(
       name: Get.parameters['name']!, loginType: Get.parameters['login_type']!,
@@ -688,20 +690,30 @@ class _ThreeDGetTransition extends CustomTransition {
       return AnimatedBuilder(
         animation: secondaryAnimation,
         builder: (context, _) {
+          // Check if this is an interactive gesture (swipe back)
+          final bool isGestureDriven = Navigator.of(context).userGestureInProgress;
+
           final size = MediaQuery.of(context).size;
-          final double t = Curves.easeInOutSine.transform(secondaryAnimation.value);
+          // Use linear interpolation during gestures, curve otherwise
+          final double t = isGestureDriven
+              ? secondaryAnimation.value
+              : Curves.easeInOutSine.transform(secondaryAnimation.value);
           final double dx = -size.width * 0.20 * t; // 20% shift left
-          final double blur = 4.0 * t; // Blur from 0 to 4
+          // Skip blur during gesture for performance
+          final double blur = isGestureDriven ? 0.0 : 4.0 * t;
           final double overlayOpacity = 0.5 * t; // Fade from 0 to 0.5
           return Transform.translate(
             offset: Offset(dx, 0),
             child: Stack(
               fit: StackFit.expand,
               children: [
-                ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                  child: child,
-                ),
+                if (blur > 0.1)
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                    child: child,
+                  )
+                else
+                  child,
                 // Dark overlay
                 Container(
                   color: Colors.black.withValues(alpha: overlayOpacity),
@@ -713,8 +725,11 @@ class _ThreeDGetTransition extends CustomTransition {
       );
     }
 
-    // Foreground 3D transform.
-    return _ThreeDTransitionBody(animation: animation, child: child);
+    // Foreground 3D transform - auto-wrap with swipe gesture
+    return _ThreeDTransitionBody(
+      animation: animation,
+      child: SwipeBackWrapper(child: child),
+    );
   }
 }
 
@@ -731,15 +746,26 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody> {
 
   @override
   Widget build(BuildContext context) {
-    // Fast start for opening, fast end for closing
-    final double curvedValue = widget.animation.status == AnimationStatus.reverse
-        ? Curves.fastOutSlowIn.flipped.transform(widget.animation.value)
-        : Curves.fastOutSlowIn.transform(widget.animation.value);
+    // Check if this is an interactive gesture (swipe back)
+    final bool isGestureDriven = Navigator.of(context).userGestureInProgress;
 
-    // Parameters for 3D effect.
-    const double startTranslateXRatio = 1.1;
-    const double startScale = 1.5; // Start larger, scale down to 1.0
-    const double startYAngle = -50.0 * pi / 180;
+    // Use linear interpolation during gestures for smooth finger-following,
+    // apply curves only during programmatic animations
+    final double curvedValue;
+    if (isGestureDriven) {
+      // Linear - directly follows the finger
+      curvedValue = widget.animation.value;
+    } else {
+      // Curved - fast start for opening, fast end for closing
+      curvedValue = widget.animation.status == AnimationStatus.reverse
+          ? Curves.fastOutSlowIn.flipped.transform(widget.animation.value)
+          : Curves.fastOutSlowIn.transform(widget.animation.value);
+    }
+
+    // Parameters for 3D effect - simplified during gesture for performance
+    final double startTranslateXRatio = isGestureDriven ? 1.0 : 1.1;
+    final double startScale = isGestureDriven ? 1.0 : 1.5; // No scale during gesture
+    final double startYAngle = isGestureDriven ? -30.0 * pi / 180 : -50.0 * pi / 180; // Less rotation during gesture
     const double startZAngle = 0.0 * pi / 180;
 
     final size = MediaQuery.of(context).size;
@@ -758,11 +784,12 @@ class _ThreeDTransitionBodyState extends State<_ThreeDTransitionBody> {
 
     final double cornerRadius = 24.0 * totalProgress;
     final double shadowOpacity = (effectiveProgress * 0.5).clamp(0.0, 0.3);
-    final double foregroundBlur = 6.0 * totalProgress; // Blur from 6 to 0 as screen slides in
+    // Skip blur during gesture for performance
+    final double foregroundBlur = isGestureDriven ? 0.0 : 6.0 * totalProgress;
 
     Widget transformedChild = widget.child;
 
-    // Apply blur for both opening and closing
+    // Apply blur only during programmatic animations
     if (foregroundBlur > 0.1) {
       transformedChild = ImageFiltered(
         imageFilter: ImageFilter.blur(sigmaX: foregroundBlur, sigmaY: foregroundBlur),

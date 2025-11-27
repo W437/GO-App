@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Wolt-like transition that animates both foreground (animation) and background (secondaryAnimation).
@@ -16,6 +15,8 @@ class WoltLikePageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     final Size size = MediaQuery.of(context).size;
+    // Check if this is an interactive gesture (swipe back)
+    final bool isGestureDriven = Navigator.of(context).userGestureInProgress;
 
     // Determine if this route is underneath another animating route
     final bool isBelowTop =
@@ -27,7 +28,10 @@ class WoltLikePageTransitionsBuilder extends PageTransitionsBuilder {
       return AnimatedBuilder(
         animation: secondaryAnimation,
         builder: (context, _) {
-          final double t = Curves.easeOut.transform(secondaryAnimation.value);
+          // Use linear interpolation during gestures, curve otherwise
+          final double t = isGestureDriven
+              ? secondaryAnimation.value
+              : Curves.easeOut.transform(secondaryAnimation.value);
           final double dx = -size.width * 0.12 * t; // stronger left shift
           final double scale = 1.0 - 0.08 * t;       // stronger scale down
           return Transform.translate(
@@ -45,7 +49,10 @@ class WoltLikePageTransitionsBuilder extends PageTransitionsBuilder {
       return AnimatedBuilder(
         animation: animation,
         builder: (context, _) {
-          final double t = Curves.easeOutCubic.transform(animation.value);
+          // Use linear interpolation during gestures, curve otherwise
+          final double t = isGestureDriven
+              ? animation.value
+              : Curves.easeOutCubic.transform(animation.value);
           final double dx = (1.0 - t) * size.width;
           const double maxAngle = 0.10; // ~6 deg
           final double angle = (1.0 - t) * maxAngle;
