@@ -502,76 +502,11 @@ class LocationController extends GetxController implements GetxService {
     }
   }
 
-  /// Change the active browsing zone.
-  /// This updates the zone used for filtering content (restaurants, banners, etc.)
-  /// WITHOUT changing the user's delivery address.
-  ///
-  /// Use this when user wants to explore a different zone from the home screen.
+  /// Change the active zone and save it.
+  /// Saves zone to SharedPreferences, updates API headers, and refreshes all app data.
+  /// This is the main entry point for zone changes from UI.
   Future<void> changeZone(ZoneListModel zone) async {
-    // Setting reactive variable automatically updates Obx listeners (header)
-    _activeZone.value = zone;
     print('🌍 [ZONE] Changed to: ${zone.displayName ?? zone.name ?? "ID: ${zone.id}"}');
-
-    // Calculate zone center for API coordinates
-    final center = _getZoneCenter(zone);
-
-    // Save zone to SharedPreferences so it persists across screen reopens
-    await saveZoneAsAddress(zone, refreshData: false);
-
-    // Update API header with new zone
-    final apiClient = Get.find<ApiClient>();
-    final sharedPreferences = Get.find<SharedPreferences>();
-
-    apiClient.updateHeader(
-      sharedPreferences.getString(AppConstants.token),
-      [zone.id!], // New zone ID
-      sharedPreferences.getString(AppConstants.languageCode),
-      center.latitude.toString(),
-      center.longitude.toString(),
-    );
-
-    // Refresh all zone-dependent data
-    await HomeScreen.loadData(true);
-
-    // Clear checkout data since zone changed
-    Get.find<CheckoutController>().clearPrevData();
-
-    // Update other GetBuilder listeners
-    update();
+    await saveZoneAsAddress(zone, refreshData: true);
   }
-
-  void selectZone(ZoneListModel zone) {
-    if (zone.formattedCoordinates != null && zone.formattedCoordinates!.isNotEmpty) {
-      // Calculate center point of the zone polygon for better positioning
-      double totalLat = 0;
-      double totalLng = 0;
-      int count = zone.formattedCoordinates!.length;
-
-      for (FormattedCoordinates coord in zone.formattedCoordinates!) {
-        totalLat += coord.lat!;
-        totalLng += coord.lng!;
-      }
-
-      double centerLat = totalLat / count;
-      double centerLng = totalLng / count;
-
-      _pickPosition = Position(
-        latitude: centerLat, longitude: centerLng, timestamp: DateTime.now(),
-        heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
-      );
-      _pickAddress = zone.displayName ?? zone.name ?? 'Selected Zone';
-      _inZone = true;
-      _zoneID = zone.id!;
-      _buttonDisabled = false;
-
-      if (_mapController != null) {
-        _mapController!.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(centerLat, centerLng), zoom: 12)
-        ));
-      }
-
-      update();
-    }
-  }
-
 }
