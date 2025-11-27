@@ -11,13 +11,11 @@ import 'package:godelivery_user/util/styles.dart';
 class DraggableRestaurantSheet extends StatefulWidget {
   final ExploreController exploreController;
   final Function(double)? onPositionChanged;
-  final VoidCallback? onFullscreenToggle;
 
   const DraggableRestaurantSheet({
     super.key,
     required this.exploreController,
     this.onPositionChanged,
-    this.onFullscreenToggle,
   });
 
   @override
@@ -26,7 +24,6 @@ class DraggableRestaurantSheet extends StatefulWidget {
 
 class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
   final DraggableScrollableController _draggableController = DraggableScrollableController();
-  bool _wasInFullscreenMode = false;
 
   @override
   void initState() {
@@ -55,43 +52,35 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
     }
   }
 
-  void _checkFullscreenTransition() {
-    final isInFullscreen = widget.exploreController.isFullscreenMode;
+  double _getNearestSnap(double currentSize) {
+    const snapPoints = [0.12, 0.5, 0.95];
+    double nearest = snapPoints[0];
+    double minDistance = (currentSize - snapPoints[0]).abs();
 
-    // Detect transition from fullscreen to normal mode
-    if (_wasInFullscreenMode && !isInFullscreen) {
-      // Reset sheet to default position when exiting fullscreen
-      if (_draggableController.isAttached) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _draggableController.isAttached) {
-            _draggableController.animateTo(
-              0.5,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
-        });
+    for (final snap in snapPoints) {
+      final distance = (currentSize - snap).abs();
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = snap;
       }
     }
 
-    _wasInFullscreenMode = isInFullscreen;
+    return nearest;
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ExploreController>(
       builder: (controller) {
-        // Check for fullscreen transitions
-        _checkFullscreenTransition();
 
         // Allow sheet to slide down when not in fullscreen mode
         return DraggableScrollableSheet(
           controller: _draggableController,
-          initialChildSize: 0.5, // 50% of screen (default)
-          minChildSize: 0.5,    // Keep at 50% minimum
-          maxChildSize: 0.95,    // 95% maximum (expanded - almost full screen)
+          initialChildSize: 0.12, // Start collapsed at bottom (handle visible above nav)
+          minChildSize: 0.12,     // Collapsed state - just handle above bottom nav
+          maxChildSize: 0.95,     // 95% maximum (expanded - almost full screen)
           snap: true,
-          snapSizes: const [0.5, 0.95], // Only 2 snap points
+          snapSizes: const [0.12, 0.5, 0.95], // Three snap points: collapsed, default, expanded
           builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
@@ -126,28 +115,26 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                   final currentSize = _draggableController.size;
                   var newSize = currentSize + percentageDragged;
 
-                  // Add elastic resistance at ALL boundaries
+                  // Add elastic resistance at boundaries
                   const resistance = 0.25; // Resistance factor (lower = more resistance)
-                  const maxOverscroll = 0.05; // Maximum 5% overscroll
 
-                  // At default position (0.5)
-                  if (currentSize <= 0.5 && newSize < 0.5) {
-                    // Trying to drag down from default - apply resistance
-                    final overflow = 0.5 - newSize;
-                    newSize = 0.5 - (overflow * resistance);
-                    newSize = newSize.clamp(0.5 - maxOverscroll, 0.5); // Max 5% below
+                  // At collapsed position (0.12)
+                  if (currentSize <= 0.12 && newSize < 0.12) {
+                    // Trying to drag down from collapsed - apply resistance
+                    final overflow = 0.12 - newSize;
+                    newSize = 0.12 - (overflow * resistance);
+                    newSize = newSize.clamp(0.10, 0.12);
                   }
                   // At expanded position (0.95)
                   else if (currentSize >= 0.95 && newSize > 0.95) {
                     // Trying to drag up from expanded - apply resistance
                     final overflow = newSize - 0.95;
                     newSize = 0.95 + (overflow * resistance);
-                    newSize = newSize.clamp(0.95, 0.99); // Max to 99%
+                    newSize = newSize.clamp(0.95, 0.99);
                   }
-                  // Between positions - normal movement
+                  // Between positions - normal movement (no resistance)
                   else {
-                    // No resistance in the middle zone
-                    newSize = newSize.clamp(0.5 - maxOverscroll, 0.95 + maxOverscroll);
+                    newSize = newSize.clamp(0.10, 0.99);
                   }
 
                   _draggableController.jumpTo(newSize);
@@ -158,16 +145,10 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                   final velocity = details.primaryVelocity ?? 0;
                   final currentSize = _draggableController.size;
 
-                  // SIMPLE RULE: Fast downward swipe at default position = trigger fullscreen
-                  if (currentSize <= 0.52 && velocity > 700 && !widget.exploreController.isFullscreenMode) {
-                    widget.onFullscreenToggle?.call();
-                    return;
-                  }
-
                   // Handle overscroll bounce back
-                  if (currentSize < 0.5) {
+                  if (currentSize < 0.12) {
                     _draggableController.animateTo(
-                      0.5,
+                      0.12,
                       duration: const Duration(milliseconds: 400),
                       curve: Curves.elasticOut,
                     );
@@ -181,26 +162,28 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                     return;
                   }
 
-                  // Normal zone (between 0.5 and 0.95)
+                  // Normal zone - snap to nearest position
                   if (velocity.abs() > 500) {
                     // Fast swipe
                     if (velocity < 0 && currentSize < 0.90) {
-                      // Swiped up - expand
+                      // Swiped up - go to next higher snap point
+                      final targetSnap = currentSize < 0.3 ? 0.5 : 0.95;
                       _draggableController.animateTo(
-                        0.95,
+                        targetSnap,
                         duration: const Duration(milliseconds: 350),
                         curve: Curves.easeOutCubic,
                       );
-                    } else if (velocity > 0 && currentSize > 0.55) {
-                      // Swiped down - return to default
+                    } else if (velocity > 0) {
+                      // Swiped down - go to next lower snap point
+                      final targetSnap = currentSize > 0.7 ? 0.5 : 0.12;
                       _draggableController.animateTo(
-                        0.5,
+                        targetSnap,
                         duration: const Duration(milliseconds: 350),
                         curve: Curves.easeOutCubic,
                       );
                     } else {
-                      // Stay at current position
-                      final nearestSnap = currentSize < 0.725 ? 0.5 : 0.95;
+                      // Stay at nearest snap
+                      final nearestSnap = _getNearestSnap(currentSize);
                       _draggableController.animateTo(
                         nearestSnap,
                         duration: const Duration(milliseconds: 300),
@@ -209,7 +192,7 @@ class _DraggableRestaurantSheetState extends State<DraggableRestaurantSheet> {
                     }
                   } else {
                     // Slow drag - snap to nearest
-                    final nearestSnap = currentSize < 0.725 ? 0.5 : 0.95;
+                    final nearestSnap = _getNearestSnap(currentSize);
                     _draggableController.animateTo(
                       nearestSnap,
                       duration: const Duration(milliseconds: 300),

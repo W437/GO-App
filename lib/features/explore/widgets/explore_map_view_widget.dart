@@ -15,16 +15,10 @@ import 'package:godelivery_user/util/images.dart';
 
 class ExploreMapViewWidget extends StatefulWidget {
   final ExploreController exploreController;
-  final VoidCallback? onFullscreenToggle;
-  final Animation<Offset>? topButtonsAnimation;
-  final Animation<double>? topButtonsFadeAnimation;
 
   const ExploreMapViewWidget({
     super.key,
     required this.exploreController,
-    this.onFullscreenToggle,
-    this.topButtonsAnimation,
-    this.topButtonsFadeAnimation,
   });
 
   @override
@@ -127,22 +121,8 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
 
   void _onMarkerTapped(Restaurant restaurant, int index) {
     widget.exploreController.selectRestaurant(index);
-
-    // If not in fullscreen mode, trigger fullscreen first, then show card
-    if (!widget.exploreController.isFullscreenMode) {
-      // Trigger fullscreen mode
-      widget.onFullscreenToggle?.call();
-
-      // Wait for fullscreen animation to complete before showing card
-      Future.delayed(const Duration(milliseconds: 550), () {
-        if (mounted) {
-          _showRestaurantBottomSheet(index);
-        }
-      });
-    } else {
-      // Already in fullscreen, show card immediately
-      _showRestaurantBottomSheet(index);
-    }
+    // Show restaurant card immediately
+    _showRestaurantBottomSheet(index);
   }
 
   void _showRestaurantBottomSheet(int initialIndex) {
@@ -312,105 +292,9 @@ class _ExploreMapViewWidgetState extends State<ExploreMapViewWidget> {
                 ),
               ),
             ),
-
-            // Top buttons with animation
-            if (widget.topButtonsAnimation != null && widget.topButtonsFadeAnimation != null)
-              FadeTransition(
-                opacity: widget.topButtonsFadeAnimation!,
-                child: SlideTransition(
-                  position: widget.topButtonsAnimation!,
-                  child: _buildTopButtons(context, controller),
-                ),
-              )
-            else
-              _buildTopButtons(context, controller),
           ],
         );
       },
-    );
-  }
-
-  Widget _buildTopButtons(BuildContext context, ExploreController controller) {
-    return Stack(
-      children: [
-        // Search/Filter Indicator (always visible, animates with topButtonsAnimation)
-        Positioned(
-          top: MediaQuery.of(context).padding.top + Dimensions.paddingSizeDefault,
-          left: Dimensions.paddingSizeDefault,
-          right: Dimensions.paddingSizeDefault,
-          child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Dimensions.paddingSizeDefault,
-                vertical: Dimensions.paddingSizeSmall,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(100),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: Theme.of(context).primaryColor,
-                    size: 20,
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          AddressHelper.getAddressFromSharedPref()?.address ?? 'current_location'.tr,
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyMedium!.color,
-                            fontWeight: FontWeight.w600,
-                            fontSize: Dimensions.fontSizeSmall,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${controller.filteredRestaurants?.length ?? 0} ${'restaurants'.tr}',
-                          style: TextStyle(
-                            color: Theme.of(context).disabledColor,
-                            fontSize: Dimensions.fontSizeExtraSmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                  // Fullscreen Button inside badge
-                  InkWell(
-                    onTap: widget.onFullscreenToggle,
-                    borderRadius: BorderRadius.circular(100),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).disabledColor.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        controller.isFullscreenMode ? Icons.fullscreen_exit : Icons.fullscreen,
-                        color: Theme.of(context).primaryColor,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ),
-      ],
     );
   }
 

@@ -249,6 +249,61 @@ class _ExploreRestFloatingBadgeState extends State<ExploreRestFloatingBadge> wit
                     ),
                   ],
                 ),
+                // Horizontal scrollable food items
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 80,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: 5, // Placeholder count
+                    padding: EdgeInsets.zero,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        width: 70,
+                        margin: EdgeInsets.only(right: index < 4 ? 8 : 0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Food image placeholder
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Icon(
+                                  Icons.fastfood_rounded,
+                                  color: Colors.white.withOpacity(0.4),
+                                  size: 28,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            // Food name placeholder
+                            Text(
+                              'Item ${index + 1}',
+                              style: robotoRegular.copyWith(
+                                fontSize: 10,
+                                color: Colors.white.withOpacity(0.6),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 // Action buttons inside badge
                 const SizedBox(height: 12),
                 GetBuilder<FavouriteController>(
@@ -366,7 +421,7 @@ class _ExploreRestFloatingBadgeState extends State<ExploreRestFloatingBadge> wit
                     widget.restaurants.length <= 1
                         ? _buildRestaurantBadge(widget.restaurants[0])
                         : SizedBox(
-                            height: 130, // Increased height to accommodate buttons
+                            height: 230, // Increased height to accommodate food items and buttons
                             child: PageView.builder(
                               controller: _pageController,
                               physics: const BouncingScrollPhysics(),
