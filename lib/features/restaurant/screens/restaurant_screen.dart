@@ -49,7 +49,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
   final Map<int, Animation<double>> _wiggleAnimations = {};
   final Map<int, Animation<double>> _overlayAnimations = {};
   int? _highlightedProductId;
-  int? _activeCategoryId = 0; // Default to "All" category
+  int? _activeCategoryId = 0; // Default to "All" category (legacy)
+  int? _activeSectionId; // NEW: Active menu section ID
   bool _isManualScrolling = false;
 
   static const double _logoSize = 120.0;
@@ -172,7 +173,13 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     final bool hasRestaurantDetails = restController.restaurant != null &&
                                      restController.restaurant!.schedules != null;
 
-    // Parallel loading strategy: Only fetch what's needed
+    // Step 1: Fetch lightweight menu sections first (fast, shows sticky header immediately)
+    if (!isSameRestaurant) {
+      final restaurantId = widget.restaurant!.id!;
+      await restController.getMenuSections(restaurantId);
+    }
+
+    // Step 2: Parallel load restaurant details and products
     List<Future> parallelCalls = [];
 
     // Only fetch restaurant details if it's a different restaurant or we don't have full details
@@ -182,12 +189,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       );
     }
 
-    // Only fetch categories if not loaded
-    if(categoryController.categoryList == null) {
-      parallelCalls.add(categoryController.getCategoryList(true));
-    }
-
-    // Only fetch products if different restaurant or products don't match
+    // Fetch products (with full section data)
     // Note: The new smart products endpoint includes recommended flags
     // and coupons are now included in restaurant details
     if (!isSameRestaurant || !hasCorrectProducts) {
@@ -292,6 +294,49 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     }
   }
 
+  // NEW: Handle section tap (menu sections)
+  Future<void> _handleSectionTap(int sectionId) async {
+    print('📍 _handleSectionTap called with sectionId: $sectionId');
+
+    setState(() {
+      _activeSectionId = sectionId;
+      _isManualScrolling = true;
+    });
+
+    if (scrollController.hasClients) {
+      final key = _categorySectionKeys[sectionId];
+      print('   Section key found: ${key != null}');
+      print('   Key has context: ${key?.currentContext != null}');
+
+      if(key?.currentContext != null) {
+        final box = key!.currentContext!.findRenderObject() as RenderBox;
+        final position = box.localToGlobal(Offset.zero);
+
+        // Calculate target position to center the section in viewport
+        final screenHeight = MediaQuery.of(context).size.height;
+        final centerOffset = screenHeight / 2 - box.size.height / 2;
+        final targetPosition = scrollController.offset + position.dy - centerOffset;
+
+        print('   Scrolling to section at offset: $targetPosition');
+        await scrollController.animateTo(
+          targetPosition.clamp(0.0, scrollController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    }
+
+    // Reset manual scrolling flag after animation
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isManualScrolling = false;
+        });
+      }
+    });
+  }
+
+  // LEGACY: Handle category tap
   Future<void> _handleCategoryTap(int categoryId) async {
     print('📍 _handleCategoryTap called with categoryId: $categoryId');
 
@@ -440,8 +485,170 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     return categorized;
   }
 
+  /// NEW: Build menu sections using the new section-based API structure
+  List<Widget> _buildMenuSectionsNew(BuildContext context, RestaurantController restController) {
+    final widgets = <Widget>[];
+    final menuSections = restController.visibleMenuSections ?? [];
+
+    if (menuSections.isEmpty) {
+      widgets.add(
+        SizedBox(
+          height: 220,
+          child: Center(
+            child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+          ),
+        ),
+      );
+      return widgets;
+    }
+
+    // Set first section as active if not set
+    if (_activeSectionId == null && menuSections.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _activeSectionId = menuSections.first.id;
+          });
+        }
+      });
+    }
+
+    for (final section in menuSections) {
+      if (section.products == null || section.products!.isEmpty) continue;
+
+      // Store section key for scrolling
+      final sectionId = section.id!;
+      _categorySectionKeys.putIfAbsent(sectionId, () => GlobalKey());
+      _horizontalScrollControllers.putIfAbsent(sectionId, () => ScrollController());
+
+      final horizontalController = _horizontalScrollControllers[sectionId]!;
+
+      // Create wiggle and overlay controllers for products in this section
+      for (final product in section.products!) {
+        if (product.id != null) {
+          _wiggleControllers.putIfAbsent(
+            product.id!,
+            () => AnimationController(
+              duration: const Duration(milliseconds: 400),
+              vsync: this,
+            ),
+          );
+          _overlayControllers.putIfAbsent(
+            product.id!,
+            () => AnimationController(
+              duration: const Duration(milliseconds: 200),
+              vsync: this,
+            ),
+          );
+
+          _wiggleAnimations.putIfAbsent(
+            product.id!,
+            () => TweenSequence<double>([
+              TweenSequenceItem(tween: Tween(begin: 0.0, end: -0.05), weight: 25),
+              TweenSequenceItem(tween: Tween(begin: -0.05, end: 0.05), weight: 25),
+              TweenSequenceItem(tween: Tween(begin: 0.05, end: -0.05), weight: 25),
+              TweenSequenceItem(tween: Tween(begin: -0.05, end: 0.0), weight: 25),
+            ]).animate(_wiggleControllers[product.id!]!),
+          );
+
+          _overlayAnimations.putIfAbsent(
+            product.id!,
+            () => Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: _overlayControllers[product.id!]!,
+                curve: Curves.easeOut,
+              ),
+            ),
+          );
+        }
+      }
+
+      // Section Header (regular widget, not sliver)
+      widgets.add(
+        Padding(
+          key: _categorySectionKeys[sectionId],
+          padding: const EdgeInsets.fromLTRB(
+            Dimensions.paddingSizeDefault,
+            Dimensions.paddingSizeLarge,
+            Dimensions.paddingSizeDefault,
+            Dimensions.paddingSizeSmall,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  section.name ?? '',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeExtraLarge,
+                    color: Theme.of(context).textTheme.bodyLarge!.color,
+                  ),
+                ),
+              ),
+              Text(
+                '${section.products!.length} ${'items'.tr}',
+                style: robotoRegular.copyWith(
+                  fontSize: Dimensions.fontSizeSmall,
+                  color: Theme.of(context).disabledColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Section Products - Horizontal Scroll (regular widget, not sliver)
+      widgets.add(
+        SizedBox(
+          height: 280,
+          child: ListView.builder(
+            controller: horizontalController,
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+            itemCount: section.products!.length,
+            itemBuilder: (context, index) {
+              final product = section.products![index];
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index < section.products!.length - 1 ? Dimensions.paddingSizeDefault : 0,
+                ),
+                child: RestaurantProductHorizontalCard(
+                  product: product,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Empty state
+    if (widgets.isEmpty) {
+      widgets.add(
+        SizedBox(
+          height: 220,
+          child: Center(
+            child: Text(
+              'no_items_found'.tr,
+              style: robotoMedium.copyWith(color: Theme.of(context).hintColor),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
   List<Widget> _buildMenuSections(BuildContext context, RestaurantController restController) {
     final sections = <Widget>[];
+
+    // NEW: Check if using menu sections (new API format)
+    if (restController.isUsingSections) {
+      return _buildMenuSectionsNew(context, restController);
+    }
+
+    // LEGACY: Category-based display
     final categories = restController.categoryList ?? [];
     if(restController.restaurantProducts == null) {
       sections.add(
@@ -657,17 +864,18 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
         return GetBuilder<CouponController>(builder: (couponController) {
           return GetBuilder<CategoryController>(builder: (categoryController) {
             Restaurant? restaurant;
-            if (restController.restaurant != null && restController.restaurant!.name != null &&
-                categoryController.categoryList != null) {
+
+            // Restaurant data is ready when details are loaded
+            if (restController.restaurant != null && restController.restaurant!.name != null) {
               restaurant = restController.restaurant;
             }
-            restController.setCategoryList();
+
             bool hasCoupon = (couponController.couponList!= null && couponController.couponList!.isNotEmpty);
-            // Check if products exist AND belong to current restaurant (by checking product's restaurantId)
-            final bool productsMatchCurrentRestaurant = restController.restaurantProducts != null &&
-                                                        restController.restaurantProducts!.isNotEmpty &&
-                                                        restController.restaurantProducts!.first.restaurantId == widget.restaurant!.id;
-            final bool hasProductsData = productsMatchCurrentRestaurant && categoryController.categoryList != null;
+
+            // Check if menu sections data exists
+            final bool hasProductsData = restController.isUsingSections &&
+                                          restController.visibleMenuSections != null &&
+                                          restController.visibleMenuSections!.isNotEmpty;
 
             // Use widget.restaurant for initial data, fallback to controller data when loaded
             final Restaurant activeRestaurant = restController.restaurant ?? widget.restaurant!;
@@ -694,8 +902,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                         restController: restController,
                       ),
 
-                      // Sticky categories (only show when categories are loaded)
-                      if (categoryController.categoryList != null)
+                      // Sticky section header (shows immediately when metadata loads)
+                      if (restController.isUsingSections)
                         SliverAppBar(
                           pinned: true,
                           primary: false,
@@ -710,8 +918,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                                 height: _categoryBarHeight,
                                 child: RestaurantStickyHeaderWidget(
                                   restController: restController,
-                                  activeCategoryId: _activeCategoryId,
-                                  onCategorySelected: _handleCategoryTap,
+                                  activeSectionId: _activeSectionId,
+                                  onSectionSelected: _handleSectionTap,
                                 ),
                               ),
                               Container(

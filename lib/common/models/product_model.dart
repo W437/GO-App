@@ -1,4 +1,5 @@
 /// Product model containing paginated product data with price ranges
+/// Supports both legacy products array and new section-based structure
 /// Used for displaying product lists with filtering and pagination support
 class ProductModel {
   int? totalSize;
@@ -7,15 +8,53 @@ class ProductModel {
   String? limit;
   int? offset;
   List<Product>? products;
+  List<MenuSection>? sections; // New section-based structure
+  int? totalSections;
+  String? groupedBy;
 
-  ProductModel({this.totalSize, this.minPrice, this.maxPrice, this.limit, this.offset, this.products});
+  ProductModel({
+    this.totalSize,
+    this.minPrice,
+    this.maxPrice,
+    this.limit,
+    this.offset,
+    this.products,
+    this.sections,
+    this.totalSections,
+    this.groupedBy,
+  });
 
   ProductModel.fromJson(Map<String, dynamic> json) {
-    totalSize = json['total_size'];
+    // Handle meta object
+    if (json['meta'] != null) {
+      totalSize = json['meta']['total_size'];
+      limit = json['meta']['limit']?.toString();
+      offset = (json['meta']['offset'] != null && json['meta']['offset'].toString().trim().isNotEmpty)
+          ? int.parse(json['meta']['offset'].toString())
+          : null;
+      totalSections = json['meta']['total_sections'];
+      groupedBy = json['meta']['grouped_by'];
+    } else {
+      // Legacy format
+      totalSize = json['total_size'];
+      limit = json['limit']?.toString();
+      offset = (json['offset'] != null && json['offset'].toString().trim().isNotEmpty)
+          ? int.parse(json['offset'].toString())
+          : null;
+    }
+
     minPrice = json['min_price']?.toDouble();
     maxPrice = json['max_price']?.toDouble();
-    limit = json['limit'].toString();
-    offset = (json['offset'] != null && json['offset'].toString().trim().isNotEmpty) ? int.parse(json['offset'].toString()) : null;
+
+    // Handle section-based structure (new format)
+    if (json['sections'] != null) {
+      sections = [];
+      json['sections'].forEach((v) {
+        sections!.add(MenuSection.fromJson(v));
+      });
+    }
+
+    // Handle legacy products array
     if (json['products'] != null) {
       products = [];
       json['products'].forEach((v) {
@@ -75,6 +114,8 @@ class Product {
   int? likeCount;
   bool? isRecommended; // New flag from smart products endpoint
   bool? isPopular; // New flag from smart products endpoint
+  int? sectionPosition; // Position within menu section
+  int? menuSectionId; // Menu section ID
 
   Product({
     this.id,
@@ -111,6 +152,8 @@ class Product {
     this.likeCount,
     this.isRecommended,
     this.isPopular,
+    this.sectionPosition,
+    this.menuSectionId,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -174,6 +217,8 @@ class Product {
     likeCount = json['like_count'];
     isRecommended = json['is_recommended'] ?? false;
     isPopular = json['is_popular'] ?? false;
+    sectionPosition = json['section_position'];
+    menuSectionId = json['menu_section_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -363,6 +408,51 @@ class ChoiceOptions {
     data['name'] = name;
     data['title'] = title;
     data['options'] = options;
+    return data;
+  }
+}
+
+/// Menu section model for section-based product organization
+/// Used in the new restaurant menu structure
+class MenuSection {
+  int? id;
+  String? name;
+  int? position;
+  bool? isVisible;
+  List<Product>? products;
+
+  MenuSection({
+    this.id,
+    this.name,
+    this.position,
+    this.isVisible,
+    this.products,
+  });
+
+  MenuSection.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    position = json['position'];
+    isVisible = json['is_visible'] ?? true;
+    if (json['products'] != null) {
+      products = [];
+      json['products'].forEach((v) {
+        if (v['variations'] == null || v['variations'].isEmpty || v['variations'][0]['values'] != null) {
+          products!.add(Product.fromJson(v));
+        }
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['position'] = position;
+    data['is_visible'] = isVisible;
+    if (products != null) {
+      data['products'] = products!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }

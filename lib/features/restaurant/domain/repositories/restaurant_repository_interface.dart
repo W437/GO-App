@@ -3,6 +3,7 @@ import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/explore/domain/models/map_explore_response.dart';
 import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/menu_sections_response.dart';
 import 'package:godelivery_user/interface/repository_interface.dart';
 
 abstract class RestaurantRepositoryInterface extends RepositoryInterface {
@@ -18,4 +19,5 @@ abstract class RestaurantRepositoryInterface extends RepositoryInterface {
   Future<HomeFeedModel?> getHomeFeed();
   Future<HomeFeedSectionResponse?> getHomeFeedSection(String section, {int? categoryId, int offset = 1});
   Future<MapExploreResponse?> getMapExploreRestaurants();
+  Future<MenuSectionsResponse?> getMenuSections(int restaurantId);
 }

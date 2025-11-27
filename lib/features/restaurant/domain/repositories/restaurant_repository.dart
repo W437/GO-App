@@ -4,6 +4,7 @@ import 'package:godelivery_user/api/api_client.dart';
 import 'package:godelivery_user/features/explore/domain/models/map_explore_response.dart';
 import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/menu_sections_response.dart';
 import 'package:godelivery_user/features/restaurant/domain/repositories/restaurant_repository_interface.dart';
 import 'package:godelivery_user/util/app_constants.dart';
 import 'package:get/get_connect.dart';
@@ -241,6 +242,16 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
     if (response.statusCode == 200) {
       print('🗺️ [MAP EXPLORE] API response - total_count: ${response.body?['total_count']}, restaurants: ${(response.body?['restaurants'] as List?)?.length ?? 0}');
       return MapExploreResponse.fromJson(response.body);
+    }
+    return null;
+  }
+
+  @override
+  Future<MenuSectionsResponse?> getMenuSections(int restaurantId) async {
+    Response response = await apiClient.getData('${AppConstants.menuSectionsUri}$restaurantId/menu-sections');
+    if (response.statusCode == 200) {
+      print('📋 [MENU SECTIONS] API response - total_sections: ${response.body?['total_sections']}, sections: ${(response.body?['sections'] as List?)?.length ?? 0}');
+      return MenuSectionsResponse.fromJson(response.body);
     }
     return null;
   }

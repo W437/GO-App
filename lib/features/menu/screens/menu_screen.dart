@@ -34,6 +34,8 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 import 'package:screen_corner_radius/screen_corner_radius.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' show exit;
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 class MenuScreen extends StatefulWidget {
@@ -557,6 +559,14 @@ class _MenuScreenState extends State<MenuScreen> {
                           showCartSnackBarWidget();
                         },
                       ),
+                      ModernMenuButtonWidget(
+                        icon: Icons.delete_forever,
+                        iconBackgroundColor: Colors.orange.withValues(alpha: 0.2),
+                        iconColor: Colors.orange,
+                        title: 'Clear App Data & Reset',
+                        showChevron: false,
+                        onTap: () => _showClearDataConfirmation(context),
+                      ),
                     ]),
 
                   if (Environment.debugMode)
@@ -684,6 +694,29 @@ class _MenuScreenState extends State<MenuScreen> {
     );
 
     Get.to(() => StoryCreatorFlow(config: config), fullscreenDialog: true);
+  }
+
+  void _showClearDataConfirmation(BuildContext context) {
+    Get.dialog(
+      ConfirmationDialogWidget(
+        icon: Images.dialogWarning,
+        description: 'This will clear all app data and reset to the initial state. The app will close and you will need to go through onboarding again.',
+        onYesPressed: () async {
+          // Clear all SharedPreferences data
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.clear();
+
+          // Show toast before closing
+          showCustomSnackBar('App data cleared! Please restart the app.', isError: false);
+
+          // Wait a moment for the toast to show, then close the app
+          await Future.delayed(const Duration(seconds: 2));
+          exit(0);
+        },
+        isLogOut: true,
+      ),
+      useSafeArea: false,
+    );
   }
 
 }

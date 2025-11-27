@@ -9,6 +9,7 @@ import 'package:godelivery_user/features/language/controllers/localization_contr
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/cart_suggested_item_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/menu_sections_response.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/features/category/domain/models/category_model.dart';
@@ -43,6 +44,24 @@ class RestaurantController extends GetxController implements GetxService {
 
   List<Product>? _restaurantProducts;
   List<Product>? get restaurantProducts => _restaurantProducts;
+
+  // NEW: Menu sections support
+  List<MenuSection>? _menuSections;
+  List<MenuSection>? get menuSections => _menuSections;
+
+  // Lightweight section metadata (from /menu-sections endpoint)
+  List<MenuSectionMeta>? _menuSectionsMeta;
+  List<MenuSectionMeta>? get menuSectionsMeta => _menuSectionsMeta;
+
+  // Filter visible sections only
+  List<MenuSection>? get visibleMenuSections {
+    if (_menuSections == null) return null;
+    return _menuSections!.where((section) => section.isVisible == true).toList();
+  }
+
+  // Check if using section-based structure (either full sections or just metadata)
+  bool get isUsingSections => (_menuSections != null && _menuSections!.isNotEmpty) ||
+                               (_menuSectionsMeta != null && _menuSectionsMeta!.isNotEmpty);
 
   // Filter recommended products from main product list using is_recommended flag
   List<Product>? get recommendedProducts {
@@ -408,10 +427,11 @@ class RestaurantController extends GetxController implements GetxService {
 
   Future<void> getRestaurantProductList(int? restaurantID, int offset, String type, bool notify) async {
     _foodOffset = offset;
-    if(offset == 0 || _restaurantProducts == null) {
+    if(offset == 0 || (_restaurantProducts == null && _menuSections == null)) {
       _type = type;
       _foodOffsetList = [];
       _restaurantProducts = null;
+      _menuSections = null; // Clear sections when resetting
       _foodOffset = 0;
       if(notify) {
         update();
@@ -419,24 +439,47 @@ class RestaurantController extends GetxController implements GetxService {
     }
     if (!_foodOffsetList.contains(offset)) {
       _foodOffsetList.add(offset);
-      ProductModel? productModel = await restaurantServiceInterface.getRestaurantProductList(restaurantID, offset,
-          (_restaurant != null && _restaurant!.categoryIds!.isNotEmpty && _categoryIndex != 0)
-          ? _categoryList![_categoryIndex].id : 0, type);
+      // Category filtering is no longer used for section-based menus
+      ProductModel? productModel = await restaurantServiceInterface.getRestaurantProductList(restaurantID, offset, 0, type);
 
       if (productModel != null) {
-        if (offset == 0) {
-          _restaurantProducts = [];
-          _restaurantProducts!.addAll(productModel.products!);
-        } else {
-          // Ensure initial products list exists before appending
-          if (_restaurantProducts != null) {
-            _restaurantProducts!.addAll(productModel.products!);
+        // NEW: Handle section-based response
+        if (productModel.sections != null && productModel.sections!.isNotEmpty) {
+          if (offset == 0) {
+            _menuSections = productModel.sections;
           } else {
-            print('⚠️ [RESTAURANT CONTROLLER] Cannot append offset $offset products - initial products not loaded yet, setting as initial');
+            // Append products to existing sections (for pagination)
+            if (_menuSections != null && productModel.sections != null) {
+              for (var newSection in productModel.sections!) {
+                var existingSection = _menuSections!.firstWhereOrNull((s) => s.id == newSection.id);
+                if (existingSection != null && newSection.products != null) {
+                  existingSection.products ??= [];
+                  existingSection.products!.addAll(newSection.products!);
+                } else {
+                  _menuSections!.add(newSection);
+                }
+              }
+            }
+          }
+          print('✅ [RESTAURANT CONTROLLER] Loaded ${productModel.sections!.length} menu sections');
+        }
+        // Legacy: Handle flat products array
+        else if (productModel.products != null) {
+          if (offset == 0) {
             _restaurantProducts = [];
             _restaurantProducts!.addAll(productModel.products!);
+          } else {
+            // Ensure initial products list exists before appending
+            if (_restaurantProducts != null) {
+              _restaurantProducts!.addAll(productModel.products!);
+            } else {
+              print('⚠️ [RESTAURANT CONTROLLER] Cannot append offset $offset products - initial products not loaded yet, setting as initial');
+              _restaurantProducts = [];
+              _restaurantProducts!.addAll(productModel.products!);
+            }
           }
         }
+
         _foodPageSize = productModel.totalSize;
         _foodPageOffset = productModel.offset;
         _foodPaginate = false;
@@ -502,10 +545,15 @@ class RestaurantController extends GetxController implements GetxService {
     _searchType = 'all';
   }
 
+  // DEPRECATED: Category filtering is no longer used in restaurant screen (now using menu sections)
+  // Kept for backward compatibility but does nothing when sections are active
   void setCategoryIndex(int index) {
-    _categoryIndex = index;
-    _restaurantProducts = null;
-    getRestaurantProductList(_restaurant!.id, 1, Get.find<RestaurantController>().type, false);
+    // Only use category filtering if NOT using sections (legacy mode)
+    if (!isUsingSections) {
+      _categoryIndex = index;
+      _restaurantProducts = null;
+      getRestaurantProductList(_restaurant!.id, 1, Get.find<RestaurantController>().type, false);
+    }
     update();
   }
 
@@ -627,5 +675,15 @@ class RestaurantController extends GetxController implements GetxService {
   /// Get restaurants for map explore screen
   Future<MapExploreResponse?> getMapExploreRestaurants() async {
     return await restaurantServiceInterface.getMapExploreRestaurants();
+  }
+
+  /// Get menu sections metadata for a restaurant (lightweight, fast)
+  Future<void> getMenuSections(int restaurantId) async {
+    MenuSectionsResponse? response = await restaurantServiceInterface.getMenuSections(restaurantId);
+    if (response != null && response.sections != null) {
+      _menuSectionsMeta = response.sections;
+      print('📋 [RESTAURANT] Loaded ${_menuSectionsMeta!.length} menu sections metadata');
+      update();
+    }
   }
 }

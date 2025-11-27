@@ -54,8 +54,11 @@ class ApiClient extends GetxService {
       AppConstants.localizationKey: languageCode ?? AppConstants.languages[0].languageCode!,
       AppConstants.latitude: latitude ?? '',
       AppConstants.longitude: longitude ?? '',
-      'Authorization': 'Bearer $token'
     });
+    // Only add Authorization header if token is not null or empty
+    if (token != null && token.isNotEmpty) {
+      header['Authorization'] = 'Bearer $token';
+    }
     if(setHeader) {
       _mainHeaders = header;
     }

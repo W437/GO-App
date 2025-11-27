@@ -78,6 +78,7 @@ class AppConstants {
   static const String homeFeedUri = '/api/v1/restaurants/home-feed'; // Home feed with categories
   static const String homeFeedSectionUri = '/api/v1/restaurants/home-feed/section'; // Home feed pagination
   static const String restaurantDetailsUri = '/api/v1/restaurants/details/';
+  static const String menuSectionsUri = '/api/v1/restaurants/'; // Append {id}/menu-sections
   static const String basicCampaignUri = '/api/v1/campaigns/basic';
   static const String itemCampaignUri = '/api/v1/campaigns/item';
   static const String basicCampaignDetailsUri = '/api/v1/campaigns/basic-campaign-details?basic_campaign_id=';

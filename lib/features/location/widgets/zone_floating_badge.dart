@@ -352,6 +352,10 @@ class _ZoneFloatingBadgeState extends State<ZoneFloatingBadge> with TickerProvid
                         }
                       },
                       itemBuilder: (context, index) {
+                        if (_pageController == null) {
+                          return _buildZoneBadge(widget.zones[index]);
+                        }
+
                         return AnimatedBuilder(
                           animation: _pageController!,
                           builder: (context, child) {

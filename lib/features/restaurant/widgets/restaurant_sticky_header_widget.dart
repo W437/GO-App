@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
+import 'package:godelivery_user/common/models/product_model.dart';
+import 'package:godelivery_user/features/restaurant/domain/models/menu_sections_response.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/features/category/domain/models/category_model.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
 class RestaurantStickyHeaderWidget extends StatefulWidget {
   final RestaurantController restController;
-  final int? activeCategoryId;
-  final ValueChanged<int> onCategorySelected;
+  final int? activeSectionId;
+  final ValueChanged<int> onSectionSelected;
   const RestaurantStickyHeaderWidget({
     super.key,
     required this.restController,
-    required this.activeCategoryId,
-    required this.onCategorySelected,
+    this.activeSectionId,
+    required this.onSectionSelected,
   });
 
   @override
@@ -35,44 +36,36 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
   @override
   void didUpdateWidget(covariant RestaurantStickyHeaderWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final categories = widget.restController.categoryList ?? [];
-    final hasAllCategory = categories.any((cat) => cat.id == 0);
-    final expectedKeys = hasAllCategory ? categories.length : categories.length + 1;
+    final sections = widget.restController.visibleMenuSections ?? [];
 
-    if (expectedKeys != _itemKeys.length) {
+    if (sections.length != _itemKeys.length) {
       _initializeKeys();
     }
-    if (widget.activeCategoryId != oldWidget.activeCategoryId) {
-      _scrollToActiveCategory();
+    if (widget.activeSectionId != oldWidget.activeSectionId) {
+      _scrollToActiveSection();
     }
   }
 
   void _initializeKeys() {
-    final categories = widget.restController.categoryList ?? [];
+    final sections = widget.restController.visibleMenuSections;
+    final sectionsMeta = widget.restController.menuSectionsMeta;
+    final count = sections?.length ?? sectionsMeta?.length ?? 0;
+
     _itemKeys.clear();
-    // Check if "All" already exists
-    final hasAllCategory = categories.any((cat) => cat.id == 0);
-    // Add keys: +1 only if we need to add "All" category
-    final totalItems = hasAllCategory ? categories.length : categories.length + 1;
-    for (var i = 0; i < totalItems; i++) {
+    for (var i = 0; i < count; i++) {
       _itemKeys.add(GlobalKey());
     }
   }
 
-  void _scrollToActiveCategory() {
-    final categories = widget.restController.categoryList ?? [];
-    final hasAllCategory = categories.any((cat) => cat.id == 0);
+  void _scrollToActiveSection() {
+    final sections = widget.restController.visibleMenuSections;
+    final sectionsMeta = widget.restController.menuSectionsMeta;
 
-    // Find the index in the displayed list
-    int index;
-    if (widget.activeCategoryId == 0) {
-      index = 0; // "All" is always at the first position
-    } else {
-      index = categories.indexWhere((c) => c.id == widget.activeCategoryId);
-      if (index != -1 && !hasAllCategory) {
-        // Only offset by 1 if we added "All" (it doesn't exist in backend data)
-        index = index + 1;
-      }
+    int index = -1;
+    if (sections != null && sections.isNotEmpty) {
+      index = sections.indexWhere((s) => s.id == widget.activeSectionId);
+    } else if (sectionsMeta != null && sectionsMeta.isNotEmpty) {
+      index = sectionsMeta.indexWhere((s) => s.id == widget.activeSectionId);
     }
 
     if (index == -1 || index >= _itemKeys.length || !_scrollController.hasClients) return;
@@ -116,15 +109,20 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
 
   @override
   Widget build(BuildContext context) {
-    final categories = widget.restController.categoryList ?? [];
+    // Use full sections if available, otherwise use lightweight metadata
+    final sections = widget.restController.visibleMenuSections;
+    final sectionsMeta = widget.restController.menuSectionsMeta;
 
-    // Check if "All" category already exists (id: 0)
-    final hasAllCategory = categories.any((cat) => cat.id == 0);
+    List<_SectionItem> items = [];
 
-    // Only add "All" category if it doesn't exist
-    final categoriesWithAll = hasAllCategory
-        ? categories
-        : [CategoryModel(id: 0, name: 'All'), ...categories];
+    // Prefer full sections, fallback to metadata
+    if (sections != null && sections.isNotEmpty) {
+      items = sections.map((s) => _SectionItem(s.id!, s.name ?? '')).toList();
+    } else if (sectionsMeta != null && sectionsMeta.isNotEmpty) {
+      items = sectionsMeta.map((s) => _SectionItem(s.id!, s.name ?? '')).toList();
+    }
+
+    if (items.isEmpty) return const SizedBox();
 
     return ListView.separated(
       key: _listKey,
@@ -135,17 +133,17 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
         horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeDefault,
         vertical: 2,
       ),
-      itemCount: categoriesWithAll.length,
+      itemCount: items.length,
       separatorBuilder: (_, __) => const SizedBox(width: Dimensions.paddingSizeSmall),
       itemBuilder: (context, index) {
-        final category = categoriesWithAll[index];
-        final bool isActive = category.id != null && category.id == widget.activeCategoryId;
+        final item = items[index];
+        final bool isActive = item.id == widget.activeSectionId;
         return Center(
           child: KeyedSubtree(
             key: _itemKeys.length > index ? _itemKeys[index] : null,
             child: CustomInkWellWidget(
               radius: Dimensions.radiusDefault,
-              onTap: category.id == null ? () {} : () => widget.onCategorySelected(category.id!),
+              onTap: () => widget.onSectionSelected(item.id),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
@@ -154,20 +152,31 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                  color: isActive
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
+                      : Theme.of(context).disabledColor.withValues(alpha: 0.1),
                 ),
                 child: Text(
-                    category.name ?? '',
-                    style: (isActive ? robotoBold : robotoMedium).copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
+                  item.name,
+                  style: (isActive ? robotoBold : robotoMedium).copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: isActive
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
+              ),
             ),
           ),
         );
       },
     );
   }
+}
+
+// Helper class for section items
+class _SectionItem {
+  final int id;
+  final String name;
+  _SectionItem(this.id, this.name);
 }
