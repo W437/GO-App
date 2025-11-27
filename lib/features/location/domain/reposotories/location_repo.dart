@@ -35,12 +35,11 @@ class LocationRepo implements LocationRepoInterface {
     }
 
     Response response = await apiClient.getData('${AppConstants.geocodeUri}?lat=${latLng.latitude}&lng=${latLng.longitude}');
-    String address = 'Unknown Location Found';
+    String address = 'Unknown Location';
     if(response.statusCode == 200 && response.body['status'] == 'OK') {
       address = response.body['results'][0]['formatted_address'].toString();
-    }else {
-      showCustomSnackBar(response.body['error_message'] ?? response.bodyString);
     }
+    // Don't show snackbar for geocode failures - callers handle fallback gracefully
     return address;
   }
 

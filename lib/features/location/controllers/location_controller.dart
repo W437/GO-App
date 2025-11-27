@@ -389,14 +389,8 @@ class LocationController extends GetxController implements GetxService {
     // Keep browsing zone in sync when user saves a zone as their address
     _activeZone.value = zone;
 
-    // Geocode the center point for a human-readable address
-    String addressStr = '';
-    try {
-      addressStr = await getAddressFromGeocode(center);
-    } catch (e) {
-      // Fallback to zone name if geocoding fails
-      addressStr = zone.displayName ?? zone.name ?? 'Zone ${zone.id}';
-    }
+    // Use zone name as address - no need to geocode for zone switching
+    final addressStr = zone.displayName ?? zone.name ?? 'Zone ${zone.id}';
 
     // Convert ZoneListModel to ZoneData for AddressModel
     final zoneData = ZoneData(
