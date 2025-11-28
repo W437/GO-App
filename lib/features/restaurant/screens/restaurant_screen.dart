@@ -160,6 +160,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     final categoryController = Get.find<CategoryController>();
     final couponController = Get.find<CouponController>();
 
+    // NEW: Clear stale data immediately when switching restaurants
+    // notify: false because we're in initState (can't call update during build)
+    restController.prepareForNewRestaurant(widget.restaurant!.id!, notify: false);
+
     if(restController.isSearching) {
       restController.changeSearchStatus(isUpdate: false);
     }
@@ -211,6 +215,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     if (restController.restaurant != null && restController.restaurant!.coupons != null) {
       couponController.setCouponsFromRestaurant(restController.restaurant!.coupons);
     }
+
+    // NEW: Mark transition complete
+    restController.completeTransition();
 
     // Scroll to product if specified
     if (widget.scrollToProductId != null) {
@@ -976,22 +983,19 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
       body: GetBuilder<RestaurantController>(builder: (restController) {
         return GetBuilder<CouponController>(builder: (couponController) {
           return GetBuilder<CategoryController>(builder: (categoryController) {
-            Restaurant? restaurant;
 
-            // Restaurant data is ready when details are loaded
-            if (restController.restaurant != null && restController.restaurant!.name != null) {
-              restaurant = restController.restaurant;
-            }
+            // Always use widget.restaurant as primary source (correct restaurant)
+            // Controller data is only used for additional details after loading
+            final Restaurant activeRestaurant = widget.restaurant!;
 
             bool hasCoupon = (couponController.couponList!= null && couponController.couponList!.isNotEmpty);
 
-            // Check if menu sections data exists
+            // Check if menu sections data exists AND matches current restaurant
             final bool hasProductsData = restController.isUsingSections &&
                                           restController.visibleMenuSections != null &&
-                                          restController.visibleMenuSections!.isNotEmpty;
-
-            // Use widget.restaurant for initial data, fallback to controller data when loaded
-            final Restaurant activeRestaurant = restController.restaurant ?? widget.restaurant!;
+                                          restController.visibleMenuSections!.isNotEmpty &&
+                                          !restController.isTransitioning &&
+                                          restController.restaurant?.id == widget.restaurant?.id;
 
               return Stack(
                 clipBehavior: Clip.none,
@@ -1119,10 +1123,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                                child: CustomImageWidget(
-                                  image: '${activeRestaurant.logoFullUrl}',
-                                  height: _logoSize,
-                                  width: _logoSize,
+                                // NEW: Always use widget.restaurant (current navigation target)
+                                child: BlurhashImageWidget(
+                                  imageUrl: widget.restaurant!.logoFullUrl ?? '',
+                                  blurhash: widget.restaurant!.logoBlurhash,
                                   fit: BoxFit.cover,
                                 ),
                               ),

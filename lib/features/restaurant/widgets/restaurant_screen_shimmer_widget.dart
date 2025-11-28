@@ -9,8 +9,8 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 class RestaurantScreenShimmerWidget extends StatelessWidget {
-  final Restaurant? restaurant;
-  const RestaurantScreenShimmerWidget({super.key, this.restaurant});
+  final Restaurant restaurant; // Required parameter for blurhash
+  const RestaurantScreenShimmerWidget({super.key, required this.restaurant});
 
   @override
   Widget build(BuildContext context) {
@@ -21,21 +21,11 @@ class RestaurantScreenShimmerWidget extends StatelessWidget {
         // Cover image with blurhash
         SizedBox(
           height: 200,
-          child: restaurant?.coverPhotoBlurhash != null
-              ? BlurhashImageWidget(
-                  imageUrl: restaurant!.coverPhotoFullUrl ?? '',
-                  blurhash: restaurant!.coverPhotoBlurhash,
-                  fit: BoxFit.cover,
-                )
-              : Shimmer(
-                  child: Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).shadowColor,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusLarge)),
-                    ),
-                  ),
-                ),
+          child: BlurhashImageWidget(
+            imageUrl: restaurant.coverPhotoFullUrl ?? '',
+            blurhash: restaurant.coverPhotoBlurhash,
+            fit: BoxFit.cover,
+          ),
         ),
         const SizedBox(height: Dimensions.paddingSizeSmall),
 

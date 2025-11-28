@@ -42,6 +42,38 @@ class RestaurantController extends GetxController implements GetxService {
   Restaurant? _restaurant;
   Restaurant? get restaurant => _restaurant;
 
+  // Track current restaurant to detect changes
+  int? _currentRestaurantId;
+  bool _isTransitioning = false;
+
+  bool get isTransitioning => _isTransitioning;
+
+  // Detect if switching to a different restaurant
+  bool isNewRestaurant(int? restaurantId) {
+    return _currentRestaurantId != restaurantId;
+  }
+
+  // Clear stale data when switching restaurants
+  void prepareForNewRestaurant(int restaurantId, {bool notify = true}) {
+    if (isNewRestaurant(restaurantId)) {
+      _isTransitioning = true;
+      _restaurant = null;
+      _menuSections = null;
+      _menuSectionsMeta = null;
+      _restaurantProducts = null;
+      _currentRestaurantId = restaurantId;
+      if (notify) {
+        update(); // Trigger rebuild with cleared state
+      }
+    }
+  }
+
+  // Mark transition complete after data loads
+  void completeTransition() {
+    _isTransitioning = false;
+    update();
+  }
+
   List<Product>? _restaurantProducts;
   List<Product>? get restaurantProducts => _restaurantProducts;
 
