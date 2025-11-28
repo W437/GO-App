@@ -180,23 +180,30 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
             ? const SizedBox() : Padding(
               padding: EdgeInsets.only(
-                left: 5,
-                right: 5,
+                left: 16,
+                right: 16,
                 bottom: MediaQuery.of(context).padding.bottom + 8,
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(199),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
+                      color: Color.fromRGBO(50, 50, 105, 0.15),
+                      blurRadius: 5,
+                      spreadRadius: 0,
+                      offset: Offset(0, 2),
                     ),
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.05),
+                      blurRadius: 1,
+                      spreadRadius: 0,
+                      offset: Offset(0, 1),
+                    )
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(199),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
