@@ -21,6 +21,6 @@ class CustomAssetImageWidget extends StatelessWidget {
       width: width, height: height,
       colorFilter: color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
       fit: fit!,
-    ) : Image.asset(image, fit: fit, width: width, height: height, color: color);
+    ) : Image.asset(image, fit: fit, width: width, height: height, color: color, filterQuality: FilterQuality.high);
   }
 }

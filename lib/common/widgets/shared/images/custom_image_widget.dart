@@ -70,6 +70,7 @@ class _CustomImageWidgetState extends State<CustomImageWidget> {
           height: widget.height,
           width: widget.width,
           fit: widget.fit,
+          filterQuality: FilterQuality.high,
           placeholder: (context, url) => CustomAssetImageWidget(
             placeholderImage,
             height: widget.height,

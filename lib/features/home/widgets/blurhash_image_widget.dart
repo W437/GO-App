@@ -58,14 +58,11 @@ class BlurhashImageWidget extends StatelessWidget {
           CachedNetworkImage(
             imageUrl: imageUrl,
             fit: fit,
+            filterQuality: FilterQuality.high,
             fadeInDuration: const Duration(milliseconds: 300), // Faster fade in
             fadeOutDuration: Duration.zero, // No fade out needed
             placeholder: (context, url) => const SizedBox(), // Transparent while loading
             errorWidget: (context, url, error) => const SizedBox(), // Show blurhash on error
-            maxWidthDiskCache: 200, // Cache smaller version for thumbnails
-            maxHeightDiskCache: 200,
-            memCacheWidth: 200,
-            memCacheHeight: 200,
           ),
         ],
       ),
