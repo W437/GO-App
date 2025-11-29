@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
-import 'package:godelivery_user/common/models/product_model.dart';
-import 'package:godelivery_user/features/restaurant/domain/models/menu_sections_response.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
