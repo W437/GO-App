@@ -12,35 +12,68 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
-class RestaurantProductHorizontalCard extends StatelessWidget {
+class RestaurantProductHorizontalCard extends StatefulWidget {
   final Product product;
   const RestaurantProductHorizontalCard({super.key, required this.product});
 
   @override
+  State<RestaurantProductHorizontalCard> createState() => _RestaurantProductHorizontalCardState();
+}
+
+class _RestaurantProductHorizontalCardState extends State<RestaurantProductHorizontalCard> {
+  @override
   Widget build(BuildContext context) {
-    double price = product.price!;
-    double discount = product.discount!;
-    String discountType = product.discountType!;
+    double price = widget.product.price!;
+    double discount = widget.product.discount!;
+    String discountType = widget.product.discountType!;
     double discountPrice = PriceConverter.convertWithDiscount(price, discount, discountType)!;
 
-    return CustomInkWellWidget(
-      onTap: () {
-        if (ResponsiveHelper.isMobile(context)) {
-          CustomSheet.show(
-            context: context,
-            child: RestaurantProductSheet(product: product, inRestaurantPage: true),
-            showHandle: false,
-            padding: EdgeInsets.zero,
-          );
-        } else {
-          Get.dialog(
-            Dialog(child: RestaurantProductSheet(product: product, inRestaurantPage: true)),
-          );
-        }
-      },
-      radius: Dimensions.radiusDefault,
-      padding: EdgeInsets.zero,
-      child: SizedBox(
+    // Build tooltip message
+    String tooltipMessage = widget.product.name ?? '';
+    if (widget.product.description != null && widget.product.description!.isNotEmpty) {
+      tooltipMessage += '\n\n${widget.product.description}';
+    }
+
+    return Tooltip(
+      message: tooltipMessage,
+      preferBelow: false,
+      verticalOffset: 20,
+      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+      margin: const EdgeInsets.symmetric(horizontal: 40),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      textStyle: robotoRegular.copyWith(
+        fontSize: Dimensions.fontSizeSmall,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+      ),
+      waitDuration: const Duration(milliseconds: 500),
+      child: CustomInkWellWidget(
+        onTap: () {
+          if (ResponsiveHelper.isMobile(context)) {
+            CustomSheet.show(
+              context: context,
+              child: RestaurantProductSheet(product: widget.product, inRestaurantPage: true),
+              showHandle: false,
+              padding: EdgeInsets.zero,
+            );
+          } else {
+            Get.dialog(
+              Dialog(child: RestaurantProductSheet(product: widget.product, inRestaurantPage: true)),
+            );
+          }
+        },
+        radius: Dimensions.radiusDefault,
+        padding: EdgeInsets.zero,
+        child: SizedBox(
         width: 160,
         child: Stack(
           children: [
@@ -48,7 +81,7 @@ class RestaurantProductHorizontalCard extends StatelessWidget {
               builder: (cartController) {
                 int totalQuantity = 0;
                 for (var cartItem in cartController.cartList) {
-                  if (cartItem.product?.id == product.id) {
+                  if (cartItem.product?.id == widget.product.id) {
                     totalQuantity += cartItem.quantity ?? 0;
                   }
                 }
@@ -61,112 +94,87 @@ class RestaurantProductHorizontalCard extends StatelessWidget {
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                     boxShadow: [
-                      const BoxShadow(
-                        color: Color.fromRGBO(6, 24, 44, 0.1),
-                        blurRadius: 0,
-                        spreadRadius: 2,
-                        offset: Offset(0, 0),
-                      ),
-                      const BoxShadow(
-                        color: Color.fromRGBO(6, 24, 44, 0.3),
-                        blurRadius: 6,
-                        spreadRadius: -1,
-                        offset: Offset(0, 4),
-                      ),
-                      const BoxShadow(
-                        color: Color.fromRGBO(255, 255, 255, 0.08),
-                        blurRadius: 0,
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 8,
                         spreadRadius: 0,
-                        offset: Offset(0, 1),
-                      ),
-                      const BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.3),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                        offset: Offset(0, 0),
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Stack(
+                  child: Column(
                     children: [
-                      // Product Image - takes up top 70% of card
-                      Align(
-                    alignment: Alignment.topCenter,
-                    child: FractionallySizedBox(
-                      heightFactor: 0.7,
-                      widthFactor: 1.0,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(Dimensions.radiusDefault),
-                          topRight: Radius.circular(Dimensions.radiusDefault),
-                        ),
-                        child: BlurhashImageWidget(
-                          imageUrl: product.imageFullUrl ?? '',
-                          blurhash: product.imageBlurhash,
-                          fit: BoxFit.cover,
+                      // Product Image - fixed height
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(Dimensions.radiusDefault),
+                            topRight: Radius.circular(Dimensions.radiusDefault),
+                          ),
+                          child: BlurhashImageWidget(
+                            imageUrl: widget.product.imageFullUrl ?? '',
+                            blurhash: widget.product.imageBlurhash,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
 
-                  // Bottom info section - overlays bottom of image
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor.withValues(alpha: 0.95),
-                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      ),
-                      margin: const EdgeInsets.all(8),
-                      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Likes & Price Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.favorite, color: Colors.red, size: 14),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${product.likeCount ?? 0}',
-                                    style: robotoRegular.copyWith(
-                                      fontSize: Dimensions.fontSizeSmall,
-                                      color: Theme.of(context).hintColor,
+                      // Bottom info section - below image
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(Dimensions.radiusDefault),
+                            bottomRight: Radius.circular(Dimensions.radiusDefault),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Likes & Price Row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.favorite, color: Colors.red, size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${widget.product.likeCount ?? 0}',
+                                      style: robotoRegular.copyWith(
+                                        fontSize: Dimensions.fontSizeSmall,
+                                        color: Theme.of(context).hintColor,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                PriceConverter.convertPrice(discountPrice),
-                                style: robotoBold.copyWith(
-                                  fontSize: Dimensions.fontSizeDefault,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
+                                Text(
+                                  PriceConverter.convertPrice(discountPrice),
+                                  style: robotoMedium.copyWith(
+                                    fontSize: Dimensions.fontSizeDefault,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
 
-                          // Name
-                          Text(
-                            product.name ?? '',
-                            style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                            // Name - single line with ellipsis
+                            Text(
+                              widget.product.name ?? '',
+                              style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            );
+                );
               },
             ),
 
@@ -175,7 +183,7 @@ class RestaurantProductHorizontalCard extends StatelessWidget {
               builder: (cartController) {
                 int totalQuantity = 0;
                 for (var cartItem in cartController.cartList) {
-                  if (cartItem.product?.id == product.id) {
+                  if (cartItem.product?.id == widget.product.id) {
                     totalQuantity += cartItem.quantity ?? 0;
                   }
                 }
@@ -211,20 +219,15 @@ class RestaurantProductHorizontalCard extends StatelessWidget {
                 onPointerMove: (_) {}, // Block pointer events
                 onPointerCancel: (_) {}, // Block pointer events
                 child: ExpandableProductQuantityBadge(
-                  productId: product.id!,
+                  productId: widget.product.id!,
                 ),
               ),
             ),
           ],
         ),
       ),
+      ),
     );
   }
 }
 
-// Extension to safely access unit if it's not in the model definition we saw earlier
-// If 'unit' is not in Product, we might need to check if it's available or use something else.
-// Based on the model file I read, I didn't see 'unit'. I saw 'choiceOptions', 'variations'.
-// The reference image shows "350g", "1.5L". This is usually a 'unit' field.
-// I'll check the Product model again quickly to see if I missed 'unit' or similar.
-// If not, I'll just omit it or use description for now.

@@ -281,8 +281,8 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
     await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
 
-    // Spin the globe 360° smoothly over 1.5 seconds
-    print('🗺️ [MAPBOX $_instanceId] Spinning globe 360° smoothly...');
+    // Spin the globe 180° smoothly over 1.5 seconds (slower rotation)
+    print('🗺️ [MAPBOX $_instanceId] Spinning globe 180° smoothly...');
     const spinDurationMs = 1500;
     const frameIntervalMs = 16;  // ~60fps
     const totalFrames = spinDurationMs ~/ frameIntervalMs;
@@ -291,7 +291,7 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
       if (!mounted) return;
 
       final progress = frame / totalFrames;
-      double currentLng = northAtlanticLng + (360.0 * progress);
+      double currentLng = northAtlanticLng + (180.0 * progress);
       if (currentLng > 180.0) {
         currentLng -= 360.0;
       }

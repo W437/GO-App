@@ -227,8 +227,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
     if(widget.fromAddAddress) {
       Get.find<LocationController>().setPickData();
     }
-    // Center around Shefa-Amr (Northern Israel service area)
-    _initialPosition = const LatLng(32.82461934938776, 35.14441039413214);
+    // Center around Northern Israel service area (shifted north and west to show more coverage)
+    _initialPosition = const LatLng(32.95, 35.10);
   }
 
   /// Check if user has a saved address with zone and fill in zone details

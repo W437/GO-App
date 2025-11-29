@@ -210,11 +210,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: Dimensions.paddingSizeDefault),
+                            const SizedBox(height: Dimensions.paddingSizeSmall),
                             const StoryStripWidget(),
-                            const SizedBox(height: Dimensions.paddingSizeDefault),
+                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                             const BannerViewWidget(),
-                            const SizedBox(height: Dimensions.paddingSizeLarge),
+                            const SizedBox(height: Dimensions.paddingSizeSmall),
                             const BadWeatherWidget(),
                             const CategoriesCuisinesTabbedWidget(),
                             const SizedBox(height: Dimensions.paddingSizeLarge),

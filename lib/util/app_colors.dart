@@ -92,14 +92,14 @@ class AppColors {
   static const LinearGradient gradientFrost = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFE6FDFF), Color(0xFFE6F4F1)],
+    colors: [Color(0xFFF7F7F7), Color(0xFFF3F4F6)],
     stops: [0.0, 1.0],
   );
 
   static const LinearGradient gradientFrostVertical = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFFE6FDFF), Color(0xFFE6F4F1)],
+    colors: [Color(0xFFF7F7F7), Color(0xFFF3F4F6)],
     stops: [0.0, 1.0],
   );
 

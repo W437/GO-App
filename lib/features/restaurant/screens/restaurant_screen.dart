@@ -73,7 +73,11 @@ class _RestaurantScreenState extends State<RestaurantScreen>
   void initState() {
     super.initState();
     scrollController.addListener(_onScroll);
-    _initDataCall();
+    // Defer data loading to after the first frame to avoid calling update()
+    // during the build phase when cached data triggers a synchronous update
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _initDataCall();
+    });
   }
 
   @override
