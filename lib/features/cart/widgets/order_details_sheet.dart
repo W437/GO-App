@@ -58,67 +58,73 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
 
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          body: Column(
+          body: Stack(
             children: [
               // ============================================================
-              // CONTENT (Header removed - now handled by CustomFullSheetNavigator)
+              // SCROLLABLE CONTENT
               // ============================================================
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // MESSAGE TO RESTAURANT SECTION
-                        _buildMessageToRestaurantSection(context, cartController),
+              SingleChildScrollView(
+                controller: scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: Dimensions.paddingSizeDefault,
+                    bottom: 180, // Space for bottom overlay (subtotal + button height)
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // MESSAGE TO RESTAURANT SECTION
+                      _buildMessageToRestaurantSection(context, cartController),
 
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
+                      const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                        // RESTAURANT UNAVAILABLE NOTICE
-                        if (!isRestaurantOpen && restaurantController.restaurant != null)
-                          _buildRestaurantUnavailableNotice(
-                            context,
-                            restaurantController,
-                            cartController,
-                          ),
-
-                        // Spacing before Order Items
-                        if (!isRestaurantOpen && restaurantController.restaurant != null)
-                          const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                        // ORDER ITEMS SECTION
-                        _buildOrderItemsSection(
+                      // RESTAURANT UNAVAILABLE NOTICE
+                      if (!isRestaurantOpen && restaurantController.restaurant != null)
+                        _buildRestaurantUnavailableNotice(
                           context,
+                          restaurantController,
                           cartController,
-                          isRestaurantOpen,
                         ),
 
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
+                      // Spacing before Order Items
+                      if (!isRestaurantOpen && restaurantController.restaurant != null)
+                        const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                        // RECOMMENDED ITEMS
-                        if (!isDesktop)
-                          CartSuggestedItemViewWidget(
-                            cartList: cartController.cartList,
-                          ),
+                      // ORDER ITEMS SECTION
+                      _buildOrderItemsSection(
+                        context,
+                        cartController,
+                        isRestaurantOpen,
+                      ),
 
-                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-                      ],
-                    ),
+                      const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                      // RECOMMENDED ITEMS
+                      if (!isDesktop)
+                        CartSuggestedItemViewWidget(
+                          cartList: cartController.cartList,
+                        ),
+
+                      const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                    ],
                   ),
                 ),
               ),
 
               // ============================================================
-              // BOTTOM CHECKOUT BAR WITH GRADIENT BACKDROP
+              // BOTTOM CHECKOUT BAR - OVERLAYS CONTENT
               // ============================================================
-              CheckoutButtonWidget(
-                cartController: cartController,
-                availableList: cartController.availableList,
-                isRestaurantOpen: isRestaurantOpen,
-                fromDineIn: widget.fromDineIn,
-                restaurantName: restaurantName,
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: CheckoutButtonWidget(
+                  cartController: cartController,
+                  availableList: cartController.availableList,
+                  isRestaurantOpen: isRestaurantOpen,
+                  fromDineIn: widget.fromDineIn,
+                  restaurantName: restaurantName,
+                ),
               ),
             ],
           ),

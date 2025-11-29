@@ -23,7 +23,7 @@ class AppConstants {
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
   static const String restaurantProductUri = '/api/v1/products/latest'; // Legacy - kept for compatibility
-  static const String smartProductsUri = '/api/v1/products/restaurant'; // New smart endpoint with flags
+  static const String smartProductsUri = '/api/v1/restaurants'; // New RESTful endpoint (append /{id}/products)
   static const String popularProductUri = '/api/v1/products/popular';
   static const String reviewedProductUri = '/api/v1/products/most-reviewed';
   static const String subCategoryUri = '/api/v1/categories/childes/';
