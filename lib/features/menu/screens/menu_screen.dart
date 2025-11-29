@@ -9,6 +9,7 @@ import 'package:godelivery_user/common/widgets/shared/images/custom_asset_image_
 import 'package:godelivery_user/common/widgets/shared/images/emoji_profile_picture.dart';
 import 'package:godelivery_user/config/environment.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
+import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:godelivery_user/features/auth/screens/sign_in_screen.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/developer/controllers/developer_catalog_controller.dart';
@@ -566,6 +567,20 @@ class _MenuScreenState extends State<MenuScreen> {
                         title: 'Clear App Data & Reset',
                         showChevron: false,
                         onTap: () => _showClearDataConfirmation(context),
+                      ),
+                      GetBuilder<DashboardController>(
+                        builder: (dashboardController) => ModernMenuButtonWidget(
+                          icon: dashboardController.isBottomNavVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          iconBackgroundColor: Colors.purple.withValues(alpha: 0.2),
+                          iconColor: Colors.purple,
+                          title: 'Toggle Bottom Nav',
+                          showChevron: false,
+                          onTap: () {
+                            dashboardController.toggleBottomNav();
+                          },
+                        ),
                       ),
                     ]),
 

@@ -14,6 +14,7 @@ import 'package:godelivery_user/features/order/domain/models/order_model.dart';
 import 'package:godelivery_user/features/auth/controllers/auth_controller.dart';
 import 'package:godelivery_user/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:godelivery_user/features/location/widgets/location_manager_sheet.dart';
+import 'package:godelivery_user/features/dashboard/widgets/animated_bottom_nav.dart';
 import 'package:godelivery_user/features/dashboard/widgets/bottom_nav_item.dart';
 import 'package:godelivery_user/features/dashboard/widgets/circular_reveal_clipper.dart';
 import 'package:godelivery_user/features/dashboard/widgets/running_order_view_widget.dart';
@@ -176,80 +177,92 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
         key: _scaffoldKey,
         extendBody: true,
         bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
+            return GetBuilder<DashboardController>(builder: (dashboardController) {
+              final hasRunningOrders = orderController.showBottomSheet &&
+                  (orderController.runningOrderList != null &&
+                   orderController.runningOrderList!.isNotEmpty &&
+                   _isLogin);
 
-            return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
-            ? const SizedBox() : Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: MediaQuery.of(context).padding.bottom + 8,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(199),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromRGBO(50, 50, 105, 0.15),
-                      blurRadius: 5,
-                      spreadRadius: 0,
-                      offset: Offset(0, 2),
+              if (hasRunningOrders) {
+                return const SizedBox();
+              }
+
+              return AnimatedBottomNav(
+                isVisible: dashboardController.isBottomNavVisible,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: MediaQuery.of(context).padding.bottom + 8,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(199),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromRGBO(50, 50, 105, 0.15),
+                          blurRadius: 5,
+                          spreadRadius: 0,
+                          offset: Offset(0, 2),
+                        ),
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.05),
+                          blurRadius: 1,
+                          spreadRadius: 0,
+                          offset: Offset(0, 1),
+                        )
+                      ],
                     ),
-                    BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.05),
-                      blurRadius: 1,
-                      spreadRadius: 0,
-                      offset: Offset(0, 1),
-                    )
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(199),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      color: Theme.of(context).cardColor.withValues(alpha: 0.90),
-                      child: SizedBox(
-                        height: 65,
-                        child: Row(
-                          children: [
-                            BottomNavItem(
-                              iconPath: 'assets/image/ui/explore_icon.png',
-                              label: 'Explore',
-                              isSelected: _pageIndex == 0,
-                              onTap: (details) => _setPage(0, details.globalPosition),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(199),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          color: Theme.of(context).cardColor.withValues(alpha: 0.90),
+                          child: SizedBox(
+                            height: 65,
+                            child: Row(
+                              children: [
+                                BottomNavItem(
+                                  iconPath: 'assets/image/ui/explore_icon.png',
+                                  label: 'Explore',
+                                  isSelected: _pageIndex == 0,
+                                  onTap: (details) => _setPage(0, details.globalPosition),
+                                ),
+                                BottomNavItem(
+                                  iconData: Icons.storefront_outlined,
+                                  label: 'Mart',
+                                  isSelected: _pageIndex == 1,
+                                  onTap: (details) => _setPage(1, details.globalPosition),
+                                ),
+                                BottomNavItem(
+                                  iconPath: 'assets/image/ui/home_icon.png',
+                                  label: 'Home',
+                                  isSelected: _pageIndex == 2,
+                                  onTap: (details) => _setPage(2, details.globalPosition),
+                                ),
+                                BottomNavItem(
+                                  iconPath: 'assets/image/ui/orders_icon.png',
+                                  label: 'Orders',
+                                  isSelected: _pageIndex == 3,
+                                  onTap: (details) => _setPage(3, details.globalPosition),
+                                ),
+                                BottomNavItem(
+                                  iconPath: 'assets/image/ui/profile_icon.png',
+                                  label: 'Menu',
+                                  isSelected: _pageIndex == 4,
+                                  onTap: (details) => _setPage(4, details.globalPosition),
+                                ),
+                              ],
                             ),
-                            BottomNavItem(
-                              iconData: Icons.storefront_outlined,
-                              label: 'Mart',
-                              isSelected: _pageIndex == 1,
-                              onTap: (details) => _setPage(1, details.globalPosition),
-                            ),
-                            BottomNavItem(
-                              iconPath: 'assets/image/ui/home_icon.png',
-                              label: 'Home',
-                              isSelected: _pageIndex == 2,
-                              onTap: (details) => _setPage(2, details.globalPosition),
-                            ),
-                            BottomNavItem(
-                              iconPath: 'assets/image/ui/orders_icon.png',
-                              label: 'Orders',
-                              isSelected: _pageIndex == 3,
-                              onTap: (details) => _setPage(3, details.globalPosition),
-                            ),
-                            BottomNavItem(
-                              iconPath: 'assets/image/ui/profile_icon.png',
-                              label: 'Menu',
-                              isSelected: _pageIndex == 4,
-                              onTap: (details) => _setPage(4, details.globalPosition),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
+              );
+            });
           }
         ),
         body: GetBuilder<OrderController>(
