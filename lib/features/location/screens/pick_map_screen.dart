@@ -1453,46 +1453,8 @@ class _PickMapScreenState extends State<PickMapScreen> with TickerProviderStateM
       );
     }
 
-    // Empty state - no zone saved
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Dimensions.paddingSizeSmall,
-        vertical: Dimensions.paddingSizeExtraSmall,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.grey[800]!.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: Colors.amber.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 12,
-            color: Colors.amber[400],
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'no_zone_selected'.tr,
-            style: robotoMedium.copyWith(
-              fontSize: Dimensions.fontSizeExtraSmall,
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
-      ),
-    );
+    // Empty state - no zone saved (don't show badge)
+    return const SizedBox.shrink();
   }
 
   void _onZoneSelected(LocationController locationController) {

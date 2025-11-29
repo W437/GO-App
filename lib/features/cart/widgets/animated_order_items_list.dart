@@ -8,7 +8,8 @@ import 'package:godelivery_user/features/cart/widgets/order_item_widget.dart';
 /// Animated list wrapper for order items
 /// Handles smooth removal animations when items are deleted
 class AnimatedOrderItemsList extends StatefulWidget {
-  const AnimatedOrderItemsList({super.key});
+  final List<CartModel> cartItems;
+  const AnimatedOrderItemsList({super.key, required this.cartItems});
 
   @override
   State<AnimatedOrderItemsList> createState() => _AnimatedOrderItemsListState();
@@ -25,21 +26,21 @@ class _AnimatedOrderItemsListState extends State<AnimatedOrderItemsList> {
     super.initState();
     final controller = Get.find<CartController>();
     _cachedList = List.generate(
-      controller.cartList.length,
+      widget.cartItems.length,
       (i) => _CachedCartItem(
-        cart: controller.cartList[i],
+        cart: widget.cartItems[i],
         addOns: controller.addOnsList.length > i
             ? List<AddOns>.from(controller.addOnsList[i])
             : <AddOns>[],
       ),
     );
-    _lastCartLength = controller.cartList.length;
+    _lastCartLength = widget.cartItems.length;
   }
 
   void _syncWithCart(CartController cartController) {
     if (_isSyncing) return;
 
-    final newList = cartController.cartList;
+    final newList = widget.cartItems;
 
     // Only sync if count actually changed
     if (newList.length == _lastCartLength) return;

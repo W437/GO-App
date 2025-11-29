@@ -30,12 +30,12 @@ class SocialLoginWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GoogleSignIn googleSignIn = GoogleSignIn();
+    final centralizeSetup = Get.find<SplashController>().configModel!.centralizeLoginSetup!;
 
-    bool canAppleLogin = Get.find<SplashController>().configModel!.appleLogin!.isNotEmpty && Get.find<SplashController>().configModel!.appleLogin![0].status!
-        && !GetPlatform.isAndroid && !GetPlatform.isWeb;
-
-    bool canGoogleAndFacebookLogin = Get.find<SplashController>().configModel!.socialLogin!.isNotEmpty && (Get.find<SplashController>().configModel!.socialLogin![0].status!
-        || Get.find<SplashController>().configModel!.socialLogin![1].status!);
+    bool canAppleLogin = (centralizeSetup.appleLoginStatus ?? false) && !GetPlatform.isAndroid && !GetPlatform.isWeb;
+    bool canGoogleLogin = centralizeSetup.googleLoginStatus ?? false;
+    bool canFacebookLogin = centralizeSetup.facebookLoginStatus ?? false;
+    bool canGoogleAndFacebookLogin = canGoogleLogin || canFacebookLogin;
 
     if(onlySocialLogin) {
       return Column(
@@ -46,7 +46,7 @@ class SocialLoginWidget extends StatelessWidget {
             showWelcomeText ? Text('${'welcome_to'.tr} ${AppConstants.appName}', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)) : const SizedBox(),
             const SizedBox(height: Dimensions.paddingSizeLarge),
 
-            Get.find<SplashController>().configModel!.socialLogin![0].status! ? CustomButtonWidget(
+            canGoogleLogin ? CustomButtonWidget(
               height: 50,
               color: Theme.of(context).cardColor,
               textColor: Theme.of(context).textTheme.bodyLarge?.color,
@@ -59,9 +59,9 @@ class SocialLoginWidget extends StatelessWidget {
                 Text('Sign in with Google', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
               ]),
             ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeSmall : 0),
+            SizedBox(height: canGoogleLogin ? Dimensions.paddingSizeSmall : 0),
 
-            Get.find<SplashController>().configModel!.socialLogin![1].status! ? CustomButtonWidget(
+            canFacebookLogin ? CustomButtonWidget(
               height: 50,
               color: const Color(0xFF1877F2),
               textColor: Colors.white,
@@ -73,7 +73,7 @@ class SocialLoginWidget extends StatelessWidget {
                 Text('Sign in with Facebook', style: robotoMedium.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
               ]),
             ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![1].status! ? Dimensions.paddingSizeSmall : 0),
+            SizedBox(height: canFacebookLogin ? Dimensions.paddingSizeSmall : 0),
 
             canAppleLogin ? CustomButtonWidget(
               height: 50,
@@ -137,7 +137,7 @@ class SocialLoginWidget extends StatelessWidget {
 
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
 
-        Get.find<SplashController>().configModel!.socialLogin![0].status! ? InkWell(
+        canGoogleLogin ? InkWell(
           onTap: () => _googleLogin(googleSignIn),
           child: Container(
             height: 40,width: 40,
@@ -155,9 +155,8 @@ class SocialLoginWidget extends StatelessWidget {
             ),
           ),
         ) : const SizedBox(),
-        // SizedBox(width: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeLarge : 0),
 
-        Get.find<SplashController>().configModel!.socialLogin![1].status! ? Padding(
+        canFacebookLogin ? Padding(
           padding: EdgeInsets.only(left: Get.find<LocalizationController>().isLtr ? Dimensions.paddingSizeLarge : 0, right: Get.find<LocalizationController>().isLtr ? 0 : Dimensions.paddingSizeLarge),
           child: InkWell(
             onTap: () => _facebookLogin(),
@@ -173,7 +172,6 @@ class SocialLoginWidget extends StatelessWidget {
             ),
           ),
         ) : const SizedBox(),
-        // const SizedBox(width: Dimensions.paddingSizeLarge),
 
         canAppleLogin ? Padding(
           padding: const EdgeInsets.only(left: Dimensions.paddingSizeLarge),

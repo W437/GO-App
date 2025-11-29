@@ -124,6 +124,9 @@ class PricingViewWidget extends StatelessWidget {
                 isRestaurantOpen: isRestaurantOpen,
                 fromDineIn: fromDineIn,
                 restaurantName: restaurantController.restaurant?.name ?? 'Restaurant',
+                restaurantId: restaurantController.restaurant?.id ?? 0,
+                cartItems: cartController.cartList,
+                subtotal: cartController.subTotal,
               ) : const SizedBox.shrink(),
 
             ]);

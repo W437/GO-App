@@ -37,7 +37,9 @@ class CartController extends GetxController implements GetxService {
   // New state for grouped carts (populated alongside _cartList for backward compatibility)
   Map<int, RestaurantCart> _restaurantCarts = {};
   List<RestaurantCart> get restaurantCarts => _restaurantCarts.values.toList();
+
   int? _currentRestaurantId;
+  int? get currentRestaurantId => _currentRestaurantId;
 
   // Get cart for specific restaurant
   RestaurantCart? getCartForRestaurant(int restaurantId) => _restaurantCarts[restaurantId];
@@ -203,6 +205,41 @@ class CartController extends GetxController implements GetxService {
     }
   }
 
+  Future<void> clearRestaurantCart(int restaurantId) async {
+    _isLoading = true;
+    update();
+
+    // Get items for this restaurant
+    final itemsToRemove = _cartList.where((item) => item.product?.restaurantId == restaurantId).toList();
+
+    if (itemsToRemove.isEmpty) {
+      _isLoading = false;
+      update();
+      return;
+    }
+
+    // Remove from backend (if online)
+    if (AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) {
+      // Delete each item from backend
+      for (var item in itemsToRemove) {
+        if (item.id != null) {
+          await cartServiceInterface.removeCartItemOnline(item.id, AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId());
+        }
+      }
+      // Re-fetch cart to ensure sync
+      await getCartDataOnline();
+    } else {
+      // Offline: just remove locally
+      _cartList.removeWhere((item) => item.product?.restaurantId == restaurantId);
+      cartServiceInterface.addToSharedPrefCartList(_cartList);
+      calculationCart();
+      groupCartsByRestaurant();
+      update();
+    }
+
+    _isLoading = false;
+    update();
+  }
 
   int isExistInCart(int? productID, int? cartIndex) {
     return cartServiceInterface.isExistInCart(productID, cartIndex, _cartList);
@@ -241,6 +278,7 @@ class CartController extends GetxController implements GetxService {
       _cartList = [];
       _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
       calculationCart();
+      groupCartsByRestaurant(); // Group by restaurant after adding
       if(!fromDirectlyAdd) {
         Get.back();
       }
@@ -284,6 +322,7 @@ class CartController extends GetxController implements GetxService {
       _cartList = [];
       _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
       calculationCart();
+      groupCartsByRestaurant(); // Group by restaurant after updating
       if(!fromDirectlyAdd) {
         Get.back();
       }
@@ -427,43 +466,52 @@ class CartController extends GetxController implements GetxService {
     }
   }
 
-  /// Helper method to get Restaurant object from cart item
-  /// In production, this should fetch from RestaurantController or API
+  /// Get Restaurant object from cart item (uses RestaurantController cache)
   Restaurant? _getRestaurantFromCartItem(CartModel cartItem) {
-    // Try to get from RestaurantController first
+    final restaurantId = cartItem.product?.restaurantId;
+    if (restaurantId == null) return null;
+
     try {
       var restaurantController = Get.find<RestaurantController>();
-      if (restaurantController.restaurant != null &&
-          restaurantController.restaurant!.id == cartItem.product?.restaurantId) {
+
+      // Check currently loaded restaurant
+      if (restaurantController.restaurant?.id == restaurantId) {
         return restaurantController.restaurant;
       }
+
+      // Check cache for this restaurant
+      final cached = restaurantController.getCachedRestaurant(restaurantId);
+      if (cached != null) {
+        return cached;
+      }
+
+      // NOT in cache - fetch it asynchronously (don't block)
+      restaurantController.loadRestaurant(restaurantId).then((_) {
+        // After loading, re-group carts to update UI with correct logo
+        groupCartsByRestaurant();
+      });
     } catch (e) {
       debugPrint('RestaurantController not found: $e');
     }
 
-    // Fallback: Create minimal Restaurant object from product data
-    // Note: In Phase 3, we should fetch full restaurant data from API
-    if (cartItem.product?.restaurantId != null) {
-      return Restaurant(
-        id: cartItem.product!.restaurantId,
-        name: cartItem.product!.restaurantName ?? 'Restaurant',
-        logoFullUrl: cartItem.product!.imageFullUrl ?? '',
-        coverPhotoFullUrl: '',
-        address: '',
-        latitude: '',
-        longitude: '',
-        minimumOrder: 0,
-        avgRating: 0,
-        tax: 0,
-        active: true,
-        open: 1,
-        delivery: true,
-        takeAway: true,
-        deliveryTime: '30-40 min',
-      );
-    }
-
-    return null;
+    // Return minimal placeholder while loading
+    return Restaurant(
+      id: restaurantId,
+      name: cartItem.product!.restaurantName ?? 'Restaurant',
+      logoFullUrl: '',  // Empty until loaded
+      coverPhotoFullUrl: '',
+      address: '',
+      latitude: '',
+      longitude: '',
+      minimumOrder: 0,
+      avgRating: 0,
+      tax: 0,
+      active: true,
+      open: 1,
+      delivery: true,
+      takeAway: true,
+      deliveryTime: '30-40 min',
+    );
   }
 
   /// Calculate subtotal for a list of cart items

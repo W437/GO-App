@@ -853,37 +853,13 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
   }
 
   Future<void> _executeActions(CartController cartController, ProductController productController, CartModel cartModel, OnlineCart onlineCart) async {
-    if (cartController.existAnotherRestaurantProduct(cartModel.product!.restaurantId)) {
-      // AWAIT the dialog to prevent navigation stack corruption
-      final bool? confirmed = await Get.dialog<bool>(
-        ConfirmationDialogWidget(
-          icon: Images.warning,
-          title: 'are_you_sure_to_reset'.tr,
-          description: 'if_you_continue'.tr,
-          onYesPressed: () {
-            Get.back(result: true); // Return true to indicate confirmation
-          },
-        ),
-        barrierDismissible: false,
-      );
-
-      // Only proceed if user confirmed
-      if (confirmed == true) {
-        final success = await cartController.clearCartOnline();
-        if (success) {
-          await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
-          Get.back(); // Close product sheet
-        }
-      }
-      // If cancelled, do nothing (sheet stays open)
+    // Multi-restaurant cart support: Allow adding from different restaurants
+    if (widget.cart != null || productController.cartIndex != -1) {
+      await cartController.updateCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
     } else {
-      if(widget.cart != null || productController.cartIndex != -1) {
-        await cartController.updateCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
-      } else {
-        await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
-      }
-      Get.back(); // Close product sheet
+      await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
     }
+    Get.back(); // Close product sheet
   }
 
   double _getVariationPriceWithDiscount(Product product, ProductController productController, double? discount, String? discountType) {

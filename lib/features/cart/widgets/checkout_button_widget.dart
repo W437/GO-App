@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/feedback/custom_toast_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
 import 'package:godelivery_user/common/widgets/shared/text/animated_text_transition.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/checkout/screens/checkout_screen.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
@@ -13,8 +16,6 @@ import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class CheckoutButtonWidget extends StatelessWidget {
   final CartController cartController;
@@ -22,7 +23,21 @@ class CheckoutButtonWidget extends StatelessWidget {
   final bool isRestaurantOpen;
   final bool fromDineIn;
   final String restaurantName;
-  const CheckoutButtonWidget({super.key, required this.cartController, required this.availableList, required this.isRestaurantOpen, this.fromDineIn = false, required this.restaurantName});
+  final int restaurantId;
+  final List<CartModel> cartItems;
+  final double subtotal;
+
+  const CheckoutButtonWidget({
+    super.key,
+    required this.cartController,
+    required this.availableList,
+    required this.isRestaurantOpen,
+    required this.restaurantName,
+    required this.restaurantId,
+    required this.cartItems,
+    required this.subtotal,
+    this.fromDineIn = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +51,7 @@ class CheckoutButtonWidget extends StatelessWidget {
         child: GetBuilder<RestaurantController>(builder: (restaurantController) {
           if(restaurantController.restaurant != null && restaurantController.restaurant!.freeDelivery != null && !restaurantController.restaurant!.freeDelivery!
            && (Get.find<SplashController>().configModel?.adminFreeDelivery?.status == true && (Get.find<SplashController>().configModel?.adminFreeDelivery?.type != null && Get.find<SplashController>().configModel?.adminFreeDelivery?.type == 'free_delivery_by_specific_criteria') && (Get.find<SplashController>().configModel!.adminFreeDelivery?.freeDeliveryOver != null))){
-            percentage = cartController.subTotal/Get.find<SplashController>().configModel!.adminFreeDelivery!.freeDeliveryOver!;
+            percentage = subtotal/Get.find<SplashController>().configModel!.adminFreeDelivery!.freeDeliveryOver!;
           }
           return Column(mainAxisSize: MainAxisSize.min, children: [
             (restaurantController.restaurant != null && restaurantController.restaurant!.freeDelivery != null && !restaurantController.restaurant!.freeDelivery!
@@ -49,7 +64,7 @@ class CheckoutButtonWidget extends StatelessWidget {
                   const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
                   PriceConverter.convertAnimationPrice(
-                    Get.find<SplashController>().configModel!.adminFreeDelivery!.freeDeliveryOver! - cartController.subTotal,
+                    Get.find<SplashController>().configModel!.adminFreeDelivery!.freeDeliveryOver! - subtotal,
                     textStyle: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
                   ),
                   const SizedBox(width: Dimensions.paddingSizeExtraSmall),
@@ -88,7 +103,7 @@ class CheckoutButtonWidget extends StatelessWidget {
                     ),
                   ),
                   AnimatedTextTransition(
-                    value: PriceConverter.convertPrice(cartController.subTotal),
+                    value: PriceConverter.convertPrice(subtotal),
                     style: robotoBold.copyWith(
                       color: Theme.of(context).primaryColor,
                       fontSize: Dimensions.fontSizeExtraLarge,
@@ -123,7 +138,7 @@ class CheckoutButtonWidget extends StatelessWidget {
   }
 
   void _processToCheckoutButtonPressed(BuildContext context, RestaurantController restaurantController) {
-    if(!cartController.cartList.first.product!.scheduleOrder! && cartController.availableList.contains(false)) {
+    if(!cartItems.first.product!.scheduleOrder! && cartController.availableList.contains(false)) {
       showCustomSnackBar('one_or_more_product_unavailable'.tr);
     } else if(restaurantController.restaurant!.freeDelivery == null || restaurantController.restaurant!.cutlery == null) {
       showCustomSnackBar('restaurant_is_unavailable'.tr);
@@ -140,7 +155,7 @@ class CheckoutButtonWidget extends StatelessWidget {
           subtitle: 'Checkout',
           child: CheckoutScreen(
             fromCart: true,
-            cartList: cartController.cartList,
+            cartList: cartItems,
             fromDineInPage: fromDineIn,
             showAppBar: false, // No AppBar - using CustomFullSheetNavigator's top bar
           ),

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/cart/domain/models/cart_model.dart';
 import 'package:godelivery_user/features/cart/widgets/animated_order_items_list.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_suggested_item_view_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/checkout_button_widget.dart';
@@ -46,15 +46,25 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
 
     return GetBuilder<RestaurantController>(builder: (restaurantController) {
       return GetBuilder<CartController>(builder: (cartController) {
-        bool isRestaurantOpen = true;
-        if (restaurantController.restaurant != null) {
-          isRestaurantOpen = restaurantController.isRestaurantOpenNow(
-            restaurantController.restaurant!.active!,
-            restaurantController.restaurant!.schedules,
-          );
+        // Get cart for current restaurant context
+        final currentRestaurantId = cartController.currentRestaurantId;
+        final restaurantCart = currentRestaurantId != null
+            ? cartController.getCartForRestaurant(currentRestaurantId)
+            : null;
+
+        // Fallback to first restaurant if no context set
+        final activeCart = restaurantCart ?? (cartController.restaurantCarts.isNotEmpty
+            ? cartController.restaurantCarts.first
+            : null);
+
+        if (activeCart == null) {
+          return const Center(child: Text('No cart items'));
         }
 
-        String restaurantName = restaurantController.restaurant?.name ?? 'Restaurant';
+        final restaurant = activeCart.restaurant;
+        final cartItems = activeCart.items;
+        bool isRestaurantOpen = activeCart.canOrder;
+        String restaurantName = restaurant.name ?? 'Restaurant';
 
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
@@ -74,7 +84,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // MESSAGE TO RESTAURANT SECTION
-                      _buildMessageToRestaurantSection(context, cartController),
+                      _buildMessageToRestaurantSection(context, cartController, restaurant.id!),
 
                       const SizedBox(height: Dimensions.paddingSizeDefault),
 
@@ -95,6 +105,8 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                         context,
                         cartController,
                         isRestaurantOpen,
+                        cartItems,
+                        restaurant.id!,
                       ),
 
                       const SizedBox(height: Dimensions.paddingSizeDefault),
@@ -102,7 +114,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                       // RECOMMENDED ITEMS
                       if (!isDesktop)
                         CartSuggestedItemViewWidget(
-                          cartList: cartController.cartList,
+                          cartList: cartItems,
                         ),
 
                       const SizedBox(height: Dimensions.paddingSizeExtraLarge),
@@ -124,6 +136,9 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                   isRestaurantOpen: isRestaurantOpen,
                   fromDineIn: widget.fromDineIn,
                   restaurantName: restaurantName,
+                  restaurantId: restaurant.id!,
+                  cartItems: cartItems,
+                  subtotal: activeCart.subtotal,
                 ),
               ),
             ],
@@ -141,16 +156,11 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   Widget _buildMessageToRestaurantSection(
     BuildContext context,
     CartController cartController,
+    int restaurantId,
   ) {
-    // Get saved special instructions
-    String? savedInstructions;
-    if (cartController.cartList.isNotEmpty) {
-      final restaurantId = cartController.cartList[0].product?.restaurantId;
-      if (restaurantId != null) {
-        final restaurantCart = cartController.getCartForRestaurant(restaurantId);
-        savedInstructions = restaurantCart?.specialInstructions;
-      }
-    }
+    // Get saved special instructions for this restaurant
+    final restaurantCart = cartController.getCartForRestaurant(restaurantId);
+    final savedInstructions = restaurantCart?.specialInstructions;
 
     final bool hasInstructions = savedInstructions != null && savedInstructions.isNotEmpty;
 
@@ -162,7 +172,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
       ),
       child: InkWell(
-        onTap: () => _showMessageDialog(context),
+        onTap: () => _showMessageDialog(context, restaurantId),
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
         child: Row(
           children: [
@@ -210,21 +220,12 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     );
   }
 
-  void _showMessageDialog(BuildContext context) {
+  void _showMessageDialog(BuildContext context, int restaurantId) {
     final cartController = Get.find<CartController>();
 
-    // Load existing special instructions if any
-    if (cartController.cartList.isNotEmpty) {
-      final restaurantId = cartController.cartList[0].product?.restaurantId;
-      if (restaurantId != null) {
-        final restaurantCart = cartController.getCartForRestaurant(restaurantId);
-        _messageController.text = restaurantCart?.specialInstructions ?? '';
-      } else {
-        _messageController.clear();
-      }
-    } else {
-      _messageController.clear();
-    }
+    // Load existing special instructions for this restaurant
+    final restaurantCart = cartController.getCartForRestaurant(restaurantId);
+    _messageController.text = restaurantCart?.specialInstructions ?? '';
 
     CustomSheet.show(
       context: context,
@@ -299,17 +300,11 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
             onPressed: () {
               final cartController = Get.find<CartController>();
 
-              // Get restaurant ID from first cart item
-              if (cartController.cartList.isNotEmpty) {
-                final restaurantId = cartController.cartList[0].product?.restaurantId;
-                if (restaurantId != null) {
-                  // Save special instructions
-                  cartController.setCartSpecialInstructions(
-                    restaurantId,
-                    _messageController.text.trim(),
-                  );
-                }
-              }
+              // Save special instructions for this restaurant
+              cartController.setCartSpecialInstructions(
+                restaurantId,
+                _messageController.text.trim(),
+              );
 
               // Dismiss keyboard
               FocusScope.of(context).unfocus();
@@ -401,6 +396,8 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     BuildContext context,
     CartController cartController,
     bool isRestaurantOpen,
+    List<CartModel> cartItems,
+    int restaurantId,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
@@ -442,16 +439,10 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     expand: false,
                     buttonText: '+ Add more',
                     onPressed: () {
-                      if (cartController.cartList.isNotEmpty) {
-                        Get.toNamed(
-                          RouteHelper.getRestaurantRoute(
-                            cartController.cartList[0].product!.restaurantId,
-                          ),
-                          arguments: RestaurantScreen(
-                            restaurantId: cartController.cartList[0].product!.restaurantId!,
-                          ),
-                        );
-                      }
+                      Get.toNamed(
+                        RouteHelper.getRestaurantRoute(restaurantId),
+                        arguments: RestaurantScreen(restaurantId: restaurantId),
+                      );
                     },
                     height: 32,
                     width: 110,
@@ -464,7 +455,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
             ],
           ),
           const SizedBox(height: Dimensions.paddingSizeSmall),
-          const AnimatedOrderItemsList(),
+          AnimatedOrderItemsList(cartItems: cartItems),
         ],
       ),
     );

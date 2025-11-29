@@ -181,23 +181,8 @@ class ItemCardWidget extends StatelessWidget {
 
                               OnlineCart onlineCart = OnlineCart(null, product.id, null, product.price!.toString(), [], 1, [], [], [], 'Food', variationOptionIds: []);
 
-                              if (Get.find<CartController>().existAnotherRestaurantProduct(cartModel.product!.restaurantId)) {
-                                Get.dialog(ConfirmationDialogWidget(
-                                  icon: Images.warning,
-                                  title: 'are_you_sure_to_reset'.tr,
-                                  description: 'if_you_continue'.tr,
-                                  onYesPressed: () {
-                                    Get.find<CartController>().clearCartOnline().then((success) async {
-                                      if (success) {
-                                        await Get.find<CartController>().addToCartOnline(onlineCart);
-                                        Get.back();
-                                      }
-                                    });
-                                  },
-                                ), barrierDismissible: false);
-                              } else {
-                                Get.find<CartController>().addToCartOnline(onlineCart);
-                              }
+                              // Multi-restaurant cart support: Allow adding from any restaurant
+                              Get.find<CartController>().addToCartOnline(onlineCart);
 
                             } else {
                               ResponsiveHelper.isMobile(context) ? Get.bottomSheet(

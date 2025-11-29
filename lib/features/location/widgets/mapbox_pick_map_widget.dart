@@ -277,13 +277,13 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
     );
     if (!mounted) return;
 
-    // Small delay to ensure the camera change is rendered
-    await Future.delayed(const Duration(milliseconds: 100));
+    // 200ms delay after map loads before animation starts
+    await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
 
-    // Spin the globe 360° smoothly over 2.5 seconds
+    // Spin the globe 360° smoothly over 1.5 seconds
     print('🗺️ [MAPBOX $_instanceId] Spinning globe 360° smoothly...');
-    const spinDurationMs = 2500;
+    const spinDurationMs = 1500;
     const frameIntervalMs = 16;  // ~60fps
     const totalFrames = spinDurationMs ~/ frameIntervalMs;
 
@@ -311,9 +311,9 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
     }
     if (!mounted) return;
 
-    // Fly to target location (4 seconds)
+    // Fly to target location (3 seconds)
     final flyToZoom = widget.initialZoom - 0.5;
-    print('🗺️ [MAPBOX $_instanceId] Starting flyTo animation (4000ms) to zoom=$flyToZoom');
+    print('🗺️ [MAPBOX $_instanceId] Starting flyTo animation (3000ms) to zoom=$flyToZoom');
     mapboxMap.flyTo(
       CameraOptions(
         center: Point(coordinates: Position(
@@ -324,10 +324,10 @@ class MapboxPickMapWidgetState extends State<MapboxPickMapWidget> {
         bearing: 0,
         pitch: 0,
       ),
-      MapAnimationOptions(duration: 4000, startDelay: 0),
+      MapAnimationOptions(duration: 3000, startDelay: 0),
     );
 
-    await Future.delayed(const Duration(milliseconds: 4000));
+    await Future.delayed(const Duration(milliseconds: 3000));
     if (!mounted) return;
 
     await _finalizeAnimation(mapboxMap);

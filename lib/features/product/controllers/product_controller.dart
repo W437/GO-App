@@ -235,23 +235,8 @@ class ProductController extends GetxController implements GetxService {
 
       setExistInCart(product);
 
-      if (Get.find<CartController>().existAnotherRestaurantProduct(cartModel.product!.restaurantId)) {
-        Get.dialog(ConfirmationDialogWidget(
-          icon: Images.warning,
-          title: 'are_you_sure_to_reset'.tr,
-          description: 'if_you_continue'.tr,
-          onYesPressed: () {
-            Get.find<CartController>().clearCartOnline().then((success) async {
-              if (success) {
-                Get.back();
-                await Get.find<CartController>().addToCartOnline(onlineCart, fromDirectlyAdd: true);
-              }
-            });
-          },
-        ), barrierDismissible: false);
-      } else {
-        Get.find<CartController>().addToCartOnline(onlineCart, fromDirectlyAdd: true);
-      }
+      // Multi-restaurant cart support: Allow adding from any restaurant
+      Get.find<CartController>().addToCartOnline(onlineCart, fromDirectlyAdd: true);
     } else {
       ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
         RestaurantProductSheet(product: product, isCampaign: false),
