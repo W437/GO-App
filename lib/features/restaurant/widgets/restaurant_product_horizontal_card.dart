@@ -4,6 +4,7 @@ import 'package:godelivery_user/common/models/product_model.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
+import 'package:godelivery_user/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/expandable_product_quantity_badge.dart';
 import 'package:godelivery_user/common/widgets/adaptive/product/restaurant_product_sheet.dart';
@@ -122,7 +123,6 @@ class _RestaurantProductHorizontalCardState extends State<RestaurantProductHoriz
                       // Bottom info section - below image
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                         decoration: BoxDecoration(
                           color: Theme.of(context).cardColor,
                           borderRadius: const BorderRadius.only(
@@ -132,42 +132,55 @@ class _RestaurantProductHorizontalCardState extends State<RestaurantProductHoriz
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Likes & Price Row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.favorite, color: Colors.red, size: 14),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${widget.product.likeCount ?? 0}',
-                                      style: robotoRegular.copyWith(
-                                        fontSize: Dimensions.fontSizeSmall,
-                                        color: Theme.of(context).hintColor,
+                            // Likes & Price Row - full width muted bg
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).hintColor.withValues(alpha: 0.08),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.favorite, color: Colors.red, size: 14),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${widget.product.likeCount ?? 0}',
+                                        style: robotoRegular.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          color: Theme.of(context).hintColor,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  PriceConverter.convertPrice(discountPrice),
-                                  style: robotoMedium.copyWith(
-                                    fontSize: Dimensions.fontSizeDefault,
-                                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    PriceConverter.convertPrice(discountPrice),
+                                    style: robotoMedium.copyWith(
+                                      fontSize: Dimensions.fontSizeDefault,
+                                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 4),
 
                             // Name - single line with ellipsis
-                            Text(
-                              widget.product.name ?? '',
-                              style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
+                            Padding(
+                              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                              child: Text(
+                                widget.product.name ?? '',
+                                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ],
                         ),
@@ -208,7 +221,7 @@ class _RestaurantProductHorizontalCardState extends State<RestaurantProductHoriz
               },
             ),
 
-            // Expandable Cart Badge - Top Right Corner (inside CustomInkWellWidget but with pointer blocking)
+            // Add Button / Quantity Badge - Top Right Corner
             Positioned(
               top: 0,
               right: 0,
@@ -218,8 +231,75 @@ class _RestaurantProductHorizontalCardState extends State<RestaurantProductHoriz
                 onPointerUp: (_) {},   // Block pointer events
                 onPointerMove: (_) {}, // Block pointer events
                 onPointerCancel: (_) {}, // Block pointer events
-                child: ExpandableProductQuantityBadge(
-                  productId: widget.product.id!,
+                child: GetBuilder<CartController>(
+                  builder: (cartController) {
+                    final cartItems = cartController.cartList
+                        .where((item) => item.product?.id == widget.product.id)
+                        .toList();
+                    final int totalQuantity = cartItems.fold(0, (sum, item) => sum + (item.quantity ?? 0));
+
+                    // Show quantity badge if in cart
+                    if (totalQuantity > 0) {
+                      return ExpandableProductQuantityBadge(
+                        productId: widget.product.id!,
+                      );
+                    }
+
+                    // Show ADD button if not in cart
+                    return GestureDetector(
+                      onTap: () {
+                        // Check if product has variations
+                        if (widget.product.variations != null && widget.product.variations!.isNotEmpty) {
+                          // Open product sheet for variations
+                          if (ResponsiveHelper.isMobile(context)) {
+                            CustomSheet.show(
+                              context: context,
+                              child: RestaurantProductSheet(product: widget.product, inRestaurantPage: true),
+                              showHandle: false,
+                              padding: EdgeInsets.zero,
+                            );
+                          } else {
+                            Get.dialog(
+                              Dialog(child: RestaurantProductSheet(product: widget.product, inRestaurantPage: true)),
+                            );
+                          }
+                        } else {
+                          // Add directly to cart
+                          final onlineCart = OnlineCart(
+                            null,
+                            widget.product.id,
+                            null,
+                            widget.product.price!.toString(),
+                            [],
+                            1,
+                            [],
+                            [],
+                            [],
+                            'Food',
+                            variationOptionIds: [],
+                          );
+                          cartController.addToCartOnline(onlineCart, fromDirectlyAdd: true);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(Dimensions.radiusDefault),
+                            bottomLeft: Radius.circular(Dimensions.radiusDefault),
+                          ),
+                        ),
+                        child: Text(
+                          'ADD',
+                          style: robotoBold.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

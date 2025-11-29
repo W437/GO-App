@@ -171,15 +171,15 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
           // Cart was updated (item added or removed)
           _updateBounceTimer?.cancel();
 
-          // Price bounces at 1500ms
-          Timer(const Duration(milliseconds: 1500), () {
+          // Price bounces at 500ms
+          Timer(const Duration(milliseconds: 500), () {
             if (mounted) {
               _priceBounceController.forward(from: 0.0);
             }
           });
 
-          // Icon bounces at 1750ms (250ms later)
-          _updateBounceTimer = Timer(const Duration(milliseconds: 1750), () {
+          // Icon bounces at 750ms (250ms later)
+          _updateBounceTimer = Timer(const Duration(milliseconds: 750), () {
             if (mounted) {
               _iconBounceController.forward(from: 0.0);
             }
@@ -263,7 +263,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                             ),
                             child: AnimatedTextTransition(
                               value: cartController.cartList.length,
-                              delay: const Duration(milliseconds: 1500),
+                              delay: const Duration(milliseconds: 500),
                               style: robotoBold.copyWith(
                                 fontSize: 11,
                                 color: Colors.white,
@@ -286,7 +286,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
                           },
                           child: AnimatedTextTransition(
                             value: PriceConverter.convertPrice(cartController.calculationCart()),
-                            delay: const Duration(milliseconds: 1500),
+                            delay: const Duration(milliseconds: 500),
                             style: robotoBold.copyWith(
                               fontSize: Dimensions.fontSizeLarge,
                               color: Colors.white,
