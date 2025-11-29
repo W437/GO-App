@@ -11,7 +11,6 @@ import 'package:godelivery_user/features/cart/widgets/shopping_carts_view.dart';
 import 'package:godelivery_user/features/checkout/controllers/checkout_controller.dart';
 import 'package:godelivery_user/features/order/controllers/order_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -33,7 +32,10 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    initCall();
+    // Defer to avoid setState during build when cache hits trigger update()
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) initCall();
+    });
   }
 
   Future<void> initCall() async {
@@ -55,6 +57,7 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
     }
 
     // Multi-restaurant cart: Fetch details for ALL restaurants in cart
+    // Use fetchRestaurantForCache to avoid changing current restaurant
     if (cartController.cartList.isNotEmpty) {
       final restaurantIds = cartController.cartList
           .map((item) => item.product?.restaurantId)
@@ -62,12 +65,9 @@ class _ShoppingCartSheetState extends State<ShoppingCartSheet> with SingleTicker
           .toSet()
           .toList();
 
-      // Load restaurant details for each (uses cache automatically)
+      // Fetch restaurant details for each (caches without changing current)
       for (var restaurantId in restaurantIds) {
-        final cached = restaurantController.getCachedRestaurant(restaurantId);
-        if (cached == null) {
-          await restaurantController.loadRestaurant(restaurantId);
-        }
+        await restaurantController.fetchRestaurantForCache(restaurantId);
       }
 
       // Re-group carts after loading restaurant details

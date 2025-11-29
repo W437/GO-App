@@ -116,31 +116,41 @@ class _RestaurantScreenState extends State<RestaurantScreen>
     });
   }
 
-  void _initCartVisibility() {
+  /// Get count of cart items for this restaurant
+  int _getCartCountForThisRestaurant() {
     final cartController = Get.find<CartController>();
-    final currentCount = cartController.cartList.length;
+    return cartController.cartList
+        .where((item) => item.product?.restaurantId == widget.restaurantId)
+        .length;
+  }
+
+  /// Check if cart has any items for this restaurant
+  bool _hasCartForThisRestaurant() {
+    final cartController = Get.find<CartController>();
+    return cartController.cartList
+        .any((item) => item.product?.restaurantId == widget.restaurantId);
+  }
+
+  void _initCartVisibility() {
+    final currentCount = _getCartCountForThisRestaurant();
     _previousCartCount = currentCount;
 
     // If cart already has items for this restaurant, show cart after delay
     if (currentCount > 0) {
-      final firstItem = cartController.cartList.first;
-      if (firstItem.product?.restaurantId == widget.restaurantId) {
-        _cartWidgetTimer = Timer(const Duration(milliseconds: 350), () {
-          if (mounted) {
-            setState(() => _showCartWidget = true);
-          }
-        });
-      }
+      _cartWidgetTimer = Timer(const Duration(milliseconds: 350), () {
+        if (mounted) {
+          setState(() => _showCartWidget = true);
+        }
+      });
     }
   }
 
   void _onCartChanged() {
     if (!mounted) return;
 
-    final cartController = Get.find<CartController>();
-    final currentCount = cartController.cartList.length;
+    final currentCount = _getCartCountForThisRestaurant();
 
-    // Detect cart becoming non-empty
+    // Detect cart for THIS restaurant becoming non-empty
     if (currentCount > 0 && _previousCartCount == 0) {
       _showCartWidget = false;
       _cartWidgetTimer?.cancel();
@@ -150,7 +160,7 @@ class _RestaurantScreenState extends State<RestaurantScreen>
         }
       });
     }
-    // Detect cart becoming empty
+    // Detect cart for THIS restaurant becoming empty
     else if (currentCount == 0 && _previousCartCount > 0) {
       _cartWidgetTimer?.cancel();
       setState(() => _showCartWidget = false);
@@ -237,7 +247,8 @@ class _RestaurantScreenState extends State<RestaurantScreen>
 
     // Update logo position, opacity, and scale
     setState(() {
-      _scrollOffset = offset.clamp(0.0, double.infinity);
+      // Allow negative offset for overscroll (pull down) effect
+      _scrollOffset = offset;
 
       final double animationOffset = (offset - animationThreshold).clamp(0.0, animationRange);
       _logoOpacity = (1.0 - (animationOffset / animationRange)).clamp(0.0, 1.0);
@@ -760,10 +771,7 @@ class _RestaurantScreenState extends State<RestaurantScreen>
 
       bottomNavigationBar: GetBuilder<CartController>(builder: (cartController) {
         // Check if cart has items for this restaurant (no side effects in build!)
-        final bool hasCartForThisRestaurant = cartController.cartList.isNotEmpty &&
-            cartController.cartList.first.product?.restaurantId == widget.restaurantId;
-
-        final bool showCart = _showCartWidget && hasCartForThisRestaurant && !isDesktop;
+        final bool showCart = _showCartWidget && _hasCartForThisRestaurant() && !isDesktop;
 
         return Stack(
           clipBehavior: Clip.none,

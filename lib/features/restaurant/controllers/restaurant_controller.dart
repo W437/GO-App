@@ -222,6 +222,52 @@ class RestaurantController extends GetxController implements GetxService {
     completeTransition();
   }
 
+  /// Fetch restaurant data for caching only - does NOT change current restaurant
+  /// Use this when you need restaurant data (e.g., for cart display) without navigation
+  Future<Restaurant?> fetchRestaurantForCache(int restaurantId) async {
+    // Check cache first
+    final cached = getCachedRestaurant(restaurantId);
+    if (cached != null) {
+      return cached;
+    }
+
+    // Fetch from API without setting as current
+    try {
+      final Restaurant? fetchedRestaurant = await restaurantServiceInterface.getRestaurantDetails(
+        restaurantId.toString(),
+        '',
+        Get.find<LocalizationController>().locale.languageCode
+      );
+
+      if (fetchedRestaurant != null) {
+        // Cache it for future use (without changing current restaurant)
+        _loadedRestaurants.removeWhere((entry) => entry.id == restaurantId);
+        _loadedRestaurants.insert(
+          0,
+          _RestaurantCacheEntry(
+            id: restaurantId,
+            restaurant: fetchedRestaurant,
+            sections: null,
+            sectionsMeta: null,
+            loadedAt: DateTime.now(),
+          ),
+        );
+
+        // Keep only last 5 restaurants
+        if (_loadedRestaurants.length > 5) {
+          _loadedRestaurants.removeLast();
+        }
+
+        // Notify listeners to update UI with new cached data
+        update();
+      }
+
+      return fetchedRestaurant;
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ==================== RESTAURANT LIST METHODS ====================
 
   Future<void> getRestaurantList(int offset, bool reload, {bool fromMap = false}) async {
@@ -542,6 +588,10 @@ class RestaurantController extends GetxController implements GetxService {
   /// Get cached restaurant from any loaded list (for optimistic UI)
   Restaurant? getCachedRestaurant(int restaurantId) {
     if (_restaurant?.id == restaurantId) return _restaurant;
+
+    // Check loaded restaurants cache first (has full details)
+    final loadedEntry = _loadedRestaurants.firstWhereOrNull((entry) => entry.id == restaurantId);
+    if (loadedEntry != null) return loadedEntry.restaurant;
 
     Restaurant? findInList(List<Restaurant>? list) {
       return list?.firstWhereOrNull((r) => r.id == restaurantId);

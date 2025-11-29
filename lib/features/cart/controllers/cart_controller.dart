@@ -466,10 +466,8 @@ class CartController extends GetxController implements GetxService {
     }
   }
 
-  // Track which restaurants are currently being fetched to prevent duplicate requests
-  final Set<int> _fetchingRestaurants = {};
-
   /// Get Restaurant object from cart item (uses RestaurantController cache)
+  /// NOTE: This only checks cache, does NOT trigger navigation or set current restaurant
   Restaurant? _getRestaurantFromCartItem(CartModel cartItem) {
     final restaurantId = cartItem.product?.restaurantId;
     if (restaurantId == null) return null;
@@ -477,7 +475,7 @@ class CartController extends GetxController implements GetxService {
     try {
       var restaurantController = Get.find<RestaurantController>();
 
-      // Check currently loaded restaurant
+      // Check currently loaded restaurant (only if it matches - don't change it!)
       if (restaurantController.restaurant?.id == restaurantId) {
         return restaurantController.restaurant;
       }
@@ -488,28 +486,17 @@ class CartController extends GetxController implements GetxService {
         return cached;
       }
 
-      // NOT in cache - fetch it asynchronously (don't block)
-      // Use a guard to prevent duplicate fetches and infinite loops
-      if (!_fetchingRestaurants.contains(restaurantId)) {
-        _fetchingRestaurants.add(restaurantId);
-        restaurantController.loadRestaurant(restaurantId).then((_) {
-          _fetchingRestaurants.remove(restaurantId);
-          // Just update UI, don't re-group (that would cause infinite recursion)
-          update();
-        }).catchError((e) {
-          _fetchingRestaurants.remove(restaurantId);
-          debugPrint('Failed to fetch restaurant $restaurantId: $e');
-        });
-      }
+      // NOT in cache - DO NOT call loadRestaurant() as that changes the current restaurant
+      // and causes navigation bugs. Just use placeholder with product's restaurant name.
     } catch (e) {
       debugPrint('RestaurantController not found: $e');
     }
 
-    // Return minimal placeholder while loading
+    // Return minimal placeholder - sufficient for cart display
     return Restaurant(
       id: restaurantId,
       name: cartItem.product!.restaurantName ?? 'Restaurant',
-      logoFullUrl: '',  // Empty until loaded
+      logoFullUrl: '',  // Logo will show when user navigates to restaurant
       coverPhotoFullUrl: '',
       address: '',
       latitude: '',
