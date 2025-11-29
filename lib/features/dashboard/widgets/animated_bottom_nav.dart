@@ -19,44 +19,54 @@ class AnimatedBottomNav extends StatefulWidget {
 }
 
 class _AnimatedBottomNavState extends State<AnimatedBottomNav>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late AnimationController _hideController;
+  late AnimationController _springController;
   late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<double> _blurAnimation;
   late Animation<double> _rotateAnimation;
+  late Animation<double> _opacityAnimation;
+  late Animation<double> _springAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    _hideController = AnimationController(
       vsync: this,
       duration: widget.duration,
     );
 
+    _springController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
     // Start at shown state (value = 0 means visible, value = 1 means hidden)
-    _controller.value = widget.isVisible ? 0.0 : 1.0;
+    _hideController.value = widget.isVisible ? 0.0 : 1.0;
+    // Spring starts "completed" so multiply doesn't affect initial state
+    _springController.value = 1.0;
 
     _setupAnimations();
   }
 
   void _setupAnimations() {
-    // Slide: 0 -> shifts down outside screen (using percentage of height)
+    // Slide: 0 -> shifts down outside screen
     _slideAnimation = Tween<double>(
       begin: 0.0,
-      end: 1.5, // 150% of widget height to ensure it's fully off screen
+      end: 1.5,
     ).animate(CurvedAnimation(
-      parent: _controller,
+      parent: _hideController,
       curve: Curves.easeInOutCubic,
     ));
 
-    // Scale: 1.0 -> 0.6
+    // Scale: 1.0 -> 0.6 (for hiding)
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.6,
     ).animate(CurvedAnimation(
-      parent: _controller,
+      parent: _hideController,
       curve: Curves.easeInOutCubic,
     ));
 
@@ -65,18 +75,50 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
       begin: 0.0,
       end: 4.0,
     ).animate(CurvedAnimation(
-      parent: _controller,
+      parent: _hideController,
       curve: Curves.easeInOutCubic,
     ));
 
-    // Rotate: 0 -> 15 degrees (converted to radians)
+    // Rotate: 0 -> 15 degrees
     _rotateAnimation = Tween<double>(
       begin: 0.0,
-      end: 15.0 * math.pi / 180, // 15 degrees in radians
+      end: 15.0 * math.pi / 180,
     ).animate(CurvedAnimation(
-      parent: _controller,
+      parent: _hideController,
       curve: Curves.easeInOutCubic,
     ));
+
+    // Opacity: 1.0 -> 0.7
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.7,
+    ).animate(CurvedAnimation(
+      parent: _hideController,
+      curve: Curves.easeInOutCubic,
+    ));
+
+    // Spring bounce: overshoot then settle back to 1.0 (only for showing)
+    _springAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.04),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.04, end: 0.98)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.01)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.01, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
+      ),
+    ]).animate(_springController);
   }
 
   @override
@@ -85,46 +127,60 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
 
     if (oldWidget.isVisible != widget.isVisible) {
       if (widget.isVisible) {
-        _controller.reverse(); // Animate to visible (value -> 0)
+        // Showing: reverse hide animation, start spring at 300ms
+        _hideController.reverse();
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            _springController.forward(from: 0.0);
+          }
+        });
       } else {
-        _controller.forward(); // Animate to hidden (value -> 1)
+        // Hiding: just run hide animation
+        _hideController.forward();
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _hideController.dispose();
+    _springController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: Listenable.merge([_hideController, _springController]),
       builder: (context, child) {
-        // Don't render at all when fully hidden to save resources
-        if (_controller.value == 1.0) {
+        // Don't render at all when fully hidden
+        if (_hideController.value == 1.0) {
           return const SizedBox.shrink();
         }
 
-        return Transform.translate(
-          offset: Offset(0, _slideAnimation.value * 100), // Slide down
-          child: Transform.scale(
-            scale: _scaleAnimation.value,
-            alignment: Alignment.bottomCenter,
-            child: Transform.rotate(
-              angle: _rotateAnimation.value,
+        // Combine scale from hide animation with spring bounce
+        final scaleValue = _scaleAnimation.value * _springAnimation.value;
+
+        return Opacity(
+          opacity: _opacityAnimation.value,
+          child: Transform.translate(
+            offset: Offset(0, _slideAnimation.value * 100),
+            child: Transform.scale(
+              scale: scaleValue,
               alignment: Alignment.bottomCenter,
-              child: _blurAnimation.value > 0.01
-                  ? ImageFiltered(
-                      imageFilter: ImageFilter.blur(
-                        sigmaX: _blurAnimation.value,
-                        sigmaY: _blurAnimation.value,
-                      ),
-                      child: child,
-                    )
-                  : child,
+              child: Transform.rotate(
+                angle: _rotateAnimation.value,
+                alignment: Alignment.bottomCenter,
+                child: _blurAnimation.value > 0.01
+                    ? ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: _blurAnimation.value,
+                          sigmaY: _blurAnimation.value,
+                        ),
+                        child: child,
+                      )
+                    : child,
+              ),
             ),
           ),
         );
@@ -133,3 +189,4 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
     );
   }
 }
+
