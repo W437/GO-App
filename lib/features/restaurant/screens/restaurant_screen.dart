@@ -996,9 +996,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
         return GetBuilder<CouponController>(builder: (couponController) {
           return GetBuilder<CategoryController>(builder: (categoryController) {
 
-            // Always use widget.restaurant as primary source (correct restaurant)
-            // Controller data is only used for additional details after loading
-            final Restaurant activeRestaurant = widget.restaurant!;
+            // Use loaded controller data if it matches current restaurant
+            // Otherwise use widget.restaurant (during loading or mismatch)
+            final Restaurant activeRestaurant =
+                (restController.restaurant?.id == widget.restaurant?.id && restController.restaurant != null)
+                ? restController.restaurant!  // Full data from API
+                : widget.restaurant!;         // Minimal data during loading
 
             bool hasCoupon = (couponController.couponList!= null && couponController.couponList!.isNotEmpty);
 
@@ -1135,10 +1138,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-                                // NEW: Always use widget.restaurant (current navigation target)
+                                // Use loaded data if available, otherwise widget parameter
                                 child: BlurhashImageWidget(
-                                  imageUrl: widget.restaurant!.logoFullUrl ?? '',
-                                  blurhash: widget.restaurant!.logoBlurhash,
+                                  imageUrl: activeRestaurant.logoFullUrl ?? '',
+                                  blurhash: activeRestaurant.logoBlurhash,
                                   fit: BoxFit.cover,
                                 ),
                               ),
