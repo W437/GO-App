@@ -8,29 +8,44 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
 /// Expandable Quantity Badge
-/// Collapsed: Shows just the quantity number
-/// Expanded: Shows [- button] [quantity] [+ button]
-/// Smoothly animates between states
+/// Collapsed: Shows quantity circle (e.g. "3x")
+/// Expanded: Shows [Delete] [- qty +] with product title on right
 class ExpandableQuantityBadge extends StatefulWidget {
   final CartModel cart;
   final int cartIndex;
+  final ValueChanged<bool>? onExpandedChanged;
 
   const ExpandableQuantityBadge({
     super.key,
     required this.cart,
     required this.cartIndex,
+    this.onExpandedChanged,
   });
 
   @override
-  State<ExpandableQuantityBadge> createState() => _ExpandableQuantityBadgeState();
+  State<ExpandableQuantityBadge> createState() => ExpandableQuantityBadgeState();
 }
 
-class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
+class ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
     with TickerProviderStateMixin {
   bool _isExpanded = false;
   Timer? _autoCollapseTimer;
 
   static const double _badgeSize = 36;
+  static const double _buttonSize = 32;
+
+  bool get isExpanded => _isExpanded;
+
+  @override
+  void didUpdateWidget(ExpandableQuantityBadge oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset expanded state if cart item changed
+    if (oldWidget.cart.product?.id != widget.cart.product?.id ||
+        oldWidget.cartIndex != widget.cartIndex) {
+      _autoCollapseTimer?.cancel();
+      _isExpanded = false;
+    }
+  }
 
   @override
   void dispose() {
@@ -38,7 +53,7 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
     super.dispose();
   }
 
-  void _toggle() {
+  void toggle() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -47,20 +62,29 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
         _autoCollapseTimer?.cancel();
       }
     });
+    widget.onExpandedChanged?.call(_isExpanded);
+  }
+
+  void collapse() {
+    if (_isExpanded) {
+      setState(() {
+        _isExpanded = false;
+        _autoCollapseTimer?.cancel();
+      });
+      widget.onExpandedChanged?.call(false);
+    }
   }
 
   void _startAutoCollapseTimer() {
     _autoCollapseTimer?.cancel();
-    _autoCollapseTimer = Timer(const Duration(milliseconds: 1500), () {
+    _autoCollapseTimer = Timer(const Duration(milliseconds: 3000), () {
       if (_isExpanded && mounted) {
-        setState(() {
-          _isExpanded = false;
-        });
+        collapse();
       }
     });
   }
 
-  void _onQuantityChanged() {
+  void _resetAutoCollapseTimer() {
     if (_isExpanded) {
       _startAutoCollapseTimer();
     }
@@ -73,99 +97,153 @@ class _ExpandableQuantityBadgeState extends State<ExpandableQuantityBadge>
         final quantity = widget.cart.quantity ?? 1;
         final theme = Theme.of(context);
 
-        return GestureDetector(
-          onTap: _isExpanded ? null : _toggle,
-          child: Container(
-            width: _badgeSize,
-            height: _badgeSize,
-            decoration: BoxDecoration(
-              color: theme.disabledColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(_badgeSize / 2),
-            ),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              child: _isExpanded
-                  ? Column(
-                      key: const ValueKey('expanded'),
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Plus button (top)
-                        _buildCompactButton(
-                          icon: Icons.add,
-                          enabled: true,
-                          onTap: () {
-                            _onQuantityChanged();
-                            cartController.setQuantity(
-                              true,
-                              widget.cart,
-                              cartIndex: widget.cartIndex,
-                            );
-                          },
-                          color: theme.primaryColor,
-                        ),
-                        // Quantity
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 1),
-                          child: Text(
-                            '$quantity',
-                            style: robotoBold.copyWith(
-                              fontSize: 10,
-                              color: theme.primaryColor,
-                            ),
-                          ),
-                        ),
-                        // Minus button (bottom)
-                        _buildCompactButton(
-                          icon: Icons.remove,
-                          enabled: quantity > 1,
-                          onTap: quantity > 1
-                              ? () {
-                                  _onQuantityChanged();
-                                  cartController.setQuantity(
-                                    false,
-                                    widget.cart,
-                                    cartIndex: widget.cartIndex,
-                                  );
-                                }
-                              : null,
-                          color: theme.primaryColor,
-                        ),
-                      ],
-                    )
-                  : Center(
-                      key: const ValueKey('collapsed'),
-                      child: Text(
-                        '${quantity}x',
-                        style: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeDefault,
-                          color: theme.primaryColor,
-                        ),
-                      ),
-                    ),
-            ),
-          ),
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.centerLeft,
+          child: _isExpanded
+              ? _buildExpandedControls(context, cartController, quantity, theme)
+              : _buildCollapsedBadge(context, quantity, theme),
         );
       },
     );
   }
 
-  Widget _buildCompactButton({
-    required IconData icon,
-    required bool enabled,
-    required VoidCallback? onTap,
-    required Color color,
-  }) {
-    final Color baseColor = enabled ? color : color.withValues(alpha: 0.3);
-
+  Widget _buildCollapsedBadge(BuildContext context, int quantity, ThemeData theme) {
     return GestureDetector(
-      onTap: enabled ? onTap : null,
-      behavior: HitTestBehavior.opaque,
-      child: Icon(
-        icon,
-        size: 12,
-        color: baseColor,
+      onTap: toggle,
+      child: Container(
+        width: _badgeSize,
+        height: _badgeSize,
+        decoration: BoxDecoration(
+          color: theme.disabledColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(_badgeSize / 2),
+        ),
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '$quantity',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: theme.primaryColor,
+                  ),
+                ),
+                TextSpan(
+                  text: 'x',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: theme.hintColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildExpandedControls(
+    BuildContext context,
+    CartController cartController,
+    int quantity,
+    ThemeData theme,
+  ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Delete button
+        GestureDetector(
+          onTap: () {
+            cartController.removeFromCart(widget.cartIndex);
+          },
+          child: Container(
+            width: _buttonSize,
+            height: _buttonSize,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.error.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(_buttonSize / 2),
+            ),
+            child: Icon(
+              Icons.delete_outline,
+              size: 18,
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Quantity controls: [- qty +]
+        Container(
+          height: _buttonSize,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: theme.disabledColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(_buttonSize / 2),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Minus
+              GestureDetector(
+                onTap: quantity > 1
+                    ? () {
+                        _resetAutoCollapseTimer();
+                        cartController.setQuantity(
+                          false,
+                          widget.cart,
+                          cartIndex: widget.cartIndex,
+                        );
+                      }
+                    : null,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(
+                    Icons.remove,
+                    size: 16,
+                    color: quantity > 1
+                        ? theme.primaryColor
+                        : theme.disabledColor,
+                  ),
+                ),
+              ),
+              // Quantity with animated text
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: AnimatedTextTransition(
+                  value: quantity,
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: theme.primaryColor,
+                  ),
+                ),
+              ),
+              // Plus
+              GestureDetector(
+                onTap: () {
+                  _resetAutoCollapseTimer();
+                  cartController.setQuantity(
+                    true,
+                    widget.cart,
+                    cartIndex: widget.cartIndex,
+                  );
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(
+                    Icons.add,
+                    size: 16,
+                    color: theme.primaryColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

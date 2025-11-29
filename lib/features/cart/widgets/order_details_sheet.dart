@@ -2,10 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
+import 'package:godelivery_user/common/widgets/adaptive/dialogs/confirmation_dialog_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_sheet.dart';
 import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
-import 'package:godelivery_user/features/cart/widgets/order_item_widget.dart';
+import 'package:godelivery_user/features/cart/widgets/animated_order_items_list.dart';
 import 'package:godelivery_user/features/cart/widgets/cart_suggested_item_view_widget.dart';
 import 'package:godelivery_user/features/cart/widgets/checkout_button_widget.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
@@ -14,6 +15,7 @@ import 'package:godelivery_user/helper/converters/date_converter.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
+import 'package:godelivery_user/util/images.dart';
 import 'package:godelivery_user/util/styles.dart';
 
 /// Order Details Sheet - Full-screen sheet showing one restaurant's cart
@@ -414,31 +416,18 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                 children: [
                   // Delete all button - only show when restaurant is closed
                   if (!isRestaurantOpen)
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: cartController.isClearCartLoading ? null : () => cartController.clearCartOnline(),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          child: cartController.isClearCartLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).colorScheme.error,
-                                    ),
-                                  ),
-                                )
-                              : Icon(
-                                  CupertinoIcons.trash,
-                                  size: 20,
-                                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
-                                ),
-                        ),
-                      ),
+                    CustomButtonWidget(
+                      expand: false,
+                      icon: CupertinoIcons.trash,
+                      iconSize: 18,
+                      isCircular: true,
+                      width: 32,
+                      height: 32,
+                      transparent: true,
+                      iconColor: Theme.of(context).colorScheme.error,
+                      color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                      isLoading: cartController.isClearCartLoading,
+                      onPressed: () => _showClearCartConfirmation(context, cartController),
                     ),
                   if (!isRestaurantOpen)
                     const SizedBox(width: Dimensions.paddingSizeExtraSmall),
@@ -447,7 +436,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     expand: false,
                     buttonText: '+ Add more',
                     onPressed: () {
-                      if (isRestaurantOpen && cartController.cartList.isNotEmpty) {
+                      if (cartController.cartList.isNotEmpty) {
                         Get.toNamed(
                           RouteHelper.getRestaurantRoute(
                             cartController.cartList[0].product!.restaurantId,
@@ -471,20 +460,22 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
             ],
           ),
           const SizedBox(height: Dimensions.paddingSizeSmall),
-          Column(
-            children: List.generate(
-              cartController.cartList.length,
-              (index) {
-                return OrderItemWidget(
-                  cart: cartController.cartList[index],
-                  cartIndex: index,
-                  addOns: cartController.addOnsList[index],
-                );
-              },
-            ),
-          ),
+          const AnimatedOrderItemsList(),
         ],
       ),
+    );
+  }
+
+  void _showClearCartConfirmation(BuildContext context, CartController cartController) {
+    Get.dialog(
+      ConfirmationDialogWidget(
+        icon: Images.support,
+        description: 'Are you sure you want to remove all items from your cart?',
+        onYesPressed: () {
+          cartController.clearCartOnline();
+        },
+      ),
+      useSafeArea: false,
     );
   }
 }

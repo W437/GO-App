@@ -40,7 +40,9 @@ class PrimaryBadgeWidget extends StatelessWidget {
           ],
           Text(
             '$value',
-            style: robotoMedium.copyWith(
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w500,
               fontSize: fontSize,
               color: Colors.black,
               height: 1.2,

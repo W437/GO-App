@@ -15,9 +15,9 @@ import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
 
 /// Order Item Widget - Simplified cart item display for order review
-/// Layout: [Qty Pill] [Name + Description + Price] [Image]
-/// Badge expands → pushes entire layout → image slides off-screen
-class OrderItemWidget extends StatelessWidget {
+/// Collapsed: [Qty Badge] [Name + Price] [Image]
+/// Expanded: [Delete] [- qty +] [spacer] [Product Title] [Image]
+class OrderItemWidget extends StatefulWidget {
   final CartModel cart;
   final int cartIndex;
   final List<AddOns> addOns;
@@ -30,11 +30,34 @@ class OrderItemWidget extends StatelessWidget {
   });
 
   @override
+  State<OrderItemWidget> createState() => _OrderItemWidgetState();
+}
+
+class _OrderItemWidgetState extends State<OrderItemWidget> {
+  bool _isExpanded = false;
+
+  @override
+  void didUpdateWidget(OrderItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset expanded state if cart item changed
+    if (oldWidget.cart.product?.id != widget.cart.product?.id ||
+        oldWidget.cartIndex != widget.cartIndex) {
+      _isExpanded = false;
+    }
+  }
+
+  void _onExpandedChanged(bool expanded) {
+    setState(() {
+      _isExpanded = expanded;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String addOnText = CartHelper.setupAddonsText(cart: cart) ?? '';
-    String variationText = CartHelper.setupVariationText(cart: cart);
-    double? discount = cart.product!.discount;
-    String? discountType = cart.product!.discountType;
+    String addOnText = CartHelper.setupAddonsText(cart: widget.cart) ?? '';
+    String variationText = CartHelper.setupVariationText(cart: widget.cart);
+    double? discount = widget.cart.product!.discount;
+    String? discountType = widget.cart.product!.discountType;
     final Color accent = Theme.of(context).primaryColor;
     final double lineTotal = _calculateLineTotal(
       discount: discount,
@@ -42,7 +65,7 @@ class OrderItemWidget extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: () => _navigateToProductInRestaurant(context),
+      onTap: _isExpanded ? null : () => _navigateToProductInRestaurant(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
         padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -60,75 +83,37 @@ class OrderItemWidget extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Quantity badge (clickable)
+            // Quantity badge / Edit controls
             ExpandableQuantityBadge(
-              cart: cart,
-              cartIndex: cartIndex,
+              cart: widget.cart,
+              cartIndex: widget.cartIndex,
+              onExpandedChanged: _onExpandedChanged,
             ),
             const SizedBox(width: Dimensions.paddingSizeSmall),
 
-            // Item Info
+            // Item Info (fades out when expanded) / Product title (fades in when expanded)
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cart.product!.name ?? '',
-                    style: robotoMedium.copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-
-                  Text(
-                    PriceConverter.convertPrice(lineTotal),
-                    style: robotoMedium.copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
-                      color: accent,
-                    ),
-                    textDirection: TextDirection.ltr,
-                  ),
-
-                  if (variationText.isNotEmpty || addOnText.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    if (variationText.isNotEmpty)
-                      Text(
-                        variationText,
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeSmall,
-                          color: Theme.of(context).hintColor,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (addOnText.isNotEmpty)
-                      Text(
-                        addOnText,
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeSmall,
-                          color: Theme.of(context).hintColor,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ],
+              child: AnimatedCrossFade(
+                duration: const Duration(milliseconds: 200),
+                crossFadeState: _isExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                firstChild: _buildProductInfo(context, accent, lineTotal, variationText, addOnText),
+                secondChild: _buildExpandedTitle(context),
               ),
             ),
             const SizedBox(width: Dimensions.paddingSizeSmall),
 
             // Image
-            if (cart.product!.imageFullUrl != null)
+            if (widget.cart.product!.imageFullUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                 child: SizedBox(
                   width: 72,
                   height: 72,
                   child: BlurhashImageWidget(
-                    imageUrl: cart.product!.imageFullUrl!,
-                    blurhash: cart.product!.imageBlurhash,
+                    imageUrl: widget.cart.product!.imageFullUrl!,
+                    blurhash: widget.cart.product!.imageBlurhash,
                     fit: BoxFit.cover,
                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                   ),
@@ -140,24 +125,94 @@ class OrderItemWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildProductInfo(
+    BuildContext context,
+    Color accent,
+    double lineTotal,
+    String variationText,
+    String addOnText,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.cart.product!.name ?? '',
+          style: robotoMedium.copyWith(
+            fontSize: Dimensions.fontSizeDefault,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          PriceConverter.convertPrice(lineTotal),
+          style: robotoMedium.copyWith(
+            fontSize: Dimensions.fontSizeDefault,
+            color: accent,
+          ),
+          textDirection: TextDirection.ltr,
+        ),
+        if (variationText.isNotEmpty || addOnText.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          if (variationText.isNotEmpty)
+            Text(
+              variationText,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeSmall,
+                color: Theme.of(context).hintColor,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          if (addOnText.isNotEmpty)
+            Text(
+              addOnText,
+              style: robotoRegular.copyWith(
+                fontSize: Dimensions.fontSizeSmall,
+                color: Theme.of(context).hintColor,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildExpandedTitle(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Text(
+        widget.cart.product!.name ?? '',
+        style: robotoMedium.copyWith(
+          fontSize: Dimensions.fontSizeSmall,
+          color: Theme.of(context).hintColor,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.right,
+      ),
+    );
+  }
+
   double _calculateLineTotal({double? discount, String? discountType}) {
-    final int quantity = cart.quantity ?? 1;
+    final int quantity = widget.cart.quantity ?? 1;
 
     // Base price with discount applied per item
     final double unitPrice = PriceConverter.convertWithDiscount(
-          cart.product!.price!,
+          widget.cart.product!.price!,
           discount,
           discountType,
         ) ??
-        cart.product!.price!;
+        widget.cart.product!.price!;
     double total = unitPrice * quantity;
 
     // Variation price (per selected option * quantity)
-    if (cart.product?.variations != null && cart.variations != null) {
-      final int variationGroupCount = min(cart.product!.variations!.length, cart.variations!.length);
+    if (widget.cart.product?.variations != null && widget.cart.variations != null) {
+      final int variationGroupCount = min(widget.cart.product!.variations!.length, widget.cart.variations!.length);
       for (int group = 0; group < variationGroupCount; group++) {
-        final variation = cart.product!.variations![group];
-        final selections = cart.variations![group];
+        final variation = widget.cart.product!.variations![group];
+        final selections = widget.cart.variations![group];
         if (variation.variationValues == null || selections == null) continue;
 
         final int optionCount = min(variation.variationValues!.length, selections.length);
@@ -170,9 +225,9 @@ class OrderItemWidget extends StatelessWidget {
     }
 
     // Add-ons price (stored quantity is already absolute)
-    if (cart.addOnIds != null && cart.product?.addOns != null) {
-      for (final addOnId in cart.addOnIds!) {
-        final addOn = cart.product!.addOns!.firstWhereOrNull((element) => element.id == addOnId.id);
+    if (widget.cart.addOnIds != null && widget.cart.product?.addOns != null) {
+      for (final addOnId in widget.cart.addOnIds!) {
+        final addOn = widget.cart.product!.addOns!.firstWhereOrNull((element) => element.id == addOnId.id);
         if (addOn != null) {
           total += (addOn.price ?? 0) * (addOnId.quantity ?? 1);
         }
@@ -183,18 +238,18 @@ class OrderItemWidget extends StatelessWidget {
   }
 
   void _navigateToProductInRestaurant(BuildContext context) {
-    if (cart.product?.restaurantId == null || cart.product?.id == null) {
+    if (widget.cart.product?.restaurantId == null || widget.cart.product?.id == null) {
       return;
     }
 
     Get.toNamed(
       RouteHelper.getRestaurantRoute(
-        cart.product!.restaurantId,
-        scrollToProductId: cart.product!.id,
+        widget.cart.product!.restaurantId,
+        scrollToProductId: widget.cart.product!.id,
       ),
       arguments: RestaurantScreen(
-        restaurant: Restaurant(id: cart.product!.restaurantId),
-        scrollToProductId: cart.product!.id,
+        restaurant: Restaurant(id: widget.cart.product!.restaurantId),
+        scrollToProductId: widget.cart.product!.id,
       ),
     );
   }
