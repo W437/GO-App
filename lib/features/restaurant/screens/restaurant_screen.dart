@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,12 +13,12 @@ import 'package:godelivery_user/features/cart/controllers/cart_controller.dart';
 import 'package:godelivery_user/features/category/controllers/category_controller.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:godelivery_user/features/restaurant/widgets/restaurant_details_section_widget.dart';
-import 'package:godelivery_user/features/restaurant/widgets/restaurant_info_section_widget.dart';
-import 'package:godelivery_user/features/restaurant/widgets/restaurant_logo_widget.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_product_horizontal_card.dart';
 import 'package:godelivery_user/features/restaurant/widgets/restaurant_sticky_header_widget.dart';
+import 'package:godelivery_user/features/restaurant/widgets/restaurant_details_section_widget.dart';
 import 'package:godelivery_user/features/restaurant/mixins/restaurant_scroll_mixin.dart';
+import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
+import 'package:godelivery_user/features/restaurant/widgets/restaurant_app_bar_widget.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -54,15 +55,14 @@ class _RestaurantScreenState extends State<RestaurantScreen>
   @override
   Map<int, GlobalKey> get categorySectionKeys => _categorySectionKeys;
 
-  // Logo state (uses constants from RestaurantScrollMixin)
-  final GlobalKey<RestaurantLogoWidgetState> _logoKey = GlobalKey<RestaurantLogoWidgetState>();
-  double _logoTopPosition = RestaurantScrollMixin.expandedHeight -
-      (RestaurantScrollMixin.logoSize / 2) +
-      RestaurantScrollMixin.logoCenterOffset;
-  double _logoOpacity = 1.0;
-  double _logoScale = 1.0;
+  // Logo state
+  late AnimationController _logoBounceController;
+  late Animation<double> _logoBounceAnimation;
   bool _hasBouncedOnReturn = false;
   double _previousScrollOffset = 0.0;
+  double _scrollOffset = 0.0;
+  double _logoOpacity = 1.0;
+  double _logoScale = 1.0;
 
   // Cart widget animation delay
   bool _showCartWidget = false;
@@ -73,6 +73,35 @@ class _RestaurantScreenState extends State<RestaurantScreen>
   void initState() {
     super.initState();
     scrollController.addListener(_onScroll);
+
+    // Initialize logo bounce animation
+    _logoBounceController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _logoBounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.12)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.12, end: 0.98)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.02)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 20,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
+      ),
+    ]).animate(_logoBounceController);
 
     // Initialize cart visibility based on current state
     _initCartVisibility();
@@ -135,6 +164,7 @@ class _RestaurantScreenState extends State<RestaurantScreen>
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     _cartWidgetTimer?.cancel();
+    _logoBounceController.dispose();
 
     // Remove cart listener
     Get.find<CartController>().removeListener(_onCartChanged);
@@ -207,10 +237,7 @@ class _RestaurantScreenState extends State<RestaurantScreen>
 
     // Update logo position, opacity, and scale
     setState(() {
-      _logoTopPosition = (RestaurantScrollMixin.expandedHeight -
-              (RestaurantScrollMixin.logoSize / 2) +
-              RestaurantScrollMixin.logoCenterOffset) -
-          offset;
+      _scrollOffset = offset.clamp(0.0, double.infinity);
 
       final double animationOffset = (offset - animationThreshold).clamp(0.0, animationRange);
       _logoOpacity = (1.0 - (animationOffset / animationRange)).clamp(0.0, 1.0);
@@ -223,7 +250,7 @@ class _RestaurantScreenState extends State<RestaurantScreen>
 
     if (isScrollingUp && isAtTop && !_hasBouncedOnReturn) {
       _hasBouncedOnReturn = true;
-      _logoKey.currentState?.triggerBounce();
+      _logoBounceController.forward(from: 0.0);
     } else if (!isAtTop) {
       _hasBouncedOnReturn = false;
     }
@@ -496,14 +523,149 @@ class _RestaurantScreenState extends State<RestaurantScreen>
     ];
   }
 
+  /// Build the stretchable header with cover image (logo is separate overlay)
+  Widget _buildStretchableHeader(BuildContext context, Restaurant restaurant, RestaurantController restController) {
+    return SliverAppBar(
+      expandedHeight: RestaurantScrollMixin.expandedHeight,
+      toolbarHeight: kToolbarHeight,
+      pinned: true, // Keep the app bar pinned for back button visibility
+      floating: false,
+      stretch: true,
+      elevation: 0,
+      backgroundColor: Theme.of(context).cardColor,
+      automaticallyImplyLeading: false,
+      leading: const SizedBox(),
+      leadingWidth: 0,
+      stretchTriggerOffset: 100,
+      // Pinned title bar with back button, search, and favorite
+      title: RestaurantAppBarWidget(
+        restController: restController,
+        restaurant: restaurant,
+        scrollOffset: _scrollOffset,
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [
+          StretchMode.zoomBackground,
+          StretchMode.fadeTitle,
+        ],
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Clear image (bottom layer)
+            BlurhashImageWidget(
+              imageUrl: restaurant.coverPhotoFullUrl ?? '',
+              blurhash: restaurant.coverPhotoBlurhash,
+              fit: BoxFit.cover,
+            ),
+
+            // Blurred image with gradient mask (blur at bottom)
+            ShaderMask(
+              shaderCallback: (rect) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black,
+                  ],
+                  stops: [0.4, 1.0],
+                ).createShader(rect);
+              },
+              blendMode: BlendMode.dstIn,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: BlurhashImageWidget(
+                  imageUrl: restaurant.coverPhotoFullUrl ?? '',
+                  blurhash: restaurant.coverPhotoBlurhash,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            // Top gradient overlay for readability
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.6),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.6],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build the floating logo that sits on top of everything
+  Widget _buildFloatingLogo(BuildContext context, Restaurant restaurant) {
+    return Positioned(
+      top: RestaurantScrollMixin.expandedHeight - (RestaurantScrollMixin.logoSize / 2) + RestaurantScrollMixin.logoCenterOffset - _scrollOffset,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        ignoring: _logoOpacity < 0.3,
+        child: Center(
+          child: Opacity(
+            opacity: _logoOpacity,
+            child: AnimatedBuilder(
+              animation: _logoBounceAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _logoScale * _logoBounceAnimation.value,
+                  child: child,
+                );
+              },
+              child: GestureDetector(
+                onTap: () => _logoBounceController.forward(from: 0.0),
+                child: Container(
+                  height: RestaurantScrollMixin.logoSize,
+                  width: RestaurantScrollMixin.logoSize,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      width: 2.0,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(149, 157, 165, 0.2),
+                        blurRadius: 24,
+                        spreadRadius: 0,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                    child: BlurhashImageWidget(
+                      imageUrl: restaurant.logoFullUrl ?? '',
+                      blurhash: restaurant.logoBlurhash,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
-          appBar: isDesktop ? WebMenuBar(fromDineIn: widget.fromDineIn) : null,
-
-          backgroundColor: Theme.of(context).cardColor,
-          body: GetBuilder<RestaurantController>(builder: (restController) {
+      appBar: isDesktop ? WebMenuBar(fromDineIn: widget.fromDineIn) : null,
+      backgroundColor: Theme.of(context).cardColor,
+      body: GetBuilder<RestaurantController>(builder: (restController) {
         return GetBuilder<CouponController>(builder: (couponController) {
           return GetBuilder<CategoryController>(builder: (categoryController) {
 
@@ -512,171 +674,153 @@ class _RestaurantScreenState extends State<RestaurantScreen>
                                                 restController.getCachedRestaurant(widget.restaurantId) ??
                                                 Restaurant(id: widget.restaurantId);
 
-            bool hasCoupon = (couponController.couponList!= null && couponController.couponList!.isNotEmpty);
-
             // Check if menu sections data exists
             final bool hasProductsData = restController.visibleMenuSections != null &&
                                           restController.visibleMenuSections!.isNotEmpty &&
                                           !restController.isTransitioning;
 
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    controller: scrollController,
-                    clipBehavior: Clip.none,
-                    slivers: [
-                      // Cover Image & App Bar
-                      RestaurantInfoSectionWidget(
-                        restaurant: activeRestaurant,
-                        restController: restController,
-                        hasCoupon: hasCoupon,
-                        scrollOffset: scrollController.hasClients ? scrollController.offset : 0.0,
-                      ),
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Main scrollable content
+                CustomScrollView(
+                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                  controller: scrollController,
+                  slivers: [
+                    // 1. Stretchable Cover Image
+                    _buildStretchableHeader(context, activeRestaurant, restController),
 
-                      // Restaurant Details (Card overlay effect)
-                      RestaurantDetailsSectionWidget(
-                        restaurant: activeRestaurant,
-                        restController: restController,
-                      ),
+                    // 2. Restaurant Details Section
+                    RestaurantDetailsSectionWidget(
+                      restaurant: activeRestaurant,
+                      restController: restController,
+                    ),
 
-                      // Sticky section header (shows immediately when metadata loads)
-                      if (restController.isUsingSections)
-                        SliverAppBar(
-                          pinned: true,
-                          primary: false,
-                          automaticallyImplyLeading: false,
-                          backgroundColor: Theme.of(context).cardColor,
-                          elevation: 0,
-                          toolbarHeight: RestaurantScrollMixin.categoryBarHeight + 1,
-                          titleSpacing: 0,
-                          title: Column(
-                            children: [
-                              SizedBox(
-                                height: RestaurantScrollMixin.categoryBarHeight,
-                                child: RestaurantStickyHeaderWidget(
-                                  restController: restController,
-                                  activeSectionId: restController.activeSectionId,
-                                  onSectionSelected: _handleSectionTap,
-                                ),
+                    // 3. Sticky section header (shows immediately when metadata loads)
+                    if (restController.isUsingSections)
+                      SliverAppBar(
+                        pinned: true,
+                        primary: false,
+                        automaticallyImplyLeading: false,
+                        backgroundColor: Theme.of(context).cardColor,
+                        elevation: 0,
+                        toolbarHeight: RestaurantScrollMixin.categoryBarHeight + 1,
+                        titleSpacing: 0,
+                        title: Column(
+                          children: [
+                            SizedBox(
+                              height: RestaurantScrollMixin.categoryBarHeight,
+                              child: RestaurantStickyHeaderWidget(
+                                restController: restController,
+                                activeSectionId: restController.activeSectionId,
+                                onSectionSelected: _handleSectionTap,
                               ),
-                              Container(
-                                height: 1,
-                                color: Colors.black.withValues(alpha: 0.06),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Container(
+                              height: 1,
+                              color: Colors.black.withValues(alpha: 0.06),
+                            ),
+                          ],
                         ),
+                      ),
 
-                  // 3. Content (Menu or Search Results)
-                  SliverToBoxAdapter(
-                    child: FooterViewWidget(
-                      child: Center(
-                        child: Container(
-                          width: Dimensions.webMaxWidth,
-                          padding: const EdgeInsets.only(
-                            top: Dimensions.paddingSizeLarge,
-                            bottom: Dimensions.paddingSizeExtraLarge,
+                    // 4. Content (Menu or Search Results)
+                    SliverToBoxAdapter(
+                      child: FooterViewWidget(
+                        child: Center(
+                          child: Container(
+                            width: Dimensions.webMaxWidth,
+                            padding: const EdgeInsets.only(
+                              top: Dimensions.paddingSizeLarge,
+                              bottom: Dimensions.paddingSizeExtraLarge,
+                            ),
+                            child: restController.isSearching
+                                ? _buildSearchResults(restController)
+                                : Column(
+                                    key: ValueKey('menu-${hasProductsData ? 'loaded' : 'loading'}'),
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: hasProductsData
+                                        ? _buildMenuSections(context, restController)
+                                        : _buildMenuShimmer(),
+                                  ),
                           ),
-                          child: restController.isSearching
-                              ? _buildSearchResults(restController)
-                              : Column(
-                                  key: ValueKey('menu-${hasProductsData ? 'loaded' : 'loading'}'),
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: hasProductsData
-                                      ? _buildMenuSections(context, restController)
-                                      : _buildMenuShimmer(),
-                                ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              // Restaurant Logo - Top Layer
-              RestaurantLogoWidget(
-                key: _logoKey,
-                imageUrl: activeRestaurant.logoFullUrl,
-                blurhash: activeRestaurant.logoBlurhash,
-                topPosition: _logoTopPosition,
-                opacity: _logoOpacity,
-                scale: _logoScale,
-              ),
-
-                ],
-              );
-            });
+                // Floating logo on top of everything
+                _buildFloatingLogo(context, activeRestaurant),
+              ],
+            );
           });
-        }),
-
+        });
+      }),
 
       bottomNavigationBar: GetBuilder<CartController>(builder: (cartController) {
-          // Check if cart has items for this restaurant (no side effects in build!)
-          final bool hasCartForThisRestaurant = cartController.cartList.isNotEmpty &&
-              cartController.cartList.first.product?.restaurantId == widget.restaurantId;
+        // Check if cart has items for this restaurant (no side effects in build!)
+        final bool hasCartForThisRestaurant = cartController.cartList.isNotEmpty &&
+            cartController.cartList.first.product?.restaurantId == widget.restaurantId;
 
-          final bool showCart = _showCartWidget && hasCartForThisRestaurant && !isDesktop;
+        final bool showCart = _showCartWidget && hasCartForThisRestaurant && !isDesktop;
 
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Gradient fade overlay - positioned above the cart
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: IgnorePointer(
-                  child: Container(
-                    height: 150,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Theme.of(context).cardColor.withValues(alpha: 0.0),
-                          Theme.of(context).cardColor,
-                        ],
-                        stops: const [0.0, 1.0],
-                      ),
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Gradient fade overlay - positioned above the cart
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: IgnorePointer(
+                child: Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context).cardColor.withValues(alpha: 0.0),
+                        Theme.of(context).cardColor,
+                      ],
+                      stops: const [0.0, 1.0],
                     ),
                   ),
                 ),
               ),
+            ),
 
-              // Cart widget
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  final offsetAnimation = Tween<Offset>(
-                    begin: const Offset(0.0, 1.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ));
+            // Cart widget
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                final offsetAnimation = Tween<Offset>(
+                  begin: const Offset(0.0, 1.0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                ));
 
-                  return SlideTransition(
-                    position: offsetAnimation,
-                    child: child,
-                  );
-                },
-                child: showCart
-                    ? BottomCartWidget(
-                        key: const ValueKey('cart-widget'),
-                        restaurantId: widget.restaurantId,
-                        fromDineIn: widget.fromDineIn,
-                      )
-                    : const SizedBox(key: ValueKey('empty-cart')),
-              ),
-            ],
-          );
-        })
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+              child: showCart
+                  ? BottomCartWidget(
+                      key: const ValueKey('cart-widget'),
+                      restaurantId: widget.restaurantId,
+                      fromDineIn: widget.fromDineIn,
+                    )
+                  : const SizedBox(key: ValueKey('empty-cart')),
+            ),
+          ],
+        );
+      })
     );
   }
 }
-
-
