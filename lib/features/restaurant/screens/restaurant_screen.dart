@@ -163,10 +163,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     // NEW: Clear stale data immediately when switching restaurants
     restController.prepareForNewRestaurant(widget.restaurant!.id!, notify: false);
 
-    // Trigger rebuild after current frame to show skeleton chips
+    // Reset scroll position to top when loading new restaurant
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && restController.isTransitioning) {
-        restController.update();
+      if (mounted) {
+        if (restController.isTransitioning) {
+          restController.update();
+        }
+        // Scroll to top to show cover/logo/info
+        if (scrollController.hasClients) {
+          scrollController.jumpTo(0);
+        }
       }
     });
 
