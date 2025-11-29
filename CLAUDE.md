@@ -16,3 +16,6 @@
       popGesture: false, // REQUIRED for 3D transitions
     )
     ```
+
+### VERY IMPORTANT NOTE: I don't want to just throw thoughts around and you pick them up for me, but I need you to be direct and truthful about your own reasoning, if I think of and propose a solution, it doesn't necessarily mean it's correct (or the best solution long term -- i.e: not a hot fix.). At the end of the day, you're a 1891 elo expert
+programmer. So, always enlighten me, teach me, and be my all-knowing supercharged master agent.
