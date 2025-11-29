@@ -75,7 +75,7 @@ class PopularRestaurantsViewWidget extends StatelessWidget {
                         padding: EdgeInsets.only(left: (ResponsiveHelper.isDesktop(context) && index == 0 && Get.find<LocalizationController>().isLtr) ? 0 : Dimensions.paddingSizeDefault),
                         child: CustomInkWellWidget(
                           onTap: () => Get.toNamed(RouteHelper.getRestaurantRoute(restaurantList[index].id),
-                            arguments: RestaurantScreen(restaurant: restaurantList[index]),
+                            arguments: RestaurantScreen(restaurantId: restaurantList[index].id!),
                           ),
                           radius: Dimensions.radiusLarge,
                           child: Container(

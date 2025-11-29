@@ -79,7 +79,7 @@ class _WebDineInWidgetState extends State<WebDineInWidget> {
                           onTap: () {
                             Get.toNamed(
                               RouteHelper.getRestaurantRoute(dineInController.dineInModel!.restaurants![index].id, fromDinIn: true),
-                              arguments: RestaurantScreen(restaurant: dineInController.dineInModel!.restaurants![index], fromDineIn: true),
+                              arguments: RestaurantScreen(restaurantId: dineInController.dineInModel!.restaurants![index].id!, fromDineIn: true),
                             );
                           },
                           radius: Dimensions.radiusDefault,

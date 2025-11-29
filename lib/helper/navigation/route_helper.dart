@@ -414,11 +414,9 @@ class RouteHelper {
         return getRoute(
           Get.arguments ??
               RestaurantScreen(
-                restaurant: Restaurant(
-                  id: Get.parameters['id'] != 'null' && Get.parameters['id'] != null
-                      ? int.parse(Get.parameters['id']!)
-                      : null,
-                ),
+                restaurantId: Get.parameters['id'] != 'null' && Get.parameters['id'] != null
+                    ? int.parse(Get.parameters['id']!)
+                    : 0,
                 slug: Get.parameters['slug'] ?? '',
                 fromDineIn: Get.parameters['from_dine_in'] == 'true',
               ),

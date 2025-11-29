@@ -8,7 +8,6 @@ import 'package:godelivery_user/features/home/domain/models/home_feed_model.dart
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/location/controllers/location_controller.dart';
 import 'package:godelivery_user/features/location/domain/models/zone_response_model.dart';
-import 'package:godelivery_user/features/restaurant/domain/models/cart_suggested_item_model.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/menu_sections_response.dart';
 import 'package:godelivery_user/features/restaurant/domain/models/recommended_product_model.dart';
 import 'package:godelivery_user/common/models/restaurant_model.dart';
@@ -48,6 +47,55 @@ class RestaurantController extends GetxController implements GetxService {
 
   bool get isTransitioning => _isTransitioning;
 
+  // === MENU NAVIGATION STATE ===
+  int? _activeSectionId;
+  int? get activeSectionId => _activeSectionId;
+
+  bool _isManualScrolling = false;
+  bool get isManualScrolling => _isManualScrolling;
+
+  void setActiveSectionId(int? id) {
+    if (_activeSectionId != id) {
+      _activeSectionId = id;
+      update();
+    }
+  }
+
+  void setManualScrolling(bool value) {
+    _isManualScrolling = value;
+  }
+
+  /// Get cached restaurant data from any loaded list (for optimistic UI)
+  Restaurant? getCachedRestaurant(int restaurantId) {
+    // Check currently loaded restaurant first
+    if (_restaurant?.id == restaurantId) return _restaurant;
+
+    // Search all cached restaurant lists
+    Restaurant? findInList(List<Restaurant>? list) {
+      return list?.firstWhereOrNull((r) => r.id == restaurantId);
+    }
+
+    return findInList(_restaurantModel?.restaurants)
+        ?? findInList(_popularRestaurantList)
+        ?? findInList(_latestRestaurantList)
+        ?? findInList(_recentlyViewedRestaurantList)
+        ?? findInList(_orderAgainRestaurantList)
+        ?? findInList(_homeFeedModel?.newRestaurants?.restaurants)
+        ?? findInList(_homeFeedModel?.popular?.restaurants);
+  }
+
+  /// Find section containing a product
+  MenuSection? findSectionForProduct(int productId) {
+    final sections = visibleMenuSections;
+    if (sections == null) return null;
+    for (final section in sections) {
+      if (section.products?.any((p) => p.id == productId) ?? false) {
+        return section;
+      }
+    }
+    return null;
+  }
+
   // Detect if switching to a different restaurant
   bool isNewRestaurant(int? restaurantId) {
     return _currentRestaurantId != restaurantId;
@@ -62,6 +110,11 @@ class RestaurantController extends GetxController implements GetxService {
       _menuSectionsMeta = null;
       _restaurantProducts = null;
       _currentRestaurantId = restaurantId;
+
+      // Clear navigation state
+      _activeSectionId = null;
+      _isManualScrolling = false;
+
       if (notify) {
         update(); // Trigger rebuild with cleared state
       }
@@ -72,6 +125,52 @@ class RestaurantController extends GetxController implements GetxService {
   void completeTransition() {
     _isTransitioning = false;
     update();
+  }
+
+  /// Load restaurant data (handles caching internally)
+  /// This is the single entry point for loading a restaurant - all caching logic is encapsulated here
+  Future<void> loadRestaurant(int restaurantId, {String slug = ''}) async {
+    // Step 1: Prepare for new restaurant (clears stale data if switching)
+    prepareForNewRestaurant(restaurantId, notify: false);
+
+    // Step 2: Check what data we already have
+    final bool isSameRestaurant = _restaurant?.id == restaurantId;
+    final bool hasFullDetails = isSameRestaurant &&
+                                _restaurant != null &&
+                                _restaurant!.schedules != null &&
+                                _restaurant!.schedules!.isNotEmpty;
+    final bool hasCorrectProducts = _restaurantProducts != null &&
+                                    _restaurantProducts!.isNotEmpty &&
+                                    _restaurantProducts!.first.restaurantId == restaurantId;
+    final bool hasCorrectSections = _menuSections != null &&
+                                    _menuSections!.isNotEmpty;
+
+    // Step 3: Fetch lightweight menu sections first (shows sticky header immediately)
+    if (!isSameRestaurant) {
+      await getMenuSections(restaurantId);
+    }
+
+    // Step 4: Parallel load restaurant details and products
+    final List<Future> parallelCalls = [];
+
+    if (!isSameRestaurant || !hasFullDetails) {
+      parallelCalls.add(
+        getRestaurantDetails(Restaurant(id: restaurantId), slug: slug)
+      );
+    }
+
+    if (!isSameRestaurant || (!hasCorrectProducts && !hasCorrectSections)) {
+      parallelCalls.add(
+        getRestaurantProductList(restaurantId, 0, 'all', false)
+      );
+    }
+
+    if (parallelCalls.isNotEmpty) {
+      await Future.wait(parallelCalls);
+    }
+
+    // Step 5: Mark transition complete
+    completeTransition();
   }
 
   List<Product>? _restaurantProducts;
@@ -109,14 +208,8 @@ class RestaurantController extends GetxController implements GetxService {
     return _restaurantProducts!.where((product) => product.isPopular == true).toList();
   }
 
-  ProductModel? _restaurantProductModel;
-  ProductModel? get restaurantProductModel => _restaurantProductModel;
-
   ProductModel? _restaurantSearchProductModel;
   ProductModel? get restaurantSearchProductModel => _restaurantSearchProductModel;
-
-  int _categoryIndex = 0;
-  int get categoryIndex => _categoryIndex;
 
   List<CategoryModel>? _categoryList;
   List<CategoryModel>? get categoryList => _categoryList;
@@ -149,9 +242,6 @@ class RestaurantController extends GetxController implements GetxService {
 
   RecommendedProductModel? _recommendedProductModel;
   RecommendedProductModel? get recommendedProductModel => _recommendedProductModel;
-
-  CartSuggestItemModel? _cartSuggestItemModel;
-  CartSuggestItemModel? get cartSuggestItemModel => _cartSuggestItemModel;
 
   List<Product>? _suggestedItems;
   List<Product>? get suggestedItems => _suggestedItems;
@@ -204,11 +294,7 @@ class RestaurantController extends GetxController implements GetxService {
   }
 
   Future<void> getOrderAgainRestaurantList(bool reload) async {
-    // Use cached data if available
-    if (_orderAgainRestaurantList != null && !reload) {
-      print('✅ [RESTAURANT] Using cached order again list');
-      return;
-    }
+    if (_orderAgainRestaurantList != null && !reload) return;
 
     if(reload) {
       _orderAgainRestaurantList = null;
@@ -228,11 +314,7 @@ class RestaurantController extends GetxController implements GetxService {
   }
 
   Future<void> getRecentlyViewedRestaurantList(bool reload, String type, bool notify) async {
-    // Use cached data if available
-    if (_recentlyViewedRestaurantList != null && !reload) {
-      print('✅ [RESTAURANT] Using cached recently viewed list');
-      return;
-    }
+    if (_recentlyViewedRestaurantList != null && !reload) return;
 
     _type = type;
     if(reload){
@@ -265,11 +347,7 @@ class RestaurantController extends GetxController implements GetxService {
   }
 
   Future<void> getRestaurantList(int offset, bool reload, {bool fromMap = false}) async {
-    // Use cached data if available and not reloading
-    if (_restaurantModel != null && !reload && offset == 0) {
-      print('✅ [RESTAURANT] Using cached data: ${_restaurantModel!.restaurants!.length} restaurants');
-      return;
-    }
+    if (_restaurantModel != null && !reload && offset == 0) return;
 
     if(reload) {
       // Keep empty model if reloading with 0 restaurants (avoids shimmer flash)
@@ -286,31 +364,19 @@ class RestaurantController extends GetxController implements GetxService {
 
   _prepareRestaurantList(RestaurantModel? restaurantModel, int offset) {
     if (restaurantModel != null) {
-      print('🏪 [RESTAURANT CONTROLLER] Preparing restaurant list - offset: $offset, total: ${restaurantModel.totalSize}, count: ${restaurantModel.restaurants?.length ?? 0}');
       if (offset == 0) {
         _restaurantModel = restaurantModel;
-        print('✅ [RESTAURANT CONTROLLER] Restaurant model set: ${_restaurantModel!.restaurants!.length} restaurants');
+      } else if (_restaurantModel != null) {
+        _restaurantModel!.totalSize = restaurantModel.totalSize;
+        _restaurantModel!.offset = restaurantModel.offset;
+        _restaurantModel!.restaurants!.addAll(restaurantModel.restaurants!);
       } else {
-        // Check if initial model exists before appending pagination data
-        if (_restaurantModel != null) {
-          _restaurantModel!.totalSize = restaurantModel.totalSize;
-          _restaurantModel!.offset = restaurantModel.offset;
-          _restaurantModel!.restaurants!.addAll(restaurantModel.restaurants!);
-          print('✅ [RESTAURANT CONTROLLER] Appended ${restaurantModel.restaurants!.length} restaurants, total: ${_restaurantModel!.restaurants!.length}');
-        } else {
-          print('⚠️ [RESTAURANT CONTROLLER] Cannot append offset $offset - initial model not loaded yet, setting as initial');
-          _restaurantModel = restaurantModel;
-        }
+        _restaurantModel = restaurantModel;
       }
-      update();
-    } else {
-      print('❌ [RESTAURANT CONTROLLER] Restaurant model is NULL!');
-      // Set empty model to stop shimmer and show empty state
-      if (offset == 0) {
-        _restaurantModel = RestaurantModel(totalSize: 0, offset: 0, restaurants: []);
-      }
-      update();
+    } else if (offset == 0) {
+      _restaurantModel = RestaurantModel(totalSize: 0, offset: 0, restaurants: []);
     }
+    update();
   }
 
   void setRestaurantType(String type) {
@@ -339,11 +405,7 @@ class RestaurantController extends GetxController implements GetxService {
   }
 
   Future<void> getPopularRestaurantList(bool reload, String type, bool notify) async {
-    // Use cached data if available
-    if (_popularRestaurantList != null && !reload) {
-      print('✅ [RESTAURANT] Using cached popular list');
-      return;
-    }
+    if (_popularRestaurantList != null && !reload) return;
 
     _type = type;
     if (reload) {
@@ -366,11 +428,7 @@ class RestaurantController extends GetxController implements GetxService {
   }
 
   Future<void> getLatestRestaurantList(bool reload, String type, bool notify) async {
-    // Use cached data if available
-    if (_latestRestaurantList != null && !reload) {
-      print('✅ [RESTAURANT] Using cached latest list');
-      return;
-    }
+    if (_latestRestaurantList != null && !reload) return;
 
     _type = type;
     if(reload){
@@ -400,8 +458,6 @@ class RestaurantController extends GetxController implements GetxService {
 
 
   Future<Restaurant?> getRestaurantDetails(Restaurant restaurant, {bool fromCart = false, String slug = ''}) async {
-    _categoryIndex = 0;
-
     // Always fetch from API if:
     // 1. Restaurant has no name (only ID passed) - we need full details
     // 2. Restaurant has no schedules - we need full details including hours
@@ -512,22 +568,17 @@ class RestaurantController extends GetxController implements GetxService {
               }
             }
           }
-          print('✅ [RESTAURANT CONTROLLER] Loaded ${productModel.sections!.length} menu sections');
         }
         // Legacy: Handle flat products array
         else if (productModel.products != null) {
           if (offset == 0) {
             _restaurantProducts = [];
             _restaurantProducts!.addAll(productModel.products!);
+          } else if (_restaurantProducts != null) {
+            _restaurantProducts!.addAll(productModel.products!);
           } else {
-            // Ensure initial products list exists before appending
-            if (_restaurantProducts != null) {
-              _restaurantProducts!.addAll(productModel.products!);
-            } else {
-              print('⚠️ [RESTAURANT CONTROLLER] Cannot append offset $offset products - initial products not loaded yet, setting as initial');
-              _restaurantProducts = [];
-              _restaurantProducts!.addAll(productModel.products!);
-            }
+            _restaurantProducts = [];
+            _restaurantProducts!.addAll(productModel.products!);
           }
         }
 
@@ -596,18 +647,6 @@ class RestaurantController extends GetxController implements GetxService {
     _searchType = 'all';
   }
 
-  // DEPRECATED: Category filtering is no longer used in restaurant screen (now using menu sections)
-  // Kept for backward compatibility but does nothing when sections are active
-  void setCategoryIndex(int index) {
-    // Only use category filtering if NOT using sections (legacy mode)
-    if (!isUsingSections) {
-      _categoryIndex = index;
-      _restaurantProducts = null;
-      getRestaurantProductList(_restaurant!.id, 1, Get.find<RestaurantController>().type, false);
-    }
-    update();
-  }
-
   bool isRestaurantClosed(DateTime dateTime, bool active, List<Schedules>? schedules, {int? customDateDuration}) {
     return restaurantServiceInterface.isRestaurantClosed(dateTime, active, schedules);
   }
@@ -626,11 +665,7 @@ class RestaurantController extends GetxController implements GetxService {
 
   /// Get the initial home feed data
   Future<void> getHomeFeed(bool reload) async {
-    // Use cached data if available
-    if (_homeFeedModel != null && !reload) {
-      print('✅ [RESTAURANT] Using cached home feed');
-      return;
-    }
+    if (_homeFeedModel != null && !reload) return;
 
     if (reload) {
       _homeFeedModel = null;
@@ -639,7 +674,6 @@ class RestaurantController extends GetxController implements GetxService {
       update();
     }
 
-    print('🏠 [RESTAURANT] Fetching home feed...');
     HomeFeedModel? homeFeedModel = await restaurantServiceInterface.getHomeFeed();
 
     if (homeFeedModel != null) {
@@ -664,10 +698,6 @@ class RestaurantController extends GetxController implements GetxService {
           }
         }
       }
-
-      print('✅ [RESTAURANT] Home feed loaded: ${homeFeedModel.categories?.length ?? 0} categories');
-    } else {
-      print('❌ [RESTAURANT] Home feed is NULL');
     }
 
     update();
@@ -677,14 +707,9 @@ class RestaurantController extends GetxController implements GetxService {
   Future<void> loadMoreForSection(String section, {int? categoryId}) async {
     String key = categoryId != null ? 'category_$categoryId' : section;
 
-    // Check if we have more data to load
-    if (_sectionHasMore[key] != true) {
-      print('ℹ️ [RESTAURANT] No more data for section: $key');
-      return;
-    }
+    if (_sectionHasMore[key] != true) return;
 
     int nextOffset = (_sectionOffsets[key] ?? 1) + 1;
-    print('📄 [RESTAURANT] Loading more for $key, offset: $nextOffset');
 
     HomeFeedSectionResponse? response = await restaurantServiceInterface.getHomeFeedSection(
       section,
@@ -709,7 +734,6 @@ class RestaurantController extends GetxController implements GetxService {
         _homeFeedModel!.popular!.restaurants?.addAll(response.restaurants!);
       }
 
-      print('✅ [RESTAURANT] Loaded ${response.restaurants!.length} more for $key');
       update();
     }
   }
@@ -733,7 +757,6 @@ class RestaurantController extends GetxController implements GetxService {
     MenuSectionsResponse? response = await restaurantServiceInterface.getMenuSections(restaurantId);
     if (response != null && response.sections != null) {
       _menuSectionsMeta = response.sections;
-      print('📋 [RESTAURANT] Loaded ${_menuSectionsMeta!.length} menu sections metadata');
       update();
     }
   }

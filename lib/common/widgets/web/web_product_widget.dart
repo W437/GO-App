@@ -56,7 +56,7 @@ class WebProductWidget extends StatelessWidget {
       onTap: () {
         if(isRestaurant) {
           if(restaurant != null && restaurant!.restaurantStatus == 1){
-            Get.toNamed(RouteHelper.getRestaurantRoute(restaurant!.id), arguments: RestaurantScreen(restaurant: restaurant));
+            Get.toNamed(RouteHelper.getRestaurantRoute(restaurant!.id), arguments: RestaurantScreen(restaurantId: restaurant!.id!));
           }else if(restaurant!.restaurantStatus == 0){
             showCustomSnackBar('restaurant_is_not_available'.tr);
           }

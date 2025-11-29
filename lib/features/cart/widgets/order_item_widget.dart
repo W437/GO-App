@@ -248,7 +248,7 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
         scrollToProductId: widget.cart.product!.id,
       ),
       arguments: RestaurantScreen(
-        restaurant: Restaurant(id: widget.cart.product!.restaurantId),
+        restaurantId: widget.cart.product!.restaurantId!,
         scrollToProductId: widget.cart.product!.id,
       ),
     );

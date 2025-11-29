@@ -25,7 +25,7 @@ class CompactRestaurantWidget extends StatelessWidget {
       onTap: () {
         Get.toNamed(
           RouteHelper.getRestaurantRoute(restaurant.id),
-          arguments: RestaurantScreen(restaurant: restaurant),
+          arguments: RestaurantScreen(restaurantId: restaurant.id!),
         );
       },
       radius: Dimensions.radiusDefault,

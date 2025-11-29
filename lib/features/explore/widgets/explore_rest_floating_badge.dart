@@ -354,7 +354,7 @@ class _ExploreRestFloatingBadgeState extends State<ExploreRestFloatingBadge> wit
                               Get.back(); // Close bottom sheet
                               Get.toNamed(
                                 RouteHelper.getRestaurantRoute(restaurant.id),
-                                arguments: RestaurantScreen(restaurant: restaurant),
+                                arguments: RestaurantScreen(restaurantId: restaurant.id!),
                               );
                             },
                             borderRadius: BorderRadius.circular(100),

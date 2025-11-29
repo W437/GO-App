@@ -58,7 +58,7 @@ class PopularStoreWidget1 extends StatelessWidget {
                     onTap: () {
                       Get.toNamed(
                         RouteHelper.getRestaurantRoute(restaurant[index].id),
-                        arguments: RestaurantScreen(restaurant: restaurant[index]),
+                        arguments: RestaurantScreen(restaurantId: restaurant[index].id!),
                       );
                     },
                     child: Container(

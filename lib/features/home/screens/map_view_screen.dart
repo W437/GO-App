@@ -114,7 +114,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
                             onTap: () {
                               Get.toNamed(
                                 RouteHelper.getRestaurantRoute(widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index].id : restController.restaurantModel!.restaurants![index].id),
-                                arguments: RestaurantScreen(restaurant: widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index] : restController.restaurantModel!.restaurants![index]),
+                                arguments: RestaurantScreen(restaurantId: (widget.fromDineInScreen ? dineInController.dineInModel!.restaurants![index] : restController.restaurantModel!.restaurants![index]).id!),
                               );
                             },
                           ),
@@ -464,7 +464,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
           onTap: () {
             Get.toNamed(
               RouteHelper.getRestaurantRoute(restaurants[index].id),
-              arguments: RestaurantScreen(restaurant: restaurants[index]),
+              arguments: RestaurantScreen(restaurantId: restaurants[index].id!),
             );
           },
         ),

@@ -202,7 +202,7 @@ class _DineInRestaurantScreenState extends State<DineInRestaurantScreen> {
               onTap: () {
                 if(restaurant.restaurantStatus == 1){
                   Get.toNamed(RouteHelper.getRestaurantRoute(restaurant.id, fromDinIn: true),
-                    arguments: RestaurantScreen(restaurant: restaurant, fromDineIn: true),
+                    arguments: RestaurantScreen(restaurantId: restaurant.id!, fromDineIn: true),
                   );
                 }else if(restaurant.restaurantStatus == 0){
                   showCustomSnackBar('restaurant_is_not_available'.tr);

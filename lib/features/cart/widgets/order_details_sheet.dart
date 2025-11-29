@@ -448,9 +448,7 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                             cartController.cartList[0].product!.restaurantId,
                           ),
                           arguments: RestaurantScreen(
-                            restaurant: Restaurant(
-                              id: cartController.cartList[0].product!.restaurantId,
-                            ),
+                            restaurantId: cartController.cartList[0].product!.restaurantId!,
                           ),
                         );
                       }

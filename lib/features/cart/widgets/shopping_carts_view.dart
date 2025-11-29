@@ -59,7 +59,7 @@ class ShoppingCartsView extends StatelessWidget {
                 if (restaurant.id != null) {
                   Get.toNamed(
                     RouteHelper.getRestaurantRoute(restaurant.id!),
-                    arguments: RestaurantScreen(restaurant: restaurant),
+                    arguments: RestaurantScreen(restaurantId: restaurant.id!),
                   );
                 }
               },

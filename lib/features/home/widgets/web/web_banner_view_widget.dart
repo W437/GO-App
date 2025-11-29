@@ -170,7 +170,7 @@ class WebBannerViewWidget extends StatelessWidget {
       Restaurant restaurant = homeController.bannerDataList![index];
       Get.toNamed(
         RouteHelper.getRestaurantRoute(restaurant.id),
-        arguments: RestaurantScreen(restaurant: restaurant),
+        arguments: RestaurantScreen(restaurantId: restaurant.id!),
       );
     }else if(homeController.bannerDataList![index] is BasicCampaignModel) {
       BasicCampaignModel campaign = homeController.bannerDataList![index];

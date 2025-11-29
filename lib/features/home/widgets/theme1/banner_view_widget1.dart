@@ -59,7 +59,7 @@ class BannerViewWidget1 extends StatelessWidget {
                         Restaurant restaurant = bannerDataList?[index];
                         Get.toNamed(
                           RouteHelper.getRestaurantRoute(restaurant.id),
-                          arguments: RestaurantScreen(restaurant: restaurant),
+                          arguments: RestaurantScreen(restaurantId: restaurant.id!),
                         );
                       }else if(bannerDataList?[index] is BasicCampaignModel) {
                         BasicCampaignModel campaign = bannerDataList?[index];

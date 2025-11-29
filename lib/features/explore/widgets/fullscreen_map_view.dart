@@ -101,7 +101,8 @@ class _FullscreenMapViewState extends State<FullscreenMapView> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ExploreRestFloatingBadge(
-        restaurant: restaurant,
+        restaurants: widget.controller.filteredRestaurants ?? [],
+        initialIndex: index,
         onClose: () {
           widget.controller.clearSelectedRestaurant();
           Navigator.pop(context);

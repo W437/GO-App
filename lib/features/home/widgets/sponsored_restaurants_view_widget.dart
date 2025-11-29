@@ -330,7 +330,7 @@ class _HighlightVideoWidgetState extends State<HighlightVideoWidget> {
                       onTap: () {
                         Get.toNamed(
                           RouteHelper.getRestaurantRoute(widget.advertisement.restaurantId),
-                          arguments: RestaurantScreen(restaurant: Restaurant(id: widget.advertisement.restaurantId)),
+                          arguments: RestaurantScreen(restaurantId: widget.advertisement.restaurantId!),
                         );
                       },
                       child: Container(
