@@ -126,7 +126,7 @@ class AppDataLoaderService {
       Get.find<HomeController>().getBannerList(true),
       Get.find<CuisineController>().getCuisineList(forceRefresh: true),
       Get.find<StoryController>().getStories(reload: true),
-      Get.find<RestaurantController>().getHomeFeed(true),
+      Get.find<HomeController>().getHomeFeed(true),
       Get.find<CampaignController>().getItemCampaignList(true),
     ]);
 
@@ -228,7 +228,7 @@ class AppDataLoaderService {
         _loadWithRetry(
           'home_feed',
           'Home feed...',
-          () => Get.find<RestaurantController>().getHomeFeed(false),
+          () => Get.find<HomeController>().getHomeFeed(false),
           onProgress,
           onError,
         ),

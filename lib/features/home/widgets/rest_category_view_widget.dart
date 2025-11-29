@@ -1,6 +1,6 @@
 import 'package:animated_emoji/animated_emoji.dart';
+import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/home/widgets/categorized_restaurants_widget.dart';
-import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
@@ -15,8 +15,8 @@ class RestCategoryViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<RestaurantController>(builder: (restaurantController) {
-      final categories = restaurantController.homeFeedCategories;
+    return GetBuilder<HomeController>(builder: (homeController) {
+      final categories = homeController.homeFeedCategories;
 
       // Loading state
       if (categories == null) {

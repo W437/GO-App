@@ -1,6 +1,6 @@
 import 'package:godelivery_user/common/widgets/shared/badges/primary_badge_widget.dart';
+import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/home/widgets/rest_new_card.dart';
-import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/app_colors.dart';
 import 'package:godelivery_user/util/app_constants.dart';
@@ -15,12 +15,12 @@ class NewRestViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<RestaurantController>(builder: (restaurantController) {
-      final newRestaurants = restaurantController.homeFeedModel?.newRestaurants;
+    return GetBuilder<HomeController>(builder: (homeController) {
+      final newRestaurants = homeController.homeFeedModel?.newRestaurants;
       final restaurants = newRestaurants?.restaurants;
 
       // Show shimmer while loading
-      if (restaurantController.homeFeedModel == null) {
+      if (homeController.homeFeedModel == null) {
         return _buildShimmer(context);
       }
 

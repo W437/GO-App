@@ -7,12 +7,12 @@ import 'package:godelivery_user/common/models/restaurant_model.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/custom_ink_well_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/images/custom_image_widget.dart';
 import 'package:godelivery_user/features/home/controllers/advertisement_controller.dart';
+import 'package:godelivery_user/features/home/controllers/home_controller.dart';
 import 'package:godelivery_user/features/home/domain/models/advertisement_model.dart';
 import 'package:godelivery_user/features/home/widgets/blurhash_image_widget.dart';
 import 'package:godelivery_user/features/home/widgets/rest_sponsored_card.dart';
 import 'package:godelivery_user/features/language/controllers/localization_controller.dart';
 import 'package:godelivery_user/features/restaurant/screens/restaurant_screen.dart';
-import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/helper/navigation/route_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
@@ -33,11 +33,11 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<RestaurantController>(builder: (restaurantController) {
-      final advertised = restaurantController.homeFeedModel?.advertised;
+    return GetBuilder<HomeController>(builder: (homeController) {
+      final advertised = homeController.homeFeedModel?.advertised;
 
       // Show shimmer while loading
-      if (restaurantController.homeFeedModel == null) {
+      if (homeController.homeFeedModel == null) {
         return const AdvertisementShimmer();
       }
 

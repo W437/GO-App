@@ -596,10 +596,13 @@ class _RestaurantScreenState extends State<RestaurantScreen>
                 child: child,
               );
             },
-            child: _showCartWidget && cartController.cartList.isNotEmpty && !isDesktop
+            child: _showCartWidget &&
+                    cartController.cartList.isNotEmpty &&
+                    cartController.cartList[0].product!.restaurantId == widget.restaurantId &&
+                    !isDesktop
                 ? BottomCartWidget(
                     key: const ValueKey('cart-widget'),
-                    restaurantId: cartController.cartList[0].product!.restaurantId!,
+                    restaurantId: widget.restaurantId,
                     fromDineIn: widget.fromDineIn,
                   )
                 : const SizedBox(key: ValueKey('empty-cart')),
