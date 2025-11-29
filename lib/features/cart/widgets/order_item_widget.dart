@@ -65,7 +65,7 @@ class OrderItemWidget extends StatelessWidget {
               cart: cart,
               cartIndex: cartIndex,
             ),
-            const SizedBox(width: Dimensions.paddingSizeDefault),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
 
             // Item Info
             Expanded(
@@ -117,7 +117,7 @@ class OrderItemWidget extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: Dimensions.paddingSizeDefault),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
 
             // Image
             if (cart.product!.imageFullUrl != null)

@@ -203,7 +203,7 @@ class Product {
     restaurantName = json['restaurant_name'];
     restaurantDiscount = json['restaurant_discount'].toDouble();
     restaurantStatus = json['restaurant_status'];
-    scheduleOrder = json['schedule_order'];
+    scheduleOrder = json['schedule_order'] is bool ? json['schedule_order'] : json['schedule_order'] == 1;
     avgRating = json['avg_rating'].toDouble();
     ratingCount = json['rating_count'];
     veg = json['veg'] != null ? int.parse(json['veg'].toString()) : 0;
@@ -215,8 +215,8 @@ class Product {
     nutritionsName = json['nutritions_name']?.cast<String>();
     allergiesName = json['allergies_name']?.cast<String>();
     likeCount = json['like_count'];
-    isRecommended = json['is_recommended'] ?? false;
-    isPopular = json['is_popular'] ?? false;
+    isRecommended = json['is_recommended'] is bool ? json['is_recommended'] : (json['is_recommended'] == 1 || json['is_recommended'] == true);
+    isPopular = json['is_popular'] is bool ? json['is_popular'] : (json['is_popular'] == 1 || json['is_popular'] == true);
     sectionPosition = json['section_position'];
     menuSectionId = json['menu_section_id'];
   }
@@ -433,7 +433,7 @@ class MenuSection {
     id = json['id'];
     name = json['name'];
     position = json['position'];
-    isVisible = json['is_visible'] ?? true;
+    isVisible = json['is_visible'] is bool ? json['is_visible'] : (json['is_visible'] == 1 || json['is_visible'] == null);
     if (json['products'] != null) {
       products = [];
       json['products'].forEach((v) {

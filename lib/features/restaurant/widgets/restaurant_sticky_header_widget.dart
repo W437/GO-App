@@ -6,6 +6,7 @@ import 'package:godelivery_user/features/restaurant/controllers/restaurant_contr
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
 import 'package:godelivery_user/util/dimensions.dart';
 import 'package:godelivery_user/util/styles.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class RestaurantStickyHeaderWidget extends StatefulWidget {
   final RestaurantController restController;
@@ -122,7 +123,10 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
       items = sectionsMeta.map((s) => _SectionItem(s.id!, s.name ?? '')).toList();
     }
 
-    if (items.isEmpty) return const SizedBox();
+    // Show skeleton chips while loading
+    if (items.isEmpty) {
+      return _buildSkeletonChips(context);
+    }
 
     return ListView.separated(
       key: _listKey,
@@ -165,6 +169,39 @@ class _RestaurantStickyHeaderWidgetState extends State<RestaurantStickyHeaderWid
                         : Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Build skeleton chips while menu sections are loading
+  Widget _buildSkeletonChips(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeDefault,
+        vertical: 2,
+      ),
+      itemCount: 5, // Show 5 skeleton chips
+      separatorBuilder: (_, __) => const SizedBox(width: Dimensions.paddingSizeSmall),
+      itemBuilder: (context, index) {
+        return Center(
+          child: Shimmer(
+            duration: const Duration(milliseconds: 1500),
+            interval: const Duration(milliseconds: 1500),
+            color: Theme.of(context).shadowColor,
+            colorOpacity: 0.1,
+            enabled: true,
+            child: Container(
+              height: 36,
+              width: 80 + (index * 10.0), // Vary width for realistic look
+              decoration: BoxDecoration(
+                color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
               ),
             ),
           ),

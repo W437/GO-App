@@ -165,7 +165,9 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
               left: 0,
               right: 0,
               height: 300,
-              child: Stack(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusExtraLarge)),
+                child: Stack(
                   fit: StackFit.expand,
                   children: [
                     BlurhashImageWidget(
@@ -189,6 +191,7 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
                     ),
                   ],
                 ),
+              ),
             ),
 
             // 2. Close Button
@@ -411,9 +414,9 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.white.withValues(alpha: 0.0),
-                      Colors.white.withValues(alpha: 0.8),
-                      Colors.white,
+                      Theme.of(context).cardColor.withValues(alpha: 0.0),
+                      Theme.of(context).cardColor.withValues(alpha: 0.8),
+                      Theme.of(context).cardColor,
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -851,28 +854,35 @@ class _RestaurantProductSheetState extends State<RestaurantProductSheet> {
 
   Future<void> _executeActions(CartController cartController, ProductController productController, CartModel cartModel, OnlineCart onlineCart) async {
     if (cartController.existAnotherRestaurantProduct(cartModel.product!.restaurantId)) {
-      Get.dialog(ConfirmationDialogWidget(
-        icon: Images.warning,
-        title: 'are_you_sure_to_reset'.tr,
-        description: 'if_you_continue'.tr,
-        onYesPressed: () {
-          Get.back();
-          cartController.clearCartOnline().then((success) async {
-            if(success) {
-              await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
-              Get.back();
-            }
-          });
+      // AWAIT the dialog to prevent navigation stack corruption
+      final bool? confirmed = await Get.dialog<bool>(
+        ConfirmationDialogWidget(
+          icon: Images.warning,
+          title: 'are_you_sure_to_reset'.tr,
+          description: 'if_you_continue'.tr,
+          onYesPressed: () {
+            Get.back(result: true); // Return true to indicate confirmation
+          },
+        ),
+        barrierDismissible: false,
+      );
 
-        },
-      ), barrierDismissible: false);
+      // Only proceed if user confirmed
+      if (confirmed == true) {
+        final success = await cartController.clearCartOnline();
+        if (success) {
+          await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
+          Get.back(); // Close product sheet
+        }
+      }
+      // If cancelled, do nothing (sheet stays open)
     } else {
       if(widget.cart != null || productController.cartIndex != -1) {
         await cartController.updateCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
       } else {
         await cartController.addToCartOnline(onlineCart, existCartData: widget.cart, fromDirectlyAdd: true);
       }
-      Get.back();
+      Get.back(); // Close product sheet
     }
   }
 

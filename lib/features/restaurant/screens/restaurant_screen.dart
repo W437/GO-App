@@ -161,8 +161,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     final couponController = Get.find<CouponController>();
 
     // NEW: Clear stale data immediately when switching restaurants
-    // notify: false because we're in initState (can't call update during build)
     restController.prepareForNewRestaurant(widget.restaurant!.id!, notify: false);
+
+    // Trigger rebuild after current frame to show skeleton chips
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && restController.isTransitioning) {
+        restController.update();
+      }
+    });
 
     if(restController.isSearching) {
       restController.changeSearchStatus(isUpdate: false);

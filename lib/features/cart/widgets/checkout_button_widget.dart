@@ -32,9 +32,6 @@ class CheckoutButtonWidget extends StatelessWidget {
     return Container(
       width: isDesktop ? Dimensions.webMaxWidth : null,
       padding:  const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeDefault),
-      decoration: isDesktop ? null : BoxDecoration(
-        color: Theme.of(context).cardColor,
-      ),
       child: SafeArea(
         child: GetBuilder<RestaurantController>(builder: (restaurantController) {
           if(restaurantController.restaurant != null && restaurantController.restaurant!.freeDelivery != null && !restaurantController.restaurant!.freeDelivery!

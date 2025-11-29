@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:godelivery_user/common/widgets/shared/badges/primary_badge_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/text/auto_scroll_text.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/rounded_icon_button_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/sheets/custom_full_sheet.dart';
@@ -219,26 +220,12 @@ class NewHomeHeaderWidget extends StatelessWidget {
                         ),
                         if (cartController.cartList.isNotEmpty)
                           Positioned(
-                            top: -2,
-                            right: -2,
-                            child: Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 20,
-                                minHeight: 20,
-                              ),
-                              child: Text(
-                                '${cartController.cartList.length}',
-                                style: robotoMedium.copyWith(
-                                  fontSize: 11,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                            top: -4,
+                            right: -4,
+                            child: PrimaryBadgeWidget(
+                              value: cartController.cartList.length,
+                              fontSize: 11,
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             ),
                           ),
                       ],

@@ -102,4 +102,19 @@ class AppColors {
     colors: [Color(0xFFE6FDFF), Color(0xFFE6F4F1)],
     stops: [0.0, 1.0],
   );
+
+  // Dark mode frost gradient - subtle dark elevated surface
+  static const LinearGradient gradientFrostDark = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1a1a1c), Color(0xFF151517)],
+    stops: [0.0, 1.0],
+  );
+
+  static const LinearGradient gradientFrostDarkVertical = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF1a1a1c), Color(0xFF151517)],
+    stops: [0.0, 1.0],
+  );
 }

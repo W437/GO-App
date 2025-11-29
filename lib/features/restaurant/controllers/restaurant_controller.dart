@@ -92,7 +92,9 @@ class RestaurantController extends GetxController implements GetxService {
   }
 
   // Check if using section-based structure (either full sections or just metadata)
-  bool get isUsingSections => (_menuSections != null && _menuSections!.isNotEmpty) ||
+  // Also return true during transitions to show skeleton loading state
+  bool get isUsingSections => _isTransitioning ||
+                               (_menuSections != null && _menuSections!.isNotEmpty) ||
                                (_menuSectionsMeta != null && _menuSectionsMeta!.isNotEmpty);
 
   // Filter recommended products from main product list using is_recommended flag

@@ -111,16 +111,12 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
               // ============================================================
               // BOTTOM CHECKOUT BAR WITH GRADIENT BACKDROP
               // ============================================================
-              Container(
-                width: double.infinity,
-                color: Theme.of(context).cardColor,
-                child: CheckoutButtonWidget(
-                  cartController: cartController,
-                  availableList: cartController.availableList,
-                  isRestaurantOpen: isRestaurantOpen,
-                  fromDineIn: widget.fromDineIn,
-                  restaurantName: restaurantName,
-                ),
+              CheckoutButtonWidget(
+                cartController: cartController,
+                availableList: cartController.availableList,
+                isRestaurantOpen: isRestaurantOpen,
+                fromDineIn: widget.fromDineIn,
+                restaurantName: restaurantName,
               ),
             ],
           ),

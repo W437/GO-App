@@ -1,3 +1,4 @@
+import 'package:godelivery_user/common/widgets/shared/badges/primary_badge_widget.dart';
 import 'package:godelivery_user/features/home/widgets/rest_new_card.dart';
 import 'package:godelivery_user/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:godelivery_user/helper/ui/responsive_helper.dart';
@@ -38,7 +39,7 @@ class NewRestViewWidget extends StatelessWidget {
         child: Container(
           width: Dimensions.webMaxWidth,
           decoration: BoxDecoration(
-            gradient: AppColors.gradientFrost,
+            gradient: Get.isDarkMode ? AppColors.gradientFrostDark : AppColors.gradientFrost,
             borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
             boxShadow: [
               BoxShadow(
@@ -67,19 +68,9 @@ class NewRestViewWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${restaurants.length}',
-                        style: robotoMedium.copyWith(
-                          fontSize: Dimensions.fontSizeSmall,
-                          color: Colors.white,
-                        ),
-                      ),
+                    PrimaryBadgeWidget(
+                      value: restaurants.length,
+                      fontSize: Dimensions.fontSizeSmall,
                     ),
                   ],
                 ),
@@ -131,7 +122,7 @@ class NewRestViewWidget extends StatelessWidget {
       child: Container(
         width: Dimensions.webMaxWidth,
         decoration: BoxDecoration(
-          gradient: AppColors.gradientFrost,
+          gradient: Get.isDarkMode ? AppColors.gradientFrostDark : AppColors.gradientFrost,
           borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
           boxShadow: [
             BoxShadow(

@@ -415,6 +415,16 @@ class DashboardScreenState extends State<DashboardScreen> with SingleTickerProvi
       return;
     }
 
+    // Toggle bottom nav visibility based on destination
+    final dashboardController = Get.find<DashboardController>();
+    if (pageIndex == 0) {
+      // Navigating to Explore - hide bottom nav
+      dashboardController.hideBottomNav();
+    } else if (_pageIndex == 0) {
+      // Leaving Explore - show bottom nav
+      dashboardController.showBottomNav();
+    }
+
     setState(() {
       _previousPageIndex = _pageIndex;
       _pageIndex = pageIndex;

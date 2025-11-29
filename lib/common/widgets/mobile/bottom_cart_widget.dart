@@ -188,227 +188,175 @@ class _BottomCartWidgetState extends State<BottomCartWidget> with TickerProvider
 
         _previousCartCount = currentCartCount;
 
-        return Stack(
-          children: [
-            // Fade overlay gradient
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 150,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.5, 1.0],
-                    colors: [
-                      Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0),
-                      Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.7),
-                      Theme.of(context).scaffoldBackgroundColor,
-                    ],
+        return Padding(
+          padding: EdgeInsets.only(
+            left: Dimensions.paddingSizeDefault,
+            right: Dimensions.paddingSizeDefault,
+            bottom: MediaQuery.of(context).padding.bottom + Dimensions.paddingSizeSmall,
+          ),
+          child: GestureDetector(
+            onTapDown: (_) => _pressController.forward(),
+            onTapUp: (_) {
+              _pressController.reverse();
+              // Only trigger bounce if not already animating
+              if (!_widgetBounceController.isAnimating) {
+                _widgetBounceController.forward(from: 0.0);
+              }
+            },
+            onTapCancel: () => _pressController.reverse(),
+            onTap: widget.onTap,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_pressAnimation, _widgetBounceAnimation]),
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _pressAnimation.value * _widgetBounceAnimation.value,
+                  child: child,
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Dimensions.paddingSizeLarge,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.15),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Shopping bag icon - animated
+                        AnimatedBuilder(
+                          animation: _iconBounceAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _iconBounceAnimation.value,
+                              child: child,
+                            );
+                          },
+                          child: const Icon(
+                            Icons.shopping_bag,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+
+                        // Item count badge - overlaps icon
+                        Transform.translate(
+                          offset: const Offset(-6, 0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: AnimatedTextTransition(
+                              value: cartController.cartList.length,
+                              delay: const Duration(milliseconds: 1500),
+                              style: robotoBold.copyWith(
+                                fontSize: 11,
+                                color: Colors.white,
+                                height: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                        // Total price - animated with bounce
+                        AnimatedBuilder(
+                          animation: _priceBounceAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _priceBounceAnimation.value,
+                              child: child,
+                            );
+                          },
+                          child: AnimatedTextTransition(
+                            value: PriceConverter.convertPrice(cartController.calculationCart()),
+                            delay: const Duration(milliseconds: 1500),
+                            style: robotoBold.copyWith(
+                              fontSize: Dimensions.fontSizeLarge,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+
+                        // Delivery charge inline
+                        if (deliveryCharge > 0) ...[
+                          const SizedBox(width: Dimensions.paddingSizeSmall),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.delivery_dining,
+                                  size: 18,
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  PriceConverter.convertPrice(deliveryCharge),
+                                  style: robotoMedium.copyWith(
+                                    fontSize: Dimensions.fontSizeSmall,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+
+                        const Spacer(),
+
+                        // View Cart button
+                        InkWell(
+                          onTap: () {
+                            RouteHelper.showCartModal(context);
+                          },
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Dimensions.paddingSizeLarge,
+                              vertical: Dimensions.paddingSizeSmall,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Text(
+                              'show_items'.tr,
+                              style: robotoBold.copyWith(
+                                fontSize: Dimensions.fontSizeDefault,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-
-            // Cart widget content
-            Transform.translate(
-              offset: const Offset(0, 100), // Shift down by 100px to keep position while extending beyond screen
-              child: Container(
-                padding: const EdgeInsets.only(
-                  left: Dimensions.paddingSizeDefault,
-                  right: Dimensions.paddingSizeDefault,
-                  top: Dimensions.paddingSizeDefault,
-                  bottom: Dimensions.paddingSizeExtraSmall,
-                ),
-                child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Main cart container with blur
-                    GestureDetector(
-                      onTapDown: (_) => _pressController.forward(),
-                      onTapUp: (_) {
-                        _pressController.reverse();
-                        // Only trigger bounce if not already animating
-                        if (!_widgetBounceController.isAnimating) {
-                          _widgetBounceController.forward(from: 0.0);
-                        }
-                      },
-                      onTapCancel: () => _pressController.reverse(),
-                      onTap: widget.onTap,
-                      child: AnimatedBuilder(
-                        animation: Listenable.merge([_pressAnimation, _widgetBounceAnimation]),
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _pressAnimation.value * _widgetBounceAnimation.value,
-                            child: child,
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge), // Rounded rect shape
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.4), // Match search bar opacity
-                              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color.fromRGBO(0, 0, 0, 0.1),
-                                  blurRadius: 6,
-                                  spreadRadius: -1,
-                                  offset: Offset(0, 4),
-                                ),
-                                BoxShadow(
-                                  color: Color.fromRGBO(0, 0, 0, 0.06),
-                                  blurRadius: 4,
-                                  spreadRadius: -1,
-                                  offset: Offset(0, 2),
-                                )
-                              ],
-                            ),
-                            child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Top section: Cart info and button
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: Dimensions.paddingSizeLarge,
-                                  vertical: 12,
-                                ),
-                                child: Row(
-                                  children: [
-                                    // Shopping bag icon - animated
-                                    AnimatedBuilder(
-                                      animation: _iconBounceAnimation,
-                                      builder: (context, child) {
-                                        return Transform.scale(
-                                          scale: _iconBounceAnimation.value,
-                                          child: child,
-                                        );
-                                      },
-                                      child: Icon(
-                                        Icons.shopping_bag,
-                                        color: Colors.white,
-                                        size: 26,
-                                      ),
-                                    ),
-
-                                    // Item count badge - no bounce (only text transition), overlaps icon
-                                    Transform.translate(
-                                      offset: const Offset(-6, 0),
-                                      child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: AnimatedTextTransition(
-                                        value: cartController.cartList.length,
-                                        delay: const Duration(milliseconds: 1500),
-                                        style: robotoBold.copyWith(
-                                          fontSize: 11,
-                                          color: Colors.white,
-                                          height: 1,
-                                        ),
-                                      ),
-                                    ),
-                                    ),
-
-                                    const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                                    // Total price - animated with bounce
-                                    AnimatedBuilder(
-                                      animation: _priceBounceAnimation,
-                                      builder: (context, child) {
-                                        return Transform.scale(
-                                          scale: _priceBounceAnimation.value,
-                                          child: child,
-                                        );
-                                      },
-                                      child: AnimatedTextTransition(
-                                        value: PriceConverter.convertPrice(cartController.calculationCart()),
-                                        delay: const Duration(milliseconds: 1500),
-                                        style: robotoBold.copyWith(
-                                          fontSize: Dimensions.fontSizeLarge,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-
-                                    const Spacer(),
-
-                                    // View Cart button
-                                    InkWell(
-                                      onTap: () {
-                                        RouteHelper.showCartModal(context);
-                                      },
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: Dimensions.paddingSizeDefault,
-                                          vertical: Dimensions.paddingSizeExtraSmall,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).primaryColor,
-                                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        ),
-                                        child: Text(
-                                          'show_items'.tr,
-                                          style: robotoBold.copyWith(
-                                            fontSize: Dimensions.fontSizeDefault,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Separator and delivery fee
-                              if (deliveryCharge > 0) ...[
-                                Container(
-                                  height: 1,
-                                  margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: Dimensions.paddingSizeLarge,
-                                    vertical: Dimensions.paddingSizeSmall,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '${'estimated_service_delivery_fees'.tr} ${PriceConverter.convertPrice(deliveryCharge)}',
-                                        style: robotoRegular.copyWith(
-                                          fontSize: Dimensions.fontSizeSmall,
-                                          color: Colors.white.withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              // Extra space to extend the rounded rect beyond the screen
-                              const SizedBox(height: 100),
-                            ],
-                          ),
-                        ),
-                      ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ),
-            ),
-          ],
+          ),
         );
     });
   }

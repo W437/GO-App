@@ -45,8 +45,8 @@ class RestaurantRepository implements RestaurantRepositoryInterface {
     // This returns all products with is_recommended and is_popular flags
     String url;
     if (offset == 0 && categoryID == 0) {
-      // Use smart endpoint for initial full product load
-      url = '${AppConstants.smartProductsUri}/$restaurantID?include=recommended,popular';
+      // Use fast smart endpoint for initial full product load (7x faster: ~750ms vs ~5s)
+      url = '${AppConstants.smartProductsUri}/$restaurantID/fast?include=recommended,popular';
     } else {
       // Use legacy endpoint for pagination and category filtering
       url = '${AppConstants.restaurantProductUri}?restaurant_id=$restaurantID&category_id=$categoryID&offset=$offset&limit=12&type=$type';

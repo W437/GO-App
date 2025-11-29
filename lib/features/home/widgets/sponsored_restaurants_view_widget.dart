@@ -45,7 +45,7 @@ class _SponsoredRestaurantsViewWidgetState extends State<SponsoredRestaurantsVie
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
-          gradient: AppColors.gradientFrost,
+          gradient: Get.isDarkMode ? AppColors.gradientFrostDark : AppColors.gradientFrost,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
