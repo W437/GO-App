@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:godelivery_user/common/widgets/adaptive/custom_favourite_widget.dart';
 import 'package:godelivery_user/common/widgets/shared/buttons/circular_back_button_widget.dart';
 import 'package:godelivery_user/features/coupon/controllers/coupon_controller.dart';
@@ -67,11 +69,38 @@ class RestaurantInfoSectionWidget extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
+              // Layer 1: Clear image (bottom layer)
               BlurhashImageWidget(
                 imageUrl: '${restaurant.coverPhotoFullUrl}',
                 blurhash: restaurant.coverPhotoBlurhash,
                 fit: BoxFit.cover,
               ),
+
+              // Layer 2: Blurred image with gradient mask (blur at bottom)
+              ShaderMask(
+                shaderCallback: (rect) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent, // Top stays clear
+                      Colors.black,       // Bottom gets blurred
+                    ],
+                    stops: [0.4, 1.0], // Blur starts at 40% down
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: BlurhashImageWidget(
+                    imageUrl: '${restaurant.coverPhotoFullUrl}',
+                    blurhash: restaurant.coverPhotoBlurhash,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+
+              // Layer 3: Top gradient overlay for readability
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(

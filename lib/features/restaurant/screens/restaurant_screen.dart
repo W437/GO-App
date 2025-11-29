@@ -73,6 +73,13 @@ class _RestaurantScreenState extends State<RestaurantScreen>
   void initState() {
     super.initState();
     scrollController.addListener(_onScroll);
+
+    // Initialize cart visibility based on current state
+    _initCartVisibility();
+
+    // Listen to cart changes for visibility updates
+    Get.find<CartController>().addListener(_onCartChanged);
+
     // Defer data loading to after the first frame to avoid calling update()
     // during the build phase when cached data triggers a synchronous update
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -80,11 +87,57 @@ class _RestaurantScreenState extends State<RestaurantScreen>
     });
   }
 
+  void _initCartVisibility() {
+    final cartController = Get.find<CartController>();
+    final currentCount = cartController.cartList.length;
+    _previousCartCount = currentCount;
+
+    // If cart already has items for this restaurant, show cart after delay
+    if (currentCount > 0) {
+      final firstItem = cartController.cartList.first;
+      if (firstItem.product?.restaurantId == widget.restaurantId) {
+        _cartWidgetTimer = Timer(const Duration(milliseconds: 350), () {
+          if (mounted) {
+            setState(() => _showCartWidget = true);
+          }
+        });
+      }
+    }
+  }
+
+  void _onCartChanged() {
+    if (!mounted) return;
+
+    final cartController = Get.find<CartController>();
+    final currentCount = cartController.cartList.length;
+
+    // Detect cart becoming non-empty
+    if (currentCount > 0 && _previousCartCount == 0) {
+      _showCartWidget = false;
+      _cartWidgetTimer?.cancel();
+      _cartWidgetTimer = Timer(const Duration(milliseconds: 350), () {
+        if (mounted) {
+          setState(() => _showCartWidget = true);
+        }
+      });
+    }
+    // Detect cart becoming empty
+    else if (currentCount == 0 && _previousCartCount > 0) {
+      _cartWidgetTimer?.cancel();
+      setState(() => _showCartWidget = false);
+    }
+
+    _previousCartCount = currentCount;
+  }
+
   @override
   void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     _cartWidgetTimer?.cancel();
+
+    // Remove cart listener
+    Get.find<CartController>().removeListener(_onCartChanged);
 
     // Dispose all horizontal scroll controllers
     for (var controller in _horizontalScrollControllers.values) {
@@ -447,10 +500,10 @@ class _RestaurantScreenState extends State<RestaurantScreen>
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     return Scaffold(
-      appBar: isDesktop ? WebMenuBar(fromDineIn: widget.fromDineIn) : null,
+          appBar: isDesktop ? WebMenuBar(fromDineIn: widget.fromDineIn) : null,
 
-      backgroundColor: Theme.of(context).cardColor,
-      body: GetBuilder<RestaurantController>(builder: (restController) {
+          backgroundColor: Theme.of(context).cardColor,
+          body: GetBuilder<RestaurantController>(builder: (restController) {
         return GetBuilder<CouponController>(builder: (couponController) {
           return GetBuilder<CategoryController>(builder: (categoryController) {
 
@@ -551,6 +604,7 @@ class _RestaurantScreenState extends State<RestaurantScreen>
                 opacity: _logoOpacity,
                 scale: _logoScale,
               ),
+
                 ],
               );
             });
@@ -559,57 +613,66 @@ class _RestaurantScreenState extends State<RestaurantScreen>
 
 
       bottomNavigationBar: GetBuilder<CartController>(builder: (cartController) {
-          final currentCartCount = cartController.cartList.length;
+          // Check if cart has items for this restaurant (no side effects in build!)
+          final bool hasCartForThisRestaurant = cartController.cartList.isNotEmpty &&
+              cartController.cartList.first.product?.restaurantId == widget.restaurantId;
 
-          // Detect when cart goes from empty to having items
-          if (currentCartCount > 0 && _previousCartCount == 0) {
-            // Cart just got its first item - start delay timer
-            _showCartWidget = false;
-            _cartWidgetTimer?.cancel();
-            _cartWidgetTimer = Timer(const Duration(milliseconds: 350), () {
-              if (mounted) {
-                setState(() {
-                  _showCartWidget = true;
-                });
-              }
-            });
-          } else if (currentCartCount == 0 && _previousCartCount > 0) {
-            // Cart just became empty - hide immediately
-            _showCartWidget = false;
-            _cartWidgetTimer?.cancel();
-          }
+          final bool showCart = _showCartWidget && hasCartForThisRestaurant && !isDesktop;
 
-          _previousCartCount = currentCartCount;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Gradient fade overlay - positioned above the cart
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).cardColor.withValues(alpha: 0.0),
+                          Theme.of(context).cardColor,
+                        ],
+                        stops: const [0.0, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              // Slide animation only
-              final offsetAnimation = Tween<Offset>(
-                begin: const Offset(0.0, 1.0), // Start from bottom
-                end: Offset.zero, // End at position
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic, // Smooth, fluid motion
-              ));
+              // Cart widget
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  final offsetAnimation = Tween<Offset>(
+                    begin: const Offset(0.0, 1.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ));
 
-              return SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              );
-            },
-            child: _showCartWidget &&
-                    cartController.cartList.isNotEmpty &&
-                    cartController.cartList[0].product!.restaurantId == widget.restaurantId &&
-                    !isDesktop
-                ? BottomCartWidget(
-                    key: const ValueKey('cart-widget'),
-                    restaurantId: widget.restaurantId,
-                    fromDineIn: widget.fromDineIn,
-                  )
-                : const SizedBox(key: ValueKey('empty-cart')),
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  );
+                },
+                child: showCart
+                    ? BottomCartWidget(
+                        key: const ValueKey('cart-widget'),
+                        restaurantId: widget.restaurantId,
+                        fromDineIn: widget.fromDineIn,
+                      )
+                    : const SizedBox(key: ValueKey('empty-cart')),
+              ),
+            ],
           );
         })
     );

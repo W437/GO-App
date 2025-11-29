@@ -466,6 +466,9 @@ class CartController extends GetxController implements GetxService {
     }
   }
 
+  // Track which restaurants are currently being fetched to prevent duplicate requests
+  final Set<int> _fetchingRestaurants = {};
+
   /// Get Restaurant object from cart item (uses RestaurantController cache)
   Restaurant? _getRestaurantFromCartItem(CartModel cartItem) {
     final restaurantId = cartItem.product?.restaurantId;
@@ -486,10 +489,18 @@ class CartController extends GetxController implements GetxService {
       }
 
       // NOT in cache - fetch it asynchronously (don't block)
-      restaurantController.loadRestaurant(restaurantId).then((_) {
-        // After loading, re-group carts to update UI with correct logo
-        groupCartsByRestaurant();
-      });
+      // Use a guard to prevent duplicate fetches and infinite loops
+      if (!_fetchingRestaurants.contains(restaurantId)) {
+        _fetchingRestaurants.add(restaurantId);
+        restaurantController.loadRestaurant(restaurantId).then((_) {
+          _fetchingRestaurants.remove(restaurantId);
+          // Just update UI, don't re-group (that would cause infinite recursion)
+          update();
+        }).catchError((e) {
+          _fetchingRestaurants.remove(restaurantId);
+          debugPrint('Failed to fetch restaurant $restaurantId: $e');
+        });
+      }
     } catch (e) {
       debugPrint('RestaurantController not found: $e');
     }
